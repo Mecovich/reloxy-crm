@@ -4,120 +4,128 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Reloxy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
   --black:#000; --s1:#0a0a0a; --s2:#111; --s3:#1a1a1a; --s4:#242424;
-  --line:rgba(255,255,255,0.07); --line2:rgba(255,255,255,0.12);
+  --line:rgba(255,255,255,0.07); --line2:rgba(255,255,255,0.14);
   --white:#f5f5f5; --g1:#888; --g2:#555; --g3:#333;
+  --accent:#a78bfa; --accent-dim:rgba(167,139,250,0.15);
 }
-body { font-family:-apple-system,"Inter","Helvetica Neue",sans-serif; background:var(--black); color:var(--white); display:flex; min-height:100vh; font-size:13px; line-height:1.5; -webkit-font-smoothing:antialiased; }
+body { font-family:'Inter',-apple-system,"Helvetica Neue",sans-serif; background:var(--black); color:var(--white); display:flex; min-height:100vh; font-size:13px; line-height:1.5; -webkit-font-smoothing:antialiased; }
 
-/* SIDEBAR */
-.sidebar { width:200px; min-height:100vh; background:var(--black); border-right:1px solid var(--line); position:fixed; top:0; left:0; bottom:0; display:flex; flex-direction:column; z-index:100; }
-.brand { padding:20px 20px 16px; border-bottom:1px solid var(--line); display:flex; align-items:center; gap:10px; }
-.brand-dot { width:20px; height:20px; background:var(--white); border-radius:4px; flex-shrink:0; }
-.brand-name { font-size:13px; font-weight:600; letter-spacing:-0.2px; }
-.brand-sub { font-size:10px; color:var(--g2); letter-spacing:0.3px; }
-.nav { flex:1; padding:12px 0; }
-.nav-group { margin-bottom:24px; }
-.nav-group-label { font-size:10px; font-weight:500; letter-spacing:0.8px; text-transform:uppercase; color:var(--g3); padding:0 20px; margin-bottom:2px; }
-.nav-item { display:flex; align-items:center; padding:7px 20px; font-size:13px; color:var(--g2); cursor:pointer; transition:color 0.1s; position:relative; user-select:none; justify-content:space-between; }
-.nav-item:hover { color:var(--g1); }
-.nav-item.active { color:var(--white); }
-.nav-item.active::before { content:''; position:absolute; left:0; top:50%; transform:translateY(-50%); width:2px; height:14px; background:var(--white); border-radius:0 2px 2px 0; }
-.nav-count { font-size:11px; color:var(--g3); font-variant-numeric:tabular-nums; }
+/* ── SIDEBAR ── */
+.sidebar { width:220px; min-height:100vh; background:var(--s1); border-right:1px solid var(--line); position:fixed; top:0; left:0; bottom:0; display:flex; flex-direction:column; z-index:100; }
+.brand { padding:22px 20px 18px; border-bottom:1px solid var(--line); display:flex; align-items:center; gap:10px; }
+.brand-logo { width:28px; height:28px; background:var(--white); border-radius:6px; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+.brand-logo svg { width:14px; height:14px; }
+.brand-name { font-size:14px; font-weight:700; letter-spacing:-0.4px; color:var(--white); }
+.brand-sub { font-size:10px; color:var(--g2); letter-spacing:0.2px; margin-top:1px; }
+.nav { flex:1; padding:16px 0; overflow-y:auto; }
+.nav-group { margin-bottom:28px; }
+.nav-group-label { font-size:10px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--g3); padding:0 20px; margin-bottom:4px; }
+.nav-item { display:flex; align-items:center; padding:8px 20px; font-size:13px; color:var(--g2); cursor:pointer; transition:color 0.15s,background 0.15s; position:relative; user-select:none; gap:10px; border-radius:0; }
+.nav-item:hover { color:var(--g1); background:rgba(255,255,255,0.03); }
+.nav-item.active { color:var(--white); background:rgba(255,255,255,0.05); }
+.nav-item.active::before { content:''; position:absolute; left:0; top:50%; transform:translateY(-50%); width:2px; height:18px; background:var(--accent); border-radius:0 2px 2px 0; }
+.nav-icon { width:16px; height:16px; opacity:0.5; flex-shrink:0; transition:opacity 0.15s; }
+.nav-item.active .nav-icon, .nav-item:hover .nav-icon { opacity:1; }
+.nav-count { font-size:11px; color:var(--g3); margin-left:auto; background:var(--s3); padding:1px 7px; border-radius:10px; font-variant-numeric:tabular-nums; }
+.nav-item.active .nav-count { background:var(--s4); color:var(--g2); }
 .sidebar-bottom { padding:16px 20px; border-top:1px solid var(--line); }
-.user-row { display:flex; align-items:center; gap:10px; cursor:pointer; }
-.user-initials { width:26px; height:26px; border-radius:50%; border:1px solid var(--line2); display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:600; color:var(--g1); flex-shrink:0; }
-.user-name { font-size:12px; color:var(--g1); }
+.user-row { display:flex; align-items:center; gap:10px; }
+.user-avatar { width:30px; height:30px; border-radius:50%; background:var(--s3); border:1px solid var(--line2); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:600; color:var(--g1); flex-shrink:0; }
+.user-name { font-size:12px; color:var(--white); font-weight:500; }
 .user-role { font-size:10px; color:var(--g3); }
-.logout-btn { font-size:11px; color:var(--g3); cursor:pointer; margin-top:8px; padding:4px 0; transition:color 0.1s; }
+.logout-btn { font-size:11px; color:var(--g3); cursor:pointer; margin-top:10px; padding:5px 0; transition:color 0.1s; display:flex; align-items:center; gap:6px; }
 .logout-btn:hover { color:var(--g1); }
 
-/* MAIN */
-.main { margin-left:200px; flex:1; display:flex; flex-direction:column; min-height:100vh; }
-.topbar { height:48px; border-bottom:1px solid var(--line); display:flex; align-items:center; padding:0 32px; gap:16px; position:sticky; top:0; background:var(--black); z-index:50; }
-.topbar-title { font-size:13px; font-weight:500; color:var(--white); flex:1; }
-.search { display:flex; align-items:center; gap:8px; padding:5px 12px; border:1px solid var(--line); border-radius:6px; width:200px; transition:border-color 0.15s; }
+/* ── MAIN ── */
+.main { margin-left:220px; flex:1; display:flex; flex-direction:column; min-height:100vh; }
+.topbar { height:52px; border-bottom:1px solid var(--line); display:flex; align-items:center; padding:0 36px; gap:16px; position:sticky; top:0; background:rgba(0,0,0,0.92); backdrop-filter:blur(12px); z-index:50; }
+.topbar-title { font-size:14px; font-weight:600; color:var(--white); flex:1; letter-spacing:-0.2px; }
+.search { display:flex; align-items:center; gap:8px; padding:6px 13px; border:1px solid var(--line); border-radius:7px; width:220px; transition:border-color 0.15s; background:var(--s1); }
 .search:focus-within { border-color:var(--line2); }
+.search svg { width:13px; height:13px; opacity:0.4; flex-shrink:0; }
 .search input { background:none; border:none; outline:none; font-size:12px; color:var(--white); width:100%; font-family:inherit; }
 .search input::placeholder { color:var(--g3); }
-.btn { font-size:12px; font-weight:500; padding:6px 14px; border-radius:5px; cursor:pointer; border:none; transition:opacity 0.1s; display:inline-flex; align-items:center; gap:6px; white-space:nowrap; font-family:inherit; }
+.btn { font-size:12px; font-weight:600; padding:7px 16px; border-radius:6px; cursor:pointer; border:none; transition:all 0.15s; display:inline-flex; align-items:center; gap:6px; white-space:nowrap; font-family:inherit; }
 .btn:hover { opacity:0.85; }
 .btn-white { background:var(--white); color:var(--black); }
 .btn-ghost { background:none; color:var(--g1); border:1px solid var(--line); }
 .btn-ghost:hover { border-color:var(--line2); color:var(--white); opacity:1; }
-.content { padding:32px; flex:1; }
+.content { padding:36px; flex:1; }
 
-/* PAGES */
+/* ── PAGES ── */
 .page { display:none; }
-.page.active { display:block; animation:up .2s ease; }
-@keyframes up { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+.page.active { display:block; animation:fadeup .22s ease; }
+@keyframes fadeup { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+.page-header { display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:36px; }
+.page-header h1 { font-size:24px; font-weight:700; letter-spacing:-0.6px; line-height:1.2; }
+.page-header p { font-size:12px; color:var(--g2); margin-top:5px; }
 
-/* PAGE HEADER */
-.page-header { display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:40px; }
-.page-header h1 { font-size:22px; font-weight:600; letter-spacing:-0.5px; line-height:1.2; }
-.page-header p { font-size:12px; color:var(--g2); margin-top:4px; }
-
-/* METRICS */
-.metrics { display:grid; grid-template-columns:repeat(4,1fr); border:1px solid var(--line); border-radius:8px; overflow:hidden; margin-bottom:40px; }
-.metric { padding:24px 28px; border-right:1px solid var(--line); transition:background 0.15s; }
-.metric:last-child { border-right:none; }
-.metric:hover { background:var(--s1); }
-.metric-label { font-size:11px; font-weight:500; letter-spacing:0.4px; color:var(--g2); text-transform:uppercase; margin-bottom:12px; }
-.metric-value { font-size:28px; font-weight:700; letter-spacing:-1px; color:var(--white); line-height:1; margin-bottom:8px; font-variant-numeric:tabular-nums; }
+/* ── METRICS ── */
+.metrics { display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:10px; overflow:hidden; margin-bottom:36px; }
+.metric { padding:24px 28px; background:var(--s1); transition:background 0.15s; }
+.metric:hover { background:var(--s2); }
+.metric-label { font-size:10px; font-weight:600; letter-spacing:0.6px; color:var(--g2); text-transform:uppercase; margin-bottom:14px; display:flex; align-items:center; gap:6px; }
+.metric-value { font-size:30px; font-weight:700; letter-spacing:-1.2px; color:var(--white); line-height:1; margin-bottom:8px; font-variant-numeric:tabular-nums; }
 .metric-sub { font-size:11px; color:var(--g3); }
+.metric-trend { font-size:11px; font-weight:500; }
+.metric-trend.up { color:#4ade80; }
+.metric-trend.neutral { color:var(--g3); }
 
-/* SECTION */
-.section { margin-bottom:40px; }
+/* ── SECTION ── */
+.section { margin-bottom:36px; }
 .section-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid var(--line); }
-.section-title { font-size:12px; font-weight:500; letter-spacing:0.3px; color:var(--g1); text-transform:uppercase; }
+.section-title { font-size:11px; font-weight:600; letter-spacing:0.5px; color:var(--g2); text-transform:uppercase; }
 .section-action { font-size:11px; color:var(--g2); cursor:pointer; transition:color 0.1s; }
 .section-action:hover { color:var(--white); }
 
-/* TABLE */
+/* ── TABLE ── */
 .table-wrap { overflow-x:auto; }
 table { width:100%; border-collapse:collapse; }
-th { text-align:left; font-size:11px; font-weight:500; letter-spacing:0.5px; text-transform:uppercase; color:var(--g3); padding:0 0 10px; border-bottom:1px solid var(--line); }
-th:not(:first-child) { padding-left:24px; }
+th { text-align:left; font-size:10px; font-weight:600; letter-spacing:0.6px; text-transform:uppercase; color:var(--g3); padding:0 0 12px; border-bottom:1px solid var(--line); }
+th:not(:first-child) { padding-left:20px; }
 td { padding:13px 0; border-bottom:1px solid var(--line); font-size:12.5px; color:var(--g1); vertical-align:middle; }
-td:not(:first-child) { padding-left:24px; }
+td:not(:first-child) { padding-left:20px; }
 tr:last-child td { border-bottom:none; }
 tr:hover td { color:var(--white); }
 .td-primary { color:var(--white); font-weight:500; }
 .td-action { font-size:11px; color:var(--g3); cursor:pointer; transition:color 0.1s; }
 .td-action:hover { color:var(--white); }
 
-/* STATUS */
-.status { display:inline-flex; align-items:center; gap:6px; font-size:12px; }
+/* ── STATUS ── */
+.status { display:inline-flex; align-items:center; gap:5px; font-size:12px; }
 .dot { width:5px; height:5px; border-radius:50%; flex-shrink:0; }
-.dot-hi { background:var(--white); }
-.dot-mid { background:var(--g1); }
+.dot-hi { background:#4ade80; }
+.dot-mid { background:var(--accent); }
 .dot-lo { background:var(--g3); }
 
-/* PROGRESS */
+/* ── PROGRESS ── */
 .bar { height:2px; background:var(--s4); border-radius:2px; }
-.bar-fill { height:100%; background:var(--white); border-radius:2px; }
+.bar-fill { height:100%; background:var(--white); border-radius:2px; transition:width 0.6s ease; }
 
-/* EMPTY */
+/* ── EMPTY ── */
 .empty { padding:60px 0; display:flex; flex-direction:column; align-items:center; gap:8px; text-align:center; }
 .empty-title { font-size:13px; color:var(--g2); font-weight:500; }
 .empty-sub { font-size:12px; color:var(--g3); }
 
-/* TWO-COL */
+/* ── TWO-COL ── */
 .two-col { display:grid; grid-template-columns:1fr 1fr; gap:48px; }
 
-/* KANBAN */
-.kanban { display:flex; gap:1px; background:var(--line); border:1px solid var(--line); border-radius:8px; overflow:hidden; }
-.k-col { flex:1; background:var(--black); min-width:200px; }
+/* ── KANBAN ── */
+.kanban { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+.k-col { background:var(--s1); border:1px solid var(--line); border-radius:10px; overflow:hidden; }
 .k-col-head { padding:14px 18px; border-bottom:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; }
-.k-col-name { font-size:11px; font-weight:500; text-transform:uppercase; letter-spacing:0.5px; color:var(--g2); }
-.k-col-n { font-size:11px; color:var(--g3); }
-.k-cards { padding:12px; display:flex; flex-direction:column; gap:6px; min-height:80px; }
-.k-card { padding:14px 16px; border:1px solid var(--line); border-radius:6px; background:var(--s1); cursor:pointer; transition:border-color 0.15s,background 0.15s; }
-.k-card:hover { border-color:var(--line2); background:var(--s2); }
-.k-card-tag { font-size:10px; font-weight:500; letter-spacing:0.4px; text-transform:uppercase; color:var(--g3); margin-bottom:6px; }
+.k-col-name { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.6px; color:var(--g2); }
+.k-col-n { font-size:11px; color:var(--g3); background:var(--s3); padding:1px 7px; border-radius:10px; }
+.k-cards { padding:12px; display:flex; flex-direction:column; gap:8px; min-height:80px; }
+.k-card { padding:14px 16px; border:1px solid var(--line); border-radius:8px; background:var(--black); cursor:pointer; transition:border-color 0.15s,background 0.15s,transform 0.15s; }
+.k-card:hover { border-color:var(--line2); background:var(--s1); transform:translateY(-1px); }
+.k-card-tag { font-size:10px; font-weight:600; letter-spacing:0.4px; text-transform:uppercase; color:var(--accent); margin-bottom:6px; }
 .k-card-title { font-size:12.5px; font-weight:500; color:var(--white); margin-bottom:8px; line-height:1.4; }
 .k-card-foot { display:flex; align-items:center; justify-content:space-between; font-size:11px; color:var(--g3); }
 .k-card-prog { margin-top:10px; }
@@ -125,75 +133,109 @@ tr:hover td { color:var(--white); }
 .k-card-del { font-size:10px; color:var(--g3); cursor:pointer; padding:2px 4px; opacity:0; transition:opacity 0.15s; }
 .k-card:hover .k-card-del { opacity:1; }
 .k-card-del:hover { color:var(--white); }
+.k-col-empty { padding:24px 16px; text-align:center; font-size:11px; color:var(--g3); }
 
-/* FUNNEL */
+/* ── FUNNEL ── */
 .funnel-header-row { display:flex; align-items:center; gap:24px; padding:0 0 10px; border-bottom:1px solid var(--line); margin-bottom:0; }
 .funnel-row { display:flex; align-items:center; gap:24px; padding:20px 0; border-bottom:1px solid var(--line); cursor:default; }
 .funnel-row:last-child { border-bottom:none; }
 .f-name { width:160px; flex-shrink:0; font-size:13px; font-weight:500; color:var(--white); }
 .f-bar-wrap { flex:1; }
-.f-bar-outer { height:2px; background:var(--s4); border-radius:2px; }
-.f-bar-inner { height:2px; background:var(--white); border-radius:2px; transition:width 0.6s ease; }
+.f-bar-outer { height:3px; background:var(--s4); border-radius:3px; }
+.f-bar-inner { height:3px; background:var(--accent); border-radius:3px; transition:width 0.6s ease; }
 .f-n { width:40px; text-align:right; font-size:20px; font-weight:700; letter-spacing:-0.5px; font-variant-numeric:tabular-nums; }
 .f-conv { width:52px; text-align:right; font-size:12px; color:var(--g2); }
 .f-amt { width:96px; text-align:right; font-size:12px; color:var(--g2); font-variant-numeric:tabular-nums; }
 
-/* FINANCE */
-.fin-grid { display:grid; grid-template-columns:repeat(4,1fr); border:1px solid var(--line); border-radius:8px; overflow:hidden; margin-bottom:40px; }
-.fin-card { padding:24px 28px; border-right:1px solid var(--line); }
-.fin-card:last-child { border-right:none; }
-.fin-label { font-size:11px; color:var(--g2); text-transform:uppercase; letter-spacing:0.4px; margin-bottom:10px; }
+/* ── FINANCE ── */
+.fin-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:10px; overflow:hidden; margin-bottom:36px; }
+.fin-card { padding:24px 28px; background:var(--s1); }
+.fin-label { font-size:10px; color:var(--g2); text-transform:uppercase; letter-spacing:0.6px; margin-bottom:10px; font-weight:600; }
 .fin-value { font-size:26px; font-weight:700; letter-spacing:-0.8px; color:var(--white); font-variant-numeric:tabular-nums; }
 .fin-delta { font-size:11px; color:var(--g3); margin-top:6px; }
-.inv-status { font-size:11px; font-weight:500; letter-spacing:0.3px; }
+.inv-status { font-size:11px; font-weight:600; letter-spacing:0.3px; }
+.inv-status.paid { color:#4ade80; }
+.inv-status.pending { color:var(--g2); }
+.inv-status.overdue { color:#f87171; }
 
-/* CHART */
-.chart-area { border:1px solid var(--line); border-radius:8px; padding:24px 28px; margin-bottom:40px; }
-.chart-header { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:24px; }
-.chart-label { font-size:12px; font-weight:500; text-transform:uppercase; letter-spacing:0.3px; color:var(--g2); }
-.chart-num { font-size:28px; font-weight:700; letter-spacing:-1px; color:var(--white); font-variant-numeric:tabular-nums; }
-.chart-sub { font-size:11px; color:var(--g3); margin-top:2px; }
-.chart-body { display:flex; align-items:flex-end; gap:4px; height:80px; }
-.chart-col { flex:1; display:flex; flex-direction:column; align-items:center; gap:5px; height:100%; justify-content:flex-end; }
-.chart-bar { width:100%; border-radius:2px 2px 0 0; background:var(--s3); min-height:4px; transition:background 0.15s; }
-.chart-bar.active { background:var(--white); }
+/* ── CHART ── */
+.chart-area { border:1px solid var(--line); border-radius:10px; padding:28px 32px; margin-bottom:36px; background:var(--s1); }
+.chart-header { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:28px; }
+.chart-label { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; color:var(--g2); }
+.chart-num { font-size:32px; font-weight:700; letter-spacing:-1.2px; color:var(--white); font-variant-numeric:tabular-nums; }
+.chart-sub { font-size:11px; color:var(--g3); margin-top:3px; }
+.chart-body { display:flex; align-items:flex-end; gap:6px; height:100px; }
+.chart-col { flex:1; display:flex; flex-direction:column; align-items:center; gap:6px; height:100%; justify-content:flex-end; }
+.chart-bar { width:100%; border-radius:3px 3px 0 0; background:var(--s3); min-height:4px; transition:background 0.2s; }
+.chart-bar.active { background:var(--accent); }
+.chart-bar:not(.active):hover { background:var(--s4); }
 .chart-lbl { font-size:9px; color:var(--g3); text-transform:uppercase; letter-spacing:0.3px; }
+.chart-lbl.active { color:var(--g2); }
 
-/* TABS */
+/* ── TABS ── */
 .tabs { display:flex; gap:0; margin-bottom:28px; border-bottom:1px solid var(--line); }
 .tab { font-size:12px; font-weight:500; padding:8px 16px; color:var(--g3); cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px; transition:color 0.1s; }
 .tab:first-child { padding-left:0; }
 .tab:hover { color:var(--g1); }
-.tab.active { color:var(--white); border-bottom-color:var(--white); }
+.tab.active { color:var(--white); border-bottom-color:var(--accent); }
 
-/* MODAL */
-.overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:200; align-items:center; justify-content:center; backdrop-filter:blur(6px); }
+/* ── CALENDAR ── */
+.cal-nav { display:flex; align-items:center; justify-content:space-between; margin-bottom:28px; }
+.cal-nav-title { font-size:16px; font-weight:700; letter-spacing:-0.3px; }
+.cal-nav-btns { display:flex; gap:4px; }
+.cal-nav-btn { width:32px; height:32px; background:var(--s1); border:1px solid var(--line); border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; color:var(--g1); font-size:14px; transition:all 0.1s; }
+.cal-nav-btn:hover { border-color:var(--line2); color:var(--white); }
+.cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:10px; overflow:hidden; }
+.cal-day-head { background:var(--s1); padding:12px 8px; text-align:center; font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.6px; color:var(--g3); }
+.cal-day { background:var(--black); min-height:90px; padding:10px; position:relative; transition:background 0.1s; }
+.cal-day:hover { background:var(--s1); }
+.cal-day.other-month .cal-day-num { color:var(--g3); }
+.cal-day.today { background:var(--s1); }
+.cal-day.today .cal-day-num { background:var(--accent); color:var(--black); border-radius:50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-weight:700; }
+.cal-day-num { font-size:12px; font-weight:500; color:var(--g1); margin-bottom:6px; line-height:22px; }
+.cal-event { font-size:10px; font-weight:500; padding:2px 6px; border-radius:3px; margin-bottom:2px; background:var(--accent-dim); color:var(--accent); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer; }
+.cal-event:hover { background:rgba(167,139,250,0.25); }
+.cal-event.deadline { background:rgba(248,113,113,0.15); color:#f87171; }
+
+/* ── MODAL ── */
+.overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.88); z-index:200; align-items:center; justify-content:center; backdrop-filter:blur(8px); }
 .overlay.open { display:flex; }
-.modal { background:var(--s1); border:1px solid var(--line2); border-radius:10px; padding:28px; width:440px; max-width:95vw; box-shadow:0 24px 80px rgba(0,0,0,0.8); animation:up .2s ease; max-height:90vh; overflow-y:auto; }
-.modal-title { font-size:15px; font-weight:600; letter-spacing:-0.3px; margin-bottom:24px; }
+.modal { background:var(--s1); border:1px solid var(--line2); border-radius:12px; padding:32px; width:460px; max-width:95vw; box-shadow:0 32px 100px rgba(0,0,0,0.9); animation:fadeup .2s ease; max-height:90vh; overflow-y:auto; }
+.modal-title { font-size:16px; font-weight:700; letter-spacing:-0.3px; margin-bottom:24px; }
 .field { margin-bottom:14px; }
-.field-label { font-size:11px; color:var(--g2); margin-bottom:5px; display:block; text-transform:uppercase; letter-spacing:0.4px; }
-.field-input { width:100%; background:var(--black); border:1px solid var(--line); border-radius:5px; padding:8px 12px; color:var(--white); font-size:13px; outline:none; transition:border-color 0.15s; font-family:inherit; }
-.field-input:focus { border-color:var(--line2); }
+.field-label { font-size:10px; color:var(--g2); margin-bottom:6px; display:block; text-transform:uppercase; letter-spacing:0.5px; font-weight:600; }
+.field-input { width:100%; background:var(--black); border:1px solid var(--line); border-radius:6px; padding:9px 12px; color:var(--white); font-size:13px; outline:none; transition:border-color 0.15s; font-family:inherit; }
+.field-input:focus { border-color:var(--accent); }
 .field-input::placeholder { color:var(--g3); }
 select.field-input option { background:var(--s1); }
 .field-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-.modal-foot { display:flex; justify-content:flex-end; gap:8px; margin-top:24px; }
-.modal-err { font-size:12px; color:var(--white); background:rgba(255,255,255,0.06); border:1px solid var(--line2); border-radius:5px; padding:8px 12px; margin-bottom:16px; display:none; }
+.modal-foot { display:flex; justify-content:flex-end; gap:8px; margin-top:28px; }
+.modal-err { font-size:12px; color:var(--white); background:rgba(248,113,113,0.1); border:1px solid rgba(248,113,113,0.3); border-radius:6px; padding:10px 12px; margin-bottom:16px; display:none; }
 .modal-err.show { display:block; }
 
-/* TOAST */
-.toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:var(--s2); border:1px solid var(--line2); border-radius:8px; padding:10px 18px; font-size:12px; color:var(--white); z-index:999; opacity:0; transition:opacity 0.2s; pointer-events:none; }
+/* ── TOAST ── */
+.toast { position:fixed; bottom:28px; left:50%; transform:translateX(-50%); background:var(--s2); border:1px solid var(--line2); border-radius:8px; padding:10px 20px; font-size:12px; font-weight:500; color:var(--white); z-index:999; opacity:0; transition:opacity 0.2s,transform 0.2s; pointer-events:none; }
 .toast.show { opacity:1; }
 
 ::-webkit-scrollbar { width:3px; height:3px; }
 ::-webkit-scrollbar-track { background:transparent; }
 ::-webkit-scrollbar-thumb { background:var(--s4); border-radius:3px; }
 
+/* ── DASH CARD ── */
+.dash-project-item { display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid var(--line); cursor:pointer; }
+.dash-project-item:last-child { border-bottom:none; }
+.dash-project-item:hover .dpi-title { color:var(--white); }
+.dpi-title { font-size:13px; font-weight:500; color:var(--white); margin-bottom:2px; }
+.dpi-sub { font-size:11px; color:var(--g3); }
+.dpi-right { text-align:right; }
+.dpi-date { font-size:11px; color:var(--g3); }
+.dpi-status { font-size:10px; font-weight:600; color:var(--accent); margin-top:2px; }
+
 @media(max-width:960px) {
   .metrics,.fin-grid { grid-template-columns:1fr 1fr; }
   .two-col { grid-template-columns:1fr; gap:32px; }
-  .kanban { flex-direction:column; background:none; }
+  .kanban { grid-template-columns:1fr 1fr; }
+  .cal-grid { grid-template-columns:repeat(7,1fr); }
 }
 </style>
 </head>
@@ -201,44 +243,102 @@ select.field-input option { background:var(--s1); }
 
 <aside class="sidebar">
   <div class="brand">
-    <div class="brand-dot"></div>
+    <div class="brand-logo">
+      <svg viewBox="0 0 14 14" fill="none">
+        <rect x="1" y="1" width="5" height="5" rx="1" fill="#000"/>
+        <rect x="8" y="1" width="5" height="5" rx="1" fill="#000"/>
+        <rect x="1" y="8" width="5" height="5" rx="1" fill="#000"/>
+        <rect x="8" y="8" width="5" height="5" rx="1" fill="#000"/>
+      </svg>
+    </div>
     <div>
-      <div class="brand-name" id="sb-studio">Studio</div>
-      <div class="brand-sub">CRM · Design</div>
+      <div class="brand-name">Reloxy</div>
+      <div class="brand-sub" id="sb-studio">CRM · Design</div>
     </div>
   </div>
   <nav class="nav">
     <div class="nav-group">
       <div class="nav-group-label">Обзор</div>
-      <div class="nav-item active" onclick="go('dashboard',this)">Дашборд</div>
-      <div class="nav-item" onclick="go('clients',this)">Клиенты <span class="nav-count" id="nc-clients">0</span></div>
+      <div class="nav-item active" onclick="go('dashboard',this)">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="1" y="1" width="6" height="6" rx="1.5"/><rect x="9" y="1" width="6" height="6" rx="1.5"/>
+          <rect x="1" y="9" width="6" height="6" rx="1.5"/><rect x="9" y="9" width="6" height="6" rx="1.5"/>
+        </svg>
+        Дашборд
+      </div>
+      <div class="nav-item" onclick="go('calendar',this)">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="1" y="2.5" width="14" height="12" rx="2"/>
+          <line x1="1" y1="6.5" x2="15" y2="6.5"/>
+          <line x1="5" y1="1" x2="5" y2="4"/>
+          <line x1="11" y1="1" x2="11" y2="4"/>
+        </svg>
+        Календарь
+      </div>
+      <div class="nav-item" onclick="go('clients',this)">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="8" cy="5" r="3"/>
+          <path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/>
+        </svg>
+        Клиенты <span class="nav-count" id="nc-clients">0</span>
+      </div>
     </div>
     <div class="nav-group">
       <div class="nav-group-label">Работа</div>
-      <div class="nav-item" onclick="go('projects',this)">Проекты <span class="nav-count" id="nc-projects">0</span></div>
-      <div class="nav-item" onclick="go('funnel',this)">Воронка</div>
+      <div class="nav-item" onclick="go('projects',this)">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="1" y="1" width="14" height="10" rx="2"/>
+          <line x1="4" y1="14" x2="12" y2="14"/>
+          <line x1="8" y1="11" x2="8" y2="14"/>
+        </svg>
+        Проекты <span class="nav-count" id="nc-projects">0</span>
+      </div>
+      <div class="nav-item" onclick="go('funnel',this)">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M2 2h12l-4.5 6v5l-3-2V8L2 2z"/>
+        </svg>
+        Воронка
+      </div>
     </div>
     <div class="nav-group">
       <div class="nav-group-label">Деньги</div>
-      <div class="nav-item" onclick="go('finance',this)">Финансы</div>
+      <div class="nav-item" onclick="go('finance',this)">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="1" y="3" width="14" height="10" rx="2"/>
+          <circle cx="8" cy="8" r="2.5"/>
+          <line x1="1" y1="6" x2="15" y2="6"/>
+          <line x1="1" y1="10" x2="15" y2="10"/>
+        </svg>
+        Финансы
+      </div>
     </div>
   </nav>
   <div class="sidebar-bottom">
     <div class="user-row">
-      <div class="user-initials" id="sb-initials">—</div>
+      <div class="user-avatar" id="sb-initials">—</div>
       <div>
         <div class="user-name" id="sb-name">...</div>
         <div class="user-role">Администратор</div>
       </div>
     </div>
-    <div class="logout-btn" onclick="logout()">Выйти</div>
+    <div class="logout-btn" onclick="logout()">
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M6 2H3a1 1 0 00-1 1v10a1 1 0 001 1h3M10 11l3-3-3-3M13 8H6"/>
+      </svg>
+      Выйти
+    </div>
   </div>
 </aside>
 
 <main class="main">
   <div class="topbar">
     <div class="topbar-title" id="topbar-title">Дашборд</div>
-    <div class="search"><span style="color:var(--g3);font-size:12px">⌕</span><input placeholder="Поиск..." id="search-input" oninput="doSearch(this.value)"></div>
+    <div class="search">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="6.5" cy="6.5" r="4.5"/><line x1="10" y1="10" x2="14" y2="14"/>
+      </svg>
+      <input placeholder="Поиск..." id="search-input" oninput="doSearch(this.value)">
+    </div>
     <button class="btn btn-white" id="add-btn" onclick="openAddModal()">+ Добавить</button>
   </div>
 
@@ -247,31 +347,83 @@ select.field-input option { background:var(--s1); }
     <!-- DASHBOARD -->
     <div class="page active" id="page-dashboard">
       <div class="metrics">
-        <div class="metric"><div class="metric-label">Выручка</div><div class="metric-value" id="m-revenue">—</div><div class="metric-sub">Текущий месяц</div></div>
-        <div class="metric"><div class="metric-label">Проекты</div><div class="metric-value" id="m-projects">0</div><div class="metric-sub">Активных</div></div>
-        <div class="metric"><div class="metric-label">Клиенты</div><div class="metric-value" id="m-clients">0</div><div class="metric-sub">Всего</div></div>
-        <div class="metric"><div class="metric-label">Лиды</div><div class="metric-value" id="m-leads">0</div><div class="metric-sub">В воронке</div></div>
+        <div class="metric">
+          <div class="metric-label">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 12l3-4 3 2 3-5 3 3"/></svg>
+            Выручка
+          </div>
+          <div class="metric-value" id="m-revenue">—</div>
+          <div class="metric-sub">Текущий месяц</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="14" height="10" rx="2"/></svg>
+            Проекты
+          </div>
+          <div class="metric-value" id="m-projects">0</div>
+          <div class="metric-sub">Активных</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>
+            Клиенты
+          </div>
+          <div class="metric-value" id="m-clients">0</div>
+          <div class="metric-sub">Всего</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 2h12l-4.5 6v5l-3-2V8L2 2z"/></svg>
+            Лиды
+          </div>
+          <div class="metric-value" id="m-leads">0</div>
+          <div class="metric-sub">В воронке</div>
+        </div>
       </div>
+
       <div class="chart-area">
         <div class="chart-header">
-          <div><div class="chart-label">Выручка 2026</div><div class="chart-sub" id="chart-sub">Загрузка...</div></div>
+          <div>
+            <div class="chart-label">Выручка <span id="chart-year">2026</span></div>
+            <div class="chart-sub" id="chart-sub">Загрузка...</div>
+          </div>
           <div class="chart-num" id="chart-total">₽ —</div>
         </div>
         <div class="chart-body" id="chart-bars"></div>
       </div>
+
       <div class="two-col">
         <div class="section">
           <div class="section-header">
             <div class="section-title">Последние проекты</div>
-            <span class="section-action" onclick="go('projects',document.querySelectorAll('.nav-item')[2])">Все →</span>
+            <span class="section-action" onclick="go('projects',document.querySelectorAll('.nav-item')[3])">Все →</span>
           </div>
           <div id="dash-projects"><div class="empty"><div class="empty-title">Проектов нет</div></div></div>
         </div>
         <div class="section">
-          <div class="section-header"><div class="section-title">Последние клиенты</div><span class="section-action" onclick="go('clients',document.querySelectorAll('.nav-item')[1])">Все →</span></div>
+          <div class="section-header">
+            <div class="section-title">Последние клиенты</div>
+            <span class="section-action" onclick="go('clients',document.querySelectorAll('.nav-item')[2])">Все →</span>
+          </div>
           <div id="dash-clients"><div class="empty"><div class="empty-title">Клиентов нет</div></div></div>
         </div>
       </div>
+    </div>
+
+    <!-- CALENDAR -->
+    <div class="page" id="page-calendar">
+      <div class="page-header">
+        <div><h1>Календарь</h1><p>Дедлайны проектов и важные даты</p></div>
+      </div>
+      <div class="cal-nav">
+        <div class="cal-nav-title" id="cal-month-title">Май 2026</div>
+        <div class="cal-nav-btns">
+          <div class="cal-nav-btn" onclick="calPrev()">←</div>
+          <div class="cal-nav-btn" onclick="calToday()">Сег.</div>
+          <div class="cal-nav-btn" onclick="calNext()">→</div>
+        </div>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
     </div>
 
     <!-- CLIENTS -->
@@ -280,14 +432,22 @@ select.field-input option { background:var(--s1); }
         <div><h1>Клиенты</h1><p>Все компании и контакты студии</p></div>
         <button class="btn btn-white" onclick="openAddModal()">+ Новый клиент</button>
       </div>
-      <div class="tabs"><div class="tab active" onclick="filterClients('all',this)">Все</div><div class="tab" onclick="filterClients('active',this)">Активные</div><div class="tab" onclick="filterClients('archive',this)">Архив</div></div>
+      <div class="tabs">
+        <div class="tab active" onclick="filterClients('all',this)">Все</div>
+        <div class="tab" onclick="filterClients('active',this)">Активные</div>
+        <div class="tab" onclick="filterClients('lead',this)">Потенциальные</div>
+        <div class="tab" onclick="filterClients('archive',this)">Архив</div>
+      </div>
       <div class="table-wrap">
         <table>
           <thead><tr><th>Компания</th><th>Контакт</th><th>Email</th><th>Статус</th><th>Проекты</th><th>Оборот</th><th></th></tr></thead>
           <tbody id="clients-tbody"></tbody>
         </table>
       </div>
-      <div id="clients-empty" class="empty" style="display:none"><div class="empty-title">Клиентов нет</div><div class="empty-sub">Нажмите «+ Новый клиент»</div></div>
+      <div id="clients-empty" class="empty" style="display:none">
+        <div class="empty-title">Клиентов нет</div>
+        <div class="empty-sub">Нажмите «+ Новый клиент»</div>
+      </div>
     </div>
 
     <!-- PROJECTS -->
@@ -296,12 +456,23 @@ select.field-input option { background:var(--s1); }
         <div><h1>Проекты</h1><p>Задачи и проекты студии</p></div>
         <button class="btn btn-white" onclick="openAddModal()">+ Новый проект</button>
       </div>
-      <div class="tabs"><div class="tab active">Канбан</div></div>
       <div class="kanban" id="kanban-board">
-        <div class="k-col" id="k-queue"><div class="k-col-head"><div class="k-col-name">Очередь</div><div class="k-col-n" id="kn-queue">0</div></div><div class="k-cards" id="kc-queue"></div></div>
-        <div class="k-col" id="k-inprogress"><div class="k-col-head"><div class="k-col-name">В работе</div><div class="k-col-n" id="kn-inprogress">0</div></div><div class="k-cards" id="kc-inprogress"></div></div>
-        <div class="k-col" id="k-review"><div class="k-col-head"><div class="k-col-name">Согласование</div><div class="k-col-n" id="kn-review">0</div></div><div class="k-cards" id="kc-review"></div></div>
-        <div class="k-col" id="k-done"><div class="k-col-head"><div class="k-col-name">Готово</div><div class="k-col-n" id="kn-done">0</div></div><div class="k-cards" id="kc-done"></div></div>
+        <div class="k-col">
+          <div class="k-col-head"><div class="k-col-name">Очередь</div><div class="k-col-n" id="kn-queue">0</div></div>
+          <div class="k-cards" id="kc-queue"></div>
+        </div>
+        <div class="k-col">
+          <div class="k-col-head"><div class="k-col-name">В работе</div><div class="k-col-n" id="kn-inprogress">0</div></div>
+          <div class="k-cards" id="kc-inprogress"></div>
+        </div>
+        <div class="k-col">
+          <div class="k-col-head"><div class="k-col-name">Согласование</div><div class="k-col-n" id="kn-review">0</div></div>
+          <div class="k-cards" id="kc-review"></div>
+        </div>
+        <div class="k-col">
+          <div class="k-col-head"><div class="k-col-name">Готово</div><div class="k-col-n" id="kn-done">0</div></div>
+          <div class="k-cards" id="kc-done"></div>
+        </div>
       </div>
     </div>
 
@@ -311,10 +482,10 @@ select.field-input option { background:var(--s1); }
         <div><h1>Воронка</h1><p>Стадии продаж и конверсия</p></div>
         <button class="btn btn-white" onclick="openAddModal()">+ Новый лид</button>
       </div>
-      <div class="metrics" style="margin-bottom:40px">
+      <div class="metrics" style="margin-bottom:36px">
         <div class="metric"><div class="metric-label">Закрыто</div><div class="metric-value" id="f-closed">₽ —</div><div class="metric-sub">За месяц</div></div>
         <div class="metric"><div class="metric-label">Конверсия</div><div class="metric-value" id="f-conv">—</div><div class="metric-sub">Лид → сделка</div></div>
-        <div class="metric"><div class="metric-label">Средний чек</div><div class="metric-value" id="f-avg">₽ —</div><div class="metric-sub">Закрытых сделок</div></div>
+        <div class="metric"><div class="metric-label">Средний чек</div><div class="metric-value" id="f-avg">₽ —</div><div class="metric-sub">Закрытых</div></div>
         <div class="metric"><div class="metric-label">Всего лидов</div><div class="metric-value" id="f-total">0</div><div class="metric-sub">В работе</div></div>
       </div>
       <div id="funnel-list"></div>
@@ -339,7 +510,10 @@ select.field-input option { background:var(--s1); }
           <tbody id="invoices-tbody"></tbody>
         </table>
       </div>
-      <div id="invoices-empty" class="empty" style="display:none"><div class="empty-title">Счетов нет</div><div class="empty-sub">Выставьте первый счёт</div></div>
+      <div id="invoices-empty" class="empty" style="display:none">
+        <div class="empty-title">Счетов нет</div>
+        <div class="empty-sub">Выставьте первый счёт</div>
+      </div>
     </div>
 
   </div>
@@ -367,14 +541,16 @@ let token = localStorage.getItem('crm_token');
 let user  = JSON.parse(localStorage.getItem('crm_user') || 'null');
 let currentPage = 'dashboard';
 let modalAction = null;
-
-// Data cache
 let clients  = [];
 let projects = [];
 let deals    = [];
 let invoices = [];
+let calYear  = new Date().getFullYear();
+let calMonth = new Date().getMonth();
 
-const MONTHS = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
+const MONTHS = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+const MONTHS_SHORT = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
+const DAYS = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 
 // ─── INIT ──────────────────────────────────────────────────────────────────
 async function init() {
@@ -385,12 +561,12 @@ async function init() {
     localStorage.setItem('crm_user', JSON.stringify(me));
   } catch { return logout(); }
 
-  // Set user info in sidebar
-  const initials = user.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
+  const initials = user.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
   document.getElementById('sb-initials').textContent = initials;
-  document.getElementById('sb-name').textContent     = user.name;
+  document.getElementById('sb-name').textContent = user.name;
   if (user.studioName) document.getElementById('sb-studio').textContent = user.studioName;
 
+  document.getElementById('chart-year').textContent = new Date().getFullYear();
   await loadAll();
   renderPage('dashboard');
 }
@@ -403,29 +579,23 @@ async function loadAll() {
     api('GET', '/api/invoices'),
     api('GET', '/api/stats'),
   ]);
-  clients  = c;
-  projects = p;
-  deals    = d;
-  invoices = i;
+  clients  = c; projects = p; deals = d; invoices = i;
   renderStats(s);
   renderCounts();
 }
 
-// ─── API HELPER ────────────────────────────────────────────────────────────
+// ─── API ───────────────────────────────────────────────────────────────────
 async function api(method, url, body) {
-  const opts = {
-    method,
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
-  };
+  const opts = { method, headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` } };
   if (body) opts.body = JSON.stringify(body);
-  const res = await fetch(API + url, opts);
+  const res  = await fetch(API + url, opts);
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || 'Ошибка сервера');
   return data;
 }
 
 // ─── NAV ───────────────────────────────────────────────────────────────────
-const TITLES = { dashboard:'Дашборд', clients:'Клиенты', projects:'Проекты', funnel:'Воронка', finance:'Финансы' };
+const TITLES = { dashboard:'Дашборд', calendar:'Календарь', clients:'Клиенты', projects:'Проекты', funnel:'Воронка', finance:'Финансы' };
 function go(id, el) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -438,6 +608,7 @@ function go(id, el) {
 
 function renderPage(id) {
   if (id === 'dashboard') renderDashboard();
+  if (id === 'calendar')  renderCalendar();
   if (id === 'clients')   renderClients();
   if (id === 'projects')  renderProjects();
   if (id === 'funnel')    renderFunnel();
@@ -446,7 +617,7 @@ function renderPage(id) {
 
 function renderCounts() {
   document.getElementById('nc-clients').textContent  = clients.length;
-  document.getElementById('nc-projects').textContent = projects.filter(p => p.status !== 'done').length;
+  document.getElementById('nc-projects').textContent = projects.filter(p=>p.status!=='done').length;
 }
 
 // ─── STATS ─────────────────────────────────────────────────────────────────
@@ -459,49 +630,108 @@ function renderStats(s) {
 }
 
 function renderChart(monthly) {
-  const max = Math.max(...monthly, 1);
-  const total = monthly.reduce((a, b) => a + b, 0);
+  const max   = Math.max(...monthly, 1);
+  const total = monthly.reduce((a,b) => a+b, 0);
   const nowM  = new Date().getMonth();
   document.getElementById('chart-total').textContent = '₽ ' + fmtNum(total);
   document.getElementById('chart-sub').textContent   = total ? 'Общая выручка за год' : 'Данные появятся после первой сделки';
-  const bars = MONTHS.map((m, i) => {
-    const h = Math.max(Math.round((monthly[i] / max) * 100), 4);
-    return `<div class="chart-col"><div class="chart-bar${i===nowM?' active':''}" style="height:${h}%"></div><div class="chart-lbl${i===nowM?' style="color:var(--g1)"':''}">${m}</div></div>`;
+  document.getElementById('chart-bars').innerHTML = MONTHS_SHORT.map((m,i) => {
+    const h = Math.max(Math.round((monthly[i]/max)*100), 4);
+    const active = i === nowM;
+    return `<div class="chart-col">
+      <div class="chart-bar${active?' active':''}" style="height:${h}%"></div>
+      <div class="chart-lbl${active?' active':''}">${m}</div>
+    </div>`;
   }).join('');
-  document.getElementById('chart-bars').innerHTML = bars;
 }
 
 // ─── DASHBOARD ─────────────────────────────────────────────────────────────
 function renderDashboard() {
-  // Recent projects
   const dp = document.getElementById('dash-projects');
-  if (!projects.length) { dp.innerHTML = '<div class="empty"><div class="empty-title">Проектов нет</div></div>'; }
-  else {
+  if (!projects.length) {
+    dp.innerHTML = '<div class="empty"><div class="empty-title">Проектов нет</div><div class="empty-sub">Добавьте первый проект</div></div>';
+  } else {
     dp.innerHTML = projects.slice(0,5).map(p => `
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--line)">
+      <div class="dash-project-item">
         <div>
-          <div style="font-size:13px;font-weight:500;color:var(--white)">${esc(p.title)}</div>
-          <div style="font-size:11px;color:var(--g3);margin-top:2px">${esc(p.client_name||'—')} · ${statusLabel(p.status)}</div>
+          <div class="dpi-title">${esc(p.title)}</div>
+          <div class="dpi-sub">${esc(p.client_name||'—')} · ${statusLabel(p.status)}</div>
         </div>
-        <div style="font-size:11px;color:var(--g3)">${p.deadline||'—'}</div>
-      </div>
-    `).join('') + (projects.length > 5 ? `<div style="font-size:11px;color:var(--g3);padding-top:10px">+ ещё ${projects.length-5}</div>` : '');
+        <div class="dpi-right">
+          <div class="dpi-date">${p.deadline||'—'}</div>
+          ${p.progress>0?`<div class="dpi-status">${p.progress}%</div>`:''}
+        </div>
+      </div>`).join('');
   }
 
-  // Recent clients
   const dc = document.getElementById('dash-clients');
-  if (!clients.length) { dc.innerHTML = '<div class="empty"><div class="empty-title">Клиентов нет</div></div>'; }
-  else {
+  if (!clients.length) {
+    dc.innerHTML = '<div class="empty"><div class="empty-title">Клиентов нет</div><div class="empty-sub">Добавьте первого клиента</div></div>';
+  } else {
     dc.innerHTML = clients.slice(0,5).map(c => `
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--line)">
+      <div class="dash-project-item">
         <div>
-          <div style="font-size:13px;font-weight:500;color:var(--white)">${esc(c.name)}</div>
-          <div style="font-size:11px;color:var(--g3);margin-top:2px">${esc(c.industry||'—')}</div>
+          <div class="dpi-title">${esc(c.name)}</div>
+          <div class="dpi-sub">${esc(c.industry||'—')}</div>
         </div>
         <div class="status"><div class="dot ${c.status==='active'?'dot-hi':c.status==='archive'?'dot-lo':'dot-mid'}"></div>${statusClientLabel(c.status)}</div>
-      </div>
-    `).join('');
+      </div>`).join('');
   }
+}
+
+// ─── CALENDAR ──────────────────────────────────────────────────────────────
+function calPrev()  { calMonth--; if (calMonth<0) { calMonth=11; calYear--; } renderCalendar(); }
+function calNext()  { calMonth++; if (calMonth>11) { calMonth=0; calYear++; } renderCalendar(); }
+function calToday() { calYear=new Date().getFullYear(); calMonth=new Date().getMonth(); renderCalendar(); }
+
+function renderCalendar() {
+  document.getElementById('cal-month-title').textContent = MONTHS[calMonth] + ' ' + calYear;
+  const today = new Date();
+  const firstDay = new Date(calYear, calMonth, 1);
+  const lastDay  = new Date(calYear, calMonth+1, 0);
+  // Monday-first: 0=Mon ... 6=Sun
+  let startDow = firstDay.getDay() - 1; if (startDow < 0) startDow = 6;
+
+  // Build deadline map
+  const deadlineMap = {};
+  projects.forEach(p => {
+    if (p.deadline) {
+      const d = new Date(p.deadline + 'T00:00:00');
+      if (d.getFullYear()===calYear && d.getMonth()===calMonth) {
+        const day = d.getDate();
+        if (!deadlineMap[day]) deadlineMap[day] = [];
+        deadlineMap[day].push(p);
+      }
+    }
+  });
+
+  let html = DAYS.map(d => `<div class="cal-day-head">${d}</div>`).join('');
+
+  // Prev month filler
+  const prevMonthDays = new Date(calYear, calMonth, 0).getDate();
+  for (let i = startDow-1; i >= 0; i--) {
+    html += `<div class="cal-day other-month"><div class="cal-day-num">${prevMonthDays-i}</div></div>`;
+  }
+
+  // Current month
+  for (let day = 1; day <= lastDay.getDate(); day++) {
+    const isToday = day===today.getDate() && calMonth===today.getMonth() && calYear===today.getFullYear();
+    const events  = deadlineMap[day] || [];
+    const evHtml  = events.map(p => `<div class="cal-event deadline" title="${esc(p.title)}">${esc(p.title)}</div>`).join('');
+    html += `<div class="cal-day${isToday?' today':''}">
+      <div class="cal-day-num">${day}</div>
+      ${evHtml}
+    </div>`;
+  }
+
+  // Next month filler
+  const totalCells = startDow + lastDay.getDate();
+  const remaining  = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+  for (let i = 1; i <= remaining; i++) {
+    html += `<div class="cal-day other-month"><div class="cal-day-num">${i}</div></div>`;
+  }
+
+  document.getElementById('cal-grid').innerHTML = html;
 }
 
 // ─── CLIENTS ───────────────────────────────────────────────────────────────
@@ -514,14 +744,10 @@ function filterClients(f, el) {
 }
 
 function renderClients(list) {
-  const data = (list || clients).filter(c => clientFilter === 'all' || c.status === clientFilter);
+  const data  = (list || clients).filter(c => clientFilter==='all' || c.status===clientFilter);
   const tbody = document.getElementById('clients-tbody');
   const empty = document.getElementById('clients-empty');
-  if (!data.length) {
-    tbody.innerHTML = '';
-    empty.style.display = 'flex';
-    return;
-  }
+  if (!data.length) { tbody.innerHTML=''; empty.style.display='flex'; return; }
   empty.style.display = 'none';
   tbody.innerHTML = data.map(c => `
     <tr>
@@ -535,19 +761,20 @@ function renderClients(list) {
         <span class="td-action" onclick="editClient(${c.id})" style="margin-right:12px">Ред.</span>
         <span class="td-action" onclick="deleteClient(${c.id})">Удал.</span>
       </td>
-    </tr>
-  `).join('');
+    </tr>`).join('');
 }
 
-// ─── PROJECTS / KANBAN ─────────────────────────────────────────────────────
+// ─── PROJECTS ──────────────────────────────────────────────────────────────
 function renderProjects() {
   const cols = { queue:[], inprogress:[], review:[], done:[] };
-  projects.forEach(p => { const k = p.status==='in-progress'?'inprogress':p.status; if (cols[k]) cols[k].push(p); else cols.queue.push(p); });
+  projects.forEach(p => {
+    const k = p.status==='in-progress'?'inprogress':p.status;
+    if (cols[k]) cols[k].push(p); else cols.queue.push(p);
+  });
   for (const [k, arr] of Object.entries(cols)) {
-    document.getElementById('kn-' + k).textContent = arr.length;
-    const el = document.getElementById('kc-' + k);
-    el.innerHTML = arr.length ? arr.map(p => `
-      <div class="k-card">
+    document.getElementById('kn-'+k).textContent = arr.length;
+    document.getElementById('kc-'+k).innerHTML = arr.length ? arr.map(p => `
+      <div class="k-card" onclick="editProject(${p.id})">
         <div style="display:flex;justify-content:space-between;align-items:flex-start">
           <div class="k-card-tag">${esc(p.type||'ПРОЕКТ')}</div>
           <span class="k-card-del" onclick="deleteProject(${p.id},event)">✕</span>
@@ -558,32 +785,30 @@ function renderProjects() {
           <span>${esc(p.client_name||'—')}</span>
           <span>${p.deadline||''}</span>
         </div>
-      </div>
-    `).join('') : '<div style="padding:20px 0;text-align:center;font-size:11px;color:var(--g3)">Пусто</div>';
+      </div>`).join('') : `<div class="k-col-empty">Пусто</div>`;
   }
 }
 
 // ─── FUNNEL ────────────────────────────────────────────────────────────────
 const STAGES = [
-  { key:'new',        label:'Новый лид' },
-  { key:'qualify',    label:'Квалификация' },
-  { key:'proposal',   label:'КП отправлено' },
-  { key:'negotiate',  label:'Переговоры' },
-  { key:'closed',     label:'Закрыта' },
+  { key:'new',       label:'Новый лид' },
+  { key:'qualify',   label:'Квалификация' },
+  { key:'proposal',  label:'КП отправлено' },
+  { key:'negotiate', label:'Переговоры' },
+  { key:'closed',    label:'Закрыта' },
 ];
 
 function renderFunnel() {
-  const counts = {};
-  const values = {};
+  const counts = {}; const values = {};
   STAGES.forEach(s => { counts[s.key]=0; values[s.key]=0; });
-  deals.forEach(d => { if (counts[d.stage]!==undefined) { counts[d.stage]++; values[d.stage]+=d.value||0; } });
+  deals.forEach(d => { if(counts[d.stage]!==undefined){counts[d.stage]++;values[d.stage]+=d.value||0;} });
 
   const total   = deals.length;
-  const closed  = deals.filter(d => d.stage === 'closed');
-  const closedV = closed.reduce((a,b) => a + (b.value||0), 0);
-  const conv    = total ? Math.round(closed.length / total * 100) : 0;
-  const avg     = closed.length ? Math.round(closedV / closed.length) : 0;
-  const active  = deals.filter(d => d.stage !== 'closed');
+  const closed  = deals.filter(d=>d.stage==='closed');
+  const closedV = closed.reduce((a,b)=>a+(b.value||0),0);
+  const conv    = total ? Math.round(closed.length/total*100) : 0;
+  const avg     = closed.length ? Math.round(closedV/closed.length) : 0;
+  const active  = deals.filter(d=>d.stage!=='closed');
 
   document.getElementById('f-closed').textContent = fmt(closedV);
   document.getElementById('f-conv').textContent   = conv + '%';
@@ -591,17 +816,16 @@ function renderFunnel() {
   document.getElementById('f-total').textContent  = active.length;
 
   const maxC = Math.max(...Object.values(counts), 1);
-  const list = document.getElementById('funnel-list');
-  list.innerHTML = `
+  document.getElementById('funnel-list').innerHTML = `
     <div class="funnel-header-row">
-      <div style="width:160px;flex-shrink:0;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--g3)">Стадия</div>
+      <div style="width:160px;flex-shrink:0;font-size:10px;text-transform:uppercase;letter-spacing:0.6px;color:var(--g3);font-weight:600">Стадия</div>
       <div style="flex:1"></div>
-      <div style="width:40px;text-align:right;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--g3)">Лидов</div>
-      <div style="width:52px;text-align:right;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--g3)">Конв.</div>
-      <div style="width:96px;text-align:right;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--g3)">Сумма</div>
+      <div style="width:40px;text-align:right;font-size:10px;text-transform:uppercase;letter-spacing:0.6px;color:var(--g3);font-weight:600">Лидов</div>
+      <div style="width:52px;text-align:right;font-size:10px;text-transform:uppercase;letter-spacing:0.6px;color:var(--g3);font-weight:600">Конв.</div>
+      <div style="width:96px;text-align:right;font-size:10px;text-transform:uppercase;letter-spacing:0.6px;color:var(--g3);font-weight:600">Сумма</div>
     </div>
-    ${STAGES.map((s,i) => {
-      const pct = total ? Math.round(counts[s.key]/total*100) : 0;
+    ${STAGES.map(s => {
+      const pct  = total ? Math.round(counts[s.key]/total*100) : 0;
       const barW = Math.round(counts[s.key]/maxC*100);
       return `<div class="funnel-row">
         <div class="f-name">${s.label}</div>
@@ -610,30 +834,25 @@ function renderFunnel() {
         <div class="f-conv">${pct}%</div>
         <div class="f-amt">${fmt(values[s.key])}</div>
       </div>`;
-    }).join('')}
-  `;
+    }).join('')}`;
 }
 
 // ─── FINANCE ───────────────────────────────────────────────────────────────
 function renderFinance() {
-  const paid    = invoices.filter(i => i.status === 'paid');
-  const pending = invoices.filter(i => i.status === 'pending');
-  const overdue = invoices.filter(i => i.status === 'overdue');
+  const paid    = invoices.filter(i=>i.status==='paid');
+  const pending = invoices.filter(i=>i.status==='pending');
+  const overdue = invoices.filter(i=>i.status==='overdue');
   const now = new Date();
-  const m = String(now.getMonth()+1).padStart(2,'0');
-  const y = now.getFullYear();
-  const monthPaid = paid.filter(i => i.issued_at && i.issued_at.startsWith(`${y}-${m}`));
-  const incomeV   = monthPaid.reduce((a,b) => a+(b.amount||0), 0);
-  const pendingV  = pending.reduce((a,b) => a+(b.amount||0), 0);
-  const overdueV  = overdue.reduce((a,b) => a+(b.amount||0), 0);
-  const totalV    = paid.reduce((a,b) => a+(b.amount||0), 0);
+  const m   = String(now.getMonth()+1).padStart(2,'0');
+  const y   = now.getFullYear();
+  const monthPaid = paid.filter(i=>i.issued_at&&i.issued_at.startsWith(`${y}-${m}`));
 
-  document.getElementById('fi-income').textContent    = fmt(incomeV);
-  document.getElementById('fi-pending').textContent   = fmt(pendingV);
+  document.getElementById('fi-income').textContent    = fmt(monthPaid.reduce((a,b)=>a+(b.amount||0),0));
+  document.getElementById('fi-pending').textContent   = fmt(pending.reduce((a,b)=>a+(b.amount||0),0));
   document.getElementById('fi-pending-n').textContent = `${pending.length} счетов`;
-  document.getElementById('fi-overdue').textContent   = fmt(overdueV);
+  document.getElementById('fi-overdue').textContent   = fmt(overdue.reduce((a,b)=>a+(b.amount||0),0));
   document.getElementById('fi-overdue-n').textContent = `${overdue.length} счетов`;
-  document.getElementById('fi-total').textContent     = fmt(totalV);
+  document.getElementById('fi-total').textContent     = fmt(paid.reduce((a,b)=>a+(b.amount||0),0));
 
   const tbody = document.getElementById('invoices-tbody');
   const empty = document.getElementById('invoices-empty');
@@ -646,38 +865,36 @@ function renderFinance() {
       <td style="font-variant-numeric:tabular-nums;font-weight:500;color:var(--white)">${fmt(i.amount)}</td>
       <td style="font-size:12px">${i.issued_at||'—'}</td>
       <td style="font-size:12px">${i.due_at||'—'}</td>
-      <td><div class="inv-status ${i.status==='paid'?'':'wait'}">${invLabel(i.status)}</div></td>
+      <td><div class="inv-status ${i.status}">${invLabel(i.status)}</div></td>
       <td><span class="td-action" onclick="deleteInvoice(${i.id})">Удал.</span></td>
-    </tr>
-  `).join('');
+    </tr>`).join('');
 }
 
-// ─── MODAL ─────────────────────────────────────────────────────────────────
+// ─── MODALS ────────────────────────────────────────────────────────────────
 function openAddModal() {
   document.getElementById('modal-err').classList.remove('show');
-  if (currentPage === 'clients')  openClientModal();
-  else if (currentPage === 'projects') openProjectModal();
-  else if (currentPage === 'funnel')   openDealModal();
-  else if (currentPage === 'finance')  openInvoiceModal();
+  if (currentPage==='clients')  openClientModal();
+  else if (currentPage==='projects') openProjectModal();
+  else if (currentPage==='funnel')   openDealModal();
+  else if (currentPage==='finance')  openInvoiceModal();
   else openClientModal();
 }
 
 function showModal(title, body, action) {
   document.getElementById('modal-title').textContent = title;
-  document.getElementById('modal-body').innerHTML = body;
+  document.getElementById('modal-body').innerHTML    = body;
   modalAction = action;
   document.getElementById('overlay').classList.add('open');
 }
-function closeModal() { document.getElementById('overlay').classList.remove('open'); }
-function closeOverlay(e) { if (e.target === document.getElementById('overlay')) closeModal(); }
+function closeModal()     { document.getElementById('overlay').classList.remove('open'); }
+function closeOverlay(e)  { if (e.target===document.getElementById('overlay')) closeModal(); }
 async function saveModal() {
   document.getElementById('modal-err').classList.remove('show');
   if (modalAction) await modalAction();
 }
 
-// Client modal
 function openClientModal(c) {
-  showModal(c ? 'Редактировать клиента' : 'Новый клиент', `
+  showModal(c?'Редактировать клиента':'Новый клиент', `
     <div class="field-row">
       <div class="field"><label class="field-label">Компания *</label><input class="field-input" id="m-name" value="${esc(c?.name||'')}" placeholder="Название"></div>
       <div class="field"><label class="field-label">Отрасль</label><input class="field-input" id="m-industry" value="${esc(c?.industry||'')}" placeholder="IT / SaaS"></div>
@@ -693,27 +910,25 @@ function openClientModal(c) {
         <option value="lead" ${c?.status==='lead'?'selected':''}>Потенциальный</option>
         <option value="archive" ${c?.status==='archive'?'selected':''}>Архив</option>
       </select></div>
-    </div>
-  `, async () => {
+    </div>`, async () => {
     const body = { name:val('m-name'), industry:val('m-industry'), contact_name:val('m-contact'), email:val('m-email'), phone:val('m-phone'), status:val('m-status') };
     try {
       if (c) await api('PUT', `/api/clients/${c.id}`, body);
-      else await api('POST', '/api/clients', body);
-      closeModal(); await loadAll(); renderClients(); toast(c ? 'Клиент обновлён' : 'Клиент добавлен');
-    } catch (e) { showErr(e.message); }
+      else   await api('POST', '/api/clients', body);
+      closeModal(); await loadAll(); renderClients(); toast(c?'Клиент обновлён':'Клиент добавлен');
+    } catch(e) { showErr(e.message); }
   });
 }
 
-function editClient(id) { openClientModal(clients.find(c => c.id === id)); }
+function editClient(id)    { openClientModal(clients.find(c=>c.id===id)); }
 async function deleteClient(id) {
   if (!confirm('Удалить клиента?')) return;
   try { await api('DELETE', `/api/clients/${id}`); await loadAll(); renderClients(); toast('Клиент удалён'); } catch(e) { toast(e.message); }
 }
 
-// Project modal
 function openProjectModal(p) {
-  const clientOpts = clients.map(c => `<option value="${c.id}" ${p?.client_id==c.id?'selected':''}>${esc(c.name)}</option>`).join('');
-  showModal(p ? 'Редактировать проект' : 'Новый проект', `
+  const clientOpts = clients.map(c=>`<option value="${c.id}" ${p?.client_id==c.id?'selected':''}>${esc(c.name)}</option>`).join('');
+  showModal(p?'Редактировать проект':'Новый проект', `
     <div class="field-row">
       <div class="field"><label class="field-label">Название *</label><input class="field-input" id="m-title" value="${esc(p?.title||'')}" placeholder="Ребрендинг..."></div>
       <div class="field"><label class="field-label">Тип</label><input class="field-input" id="m-type" value="${esc(p?.type||'')}" placeholder="БРЕНД / ВЕБ..."></div>
@@ -736,22 +951,22 @@ function openProjectModal(p) {
     const body = { title:val('m-title'), type:val('m-type'), client_id:val('m-client')||null, status:val('m-status'), progress:+val('m-progress'), deadline:val('m-deadline'), budget:+val('m-budget') };
     try {
       if (p) await api('PUT', `/api/projects/${p.id}`, body);
-      else await api('POST', '/api/projects', body);
-      closeModal(); await loadAll(); renderProjects(); toast(p ? 'Проект обновлён' : 'Проект добавлен');
+      else   await api('POST', '/api/projects', body);
+      closeModal(); await loadAll(); renderProjects(); toast(p?'Проект обновлён':'Проект добавлен');
     } catch(e) { showErr(e.message); }
   });
 }
 
+function editProject(id)    { openProjectModal(projects.find(p=>p.id===id)); }
 async function deleteProject(id, e) {
   e.stopPropagation();
   if (!confirm('Удалить проект?')) return;
   try { await api('DELETE', `/api/projects/${id}`); await loadAll(); renderProjects(); toast('Проект удалён'); } catch(e2) { toast(e2.message); }
 }
 
-// Deal modal
 function openDealModal(d) {
-  const clientOpts = clients.map(c => `<option value="${c.id}" ${d?.client_id==c.id?'selected':''}>${esc(c.name)}</option>`).join('');
-  showModal(d ? 'Редактировать сделку' : 'Новый лид', `
+  const clientOpts = clients.map(c=>`<option value="${c.id}" ${d?.client_id==c.id?'selected':''}>${esc(c.name)}</option>`).join('');
+  showModal(d?'Редактировать сделку':'Новый лид', `
     <div class="field"><label class="field-label">Название *</label><input class="field-input" id="m-title" value="${esc(d?.title||'')}" placeholder="Ребрендинг..."></div>
     <div class="field-row">
       <div class="field"><label class="field-label">Клиент</label><select class="field-input" id="m-client"><option value="">— не выбран —</option>${clientOpts}</select></div>
@@ -768,15 +983,14 @@ function openDealModal(d) {
     const body = { title:val('m-title'), client_id:val('m-client')||null, stage:val('m-stage'), value:+val('m-value') };
     try {
       if (d) await api('PUT', `/api/deals/${d.id}`, body);
-      else await api('POST', '/api/deals', body);
-      closeModal(); await loadAll(); renderFunnel(); toast(d ? 'Сделка обновлена' : 'Лид добавлен');
+      else   await api('POST', '/api/deals', body);
+      closeModal(); await loadAll(); renderFunnel(); toast(d?'Сделка обновлена':'Лид добавлен');
     } catch(e) { showErr(e.message); }
   });
 }
 
-// Invoice modal
 function openInvoiceModal() {
-  const clientOpts = clients.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('');
+  const clientOpts = clients.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');
   showModal('Новый счёт', `
     <div class="field-row">
       <div class="field"><label class="field-label">Номер</label><input class="field-input" id="m-number" placeholder="#2026-001"></div>
@@ -794,10 +1008,7 @@ function openInvoiceModal() {
     </select></div>
   `, async () => {
     const body = { number:val('m-number'), client_id:val('m-client')||null, amount:+val('m-amount'), issued_at:val('m-issued'), due_at:val('m-due'), status:val('m-status') };
-    try {
-      await api('POST', '/api/invoices', body);
-      closeModal(); await loadAll(); renderFinance(); toast('Счёт добавлен');
-    } catch(e) { showErr(e.message); }
+    try { await api('POST', '/api/invoices', body); closeModal(); await loadAll(); renderFinance(); toast('Счёт добавлен'); } catch(e) { showErr(e.message); }
   });
 }
 
@@ -809,26 +1020,24 @@ async function deleteInvoice(id) {
 // ─── SEARCH ────────────────────────────────────────────────────────────────
 function doSearch(q) {
   if (!q) { renderClients(); return; }
-  const r = clients.filter(c => (c.name+c.contact_name+c.email+c.industry).toLowerCase().includes(q.toLowerCase()));
+  const r = clients.filter(c=>(c.name+c.contact_name+c.email+c.industry).toLowerCase().includes(q.toLowerCase()));
   renderClients(r);
 }
 
 // ─── HELPERS ───────────────────────────────────────────────────────────────
-function val(id) { return document.getElementById(id)?.value || ''; }
-function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function fmt(n) { return n ? '₽ ' + fmtNum(n) : '₽ —'; }
+function val(id)  { return document.getElementById(id)?.value || ''; }
+function esc(s)   { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmt(n)   { return n ? '₽ ' + fmtNum(n) : '₽ —'; }
 function fmtNum(n) {
-  if (n >= 1000000) return (n/1000000).toFixed(1).replace('.0','') + 'M';
-  if (n >= 1000) return (n/1000).toFixed(0) + 'K';
+  if (n >= 1000000) return (n/1000000).toFixed(1).replace('.0','')+'M';
+  if (n >= 1000)    return (n/1000).toFixed(0)+'K';
   return String(Math.round(n));
 }
 function statusLabel(s) {
-  const m = { queue:'Очередь', 'in-progress':'В работе', review:'Согласование', done:'Готово' };
-  return m[s] || s;
+  return { queue:'Очередь', 'in-progress':'В работе', review:'Согласование', done:'Готово' }[s] || s;
 }
 function statusClientLabel(s) {
-  const m = { active:'Активный', lead:'Потенциальный', archive:'Архив' };
-  return m[s] || s;
+  return { active:'Активный', lead:'Потенциальный', archive:'Архив' }[s] || s;
 }
 function invLabel(s) {
   return { paid:'Оплачен', pending:'Ожидает', overdue:'Просрочен' }[s] || s;
@@ -848,20 +1057,7 @@ function logout() {
   window.location.href = '/';
 }
 
-// ─── KEYBOARD ──────────────────────────────────────────────────────────────
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
-
-// ─── TABS ──────────────────────────────────────────────────────────────────
-document.querySelectorAll('.tabs').forEach(g => {
-  g.querySelectorAll('.tab').forEach(t => {
-    t.addEventListener('click', () => {
-      if (!t.getAttribute('onclick')) {
-        g.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
-        t.classList.add('active');
-      }
-    });
-  });
-});
+document.addEventListener('keydown', e => { if (e.key==='Escape') closeModal(); });
 
 init();
 </script>
