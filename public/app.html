@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Studio CRM</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --black:#000; --s1:#0a0a0a; --s2:#111; --s3:#1a1a1a; --s4:#242424;
+  --line:rgba(255,255,255,0.07); --line2:rgba(255,255,255,0.12);
+  --white:#f5f5f5; --g1:#888; --g2:#555; --g3:#333;
+}
+body { font-family:-apple-system,"Inter","Helvetica Neue",sans-serif; background:var(--black); color:var(--white); display:flex; min-height:100vh; font-size:13px; line-height:1.5; -webkit-font-smoothing:antialiased; }
+
+/* SIDEBAR */
+.sidebar { width:200px; min-height:100vh; background:var(--black); border-right:1px solid var(--line); position:fixed; top:0; left:0; bottom:0; display:flex; flex-direction:column; z-index:100; }
+.brand { padding:20px 20px 16px; border-bottom:1px solid var(--line); display:flex; align-items:center; gap:10px; }
+.brand-dot { width:20px; height:20px; background:var(--white); border-radius:4px; flex-shrink:0; }
+.brand-name { font-size:13px; font-weight:600; letter-spacing:-0.2px; }
+.brand-sub { font-size:10px; color:var(--g2); letter-spacing:0.3px; }
+.nav { flex:1; padding:12px 0; }
+.nav-group { margin-bottom:24px; }
+.nav-group-label { font-size:10px; font-weight:500; letter-spacing:0.8px; text-transform:uppercase; color:var(--g3); padding:0 20px; margin-bottom:2px; }
+.nav-item { display:flex; align-items:center; padding:7px 20px; font-size:13px; color:var(--g2); cursor:pointer; transition:color 0.1s; position:relative; user-select:none; justify-content:space-between; }
+.nav-item:hover { color:var(--g1); }
+.nav-item.active { color:var(--white); }
+.nav-item.active::before { content:''; position:absolute; left:0; top:50%; transform:translateY(-50%); width:2px; height:14px; background:var(--white); border-radius:0 2px 2px 0; }
+.nav-count { font-size:11px; color:var(--g3); font-variant-numeric:tabular-nums; }
+.sidebar-bottom { padding:16px 20px; border-top:1px solid var(--line); }
+.user-row { display:flex; align-items:center; gap:10px; cursor:pointer; }
+.user-initials { width:26px; height:26px; border-radius:50%; border:1px solid var(--line2); display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:600; color:var(--g1); flex-shrink:0; }
+.user-name { font-size:12px; color:var(--g1); }
+.user-role { font-size:10px; color:var(--g3); }
+.logout-btn { font-size:11px; color:var(--g3); cursor:pointer; margin-top:8px; padding:4px 0; transition:color 0.1s; }
+.logout-btn:hover { color:var(--g1); }
+
+/* MAIN */
+.main { margin-left:200px; flex:1; display:flex; flex-direction:column; min-height:100vh; }
+.topbar { height:48px; border-bottom:1px solid var(--line); display:flex; align-items:center; padding:0 32px; gap:16px; position:sticky; top:0; background:var(--black); z-index:50; }
+.topbar-title { font-size:13px; font-weight:500; color:var(--white); flex:1; }
+.search { display:flex; align-items:center; gap:8px; padding:5px 12px; border:1px solid var(--line); border-radius:6px; width:200px; transition:border-color 0.15s; }
+.search:focus-within { border-color:var(--line2); }
+.search input { background:none; border:none; outline:none; font-size:12px; color:var(--white); width:100%; font-family:inherit; }
+.search input::placeholder { color:var(--g3); }
+.btn { font-size:12px; font-weight:500; padding:6px 14px; border-radius:5px; cursor:pointer; border:none; transition:opacity 0.1s; display:inline-flex; align-items:center; gap:6px; white-space:nowrap; font-family:inherit; }
+.btn:hover { opacity:0.85; }
+.btn-white { background:var(--white); color:var(--black); }
+.btn-ghost { background:none; color:var(--g1); border:1px solid var(--line); }
+.btn-ghost:hover { border-color:var(--line2); color:var(--white); opacity:1; }
+.content { padding:32px; flex:1; }
+
+/* PAGES */
+.page { display:none; }
+.page.active { display:block; animation:up .2s ease; }
+@keyframes up { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+/* PAGE HEADER */
+.page-header { display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:40px; }
+.page-header h1 { font-size:22px; font-weight:600; letter-spacing:-0.5px; line-height:1.2; }
+.page-header p { font-size:12px; color:var(--g2); margin-top:4px; }
+
+/* METRICS */
+.metrics { display:grid; grid-template-columns:repeat(4,1fr); border:1px solid var(--line); border-radius:8px; overflow:hidden; margin-bottom:40px; }
+.metric { padding:24px 28px; border-right:1px solid var(--line); transition:background 0.15s; }
+.metric:last-child { border-right:none; }
+.metric:hover { background:var(--s1); }
+.metric-label { font-size:11px; font-weight:500; letter-spacing:0.4px; color:var(--g2); text-transform:uppercase; margin-bottom:12px; }
+.metric-value { font-size:28px; font-weight:700; letter-spacing:-1px; color:var(--white); line-height:1; margin-bottom:8px; font-variant-numeric:tabular-nums; }
+.metric-sub { font-size:11px; color:var(--g3); }
+
+/* SECTION */
+.section { margin-bottom:40px; }
+.section-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid var(--line); }
+.section-title { font-size:12px; font-weight:500; letter-spacing:0.3px; color:var(--g1); text-transform:uppercase; }
+.section-action { font-size:11px; color:var(--g2); cursor:pointer; transition:color 0.1s; }
+.section-action:hover { color:var(--white); }
+
+/* TABLE */
+.table-wrap { overflow-x:auto; }
+table { width:100%; border-collapse:collapse; }
+th { text-align:left; font-size:11px; font-weight:500; letter-spacing:0.5px; text-transform:uppercase; color:var(--g3); padding:0 0 10px; border-bottom:1px solid var(--line); }
+th:not(:first-child) { padding-left:24px; }
+td { padding:13px 0; border-bottom:1px solid var(--line); font-size:12.5px; color:var(--g1); vertical-align:middle; }
+td:not(:first-child) { padding-left:24px; }
+tr:last-child td { border-bottom:none; }
+tr:hover td { color:var(--white); }
+.td-primary { color:var(--white); font-weight:500; }
+.td-action { font-size:11px; color:var(--g3); cursor:pointer; transition:color 0.1s; }
+.td-action:hover { color:var(--white); }
+
+/* STATUS */
+.status { display:inline-flex; align-items:center; gap:6px; font-size:12px; }
+.dot { width:5px; height:5px; border-radius:50%; flex-shrink:0; }
+.dot-hi { background:var(--white); }
+.dot-mid { background:var(--g1); }
+.dot-lo { background:var(--g3); }
+
+/* PROGRESS */
+.bar { height:2px; background:var(--s4); border-radius:2px; }
+.bar-fill { height:100%; background:var(--white); border-radius:2px; }
+
+/* EMPTY */
+.empty { padding:60px 0; display:flex; flex-direction:column; align-items:center; gap:8px; text-align:center; }
+.empty-title { font-size:13px; color:var(--g2); font-weight:500; }
+.empty-sub { font-size:12px; color:var(--g3); }
+
+/* TWO-COL */
+.two-col { display:grid; grid-template-columns:1fr 1fr; gap:48px; }
+
+/* KANBAN */
+.kanban { display:flex; gap:1px; background:var(--line); border:1px solid var(--line); border-radius:8px; overflow:hidden; }
+.k-col { flex:1; background:var(--black); min-width:200px; }
+.k-col-head { padding:14px 18px; border-bottom:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; }
+.k-col-name { font-size:11px; font-weight:500; text-transform:uppercase; letter-spacing:0.5px; color:var(--g2); }
+.k-col-n { font-size:11px; color:var(--g3); }
+.k-cards { padding:12px; display:flex; flex-direction:column; gap:6px; min-height:80px; }
+.k-card { padding:14px 16px; border:1px solid var(--line); border-radius:6px; background:var(--s1); cursor:pointer; transition:border-color 0.15s,background 0.15s; }
+.k-card:hover { border-color:var(--line2); background:var(--s2); }
+.k-card-tag { font-size:10px; font-weight:500; letter-spacing:0.4px; text-transform:uppercase; color:var(--g3); margin-bottom:6px; }
+.k-card-title { font-size:12.5px; font-weight:500; color:var(--white); margin-bottom:8px; line-height:1.4; }
+.k-card-foot { display:flex; align-items:center; justify-content:space-between; font-size:11px; color:var(--g3); }
+.k-card-prog { margin-top:10px; }
+.k-card-prog-top { display:flex; justify-content:space-between; font-size:10px; color:var(--g3); margin-bottom:4px; }
+.k-card-del { font-size:10px; color:var(--g3); cursor:pointer; padding:2px 4px; opacity:0; transition:opacity 0.15s; }
+.k-card:hover .k-card-del { opacity:1; }
+.k-card-del:hover { color:var(--white); }
+
+/* FUNNEL */
+.funnel-header-row { display:flex; align-items:center; gap:24px; padding:0 0 10px; border-bottom:1px solid var(--line); margin-bottom:0; }
+.funnel-row { display:flex; align-items:center; gap:24px; padding:20px 0; border-bottom:1px solid var(--line); cursor:default; }
+.funnel-row:last-child { border-bottom:none; }
+.f-name { width:160px; flex-shrink:0; font-size:13px; font-weight:500; color:var(--white); }
+.f-bar-wrap { flex:1; }
+.f-bar-outer { height:2px; background:var(--s4); border-radius:2px; }
+.f-bar-inner { height:2px; background:var(--white); border-radius:2px; transition:width 0.6s ease; }
+.f-n { width:40px; text-align:right; font-size:20px; font-weight:700; letter-spacing:-0.5px; font-variant-numeric:tabular-nums; }
+.f-conv { width:52px; text-align:right; font-size:12px; color:var(--g2); }
+.f-amt { width:96px; text-align:right; font-size:12px; color:var(--g2); font-variant-numeric:tabular-nums; }
+
+/* FINANCE */
+.fin-grid { display:grid; grid-template-columns:repeat(4,1fr); border:1px solid var(--line); border-radius:8px; overflow:hidden; margin-bottom:40px; }
+.fin-card { padding:24px 28px; border-right:1px solid var(--line); }
+.fin-card:last-child { border-right:none; }
+.fin-label { font-size:11px; color:var(--g2); text-transform:uppercase; letter-spacing:0.4px; margin-bottom:10px; }
+.fin-value { font-size:26px; font-weight:700; letter-spacing:-0.8px; color:var(--white); font-variant-numeric:tabular-nums; }
+.fin-delta { font-size:11px; color:var(--g3); margin-top:6px; }
+.inv-status { font-size:11px; font-weight:500; letter-spacing:0.3px; }
+
+/* CHART */
+.chart-area { border:1px solid var(--line); border-radius:8px; padding:24px 28px; margin-bottom:40px; }
+.chart-header { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:24px; }
+.chart-label { font-size:12px; font-weight:500; text-transform:uppercase; letter-spacing:0.3px; color:var(--g2); }
+.chart-num { font-size:28px; font-weight:700; letter-spacing:-1px; color:var(--white); font-variant-numeric:tabular-nums; }
+.chart-sub { font-size:11px; color:var(--g3); margin-top:2px; }
+.chart-body { display:flex; align-items:flex-end; gap:4px; height:80px; }
+.chart-col { flex:1; display:flex; flex-direction:column; align-items:center; gap:5px; height:100%; justify-content:flex-end; }
+.chart-bar { width:100%; border-radius:2px 2px 0 0; background:var(--s3); min-height:4px; transition:background 0.15s; }
+.chart-bar.active { background:var(--white); }
+.chart-lbl { font-size:9px; color:var(--g3); text-transform:uppercase; letter-spacing:0.3px; }
+
+/* TABS */
+.tabs { display:flex; gap:0; margin-bottom:28px; border-bottom:1px solid var(--line); }
+.tab { font-size:12px; font-weight:500; padding:8px 16px; color:var(--g3); cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px; transition:color 0.1s; }
+.tab:first-child { padding-left:0; }
+.tab:hover { color:var(--g1); }
+.tab.active { color:var(--white); border-bottom-color:var(--white); }
+
+/* MODAL */
+.overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:200; align-items:center; justify-content:center; backdrop-filter:blur(6px); }
+.overlay.open { display:flex; }
+.modal { background:var(--s1); border:1px solid var(--line2); border-radius:10px; padding:28px; width:440px; max-width:95vw; box-shadow:0 24px 80px rgba(0,0,0,0.8); animation:up .2s ease; max-height:90vh; overflow-y:auto; }
+.modal-title { font-size:15px; font-weight:600; letter-spacing:-0.3px; margin-bottom:24px; }
+.field { margin-bottom:14px; }
+.field-label { font-size:11px; color:var(--g2); margin-bottom:5px; display:block; text-transform:uppercase; letter-spacing:0.4px; }
+.field-input { width:100%; background:var(--black); border:1px solid var(--line); border-radius:5px; padding:8px 12px; color:var(--white); font-size:13px; outline:none; transition:border-color 0.15s; font-family:inherit; }
+.field-input:focus { border-color:var(--line2); }
+.field-input::placeholder { color:var(--g3); }
+select.field-input option { background:var(--s1); }
+.field-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.modal-foot { display:flex; justify-content:flex-end; gap:8px; margin-top:24px; }
+.modal-err { font-size:12px; color:var(--white); background:rgba(255,255,255,0.06); border:1px solid var(--line2); border-radius:5px; padding:8px 12px; margin-bottom:16px; display:none; }
+.modal-err.show { display:block; }
+
+/* TOAST */
+.toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:var(--s2); border:1px solid var(--line2); border-radius:8px; padding:10px 18px; font-size:12px; color:var(--white); z-index:999; opacity:0; transition:opacity 0.2s; pointer-events:none; }
+.toast.show { opacity:1; }
+
+::-webkit-scrollbar { width:3px; height:3px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--s4); border-radius:3px; }
+
+@media(max-width:960px) {
+  .metrics,.fin-grid { grid-template-columns:1fr 1fr; }
+  .two-col { grid-template-columns:1fr; gap:32px; }
+  .kanban { flex-direction:column; background:none; }
+}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="brand">
+    <div class="brand-dot"></div>
+    <div>
+      <div class="brand-name" id="sb-studio">Studio</div>
+      <div class="brand-sub">CRM · Design</div>
+    </div>
+  </div>
+  <nav class="nav">
+    <div class="nav-group">
+      <div class="nav-group-label">Обзор</div>
+      <div class="nav-item active" onclick="go('dashboard',this)">Дашборд</div>
+      <div class="nav-item" onclick="go('clients',this)">Клиенты <span class="nav-count" id="nc-clients">0</span></div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-label">Работа</div>
+      <div class="nav-item" onclick="go('projects',this)">Проекты <span class="nav-count" id="nc-projects">0</span></div>
+      <div class="nav-item" onclick="go('funnel',this)">Воронка</div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-label">Деньги</div>
+      <div class="nav-item" onclick="go('finance',this)">Финансы</div>
+    </div>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="user-row">
+      <div class="user-initials" id="sb-initials">—</div>
+      <div>
+        <div class="user-name" id="sb-name">...</div>
+        <div class="user-role">Администратор</div>
+      </div>
+    </div>
+    <div class="logout-btn" onclick="logout()">Выйти</div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="topbar-title">Дашборд</div>
+    <div class="search"><span style="color:var(--g3);font-size:12px">⌕</span><input placeholder="Поиск..." id="search-input" oninput="doSearch(this.value)"></div>
+    <button class="btn btn-white" id="add-btn" onclick="openAddModal()">+ Добавить</button>
+  </div>
+
+  <div class="content">
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div class="metrics">
+        <div class="metric"><div class="metric-label">Выручка</div><div class="metric-value" id="m-revenue">—</div><div class="metric-sub">Текущий месяц</div></div>
+        <div class="metric"><div class="metric-label">Проекты</div><div class="metric-value" id="m-projects">0</div><div class="metric-sub">Активных</div></div>
+        <div class="metric"><div class="metric-label">Клиенты</div><div class="metric-value" id="m-clients">0</div><div class="metric-sub">Всего</div></div>
+        <div class="metric"><div class="metric-label">Лиды</div><div class="metric-value" id="m-leads">0</div><div class="metric-sub">В воронке</div></div>
+      </div>
+      <div class="chart-area">
+        <div class="chart-header">
+          <div><div class="chart-label">Выручка 2026</div><div class="chart-sub" id="chart-sub">Загрузка...</div></div>
+          <div class="chart-num" id="chart-total">₽ —</div>
+        </div>
+        <div class="chart-body" id="chart-bars"></div>
+      </div>
+      <div class="two-col">
+        <div class="section">
+          <div class="section-header">
+            <div class="section-title">Последние проекты</div>
+            <span class="section-action" onclick="go('projects',document.querySelectorAll('.nav-item')[2])">Все →</span>
+          </div>
+          <div id="dash-projects"><div class="empty"><div class="empty-title">Проектов нет</div></div></div>
+        </div>
+        <div class="section">
+          <div class="section-header"><div class="section-title">Последние клиенты</div><span class="section-action" onclick="go('clients',document.querySelectorAll('.nav-item')[1])">Все →</span></div>
+          <div id="dash-clients"><div class="empty"><div class="empty-title">Клиентов нет</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CLIENTS -->
+    <div class="page" id="page-clients">
+      <div class="page-header">
+        <div><h1>Клиенты</h1><p>Все компании и контакты студии</p></div>
+        <button class="btn btn-white" onclick="openAddModal()">+ Новый клиент</button>
+      </div>
+      <div class="tabs"><div class="tab active" onclick="filterClients('all',this)">Все</div><div class="tab" onclick="filterClients('active',this)">Активные</div><div class="tab" onclick="filterClients('archive',this)">Архив</div></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Компания</th><th>Контакт</th><th>Email</th><th>Статус</th><th>Проекты</th><th>Оборот</th><th></th></tr></thead>
+          <tbody id="clients-tbody"></tbody>
+        </table>
+      </div>
+      <div id="clients-empty" class="empty" style="display:none"><div class="empty-title">Клиентов нет</div><div class="empty-sub">Нажмите «+ Новый клиент»</div></div>
+    </div>
+
+    <!-- PROJECTS -->
+    <div class="page" id="page-projects">
+      <div class="page-header">
+        <div><h1>Проекты</h1><p>Задачи и проекты студии</p></div>
+        <button class="btn btn-white" onclick="openAddModal()">+ Новый проект</button>
+      </div>
+      <div class="tabs"><div class="tab active">Канбан</div></div>
+      <div class="kanban" id="kanban-board">
+        <div class="k-col" id="k-queue"><div class="k-col-head"><div class="k-col-name">Очередь</div><div class="k-col-n" id="kn-queue">0</div></div><div class="k-cards" id="kc-queue"></div></div>
+        <div class="k-col" id="k-inprogress"><div class="k-col-head"><div class="k-col-name">В работе</div><div class="k-col-n" id="kn-inprogress">0</div></div><div class="k-cards" id="kc-inprogress"></div></div>
+        <div class="k-col" id="k-review"><div class="k-col-head"><div class="k-col-name">Согласование</div><div class="k-col-n" id="kn-review">0</div></div><div class="k-cards" id="kc-review"></div></div>
+        <div class="k-col" id="k-done"><div class="k-col-head"><div class="k-col-name">Готово</div><div class="k-col-n" id="kn-done">0</div></div><div class="k-cards" id="kc-done"></div></div>
+      </div>
+    </div>
+
+    <!-- FUNNEL -->
+    <div class="page" id="page-funnel">
+      <div class="page-header">
+        <div><h1>Воронка</h1><p>Стадии продаж и конверсия</p></div>
+        <button class="btn btn-white" onclick="openAddModal()">+ Новый лид</button>
+      </div>
+      <div class="metrics" style="margin-bottom:40px">
+        <div class="metric"><div class="metric-label">Закрыто</div><div class="metric-value" id="f-closed">₽ —</div><div class="metric-sub">За месяц</div></div>
+        <div class="metric"><div class="metric-label">Конверсия</div><div class="metric-value" id="f-conv">—</div><div class="metric-sub">Лид → сделка</div></div>
+        <div class="metric"><div class="metric-label">Средний чек</div><div class="metric-value" id="f-avg">₽ —</div><div class="metric-sub">Закрытых сделок</div></div>
+        <div class="metric"><div class="metric-label">Всего лидов</div><div class="metric-value" id="f-total">0</div><div class="metric-sub">В работе</div></div>
+      </div>
+      <div id="funnel-list"></div>
+    </div>
+
+    <!-- FINANCE -->
+    <div class="page" id="page-finance">
+      <div class="page-header">
+        <div><h1>Финансы</h1><p>Счета и доходы студии</p></div>
+        <button class="btn btn-white" onclick="openAddModal()">+ Счёт</button>
+      </div>
+      <div class="fin-grid">
+        <div class="fin-card"><div class="fin-label">Доход</div><div class="fin-value" id="fi-income">₽ —</div><div class="fin-delta">Текущий месяц</div></div>
+        <div class="fin-card"><div class="fin-label">К оплате</div><div class="fin-value" id="fi-pending">₽ —</div><div class="fin-delta" id="fi-pending-n">0 счетов</div></div>
+        <div class="fin-card"><div class="fin-label">Просрочено</div><div class="fin-value" id="fi-overdue">₽ —</div><div class="fin-delta" id="fi-overdue-n">0 счетов</div></div>
+        <div class="fin-card"><div class="fin-label">Всего оплачено</div><div class="fin-value" id="fi-total">₽ —</div><div class="fin-delta">За всё время</div></div>
+      </div>
+      <div class="section-header"><div class="section-title">Счета</div></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Номер</th><th>Клиент</th><th>Сумма</th><th>Выставлен</th><th>Срок</th><th>Статус</th><th></th></tr></thead>
+          <tbody id="invoices-tbody"></tbody>
+        </table>
+      </div>
+      <div id="invoices-empty" class="empty" style="display:none"><div class="empty-title">Счетов нет</div><div class="empty-sub">Выставьте первый счёт</div></div>
+    </div>
+
+  </div>
+</main>
+
+<!-- MODAL -->
+<div class="overlay" id="overlay" onclick="closeOverlay(event)">
+  <div class="modal" id="modal-box">
+    <div class="modal-title" id="modal-title">Добавить</div>
+    <div class="modal-err" id="modal-err"></div>
+    <div id="modal-body"></div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal()">Отмена</button>
+      <button class="btn btn-white" id="modal-save" onclick="saveModal()">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── STATE ─────────────────────────────────────────────────────────────────
+const API = '';
+let token = localStorage.getItem('crm_token');
+let user  = JSON.parse(localStorage.getItem('crm_user') || 'null');
+let currentPage = 'dashboard';
+let modalAction = null;
+
+// Data cache
+let clients  = [];
+let projects = [];
+let deals    = [];
+let invoices = [];
+
+const MONTHS = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
+
+// ─── INIT ──────────────────────────────────────────────────────────────────
+async function init() {
+  if (!token) return (window.location.href = '/');
+  try {
+    const me = await api('GET', '/api/auth/me');
+    user = me;
+    localStorage.setItem('crm_user', JSON.stringify(me));
+  } catch { return logout(); }
+
+  // Set user info in sidebar
+  const initials = user.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
+  document.getElementById('sb-initials').textContent = initials;
+  document.getElementById('sb-name').textContent     = user.name;
+  if (user.studioName) document.getElementById('sb-studio').textContent = user.studioName;
+
+  await loadAll();
+  renderPage('dashboard');
+}
+
+async function loadAll() {
+  const [c, p, d, i, s] = await Promise.all([
+    api('GET', '/api/clients'),
+    api('GET', '/api/projects'),
+    api('GET', '/api/deals'),
+    api('GET', '/api/invoices'),
+    api('GET', '/api/stats'),
+  ]);
+  clients  = c;
+  projects = p;
+  deals    = d;
+  invoices = i;
+  renderStats(s);
+  renderCounts();
+}
+
+// ─── API HELPER ────────────────────────────────────────────────────────────
+async function api(method, url, body) {
+  const opts = {
+    method,
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
+  };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(API + url, opts);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Ошибка сервера');
+  return data;
+}
+
+// ─── NAV ───────────────────────────────────────────────────────────────────
+const TITLES = { dashboard:'Дашборд', clients:'Клиенты', projects:'Проекты', funnel:'Воронка', finance:'Финансы' };
+function go(id, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  if (el) el.classList.add('active');
+  document.getElementById('topbar-title').textContent = TITLES[id] || id;
+  currentPage = id;
+  renderPage(id);
+}
+
+function renderPage(id) {
+  if (id === 'dashboard') renderDashboard();
+  if (id === 'clients')   renderClients();
+  if (id === 'projects')  renderProjects();
+  if (id === 'funnel')    renderFunnel();
+  if (id === 'finance')   renderFinance();
+}
+
+function renderCounts() {
+  document.getElementById('nc-clients').textContent  = clients.length;
+  document.getElementById('nc-projects').textContent = projects.filter(p => p.status !== 'done').length;
+}
+
+// ─── STATS ─────────────────────────────────────────────────────────────────
+function renderStats(s) {
+  document.getElementById('m-revenue').textContent  = fmt(s.revenue);
+  document.getElementById('m-projects').textContent = s.activeProjects;
+  document.getElementById('m-clients').textContent  = s.totalClients;
+  document.getElementById('m-leads').textContent    = s.totalLeads;
+  renderChart(s.monthly);
+}
+
+function renderChart(monthly) {
+  const max = Math.max(...monthly, 1);
+  const total = monthly.reduce((a, b) => a + b, 0);
+  const nowM  = new Date().getMonth();
+  document.getElementById('chart-total').textContent = '₽ ' + fmtNum(total);
+  document.getElementById('chart-sub').textContent   = total ? 'Общая выручка за год' : 'Данные появятся после первой сделки';
+  const bars = MONTHS.map((m, i) => {
+    const h = Math.max(Math.round((monthly[i] / max) * 100), 4);
+    return `<div class="chart-col"><div class="chart-bar${i===nowM?' active':''}" style="height:${h}%"></div><div class="chart-lbl${i===nowM?' style="color:var(--g1)"':''}">${m}</div></div>`;
+  }).join('');
+  document.getElementById('chart-bars').innerHTML = bars;
+}
+
+// ─── DASHBOARD ─────────────────────────────────────────────────────────────
+function renderDashboard() {
+  // Recent projects
+  const dp = document.getElementById('dash-projects');
+  if (!projects.length) { dp.innerHTML = '<div class="empty"><div class="empty-title">Проектов нет</div></div>'; }
+  else {
+    dp.innerHTML = projects.slice(0,5).map(p => `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--line)">
+        <div>
+          <div style="font-size:13px;font-weight:500;color:var(--white)">${esc(p.title)}</div>
+          <div style="font-size:11px;color:var(--g3);margin-top:2px">${esc(p.client_name||'—')} · ${statusLabel(p.status)}</div>
+        </div>
+        <div style="font-size:11px;color:var(--g3)">${p.deadline||'—'}</div>
+      </div>
+    `).join('') + (projects.length > 5 ? `<div style="font-size:11px;color:var(--g3);padding-top:10px">+ ещё ${projects.length-5}</div>` : '');
+  }
+
+  // Recent clients
+  const dc = document.getElementById('dash-clients');
+  if (!clients.length) { dc.innerHTML = '<div class="empty"><div class="empty-title">Клиентов нет</div></div>'; }
+  else {
+    dc.innerHTML = clients.slice(0,5).map(c => `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--line)">
+        <div>
+          <div style="font-size:13px;font-weight:500;color:var(--white)">${esc(c.name)}</div>
+          <div style="font-size:11px;color:var(--g3);margin-top:2px">${esc(c.industry||'—')}</div>
+        </div>
+        <div class="status"><div class="dot ${c.status==='active'?'dot-hi':c.status==='archive'?'dot-lo':'dot-mid'}"></div>${statusClientLabel(c.status)}</div>
+      </div>
+    `).join('');
+  }
+}
+
+// ─── CLIENTS ───────────────────────────────────────────────────────────────
+let clientFilter = 'all';
+function filterClients(f, el) {
+  clientFilter = f;
+  document.querySelectorAll('#page-clients .tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderClients();
+}
+
+function renderClients(list) {
+  const data = (list || clients).filter(c => clientFilter === 'all' || c.status === clientFilter);
+  const tbody = document.getElementById('clients-tbody');
+  const empty = document.getElementById('clients-empty');
+  if (!data.length) {
+    tbody.innerHTML = '';
+    empty.style.display = 'flex';
+    return;
+  }
+  empty.style.display = 'none';
+  tbody.innerHTML = data.map(c => `
+    <tr>
+      <td class="td-primary">${esc(c.name)}</td>
+      <td>${esc(c.contact_name||'—')}</td>
+      <td style="font-size:12px">${esc(c.email||'—')}</td>
+      <td><div class="status"><div class="dot ${c.status==='active'?'dot-hi':c.status==='archive'?'dot-lo':'dot-mid'}"></div>${statusClientLabel(c.status)}</div></td>
+      <td>${c.project_count||0}</td>
+      <td style="font-variant-numeric:tabular-nums">${fmt(c.total_paid||0)}</td>
+      <td>
+        <span class="td-action" onclick="editClient(${c.id})" style="margin-right:12px">Ред.</span>
+        <span class="td-action" onclick="deleteClient(${c.id})">Удал.</span>
+      </td>
+    </tr>
+  `).join('');
+}
+
+// ─── PROJECTS / KANBAN ─────────────────────────────────────────────────────
+function renderProjects() {
+  const cols = { queue:[], inprogress:[], review:[], done:[] };
+  projects.forEach(p => { const k = p.status==='in-progress'?'inprogress':p.status; if (cols[k]) cols[k].push(p); else cols.queue.push(p); });
+  for (const [k, arr] of Object.entries(cols)) {
+    document.getElementById('kn-' + k).textContent = arr.length;
+    const el = document.getElementById('kc-' + k);
+    el.innerHTML = arr.length ? arr.map(p => `
+      <div class="k-card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div class="k-card-tag">${esc(p.type||'ПРОЕКТ')}</div>
+          <span class="k-card-del" onclick="deleteProject(${p.id},event)">✕</span>
+        </div>
+        <div class="k-card-title">${esc(p.title)}</div>
+        ${p.progress>0?`<div class="k-card-prog"><div class="k-card-prog-top"><span>Прогресс</span><span>${p.progress}%</span></div><div class="bar"><div class="bar-fill" style="width:${p.progress}%"></div></div></div>`:''}
+        <div class="k-card-foot">
+          <span>${esc(p.client_name||'—')}</span>
+          <span>${p.deadline||''}</span>
+        </div>
+      </div>
+    `).join('') : '<div style="padding:20px 0;text-align:center;font-size:11px;color:var(--g3)">Пусто</div>';
+  }
+}
+
+// ─── FUNNEL ────────────────────────────────────────────────────────────────
+const STAGES = [
+  { key:'new',        label:'Новый лид' },
+  { key:'qualify',    label:'Квалификация' },
+  { key:'proposal',   label:'КП отправлено' },
+  { key:'negotiate',  label:'Переговоры' },
+  { key:'closed',     label:'Закрыта' },
+];
+
+function renderFunnel() {
+  const counts = {};
+  const values = {};
+  STAGES.forEach(s => { counts[s.key]=0; values[s.key]=0; });
+  deals.forEach(d => { if (counts[d.stage]!==undefined) { counts[d.stage]++; values[d.stage]+=d.value||0; } });
+
+  const total   = deals.length;
+  const closed  = deals.filter(d => d.stage === 'closed');
+  const closedV = closed.reduce((a,b) => a + (b.value||0), 0);
+  const conv    = total ? Math.round(closed.length / total * 100) : 0;
+  const avg     = closed.length ? Math.round(closedV / closed.length) : 0;
+  const active  = deals.filter(d => d.stage !== 'closed');
+
+  document.getElementById('f-closed').textContent = fmt(closedV);
+  document.getElementById('f-conv').textContent   = conv + '%';
+  document.getElementById('f-avg').textContent    = fmt(avg);
+  document.getElementById('f-total').textContent  = active.length;
+
+  const maxC = Math.max(...Object.values(counts), 1);
+  const list = document.getElementById('funnel-list');
+  list.innerHTML = `
+    <div class="funnel-header-row">
+      <div style="width:160px;flex-shrink:0;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--g3)">Стадия</div>
+      <div style="flex:1"></div>
+      <div style="width:40px;text-align:right;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--g3)">Лидов</div>
+      <div style="width:52px;text-align:right;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--g3)">Конв.</div>
+      <div style="width:96px;text-align:right;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--g3)">Сумма</div>
+    </div>
+    ${STAGES.map((s,i) => {
+      const pct = total ? Math.round(counts[s.key]/total*100) : 0;
+      const barW = Math.round(counts[s.key]/maxC*100);
+      return `<div class="funnel-row">
+        <div class="f-name">${s.label}</div>
+        <div class="f-bar-wrap"><div class="f-bar-outer"><div class="f-bar-inner" style="width:${barW}%"></div></div></div>
+        <div class="f-n">${counts[s.key]}</div>
+        <div class="f-conv">${pct}%</div>
+        <div class="f-amt">${fmt(values[s.key])}</div>
+      </div>`;
+    }).join('')}
+  `;
+}
+
+// ─── FINANCE ───────────────────────────────────────────────────────────────
+function renderFinance() {
+  const paid    = invoices.filter(i => i.status === 'paid');
+  const pending = invoices.filter(i => i.status === 'pending');
+  const overdue = invoices.filter(i => i.status === 'overdue');
+  const now = new Date();
+  const m = String(now.getMonth()+1).padStart(2,'0');
+  const y = now.getFullYear();
+  const monthPaid = paid.filter(i => i.issued_at && i.issued_at.startsWith(`${y}-${m}`));
+  const incomeV   = monthPaid.reduce((a,b) => a+(b.amount||0), 0);
+  const pendingV  = pending.reduce((a,b) => a+(b.amount||0), 0);
+  const overdueV  = overdue.reduce((a,b) => a+(b.amount||0), 0);
+  const totalV    = paid.reduce((a,b) => a+(b.amount||0), 0);
+
+  document.getElementById('fi-income').textContent    = fmt(incomeV);
+  document.getElementById('fi-pending').textContent   = fmt(pendingV);
+  document.getElementById('fi-pending-n').textContent = `${pending.length} счетов`;
+  document.getElementById('fi-overdue').textContent   = fmt(overdueV);
+  document.getElementById('fi-overdue-n').textContent = `${overdue.length} счетов`;
+  document.getElementById('fi-total').textContent     = fmt(totalV);
+
+  const tbody = document.getElementById('invoices-tbody');
+  const empty = document.getElementById('invoices-empty');
+  if (!invoices.length) { tbody.innerHTML=''; empty.style.display='flex'; return; }
+  empty.style.display = 'none';
+  tbody.innerHTML = invoices.map(i => `
+    <tr>
+      <td class="td-primary" style="font-variant-numeric:tabular-nums">${esc(i.number||'—')}</td>
+      <td>${esc(i.client_name||'—')}</td>
+      <td style="font-variant-numeric:tabular-nums;font-weight:500;color:var(--white)">${fmt(i.amount)}</td>
+      <td style="font-size:12px">${i.issued_at||'—'}</td>
+      <td style="font-size:12px">${i.due_at||'—'}</td>
+      <td><div class="inv-status ${i.status==='paid'?'':'wait'}">${invLabel(i.status)}</div></td>
+      <td><span class="td-action" onclick="deleteInvoice(${i.id})">Удал.</span></td>
+    </tr>
+  `).join('');
+}
+
+// ─── MODAL ─────────────────────────────────────────────────────────────────
+function openAddModal() {
+  document.getElementById('modal-err').classList.remove('show');
+  if (currentPage === 'clients')  openClientModal();
+  else if (currentPage === 'projects') openProjectModal();
+  else if (currentPage === 'funnel')   openDealModal();
+  else if (currentPage === 'finance')  openInvoiceModal();
+  else openClientModal();
+}
+
+function showModal(title, body, action) {
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-body').innerHTML = body;
+  modalAction = action;
+  document.getElementById('overlay').classList.add('open');
+}
+function closeModal() { document.getElementById('overlay').classList.remove('open'); }
+function closeOverlay(e) { if (e.target === document.getElementById('overlay')) closeModal(); }
+async function saveModal() {
+  document.getElementById('modal-err').classList.remove('show');
+  if (modalAction) await modalAction();
+}
+
+// Client modal
+function openClientModal(c) {
+  showModal(c ? 'Редактировать клиента' : 'Новый клиент', `
+    <div class="field-row">
+      <div class="field"><label class="field-label">Компания *</label><input class="field-input" id="m-name" value="${esc(c?.name||'')}" placeholder="Название"></div>
+      <div class="field"><label class="field-label">Отрасль</label><input class="field-input" id="m-industry" value="${esc(c?.industry||'')}" placeholder="IT / SaaS"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label class="field-label">Контакт</label><input class="field-input" id="m-contact" value="${esc(c?.contact_name||'')}" placeholder="Имя"></div>
+      <div class="field"><label class="field-label">Email</label><input class="field-input" id="m-email" value="${esc(c?.email||'')}" placeholder="email@co.ru"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label class="field-label">Телефон</label><input class="field-input" id="m-phone" value="${esc(c?.phone||'')}" placeholder="+7 999..."></div>
+      <div class="field"><label class="field-label">Статус</label><select class="field-input" id="m-status">
+        <option value="active" ${c?.status==='active'?'selected':''}>Активный</option>
+        <option value="lead" ${c?.status==='lead'?'selected':''}>Потенциальный</option>
+        <option value="archive" ${c?.status==='archive'?'selected':''}>Архив</option>
+      </select></div>
+    </div>
+  `, async () => {
+    const body = { name:val('m-name'), industry:val('m-industry'), contact_name:val('m-contact'), email:val('m-email'), phone:val('m-phone'), status:val('m-status') };
+    try {
+      if (c) await api('PUT', `/api/clients/${c.id}`, body);
+      else await api('POST', '/api/clients', body);
+      closeModal(); await loadAll(); renderClients(); toast(c ? 'Клиент обновлён' : 'Клиент добавлен');
+    } catch (e) { showErr(e.message); }
+  });
+}
+
+function editClient(id) { openClientModal(clients.find(c => c.id === id)); }
+async function deleteClient(id) {
+  if (!confirm('Удалить клиента?')) return;
+  try { await api('DELETE', `/api/clients/${id}`); await loadAll(); renderClients(); toast('Клиент удалён'); } catch(e) { toast(e.message); }
+}
+
+// Project modal
+function openProjectModal(p) {
+  const clientOpts = clients.map(c => `<option value="${c.id}" ${p?.client_id==c.id?'selected':''}>${esc(c.name)}</option>`).join('');
+  showModal(p ? 'Редактировать проект' : 'Новый проект', `
+    <div class="field-row">
+      <div class="field"><label class="field-label">Название *</label><input class="field-input" id="m-title" value="${esc(p?.title||'')}" placeholder="Ребрендинг..."></div>
+      <div class="field"><label class="field-label">Тип</label><input class="field-input" id="m-type" value="${esc(p?.type||'')}" placeholder="БРЕНД / ВЕБ..."></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label class="field-label">Клиент</label><select class="field-input" id="m-client"><option value="">— не выбран —</option>${clientOpts}</select></div>
+      <div class="field"><label class="field-label">Статус</label><select class="field-input" id="m-status">
+        <option value="queue" ${p?.status==='queue'?'selected':''}>Очередь</option>
+        <option value="in-progress" ${p?.status==='in-progress'?'selected':''}>В работе</option>
+        <option value="review" ${p?.status==='review'?'selected':''}>Согласование</option>
+        <option value="done" ${p?.status==='done'?'selected':''}>Готово</option>
+      </select></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label class="field-label">Прогресс %</label><input class="field-input" id="m-progress" type="number" min="0" max="100" value="${p?.progress||0}"></div>
+      <div class="field"><label class="field-label">Дедлайн</label><input class="field-input" id="m-deadline" type="date" value="${p?.deadline||''}"></div>
+    </div>
+    <div class="field"><label class="field-label">Бюджет ₽</label><input class="field-input" id="m-budget" type="number" value="${p?.budget||0}" placeholder="0"></div>
+  `, async () => {
+    const body = { title:val('m-title'), type:val('m-type'), client_id:val('m-client')||null, status:val('m-status'), progress:+val('m-progress'), deadline:val('m-deadline'), budget:+val('m-budget') };
+    try {
+      if (p) await api('PUT', `/api/projects/${p.id}`, body);
+      else await api('POST', '/api/projects', body);
+      closeModal(); await loadAll(); renderProjects(); toast(p ? 'Проект обновлён' : 'Проект добавлен');
+    } catch(e) { showErr(e.message); }
+  });
+}
+
+async function deleteProject(id, e) {
+  e.stopPropagation();
+  if (!confirm('Удалить проект?')) return;
+  try { await api('DELETE', `/api/projects/${id}`); await loadAll(); renderProjects(); toast('Проект удалён'); } catch(e2) { toast(e2.message); }
+}
+
+// Deal modal
+function openDealModal(d) {
+  const clientOpts = clients.map(c => `<option value="${c.id}" ${d?.client_id==c.id?'selected':''}>${esc(c.name)}</option>`).join('');
+  showModal(d ? 'Редактировать сделку' : 'Новый лид', `
+    <div class="field"><label class="field-label">Название *</label><input class="field-input" id="m-title" value="${esc(d?.title||'')}" placeholder="Ребрендинг..."></div>
+    <div class="field-row">
+      <div class="field"><label class="field-label">Клиент</label><select class="field-input" id="m-client"><option value="">— не выбран —</option>${clientOpts}</select></div>
+      <div class="field"><label class="field-label">Стадия</label><select class="field-input" id="m-stage">
+        <option value="new" ${d?.stage==='new'?'selected':''}>Новый лид</option>
+        <option value="qualify" ${d?.stage==='qualify'?'selected':''}>Квалификация</option>
+        <option value="proposal" ${d?.stage==='proposal'?'selected':''}>КП отправлено</option>
+        <option value="negotiate" ${d?.stage==='negotiate'?'selected':''}>Переговоры</option>
+        <option value="closed" ${d?.stage==='closed'?'selected':''}>Закрыта</option>
+      </select></div>
+    </div>
+    <div class="field"><label class="field-label">Сумма ₽</label><input class="field-input" id="m-value" type="number" value="${d?.value||0}" placeholder="0"></div>
+  `, async () => {
+    const body = { title:val('m-title'), client_id:val('m-client')||null, stage:val('m-stage'), value:+val('m-value') };
+    try {
+      if (d) await api('PUT', `/api/deals/${d.id}`, body);
+      else await api('POST', '/api/deals', body);
+      closeModal(); await loadAll(); renderFunnel(); toast(d ? 'Сделка обновлена' : 'Лид добавлен');
+    } catch(e) { showErr(e.message); }
+  });
+}
+
+// Invoice modal
+function openInvoiceModal() {
+  const clientOpts = clients.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('');
+  showModal('Новый счёт', `
+    <div class="field-row">
+      <div class="field"><label class="field-label">Номер</label><input class="field-input" id="m-number" placeholder="#2026-001"></div>
+      <div class="field"><label class="field-label">Клиент</label><select class="field-input" id="m-client"><option value="">— не выбран —</option>${clientOpts}</select></div>
+    </div>
+    <div class="field"><label class="field-label">Сумма ₽</label><input class="field-input" id="m-amount" type="number" placeholder="0"></div>
+    <div class="field-row">
+      <div class="field"><label class="field-label">Выставлен</label><input class="field-input" id="m-issued" type="date"></div>
+      <div class="field"><label class="field-label">Срок оплаты</label><input class="field-input" id="m-due" type="date"></div>
+    </div>
+    <div class="field"><label class="field-label">Статус</label><select class="field-input" id="m-status">
+      <option value="pending">Ожидает</option>
+      <option value="paid">Оплачен</option>
+      <option value="overdue">Просрочен</option>
+    </select></div>
+  `, async () => {
+    const body = { number:val('m-number'), client_id:val('m-client')||null, amount:+val('m-amount'), issued_at:val('m-issued'), due_at:val('m-due'), status:val('m-status') };
+    try {
+      await api('POST', '/api/invoices', body);
+      closeModal(); await loadAll(); renderFinance(); toast('Счёт добавлен');
+    } catch(e) { showErr(e.message); }
+  });
+}
+
+async function deleteInvoice(id) {
+  if (!confirm('Удалить счёт?')) return;
+  try { await api('DELETE', `/api/invoices/${id}`); await loadAll(); renderFinance(); toast('Счёт удалён'); } catch(e) { toast(e.message); }
+}
+
+// ─── SEARCH ────────────────────────────────────────────────────────────────
+function doSearch(q) {
+  if (!q) { renderClients(); return; }
+  const r = clients.filter(c => (c.name+c.contact_name+c.email+c.industry).toLowerCase().includes(q.toLowerCase()));
+  renderClients(r);
+}
+
+// ─── HELPERS ───────────────────────────────────────────────────────────────
+function val(id) { return document.getElementById(id)?.value || ''; }
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmt(n) { return n ? '₽ ' + fmtNum(n) : '₽ —'; }
+function fmtNum(n) {
+  if (n >= 1000000) return (n/1000000).toFixed(1).replace('.0','') + 'M';
+  if (n >= 1000) return (n/1000).toFixed(0) + 'K';
+  return String(Math.round(n));
+}
+function statusLabel(s) {
+  const m = { queue:'Очередь', 'in-progress':'В работе', review:'Согласование', done:'Готово' };
+  return m[s] || s;
+}
+function statusClientLabel(s) {
+  const m = { active:'Активный', lead:'Потенциальный', archive:'Архив' };
+  return m[s] || s;
+}
+function invLabel(s) {
+  return { paid:'Оплачен', pending:'Ожидает', overdue:'Просрочен' }[s] || s;
+}
+function showErr(msg) {
+  const el = document.getElementById('modal-err');
+  el.textContent = msg; el.classList.add('show');
+}
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2500);
+}
+function logout() {
+  localStorage.removeItem('crm_token');
+  localStorage.removeItem('crm_user');
+  window.location.href = '/';
+}
+
+// ─── KEYBOARD ──────────────────────────────────────────────────────────────
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+// ─── TABS ──────────────────────────────────────────────────────────────────
+document.querySelectorAll('.tabs').forEach(g => {
+  g.querySelectorAll('.tab').forEach(t => {
+    t.addEventListener('click', () => {
+      if (!t.getAttribute('onclick')) {
+        g.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+        t.classList.add('active');
+      }
+    });
+  });
+});
+
+init();
+</script>
+</body>
+</html>

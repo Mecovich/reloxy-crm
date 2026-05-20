@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Studio CRM — Вход</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --black: #000;  --s1: #0a0a0a;  --s2: #111;  --s3: #1a1a1a;
+  --line: rgba(255,255,255,0.07);  --line2: rgba(255,255,255,0.12);
+  --white: #f5f5f5;  --g1: #888;  --g2: #555;  --g3: #333;
+}
+body {
+  font-family: -apple-system, "Inter", "Helvetica Neue", sans-serif;
+  background: var(--black); color: var(--white);
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  font-size: 13px; -webkit-font-smoothing: antialiased;
+}
+
+.wrap {
+  width: 380px; padding: 0 16px;
+}
+
+.brand {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 40px; justify-content: center;
+}
+.brand-dot {
+  width: 22px; height: 22px; background: var(--white);
+  border-radius: 5px; flex-shrink: 0;
+}
+.brand-name { font-size: 15px; font-weight: 600; letter-spacing: -0.3px; }
+
+.card {
+  background: var(--s1);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.tabs {
+  display: flex; border-bottom: 1px solid var(--line);
+}
+.tab {
+  flex: 1; padding: 14px 0; text-align: center;
+  font-size: 13px; font-weight: 500; cursor: pointer;
+  color: var(--g2); transition: color 0.1s;
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+}
+.tab.active { color: var(--white); border-bottom-color: var(--white); }
+
+.form { padding: 28px; display: none; }
+.form.active { display: block; }
+
+.field { margin-bottom: 16px; }
+.field-label {
+  display: block; font-size: 11px; font-weight: 500;
+  color: var(--g2); text-transform: uppercase;
+  letter-spacing: 0.5px; margin-bottom: 6px;
+}
+.field-input {
+  width: 100%; background: var(--black);
+  border: 1px solid var(--line); border-radius: 6px;
+  padding: 10px 13px; color: var(--white);
+  font-size: 13px; outline: none; transition: border-color 0.15s;
+  font-family: inherit;
+}
+.field-input:focus { border-color: var(--line2); }
+.field-input::placeholder { color: var(--g3); }
+
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+.btn-submit {
+  width: 100%; padding: 11px;
+  background: var(--white); color: var(--black);
+  border: none; border-radius: 6px;
+  font-size: 13px; font-weight: 600;
+  cursor: pointer; margin-top: 8px;
+  transition: opacity 0.1s; font-family: inherit;
+}
+.btn-submit:hover { opacity: 0.88; }
+.btn-submit:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.error-msg {
+  font-size: 12px; color: #f5f5f5;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--line2);
+  border-radius: 6px; padding: 10px 13px;
+  margin-bottom: 16px; display: none;
+}
+.error-msg.show { display: block; }
+
+.footer-note {
+  text-align: center; font-size: 11px; color: var(--g3);
+  margin-top: 20px;
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">
+    <div class="brand-dot"></div>
+    <div class="brand-name">Studio CRM</div>
+  </div>
+
+  <div class="card">
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('login')">Войти</div>
+      <div class="tab" onclick="switchTab('register')">Регистрация</div>
+    </div>
+
+    <!-- LOGIN -->
+    <form class="form active" id="form-login" onsubmit="login(event)">
+      <div class="error-msg" id="err-login"></div>
+      <div class="field">
+        <label class="field-label">Email</label>
+        <input class="field-input" type="email" id="l-email" placeholder="you@studio.ru" required autocomplete="email">
+      </div>
+      <div class="field">
+        <label class="field-label">Пароль</label>
+        <input class="field-input" type="password" id="l-pass" placeholder="••••••••" required autocomplete="current-password">
+      </div>
+      <button class="btn-submit" type="submit" id="btn-login">Войти</button>
+    </form>
+
+    <!-- REGISTER -->
+    <form class="form" id="form-register" onsubmit="register(event)">
+      <div class="error-msg" id="err-register"></div>
+      <div class="row2">
+        <div class="field">
+          <label class="field-label">Ваше имя</label>
+          <input class="field-input" type="text" id="r-name" placeholder="Виктория" required>
+        </div>
+        <div class="field">
+          <label class="field-label">Студия</label>
+          <input class="field-input" type="text" id="r-studio" placeholder="My Studio">
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">Email</label>
+        <input class="field-input" type="email" id="r-email" placeholder="you@studio.ru" required>
+      </div>
+      <div class="field">
+        <label class="field-label">Пароль</label>
+        <input class="field-input" type="password" id="r-pass" placeholder="минимум 6 символов" required>
+      </div>
+      <button class="btn-submit" type="submit" id="btn-register">Создать аккаунт</button>
+    </form>
+  </div>
+
+  <div class="footer-note">Studio CRM · Digital Design</div>
+</div>
+
+<script>
+  // Redirect if already logged in
+  if (localStorage.getItem('crm_token')) {
+    window.location.href = '/app';
+  }
+
+  function switchTab(t) {
+    document.querySelectorAll('.tab').forEach((el, i) =>
+      el.classList.toggle('active', (i === 0 && t === 'login') || (i === 1 && t === 'register'))
+    );
+    document.getElementById('form-login').classList.toggle('active', t === 'login');
+    document.getElementById('form-register').classList.toggle('active', t === 'register');
+  }
+
+  function showErr(id, msg) {
+    const el = document.getElementById(id);
+    el.textContent = msg; el.classList.add('show');
+  }
+  function hideErr(id) { document.getElementById(id).classList.remove('show'); }
+
+  async function login(e) {
+    e.preventDefault();
+    hideErr('err-login');
+    const btn = document.getElementById('btn-login');
+    btn.disabled = true; btn.textContent = 'Входим...';
+
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: document.getElementById('l-email').value,
+          password: document.getElementById('l-pass').value
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      localStorage.setItem('crm_token', data.token);
+      localStorage.setItem('crm_user', JSON.stringify(data.user));
+      window.location.href = '/app';
+    } catch (err) {
+      showErr('err-login', err.message);
+      btn.disabled = false; btn.textContent = 'Войти';
+    }
+  }
+
+  async function register(e) {
+    e.preventDefault();
+    hideErr('err-register');
+    const btn = document.getElementById('btn-register');
+    btn.disabled = true; btn.textContent = 'Создаём...';
+
+    try {
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: document.getElementById('r-name').value,
+          email: document.getElementById('r-email').value,
+          password: document.getElementById('r-pass').value,
+          studioName: document.getElementById('r-studio').value
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      localStorage.setItem('crm_token', data.token);
+      localStorage.setItem('crm_user', JSON.stringify(data.user));
+      window.location.href = '/app';
+    } catch (err) {
+      showErr('err-register', err.message);
+      btn.disabled = false; btn.textContent = 'Создать аккаунт';
+    }
+  }
+</script>
+</body>
+</html>
