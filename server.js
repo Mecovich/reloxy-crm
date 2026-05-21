@@ -1,15 +1,30 @@
 require('dotenv').config();
-const express    = require('express');
-const Database   = require('better-sqlite3');
-const bcrypt     = require('bcryptjs');
-const jwt        = require('jsonwebtoken');
-const cors       = require('cors');
-const path       = require('path');
+const express  = require('express');
+const Database = require('better-sqlite3');
+const bcrypt   = require('bcryptjs');
+const jwt      = require('jsonwebtoken');
+const cors     = require('cors');
+const path     = require('path');
 
-const app        = express();
-const PORT       = process.env.PORT || 3000;
-const SECRET     = process.env.JWT_SECRET || 'studio-crm-dev-secret';
-const DB_PATH    = process.env.DB_PATH || 'studio.db';
+const app      = express();
+const PORT     = process.env.PORT || 3000;
+const SECRET   = process.env.JWT_SECRET || 'reloxy-dev-secret';
+const DB_PATH  = process.env.DB_PATH || 'studio.db';
+const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || '').toLowerCase().trim();
+
+// ─── TELEGRAM ────────────────────────────────────────────────────────────────
+async function tg(text) {
+  const token  = process.env.TELEGRAM_BOT_TOKEN;
+  const chatId = process.env.TELEGRAM_CHAT_ID;
+  if (!token || !chatId) return;
+  try {
+    await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: chatId, text, parse_mode: 'HTML' })
+    });
+  } catch (e) { console.error('Telegram error:', e.message); }
+}
 
 // ─── DATABASE ────────────────────────────────────────────────────────────────
 const db = new Database(DB_PATH);
@@ -23,6 +38,7 @@ db.exec(`
     email       TEXT    UNIQUE NOT NULL,
     password    TEXT    NOT NULL,
     studio_name TEXT    DEFAULT '',
+    role        TEXT    DEFAULT 'user',
     created_at  TEXT    DEFAULT (datetime('now'))
   );
 
@@ -76,6 +92,9 @@ db.exec(`
   );
 `);
 
+// Migrate: add role column if missing
+try { db.exec(`ALTER TABLE users ADD COLUMN role TEXT DEFAULT 'user'`); } catch {}
+
 // ─── MIDDLEWARE ───────────────────────────────────────────────────────────────
 app.use(cors());
 app.use(express.json());
@@ -85,12 +104,14 @@ function auth(req, res, next) {
   const header = req.headers.authorization || '';
   const token  = header.startsWith('Bearer ') ? header.slice(7) : null;
   if (!token) return res.status(401).json({ error: 'Необходима авторизация' });
-  try {
-    req.user = jwt.verify(token, SECRET);
-    next();
-  } catch {
-    res.status(401).json({ error: 'Токен недействителен' });
-  }
+  try { req.user = jwt.verify(token, SECRET); next(); }
+  catch { res.status(401).json({ error: 'Токен недействителен' }); }
+}
+
+function adminOnly(req, res, next) {
+  if (req.user.role !== 'admin')
+    return res.status(403).json({ error: 'Доступ запрещён' });
+  next();
 }
 
 // ─── AUTH ─────────────────────────────────────────────────────────────────────
@@ -101,16 +122,22 @@ app.post('/api/auth/register', async (req, res) => {
   if (password.length < 6)
     return res.status(400).json({ error: 'Пароль должен быть минимум 6 символов' });
 
-  const exists = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
+  const emailClean = email.toLowerCase().trim();
+  const exists = db.prepare('SELECT id FROM users WHERE email = ?').get(emailClean);
   if (exists) return res.status(400).json({ error: 'Email уже зарегистрирован' });
 
-  const hash   = await bcrypt.hash(password, 10);
+  const hash = await bcrypt.hash(password, 10);
+  const role = (ADMIN_EMAIL && emailClean === ADMIN_EMAIL) ? 'admin' : 'user';
   const result = db.prepare(
-    'INSERT INTO users (name, email, password, studio_name) VALUES (?, ?, ?, ?)'
-  ).run(name, email.toLowerCase().trim(), hash, studioName || '');
+    'INSERT INTO users (name, email, password, studio_name, role) VALUES (?, ?, ?, ?, ?)'
+  ).run(name, emailClean, hash, studioName || '', role);
 
-  const user  = { id: result.lastInsertRowid, name, email, studioName: studioName || '' };
-  const token = jwt.sign({ id: user.id, email: user.email, name: user.name }, SECRET, { expiresIn: '30d' });
+  const user  = { id: result.lastInsertRowid, name, email: emailClean, studioName: studioName || '', role };
+  const token = jwt.sign({ id: user.id, email: user.email, name: user.name, role }, SECRET, { expiresIn: '30d' });
+
+  // Telegram notification
+  tg(`🆕 <b>Новая регистрация</b>\n👤 ${name}\n📧 ${emailClean}\n🏢 ${studioName || '—'}`);
+
   res.json({ token, user });
 });
 
@@ -125,15 +152,50 @@ app.post('/api/auth/login', async (req, res) => {
   const ok = await bcrypt.compare(password, row.password);
   if (!ok) return res.status(401).json({ error: 'Неверный email или пароль' });
 
-  const user  = { id: row.id, name: row.name, email: row.email, studioName: row.studio_name };
-  const token = jwt.sign({ id: row.id, email: row.email, name: row.name }, SECRET, { expiresIn: '30d' });
+  const user  = { id: row.id, name: row.name, email: row.email, studioName: row.studio_name, role: row.role || 'user' };
+  const token = jwt.sign({ id: row.id, email: row.email, name: row.name, role: user.role }, SECRET, { expiresIn: '30d' });
   res.json({ token, user });
 });
 
 app.get('/api/auth/me', auth, (req, res) => {
-  const row = db.prepare('SELECT id, name, email, studio_name FROM users WHERE id = ?').get(req.user.id);
+  const row = db.prepare('SELECT id, name, email, studio_name, role FROM users WHERE id = ?').get(req.user.id);
   if (!row) return res.status(404).json({ error: 'Пользователь не найден' });
-  res.json({ id: row.id, name: row.name, email: row.email, studioName: row.studio_name });
+  res.json({ id: row.id, name: row.name, email: row.email, studioName: row.studio_name, role: row.role || 'user' });
+});
+
+// ─── ADMIN ────────────────────────────────────────────────────────────────────
+app.get('/api/admin/stats', auth, adminOnly, (req, res) => {
+  const totalUsers    = db.prepare('SELECT COUNT(*) AS v FROM users').get().v;
+  const totalClients  = db.prepare('SELECT COUNT(*) AS v FROM clients').get().v;
+  const totalProjects = db.prepare('SELECT COUNT(*) AS v FROM projects').get().v;
+  const totalRevenue  = db.prepare(`SELECT COALESCE(SUM(amount),0) AS v FROM invoices WHERE status='paid'`).get().v;
+  res.json({ totalUsers, totalClients, totalProjects, totalRevenue });
+});
+
+app.get('/api/admin/users', auth, adminOnly, (req, res) => {
+  const rows = db.prepare(`
+    SELECT u.id, u.name, u.email, u.studio_name, u.role, u.created_at,
+      (SELECT COUNT(*) FROM clients  WHERE user_id = u.id) AS clients_count,
+      (SELECT COUNT(*) FROM projects WHERE user_id = u.id) AS projects_count,
+      (SELECT COALESCE(SUM(amount),0) FROM invoices WHERE user_id = u.id AND status='paid') AS revenue
+    FROM users u ORDER BY u.created_at DESC
+  `).all();
+  res.json(rows);
+});
+
+app.delete('/api/admin/users/:id', auth, adminOnly, (req, res) => {
+  if (Number(req.params.id) === req.user.id)
+    return res.status(400).json({ error: 'Нельзя удалить себя' });
+  db.prepare('DELETE FROM users WHERE id = ?').run(req.params.id);
+  res.json({ ok: true });
+});
+
+app.put('/api/admin/users/:id/role', auth, adminOnly, (req, res) => {
+  const { role } = req.body;
+  if (!['admin','user'].includes(role))
+    return res.status(400).json({ error: 'Неверная роль' });
+  db.prepare('UPDATE users SET role=? WHERE id=?').run(role, req.params.id);
+  res.json({ ok: true });
 });
 
 // ─── STATS ───────────────────────────────────────────────────────────────────
@@ -152,11 +214,7 @@ app.get('/api/stats', auth, (req, res) => {
   const monthly = [];
   for (let i = 0; i < 12; i++) {
     const mm = String(i + 1).padStart(2, '0');
-    const s  = `${year}-${mm}-01`;
-    const e  = `${year}-${mm}-31`;
-    monthly.push(
-      db.prepare(`SELECT COALESCE(SUM(amount),0) AS v FROM invoices WHERE user_id=? AND status='paid' AND issued_at >= ? AND issued_at <= ?`).get(uid, s, e).v
-    );
+    monthly.push(db.prepare(`SELECT COALESCE(SUM(amount),0) AS v FROM invoices WHERE user_id=? AND status='paid' AND issued_at >= ? AND issued_at <= ?`).get(uid, `${year}-${mm}-01`, `${year}-${mm}-31`).v);
   }
 
   res.json({ revenue, activeProjects, totalClients, totalLeads, monthly });
@@ -176,18 +234,15 @@ app.get('/api/clients', auth, (req, res) => {
 app.post('/api/clients', auth, (req, res) => {
   const { name, industry, contact_name, email, phone, status, notes } = req.body;
   if (!name) return res.status(400).json({ error: 'Укажите название компании' });
-  const r = db.prepare(
-    `INSERT INTO clients (user_id,name,industry,contact_name,email,phone,status,notes)
-     VALUES (?,?,?,?,?,?,?,?)`
-  ).run(req.user.id, name, industry||'', contact_name||'', email||'', phone||'', status||'active', notes||'');
+  const r = db.prepare(`INSERT INTO clients (user_id,name,industry,contact_name,email,phone,status,notes) VALUES (?,?,?,?,?,?,?,?)`)
+    .run(req.user.id, name, industry||'', contact_name||'', email||'', phone||'', status||'active', notes||'');
   res.json({ id: r.lastInsertRowid, name, industry, contact_name, email, phone, status: status||'active', notes, project_count: 0, total_paid: 0 });
 });
 
 app.put('/api/clients/:id', auth, (req, res) => {
   const { name, industry, contact_name, email, phone, status, notes } = req.body;
-  db.prepare(
-    `UPDATE clients SET name=?,industry=?,contact_name=?,email=?,phone=?,status=?,notes=? WHERE id=? AND user_id=?`
-  ).run(name, industry||'', contact_name||'', email||'', phone||'', status||'active', notes||'', req.params.id, req.user.id);
+  db.prepare(`UPDATE clients SET name=?,industry=?,contact_name=?,email=?,phone=?,status=?,notes=? WHERE id=? AND user_id=?`)
+    .run(name, industry||'', contact_name||'', email||'', phone||'', status||'active', notes||'', req.params.id, req.user.id);
   res.json({ ok: true });
 });
 
@@ -198,29 +253,22 @@ app.delete('/api/clients/:id', auth, (req, res) => {
 
 // ─── PROJECTS ────────────────────────────────────────────────────────────────
 app.get('/api/projects', auth, (req, res) => {
-  const rows = db.prepare(`
-    SELECT p.*, c.name AS client_name
-    FROM projects p LEFT JOIN clients c ON p.client_id = c.id
-    WHERE p.user_id = ? ORDER BY p.created_at DESC
-  `).all(req.user.id);
+  const rows = db.prepare(`SELECT p.*, c.name AS client_name FROM projects p LEFT JOIN clients c ON p.client_id = c.id WHERE p.user_id = ? ORDER BY p.created_at DESC`).all(req.user.id);
   res.json(rows);
 });
 
 app.post('/api/projects', auth, (req, res) => {
   const { title, type, client_id, status, progress, deadline, budget } = req.body;
   if (!title) return res.status(400).json({ error: 'Укажите название проекта' });
-  const r = db.prepare(
-    `INSERT INTO projects (user_id,title,type,client_id,status,progress,deadline,budget)
-     VALUES (?,?,?,?,?,?,?,?)`
-  ).run(req.user.id, title, type||'', client_id||null, status||'queue', progress||0, deadline||'', budget||0);
+  const r = db.prepare(`INSERT INTO projects (user_id,title,type,client_id,status,progress,deadline,budget) VALUES (?,?,?,?,?,?,?,?)`)
+    .run(req.user.id, title, type||'', client_id||null, status||'queue', progress||0, deadline||'', budget||0);
   res.json({ id: r.lastInsertRowid, title, type, client_id, status: status||'queue', progress: progress||0, deadline, budget: budget||0 });
 });
 
 app.put('/api/projects/:id', auth, (req, res) => {
   const { title, type, client_id, status, progress, deadline, budget } = req.body;
-  db.prepare(
-    `UPDATE projects SET title=?,type=?,client_id=?,status=?,progress=?,deadline=?,budget=? WHERE id=? AND user_id=?`
-  ).run(title, type||'', client_id||null, status||'queue', progress||0, deadline||'', budget||0, req.params.id, req.user.id);
+  db.prepare(`UPDATE projects SET title=?,type=?,client_id=?,status=?,progress=?,deadline=?,budget=? WHERE id=? AND user_id=?`)
+    .run(title, type||'', client_id||null, status||'queue', progress||0, deadline||'', budget||0, req.params.id, req.user.id);
   res.json({ ok: true });
 });
 
@@ -231,28 +279,22 @@ app.delete('/api/projects/:id', auth, (req, res) => {
 
 // ─── DEALS ───────────────────────────────────────────────────────────────────
 app.get('/api/deals', auth, (req, res) => {
-  const rows = db.prepare(`
-    SELECT d.*, c.name AS client_name
-    FROM deals d LEFT JOIN clients c ON d.client_id = c.id
-    WHERE d.user_id = ? ORDER BY d.created_at DESC
-  `).all(req.user.id);
+  const rows = db.prepare(`SELECT d.*, c.name AS client_name FROM deals d LEFT JOIN clients c ON d.client_id = c.id WHERE d.user_id = ? ORDER BY d.created_at DESC`).all(req.user.id);
   res.json(rows);
 });
 
 app.post('/api/deals', auth, (req, res) => {
   const { title, client_id, stage, value } = req.body;
   if (!title) return res.status(400).json({ error: 'Укажите название сделки' });
-  const r = db.prepare(
-    `INSERT INTO deals (user_id,title,client_id,stage,value) VALUES (?,?,?,?,?)`
-  ).run(req.user.id, title, client_id||null, stage||'new', value||0);
+  const r = db.prepare(`INSERT INTO deals (user_id,title,client_id,stage,value) VALUES (?,?,?,?,?)`)
+    .run(req.user.id, title, client_id||null, stage||'new', value||0);
   res.json({ id: r.lastInsertRowid, title, client_id, stage: stage||'new', value: value||0 });
 });
 
 app.put('/api/deals/:id', auth, (req, res) => {
   const { title, client_id, stage, value } = req.body;
-  db.prepare(
-    `UPDATE deals SET title=?,client_id=?,stage=?,value=? WHERE id=? AND user_id=?`
-  ).run(title, client_id||null, stage||'new', value||0, req.params.id, req.user.id);
+  db.prepare(`UPDATE deals SET title=?,client_id=?,stage=?,value=? WHERE id=? AND user_id=?`)
+    .run(title, client_id||null, stage||'new', value||0, req.params.id, req.user.id);
   res.json({ ok: true });
 });
 
@@ -263,28 +305,34 @@ app.delete('/api/deals/:id', auth, (req, res) => {
 
 // ─── INVOICES ────────────────────────────────────────────────────────────────
 app.get('/api/invoices', auth, (req, res) => {
-  const rows = db.prepare(`
-    SELECT i.*, c.name AS client_name
-    FROM invoices i LEFT JOIN clients c ON i.client_id = c.id
-    WHERE i.user_id = ? ORDER BY i.created_at DESC
-  `).all(req.user.id);
+  const rows = db.prepare(`SELECT i.*, c.name AS client_name FROM invoices i LEFT JOIN clients c ON i.client_id = c.id WHERE i.user_id = ? ORDER BY i.created_at DESC`).all(req.user.id);
   res.json(rows);
 });
 
 app.post('/api/invoices', auth, (req, res) => {
   const { number, client_id, project_id, amount, status, issued_at, due_at } = req.body;
-  const r = db.prepare(
-    `INSERT INTO invoices (user_id,number,client_id,project_id,amount,status,issued_at,due_at)
-     VALUES (?,?,?,?,?,?,?,?)`
-  ).run(req.user.id, number||'', client_id||null, project_id||null, amount||0, status||'pending', issued_at||'', due_at||'');
+  const r = db.prepare(`INSERT INTO invoices (user_id,number,client_id,project_id,amount,status,issued_at,due_at) VALUES (?,?,?,?,?,?,?,?)`)
+    .run(req.user.id, number||'', client_id||null, project_id||null, amount||0, status||'pending', issued_at||'', due_at||'');
+
+  if (status === 'paid') {
+    const u = db.prepare('SELECT name FROM users WHERE id=?').get(req.user.id);
+    tg(`💰 <b>Оплачен счёт</b>\n👤 ${u?.name || req.user.email}\n🧾 ${number || '—'}\n💵 ₽${amount || 0}`);
+  }
+
   res.json({ id: r.lastInsertRowid, ...req.body });
 });
 
 app.put('/api/invoices/:id', auth, (req, res) => {
   const { number, client_id, project_id, amount, status, issued_at, due_at } = req.body;
-  db.prepare(
-    `UPDATE invoices SET number=?,client_id=?,project_id=?,amount=?,status=?,issued_at=?,due_at=? WHERE id=? AND user_id=?`
-  ).run(number||'', client_id||null, project_id||null, amount||0, status||'pending', issued_at||'', due_at||'', req.params.id, req.user.id);
+  const prev = db.prepare('SELECT status FROM invoices WHERE id=? AND user_id=?').get(req.params.id, req.user.id);
+  db.prepare(`UPDATE invoices SET number=?,client_id=?,project_id=?,amount=?,status=?,issued_at=?,due_at=? WHERE id=? AND user_id=?`)
+    .run(number||'', client_id||null, project_id||null, amount||0, status||'pending', issued_at||'', due_at||'', req.params.id, req.user.id);
+
+  if (prev && prev.status !== 'paid' && status === 'paid') {
+    const u = db.prepare('SELECT name FROM users WHERE id=?').get(req.user.id);
+    tg(`💰 <b>Оплачен счёт</b>\n👤 ${u?.name || req.user.email}\n🧾 ${number || '—'}\n💵 ₽${amount || 0}`);
+  }
+
   res.json({ ok: true });
 });
 
@@ -293,10 +341,9 @@ app.delete('/api/invoices/:id', auth, (req, res) => {
   res.json({ ok: true });
 });
 
-// ─── FALLBACK ─────────────────────────────────────────────────────────────────
-app.get('/app', (req, res) => res.sendFile(path.join(__dirname, 'public', 'app.html')));
-app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'public', 'login.html')));
+// ─── ROUTES ──────────────────────────────────────────────────────────────────
+app.get('/app',   (req, res) => res.sendFile(path.join(__dirname, 'public', 'app.html')));
+app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
+app.get('*',      (req, res) => res.sendFile(path.join(__dirname, 'public', 'login.html')));
 
-app.listen(PORT, () => {
-  console.log(`\n  Studio CRM → http://localhost:${PORT}\n`);
-});
+app.listen(PORT, () => console.log(`\n  Reloxy CRM → http://localhost:${PORT}\n`));

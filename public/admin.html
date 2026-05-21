@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reloxy Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --black:#000; --s1:#0a0a0a; --s2:#111; --s3:#1a1a1a; --s4:#242424;
+  --line:rgba(255,255,255,0.07); --line2:rgba(255,255,255,0.14);
+  --white:#f5f5f5; --g1:#888; --g2:#555; --g3:#333;
+  --accent:#a78bfa;
+}
+body { font-family:'Inter',-apple-system,sans-serif; background:var(--black); color:var(--white); min-height:100vh; font-size:13px; -webkit-font-smoothing:antialiased; }
+
+.topbar { height:52px; border-bottom:1px solid var(--line); display:flex; align-items:center; padding:0 36px; gap:16px; background:var(--s1); position:sticky; top:0; z-index:50; }
+.topbar-brand { display:flex; align-items:center; gap:10px; }
+.topbar-logo { width:26px; height:26px; background:var(--white); border-radius:5px; display:flex; align-items:center; justify-content:center; }
+.topbar-logo svg { width:13px; height:13px; }
+.topbar-name { font-size:14px; font-weight:700; letter-spacing:-0.3px; }
+.admin-badge { font-size:10px; font-weight:600; background:var(--accent); color:var(--black); padding:2px 8px; border-radius:10px; letter-spacing:0.3px; }
+.topbar-right { margin-left:auto; display:flex; align-items:center; gap:12px; }
+.topbar-user { font-size:12px; color:var(--g1); }
+.btn { font-size:12px; font-weight:500; padding:6px 14px; border-radius:6px; cursor:pointer; border:none; font-family:inherit; transition:opacity 0.1s; }
+.btn-ghost { background:none; color:var(--g1); border:1px solid var(--line); }
+.btn-ghost:hover { color:var(--white); border-color:var(--line2); }
+.btn-danger { background:rgba(248,113,113,0.12); color:#f87171; border:1px solid rgba(248,113,113,0.2); }
+.btn-danger:hover { background:rgba(248,113,113,0.2); }
+.btn-accent { background:var(--accent); color:var(--black); font-weight:600; }
+
+.content { padding:36px; max-width:1100px; margin:0 auto; }
+
+.page-header { margin-bottom:36px; }
+.page-header h1 { font-size:24px; font-weight:700; letter-spacing:-0.6px; }
+.page-header p  { font-size:12px; color:var(--g2); margin-top:5px; }
+
+.stats { display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:10px; overflow:hidden; margin-bottom:36px; }
+.stat { padding:24px 28px; background:var(--s1); }
+.stat-label { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.6px; color:var(--g2); margin-bottom:10px; }
+.stat-value { font-size:28px; font-weight:700; letter-spacing:-1px; color:var(--white); font-variant-numeric:tabular-nums; }
+
+.section-header { display:flex; align-items:center; justify-content:space-between; padding-bottom:12px; border-bottom:1px solid var(--line); margin-bottom:0; }
+.section-title { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; color:var(--g2); }
+.section-count { font-size:11px; color:var(--g3); }
+
+table { width:100%; border-collapse:collapse; margin-top:0; }
+th { text-align:left; font-size:10px; font-weight:600; letter-spacing:0.6px; text-transform:uppercase; color:var(--g3); padding:12px 0; border-bottom:1px solid var(--line); }
+th:not(:first-child) { padding-left:20px; }
+td { padding:14px 0; border-bottom:1px solid var(--line); font-size:12.5px; color:var(--g1); vertical-align:middle; }
+td:not(:first-child) { padding-left:20px; }
+tr:last-child td { border-bottom:none; }
+tr:hover td { color:var(--white); }
+.td-main { color:var(--white); font-weight:500; }
+.td-sub  { font-size:11px; color:var(--g3); margin-top:2px; }
+
+.role-badge { font-size:10px; font-weight:600; padding:2px 8px; border-radius:10px; display:inline-block; }
+.role-admin { background:var(--accent); color:var(--black); }
+.role-user  { background:var(--s3); color:var(--g1); border:1px solid var(--line); }
+
+.actions { display:flex; gap:6px; }
+.td-action { font-size:11px; color:var(--g3); cursor:pointer; transition:color 0.1s; }
+.td-action:hover { color:var(--white); }
+.td-action.danger:hover { color:#f87171; }
+
+.empty { padding:60px 0; text-align:center; color:var(--g3); font-size:13px; }
+
+::-webkit-scrollbar { width:3px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--s4); border-radius:3px; }
+
+.toast { position:fixed; bottom:28px; left:50%; transform:translateX(-50%); background:var(--s2); border:1px solid var(--line2); border-radius:8px; padding:10px 20px; font-size:12px; font-weight:500; color:var(--white); z-index:999; opacity:0; transition:opacity 0.2s; pointer-events:none; }
+.toast.show { opacity:1; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-brand">
+    <div class="topbar-logo">
+      <svg viewBox="0 0 14 14" fill="none">
+        <rect x="1" y="1" width="5" height="5" rx="1" fill="#000"/>
+        <rect x="8" y="1" width="5" height="5" rx="1" fill="#000"/>
+        <rect x="1" y="8" width="5" height="5" rx="1" fill="#000"/>
+        <rect x="8" y="8" width="5" height="5" rx="1" fill="#000"/>
+      </svg>
+    </div>
+    <div class="topbar-name">Reloxy</div>
+    <div class="admin-badge">ADMIN</div>
+  </div>
+  <div class="topbar-right">
+    <div class="topbar-user" id="admin-name">...</div>
+    <button class="btn btn-ghost" onclick="window.location.href='/app'">← В CRM</button>
+    <button class="btn btn-ghost" onclick="logout()">Выйти</button>
+  </div>
+</div>
+
+<div class="content">
+  <div class="page-header">
+    <h1>Панель администратора</h1>
+    <p>Управление пользователями и общая статистика</p>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-label">Пользователей</div><div class="stat-value" id="s-users">—</div></div>
+    <div class="stat"><div class="stat-label">Клиентов</div><div class="stat-value" id="s-clients">—</div></div>
+    <div class="stat"><div class="stat-label">Проектов</div><div class="stat-value" id="s-projects">—</div></div>
+    <div class="stat"><div class="stat-label">Общая выручка</div><div class="stat-value" id="s-revenue">—</div></div>
+  </div>
+
+  <div class="section-header">
+    <div class="section-title">Пользователи</div>
+    <div class="section-count" id="users-count"></div>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Пользователь</th>
+        <th>Студия</th>
+        <th>Роль</th>
+        <th>Клиентов</th>
+        <th>Проектов</th>
+        <th>Выручка</th>
+        <th>Дата</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody id="users-tbody"></tbody>
+  </table>
+  <div id="users-empty" class="empty" style="display:none">Пользователей нет</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const token = localStorage.getItem('crm_token');
+const me    = JSON.parse(localStorage.getItem('crm_user') || 'null');
+
+async function init() {
+  if (!token) return (window.location.href = '/');
+  if (!me || me.role !== 'admin') {
+    alert('Доступ только для администраторов');
+    return (window.location.href = '/app');
+  }
+  document.getElementById('admin-name').textContent = me.name;
+  await Promise.all([loadStats(), loadUsers()]);
+}
+
+async function api(method, url, body) {
+  const opts = { method, headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` } };
+  if (body) opts.body = JSON.stringify(body);
+  const res  = await fetch(url, opts);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Ошибка');
+  return data;
+}
+
+async function loadStats() {
+  try {
+    const s = await api('GET', '/api/admin/stats');
+    document.getElementById('s-users').textContent    = s.totalUsers;
+    document.getElementById('s-clients').textContent  = s.totalClients;
+    document.getElementById('s-projects').textContent = s.totalProjects;
+    document.getElementById('s-revenue').textContent  = fmtRub(s.totalRevenue);
+  } catch(e) { console.error(e); }
+}
+
+async function loadUsers() {
+  try {
+    const users = await api('GET', '/api/admin/users');
+    document.getElementById('users-count').textContent = users.length + ' чел.';
+    const tbody = document.getElementById('users-tbody');
+    const empty = document.getElementById('users-empty');
+
+    if (!users.length) { tbody.innerHTML=''; empty.style.display='block'; return; }
+    empty.style.display = 'none';
+
+    tbody.innerHTML = users.map(u => `
+      <tr>
+        <td>
+          <div class="td-main">${esc(u.name)}</div>
+          <div class="td-sub">${esc(u.email)}</div>
+        </td>
+        <td>${esc(u.studio_name || '—')}</td>
+        <td><span class="role-badge role-${u.role}">${u.role === 'admin' ? 'Админ' : 'Пользователь'}</span></td>
+        <td>${u.clients_count}</td>
+        <td>${u.projects_count}</td>
+        <td style="font-variant-numeric:tabular-nums">${fmtRub(u.revenue)}</td>
+        <td style="font-size:11px;color:var(--g3)">${fmtDate(u.created_at)}</td>
+        <td>
+          <div class="actions">
+            ${u.id !== me.id ? `
+              <span class="td-action" onclick="toggleRole(${u.id}, '${u.role}')">${u.role === 'admin' ? '↓ User' : '↑ Admin'}</span>
+              <span class="td-action danger" onclick="deleteUser(${u.id}, '${esc(u.name)}')">Удалить</span>
+            ` : '<span style="font-size:11px;color:var(--g3)">Вы</span>'}
+          </div>
+        </td>
+      </tr>`).join('');
+  } catch(e) { console.error(e); }
+}
+
+async function toggleRole(id, currentRole) {
+  const newRole = currentRole === 'admin' ? 'user' : 'admin';
+  if (!confirm(`Изменить роль на "${newRole}"?`)) return;
+  try {
+    await api('PUT', `/api/admin/users/${id}/role`, { role: newRole });
+    toast('Роль обновлена');
+    loadUsers();
+  } catch(e) { toast(e.message); }
+}
+
+async function deleteUser(id, name) {
+  if (!confirm(`Удалить пользователя "${name}" и все его данные? Это нельзя отменить.`)) return;
+  try {
+    await api('DELETE', `/api/admin/users/${id}`);
+    toast('Пользователь удалён');
+    loadStats();
+    loadUsers();
+  } catch(e) { toast(e.message); }
+}
+
+function fmtRub(n) {
+  if (!n) return '₽ —';
+  if (n >= 1000000) return '₽ ' + (n/1000000).toFixed(1) + 'M';
+  if (n >= 1000)    return '₽ ' + (n/1000).toFixed(0) + 'K';
+  return '₽ ' + Math.round(n);
+}
+
+function fmtDate(s) {
+  if (!s) return '—';
+  return s.slice(0,10);
+}
+
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+function logout() {
+  localStorage.removeItem('crm_token');
+  localStorage.removeItem('crm_user');
+  window.location.href = '/';
+}
+
+init();
+</script>
+</body>
+</html>
