@@ -146,14 +146,22 @@ app.post('/api/auth/login', async (req, res) => {
   if (!email || !password)
     return res.status(400).json({ error: 'Введите email и пароль' });
 
-  const row = db.prepare('SELECT * FROM users WHERE email = ?').get(email.toLowerCase().trim());
+  const emailClean = email.toLowerCase().trim();
+  const row = db.prepare('SELECT * FROM users WHERE email = ?').get(emailClean);
   if (!row) return res.status(401).json({ error: 'Неверный email или пароль' });
 
   const ok = await bcrypt.compare(password, row.password);
   if (!ok) return res.status(401).json({ error: 'Неверный email или пароль' });
 
-  const user  = { id: row.id, name: row.name, email: row.email, studioName: row.studio_name, role: row.role || 'user' };
-  const token = jwt.sign({ id: row.id, email: row.email, name: row.name, role: user.role }, SECRET, { expiresIn: '30d' });
+  // Auto-upgrade to admin if email matches ADMIN_EMAIL
+  let role = row.role || 'user';
+  if (ADMIN_EMAIL && emailClean === ADMIN_EMAIL && role !== 'admin') {
+    db.prepare('UPDATE users SET role=? WHERE id=?').run('admin', row.id);
+    role = 'admin';
+  }
+
+  const user  = { id: row.id, name: row.name, email: row.email, studioName: row.studio_name, role };
+  const token = jwt.sign({ id: row.id, email: row.email, name: row.name, role }, SECRET, { expiresIn: '30d' });
   res.json({ token, user });
 });
 
