@@ -12,14 +12,14 @@
   --black:#000; --s1:#0a0a0a; --s2:#111; --s3:#1a1a1a; --s4:#242424;
   --line:rgba(255,255,255,0.07); --line2:rgba(255,255,255,0.14);
   --white:#f5f5f5; --g1:#888; --g2:#555; --g3:#333;
-  --accent:#a78bfa;
+  --accent:#fff;
 }
 body { font-family:'Inter',-apple-system,sans-serif; background:var(--black); color:var(--white); min-height:100vh; font-size:13px; -webkit-font-smoothing:antialiased; }
 
 .topbar { height:52px; border-bottom:1px solid var(--line); display:flex; align-items:center; padding:0 36px; gap:16px; background:var(--s1); position:sticky; top:0; z-index:50; }
 .topbar-brand { display:flex; align-items:center; gap:10px; }
-.topbar-logo { width:26px; height:26px; background:var(--white); border-radius:5px; display:flex; align-items:center; justify-content:center; }
-.topbar-logo svg { width:13px; height:13px; }
+.topbar-logo { width:44px; height:27px; display:flex; align-items:center; }
+.topbar-logo svg { width:44px; height:27px; }
 .topbar-name { font-size:14px; font-weight:700; letter-spacing:-0.3px; }
 .admin-badge { font-size:10px; font-weight:600; background:var(--accent); color:var(--black); padding:2px 8px; border-radius:10px; letter-spacing:0.3px; }
 .topbar-right { margin-left:auto; display:flex; align-items:center; gap:12px; }
@@ -80,12 +80,7 @@ tr:hover td { color:var(--white); }
 <div class="topbar">
   <div class="topbar-brand">
     <div class="topbar-logo">
-      <svg viewBox="0 0 14 14" fill="none">
-        <rect x="1" y="1" width="5" height="5" rx="1" fill="#000"/>
-        <rect x="8" y="1" width="5" height="5" rx="1" fill="#000"/>
-        <rect x="1" y="8" width="5" height="5" rx="1" fill="#000"/>
-        <rect x="8" y="8" width="5" height="5" rx="1" fill="#000"/>
-      </svg>
+      <svg viewBox="0 0 613 384" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M526.127 383.766C480.839 383.768 436.198 383.584 391.564 383.986C384.302 384.051 380.731 381.32 377.449 375.756C355.717 338.909 333.766 302.182 311.842 265.44C310.355 262.95 308.509 260.659 306.016 257.119C296.737 272.686 288.063 287.324 279.303 301.914C263.854 327.645 248.436 353.396 232.72 378.976C231.368 381.176 227.903 383.504 225.406 383.518C176.967 383.794 128.526 383.735 80.0859 383.727C79.3577 383.727 78.6294 383.499 76.1968 383.094C101.686 340.653 126.82 298.804 152.691 255.727C101.215 255.727 51.2272 255.727 0 255.727C3.54499 249.3 6.29222 243.902 9.41748 238.717C42.9535 183.072 76.5747 127.474 110.116 71.8322C122.986 50.4819 135.847 29.1243 148.406 7.60357C151.582 2.16026 155.195 -0.0190267 162.008 0.000125042C259.147 0.273305 356.288 0.252474 453.427 0.0701478C458.5 0.060616 461.04 1.7099 463.41 5.68191C486.347 44.1217 509.423 82.4844 532.524 120.833C535.076 125.07 536.055 128.657 532.986 133.488C523.424 148.545 514.442 163.948 505.343 179.276C493.589 199.075 481.955 218.94 470.236 238.758C467.263 243.784 464.163 248.739 460.304 255.066C511.488 255.066 561.381 255.066 613 255.066C605.979 267.032 599.922 277.541 593.684 287.948C576.059 317.357 558.119 346.592 540.892 376.215C537.377 382.258 533.554 384.83 526.127 383.766Z" fill="#f5f5f5"/><path d="M305.19 256.168L152.215 255.434L75.3462 383.885H229.844L305.19 256.168Z" fill="#f5f5f5"/></svg>
     </div>
     <div class="topbar-name">Reloxy</div>
     <div class="admin-badge">ADMIN</div>
