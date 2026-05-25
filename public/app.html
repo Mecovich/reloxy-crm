@@ -73,10 +73,9 @@ body { font-family:'Plus Jakarta Sans',-apple-system,"Helvetica Neue",sans-serif
 .topbar-actions { display:flex; align-items:center; gap:4px; }
 /* ── TOPBAR USER CHIP ── */
 .tb-user-wrap { position:relative; margin-left:6px; }
-.tb-user-chip { display:flex; align-items:center; gap:7px; padding:4px 10px 4px 5px; border-radius:8px; background:var(--s3); border:1px solid var(--line); cursor:pointer; transition:background 0.12s,border-color 0.12s; }
+.tb-user-chip { display:flex; align-items:center; gap:6px; padding:5px 10px; border-radius:8px; background:var(--s3); border:1px solid var(--line); cursor:pointer; transition:background 0.12s,border-color 0.12s; }
 .tb-user-chip:hover { background:var(--s4); border-color:var(--line2); }
-.tb-user-av { width:24px; height:24px; border-radius:50%; background:var(--s4); border:1px solid var(--line2); display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; color:var(--g1); flex-shrink:0; }
-.tb-user-name { font-size:12px; font-weight:500; color:var(--white); max-width:110px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.tb-user-name { font-size:12px; font-weight:500; color:var(--white); max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .topbar-btn { width:34px; height:34px; display:flex; align-items:center; justify-content:center; border-radius:8px; cursor:pointer; color:var(--g2); transition:all 0.15s; }
 .topbar-btn:hover { background:var(--s3); color:var(--white); }
 .topbar-btn svg { width:16px; height:16px; }
@@ -560,10 +559,6 @@ select.field-input option { background:var(--s3); color:var(--white); }
       </div>
     </div>
   </nav>
-  <!-- hidden compat ids -->
-  <span id="sb-initials" style="display:none"></span>
-  <span id="sb-name" style="display:none"></span>
-  <span id="settings-nav-btn" style="display:none"></span>
 </aside>
 
 <main class="main">
@@ -586,10 +581,11 @@ select.field-input option { background:var(--s3); color:var(--white); }
       <!-- Topbar user chip + dropdown -->
       <div class="tb-user-wrap" id="tb-user-wrap">
         <div class="tb-user-chip" onclick="toggleUserPopup(event)" id="tb-user-chip">
-          <div class="tb-user-av" id="topbar-avatar">—</div>
           <div class="tb-user-name" id="topbar-username">...</div>
           <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.6" style="opacity:0.3;flex-shrink:0"><path d="M2 3.5L5 6.5 8 3.5"/></svg>
         </div>
+        <!-- hidden compat -->
+        <span id="topbar-avatar" style="display:none"></span>
         <!-- Dropdown -->
         <div class="user-popup" id="user-popup">
           <div class="user-popup-header">
@@ -1386,22 +1382,17 @@ async function init() {
   } catch { return logout(); }
 
   const initials = user.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
-  document.getElementById('sb-initials').textContent  = initials;
-  document.getElementById('sb-name').textContent      = user.name;
   document.getElementById('popup-initials').textContent = initials;
   document.getElementById('popup-name').textContent   = user.name;
   document.getElementById('popup-email').textContent  = user.email || '';
 
-  // Topbar user chip
-  const tbAv = document.getElementById('topbar-avatar');
+  // Topbar user chip — just name, no avatar circle
   const tbName = document.getElementById('topbar-username');
-  if (tbAv) tbAv.textContent = initials;
   if (tbName) tbName.textContent = user.name;
 
   // Plan badge
   const plan = user.plan || localStorage.getItem('reloxy_plan') || 'free';
-  const planEl = document.getElementById('sb-plan');
-  if (planEl) { planEl.textContent = plan.charAt(0).toUpperCase()+plan.slice(1); planEl.className = 'plan-badge plan-'+plan; }
+  // plan badge removed from sidebar
 
   // Quick notes
   const notesEl = document.getElementById('quick-notes-area');
@@ -2268,10 +2259,9 @@ async function saveProfile() {
     const updated = await api('PUT', '/api/me', { name, studio_name: user?.studio_name || '' });
     user = { ...user, ...updated };
     localStorage.setItem('crm_user', JSON.stringify(user));
-    document.getElementById('sb-name').textContent = user.name;
-    document.getElementById('sb-role').textContent = user.studio_name || 'Studio';
     const ini = user.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
-    document.getElementById('sb-initials').textContent = ini;
+    const tbN = document.getElementById('topbar-username');
+    if (tbN) tbN.textContent = user.name;
     document.getElementById('popup-initials').textContent = ini;
     document.getElementById('popup-name').textContent = user.name;
     document.getElementById('set-big-avatar').textContent = ini;
@@ -2286,7 +2276,6 @@ async function saveStudio() {
     const updated = await api('PUT', '/api/me', { name: user?.name || '', studio_name: studio });
     user = { ...user, ...updated };
     localStorage.setItem('crm_user', JSON.stringify(user));
-    document.getElementById('sb-role').textContent = studio || 'Studio';
     setMsg('studio-msg', t('msg_studio_saved'), 'ok');
   } catch(e) { setMsg('studio-msg', e.message, 'err'); }
 }
