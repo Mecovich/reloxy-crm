@@ -6,237 +6,457 @@
 <title>Reloxy</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --black:#000; --s1:#0a0a0a; --s2:#111; --s3:#1a1a1a; --s4:#242424;
-  --line:rgba(255,255,255,0.07); --line2:rgba(255,255,255,0.14);
-  --white:#f5f5f5; --g1:#888; --g2:#555; --g3:#333;
-  --accent:#fff; --accent-dim:rgba(255,255,255,0.08);
+  --black:#040404; --s1:#0c0c0e; --s2:#111114; --s3:#18181c; --s4:#222228;
+  --line:rgba(255,255,255,0.06); --line2:rgba(255,255,255,0.12); --line3:rgba(255,255,255,0.2);
+  --white:#f0f0f0; --g1:#7a7a82; --g2:#4a4a52; --g3:#2e2e36;
+  --accent:#fff; --accent-dim:rgba(255,255,255,0.07);
+  --sh-sm:0 1px 3px rgba(0,0,0,0.5),0 1px 8px rgba(0,0,0,0.3);
+  --sh-md:0 4px 16px rgba(0,0,0,0.6),0 1px 4px rgba(0,0,0,0.4);
+  --sh-lg:0 16px 48px rgba(0,0,0,0.8),0 4px 16px rgba(0,0,0,0.5);
+  --r:10px; --r-sm:7px; --r-lg:14px;
 }
-body { font-family:'Inter',-apple-system,"Helvetica Neue",sans-serif; background:var(--black); color:var(--white); display:flex; min-height:100vh; font-size:13px; line-height:1.5; -webkit-font-smoothing:antialiased; }
+body { font-family:'Inter',-apple-system,"Helvetica Neue",sans-serif; background:var(--black); color:var(--white); display:flex; min-height:100vh; font-size:14px; line-height:1.55; -webkit-font-smoothing:antialiased; letter-spacing:-0.1px; }
 
 /* ── SIDEBAR ── */
-.sidebar { width:220px; min-height:100vh; background:var(--s1); border-right:1px solid var(--line); position:fixed; top:0; left:0; bottom:0; display:flex; flex-direction:column; z-index:100; }
-.brand { padding:22px 20px 18px; border-bottom:1px solid var(--line); display:flex; align-items:center; gap:10px; }
-.brand-logo { width:44px; height:27px; flex-shrink:0; display:flex; align-items:center; }
-.brand-logo svg { width:44px; height:27px; }
-.brand-name { font-size:14px; font-weight:700; letter-spacing:-0.4px; color:var(--white); }
-.brand-sub { font-size:10px; color:var(--g2); letter-spacing:0.2px; margin-top:1px; }
-.nav { flex:1; padding:16px 0; overflow-y:auto; }
-.nav-group { margin-bottom:28px; }
-.nav-group-label { font-size:10px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--g3); padding:0 20px; margin-bottom:4px; }
-.nav-item { display:flex; align-items:center; padding:8px 20px; font-size:13px; color:var(--g2); cursor:pointer; transition:color 0.15s,background 0.15s; position:relative; user-select:none; gap:10px; border-radius:0; }
-.nav-item:hover { color:var(--g1); background:rgba(255,255,255,0.03); }
-.nav-item.active { color:var(--white); background:rgba(255,255,255,0.05); }
-.nav-item.active::before { content:''; position:absolute; left:0; top:50%; transform:translateY(-50%); width:2px; height:18px; background:var(--accent); border-radius:0 2px 2px 0; }
-.nav-icon { width:16px; height:16px; opacity:0.5; flex-shrink:0; transition:opacity 0.15s; }
-.nav-item.active .nav-icon, .nav-item:hover .nav-icon { opacity:1; }
-.nav-count { font-size:11px; color:var(--g3); margin-left:auto; background:var(--s3); padding:1px 7px; border-radius:10px; font-variant-numeric:tabular-nums; }
-.nav-item.active .nav-count { background:var(--s4); color:var(--g2); }
-.sidebar-bottom { padding:16px 20px; border-top:1px solid var(--line); }
-.user-row { display:flex; align-items:center; gap:10px; }
-.user-avatar { width:30px; height:30px; border-radius:50%; background:var(--s3); border:1px solid var(--line2); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:600; color:var(--g1); flex-shrink:0; }
-.user-name { font-size:12px; color:var(--white); font-weight:500; }
-.user-role { font-size:10px; color:var(--g3); }
-.logout-btn { font-size:11px; color:var(--g3); cursor:pointer; margin-top:10px; padding:5px 0; transition:color 0.1s; display:flex; align-items:center; gap:6px; }
-.logout-btn:hover { color:var(--g1); }
+.sidebar { width:248px; min-height:100vh; background:var(--s1); border-right:1px solid var(--line); position:fixed; top:0; left:0; bottom:0; display:flex; flex-direction:column; z-index:100; }
+.brand { padding:22px 20px 18px; border-bottom:1px solid var(--line); display:flex; align-items:center; gap:11px; }
+.brand-logo { width:32px; height:32px; flex-shrink:0; display:flex; align-items:center; }
+.brand-logo img { width:32px; height:32px; object-fit:contain; mix-blend-mode:screen; }
+.brand-name { font-size:14px; font-weight:700; letter-spacing:-0.5px; color:var(--white); }
+.brand-sub { font-size:10.5px; color:var(--g2); letter-spacing:0.1px; margin-top:2px; }
+.nav { flex:1; padding:14px 0 10px; overflow-y:auto; }
+.nav-group { margin-bottom:6px; }
+.nav-group-label { font-size:10px; font-weight:600; letter-spacing:0.5px; text-transform:uppercase; color:var(--g3); padding:10px 22px 5px; }
+.nav-item { display:flex; align-items:center; padding:7px 11px; margin:1px 8px; font-size:13px; color:var(--g1); cursor:pointer; transition:color 0.12s,background 0.12s; position:relative; user-select:none; gap:9px; border-radius:7px; letter-spacing:-0.2px; }
+.nav-item:hover { color:var(--white); background:rgba(255,255,255,0.04); }
+.nav-item.active { color:var(--white); background:rgba(255,255,255,0.07); }
+.nav-item.active::before { content:''; position:absolute; left:-8px; top:50%; transform:translateY(-50%); width:3px; height:16px; border-radius:0 2px 2px 0; background:var(--white); opacity:0.6; }
+.nav-icon { width:15px; height:15px; opacity:0.3; flex-shrink:0; transition:opacity 0.12s; }
+.nav-item.active .nav-icon { opacity:0.85; }
+.nav-item:hover .nav-icon { opacity:0.55; }
+.nav-count { font-size:10.5px; color:var(--g2); margin-left:auto; font-variant-numeric:tabular-nums; background:var(--s3); border:1px solid var(--line); border-radius:4px; padding:0px 5px; }
+.nav-item.active .nav-count { color:var(--g1); }
+.sidebar-bottom { padding:12px 14px; border-top:1px solid var(--line); position:relative; }
+.user-row { display:flex; align-items:center; gap:10px; padding:8px 8px; border-radius:9px; cursor:pointer; transition:background 0.12s; }
+.user-row:hover { background:rgba(255,255,255,0.05); }
+.user-row.active { background:rgba(255,255,255,0.07); }
+.user-avatar { width:34px; height:34px; border-radius:50%; background:var(--s3); border:1px solid var(--line2); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:var(--g1); flex-shrink:0; letter-spacing:-0.3px; }
+.user-name { font-size:13px; color:var(--white); font-weight:600; letter-spacing:-0.2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.user-role { font-size:11px; color:var(--g2); margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+/* ── USER POPUP ── */
+.user-popup { position:absolute; bottom:calc(100% + 8px); left:10px; right:10px; background:var(--s2); border:1px solid var(--line2); border-radius:14px; box-shadow:var(--sh-lg); z-index:200; overflow:hidden; opacity:0; transform:translateY(6px) scale(0.98); pointer-events:none; transition:opacity 0.18s cubic-bezier(.16,1,.3,1),transform 0.18s cubic-bezier(.16,1,.3,1); transform-origin:bottom center; }
+.user-popup.open { opacity:1; transform:translateY(0) scale(1); pointer-events:all; }
+.user-popup-header { padding:14px 16px; display:flex; align-items:center; gap:12px; border-bottom:1px solid var(--line); }
+.user-popup-avatar { width:38px; height:38px; border-radius:50%; background:linear-gradient(135deg,#3b3b45,#222228); border:1px solid var(--line2); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; color:var(--white); flex-shrink:0; }
+.user-popup-name { font-size:13px; font-weight:700; color:var(--white); letter-spacing:-0.2px; }
+.user-popup-email { font-size:11px; color:var(--g1); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.user-popup-list { padding:6px 0; }
+.user-popup-item { display:flex; align-items:center; gap:11px; padding:9px 16px; font-size:13px; color:var(--g1); cursor:pointer; transition:color 0.1s,background 0.1s; }
+.user-popup-item:hover { background:rgba(255,255,255,0.05); color:var(--white); }
+.user-popup-item svg { opacity:0.45; flex-shrink:0; transition:opacity 0.1s; }
+.user-popup-item:hover svg { opacity:0.8; }
+.user-popup-divider { height:1px; background:var(--line); margin:4px 0; }
+.user-popup-item.danger { color:#f87171; }
+.user-popup-item.danger svg { opacity:0.6; }
+.user-popup-item.danger:hover { background:rgba(248,113,113,0.08); color:#f87171; }
 
 /* ── MAIN ── */
-.main { margin-left:220px; flex:1; display:flex; flex-direction:column; min-height:100vh; }
-.topbar { height:52px; border-bottom:1px solid var(--line); display:flex; align-items:center; padding:0 36px; gap:16px; position:sticky; top:0; background:rgba(0,0,0,0.92); backdrop-filter:blur(12px); z-index:50; }
-.topbar-title { font-size:14px; font-weight:600; color:var(--white); flex:1; letter-spacing:-0.2px; }
-.search { display:flex; align-items:center; gap:8px; padding:6px 13px; border:1px solid var(--line); border-radius:7px; width:220px; transition:border-color 0.15s; background:var(--s1); }
-.search:focus-within { border-color:var(--line2); }
-.search svg { width:13px; height:13px; opacity:0.4; flex-shrink:0; }
-.search input { background:none; border:none; outline:none; font-size:12px; color:var(--white); width:100%; font-family:inherit; }
-.search input::placeholder { color:var(--g3); }
-.btn { font-size:12px; font-weight:600; padding:7px 16px; border-radius:6px; cursor:pointer; border:none; transition:all 0.15s; display:inline-flex; align-items:center; gap:6px; white-space:nowrap; font-family:inherit; }
-.btn:hover { opacity:0.85; }
-.btn-white { background:var(--white); color:var(--black); }
-.btn-ghost { background:none; color:var(--g1); border:1px solid var(--line); }
-.btn-ghost:hover { border-color:var(--line2); color:var(--white); opacity:1; }
-.content { padding:36px; flex:1; }
+.main { margin-left:248px; flex:1; display:flex; flex-direction:column; min-height:100vh; }
+.topbar { height:56px; border-bottom:1px solid var(--line); display:flex; align-items:center; padding:0 36px; gap:12px; position:sticky; top:0; background:rgba(4,4,4,0.96); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); z-index:50; }
+.topbar-title { font-size:13.5px; font-weight:600; color:var(--g1); flex:1; letter-spacing:-0.2px; }
+.topbar-actions { display:flex; align-items:center; gap:4px; }
+.topbar-btn { width:34px; height:34px; display:flex; align-items:center; justify-content:center; border-radius:8px; cursor:pointer; color:var(--g2); transition:all 0.15s; }
+.topbar-btn:hover { background:var(--s3); color:var(--white); }
+.topbar-btn svg { width:16px; height:16px; }
+.topbar-notif { position:relative; }
+.topbar-notif-dot { position:absolute; top:6px; right:6px; width:6px; height:6px; border-radius:50%; background:#f87171; border:1.5px solid var(--black); }
+.search { display:flex; align-items:center; gap:8px; padding:7px 14px; border:1px solid var(--line); border-radius:var(--r-sm); width:240px; transition:border-color 0.15s,box-shadow 0.15s; background:var(--s2); }
+.search:focus-within { border-color:var(--line2); box-shadow:0 0 0 3px rgba(255,255,255,0.04); }
+.search svg { width:13px; height:13px; opacity:0.3; flex-shrink:0; }
+.search input { background:none; border:none; outline:none; font-size:13px; color:var(--white); width:100%; font-family:inherit; }
+.search input::placeholder { color:var(--g2); }
+.btn { font-size:13px; font-weight:500; padding:7px 16px; border-radius:8px; cursor:pointer; border:none; transition:all 0.15s; display:inline-flex; align-items:center; gap:6px; white-space:nowrap; font-family:inherit; letter-spacing:-0.2px; }
+.btn-white { background:var(--white); color:#080808; box-shadow:0 1px 2px rgba(0,0,0,0.3); font-weight:600; }
+.btn-white:hover { background:#e2e2e2; }
+.btn-ghost { background:transparent; color:var(--g1); border:1px solid var(--line2); }
+.btn-ghost:hover { border-color:var(--line3); color:var(--white); background:rgba(255,255,255,0.04); }
+.content { padding:32px 40px; flex:1; }
 
 /* ── PAGES ── */
 .page { display:none; }
-.page.active { display:block; animation:fadeup .22s ease; }
+.page.active { display:block; animation:fadeup .22s cubic-bezier(.16,1,.3,1); }
 @keyframes fadeup { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
-.page-header { display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:36px; }
-.page-header h1 { font-size:24px; font-weight:700; letter-spacing:-0.6px; line-height:1.2; }
-.page-header p { font-size:12px; color:var(--g2); margin-top:5px; }
+.page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:32px; }
+.page-header h1 { font-size:22px; font-weight:700; letter-spacing:-0.7px; line-height:1.2; color:var(--white); }
+.page-header p { font-size:12.5px; color:var(--g2); margin-top:3px; }
+
+/* ── DASH HEADER ── */
+.dash-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:28px; }
+.dash-title { font-size:28px; font-weight:700; letter-spacing:-1px; line-height:1.1; color:var(--white); }
+.dash-period-label { font-size:12px; color:var(--g2); margin-top:4px; }
 
 /* ── METRICS ── */
-.metrics { display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:10px; overflow:hidden; margin-bottom:36px; }
-.metric { padding:24px 28px; background:var(--s1); transition:background 0.15s; }
-.metric:hover { background:var(--s2); }
-.metric-label { font-size:10px; font-weight:600; letter-spacing:0.6px; color:var(--g2); text-transform:uppercase; margin-bottom:14px; display:flex; align-items:center; gap:6px; }
-.metric-value { font-size:30px; font-weight:700; letter-spacing:-1.2px; color:var(--white); line-height:1; margin-bottom:8px; font-variant-numeric:tabular-nums; }
-.metric-sub { font-size:11px; color:var(--g3); }
-.metric-trend { font-size:11px; font-weight:500; }
-.metric-trend.up { color:#4ade80; }
-.metric-trend.neutral { color:var(--g3); }
+.metrics { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:20px; }
+.metric { padding:18px 20px 16px; background:var(--s1); border:1px solid var(--line); border-radius:12px; transition:border-color 0.2s; cursor:default; }
+.metric:hover { border-color:var(--line2); }
+.metric-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+.metric-name { font-size:11.5px; font-weight:500; color:var(--g1); letter-spacing:-0.1px; }
+.metric-icon { width:28px; height:28px; border-radius:7px; background:var(--s3); border:1px solid var(--line); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.metric-icon svg { width:13px; height:13px; opacity:0.45; }
+.metric-val-row { display:flex; align-items:baseline; gap:8px; margin-bottom:5px; }
+.metric-value { font-size:26px; font-weight:700; letter-spacing:-1px; color:var(--white); line-height:1; font-variant-numeric:tabular-nums; }
+.metric-badge { font-size:10px; font-weight:600; padding:2px 6px; border-radius:4px; align-self:center; }
+.metric-badge.up   { background:rgba(74,222,128,0.1); color:#4ade80; border:1px solid rgba(74,222,128,0.18); }
+.metric-badge.down { background:rgba(248,113,113,0.1); color:#f87171; border:1px solid rgba(248,113,113,0.18); }
+.metric-badge.flat { background:var(--s3); color:var(--g2); border:1px solid var(--line2); }
+.metric-sub { font-size:11px; color:var(--g2); }
+
+/* ── DASH 2-COL LAYOUT ── */
+.dash-layout { display:grid; grid-template-columns:300px 1fr; gap:16px; align-items:start; }
+.dash-side { display:flex; flex-direction:column; gap:14px; }
+.dash-chart-wrap { background:var(--s2); border:1px solid var(--line); border-radius:var(--r-lg); padding:24px 28px 20px; }
+.dash-chart-head { display:flex; align-items:flex-start; justify-content:space-between; }
+.dash-chart-title { font-size:12px; font-weight:500; color:var(--g1); margin-bottom:6px; }
+.dash-chart-dot { color:var(--g3); }
+.dash-chart-total-row { display:flex; align-items:center; gap:10px; }
 
 /* ── SECTION ── */
-.section { margin-bottom:36px; }
-.section-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid var(--line); }
-.section-title { font-size:11px; font-weight:600; letter-spacing:0.5px; color:var(--g2); text-transform:uppercase; }
-.section-action { font-size:11px; color:var(--g2); cursor:pointer; transition:color 0.1s; }
+.section { margin-bottom:40px; }
+.section-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid var(--line); }
+.section-title { font-size:15px; font-weight:600; letter-spacing:-0.3px; color:var(--white); }
+.section-action { font-size:12px; color:var(--g2); cursor:pointer; transition:color 0.1s; }
 .section-action:hover { color:var(--white); }
 
 /* ── TABLE ── */
 .table-wrap { overflow-x:auto; }
 table { width:100%; border-collapse:collapse; }
-th { text-align:left; font-size:10px; font-weight:600; letter-spacing:0.6px; text-transform:uppercase; color:var(--g3); padding:0 0 12px; border-bottom:1px solid var(--line); }
+th { text-align:left; font-size:10.5px; font-weight:600; letter-spacing:0.3px; text-transform:uppercase; color:var(--g2); padding:0 0 12px; border-bottom:1px solid var(--line); }
 th:not(:first-child) { padding-left:20px; }
-td { padding:13px 0; border-bottom:1px solid var(--line); font-size:12.5px; color:var(--g1); vertical-align:middle; }
+td { padding:13px 0; border-bottom:1px solid var(--line); font-size:13px; color:var(--g1); vertical-align:middle; transition:color 0.1s; }
 td:not(:first-child) { padding-left:20px; }
 tr:last-child td { border-bottom:none; }
+tr { transition:background 0.12s; }
 tr:hover td { color:var(--white); }
-.td-primary { color:var(--white); font-weight:500; }
-.td-action { font-size:11px; color:var(--g3); cursor:pointer; transition:color 0.1s; }
-.td-action:hover { color:var(--white); }
+tr:hover { background:rgba(255,255,255,0.02); }
+tr:hover td { background:transparent; }
+.td-primary { color:var(--white); font-weight:500; font-size:13.5px; }
+.td-actions { display:flex; align-items:center; gap:4px; }
+.td-action { font-size:11.5px; color:var(--g2); cursor:pointer; transition:all 0.12s; padding:3px 9px; border-radius:6px; border:1px solid transparent; font-family:inherit; background:transparent; display:inline-flex; align-items:center; white-space:nowrap; }
+.td-action:hover { color:var(--white); background:var(--s3); border-color:var(--line2); }
+.td-action.danger { color:var(--g2); }
+.td-action.danger:hover { color:#f87171; background:rgba(248,113,113,0.08); border-color:rgba(248,113,113,0.2); }
 
 /* ── STATUS ── */
 .status { display:inline-flex; align-items:center; gap:5px; font-size:12px; }
 .dot { width:5px; height:5px; border-radius:50%; flex-shrink:0; }
-.dot-hi { background:#4ade80; }
-.dot-mid { background:var(--accent); }
+.dot-hi { background:#4ade80; box-shadow:0 0 5px rgba(74,222,128,0.6); }
+.dot-mid { background:rgba(255,255,255,0.6); }
 .dot-lo { background:var(--g3); }
 
-/* ── PROGRESS ── */
-.bar { height:2px; background:var(--s4); border-radius:2px; }
-.bar-fill { height:100%; background:var(--white); border-radius:2px; transition:width 0.6s ease; }
+/* ── UNIFIED BADGES ── */
+.badge { display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:600; padding:2px 8px; border-radius:5px; letter-spacing:0; white-space:nowrap; }
+.badge-green { background:rgba(74,222,128,0.1); color:#4ade80; border:1px solid rgba(74,222,128,0.18); }
+.badge-red   { background:rgba(248,113,113,0.1); color:#f87171; border:1px solid rgba(248,113,113,0.18); }
+.badge-gray  { background:var(--s3); color:var(--g1); border:1px solid var(--line2); }
+.badge-yellow{ background:rgba(251,191,36,0.1); color:#fbbf24; border:1px solid rgba(251,191,36,0.18); }
+.badge-purple{ background:rgba(139,92,246,0.1); color:#a78bfa; border:1px solid rgba(139,92,246,0.18); }
 
-/* ── EMPTY ── */
-.empty { padding:60px 0; display:flex; flex-direction:column; align-items:center; gap:8px; text-align:center; }
-.empty-title { font-size:13px; color:var(--g2); font-weight:500; }
-.empty-sub { font-size:12px; color:var(--g3); }
+/* ── PROGRESS ── */
+.bar { height:2px; background:rgba(255,255,255,0.07); border-radius:2px; overflow:hidden; }
+.bar-fill { height:100%; background:rgba(255,255,255,0.55); border-radius:2px; transition:width 0.7s cubic-bezier(.16,1,.3,1); }
+
+/* ── EMPTY STATE ── */
+.empty { padding:40px 24px; display:flex; flex-direction:column; align-items:center; gap:16px; text-align:center; }
+.empty-skel { background:var(--s3); border:1px solid var(--line); border-radius:12px; padding:14px 16px; width:100%; max-width:280px; display:flex; flex-direction:column; gap:10px; }
+.empty-skel-row { display:flex; align-items:center; gap:10px; }
+.empty-skel-av { width:32px; height:32px; border-radius:50%; background:var(--s4); flex-shrink:0; }
+.empty-skel-lines { flex:1; display:flex; flex-direction:column; gap:6px; }
+.empty-skel-line { height:7px; border-radius:20px; background:var(--s4); }
+.empty-texts { display:flex; flex-direction:column; gap:5px; align-items:center; }
+.empty-title { font-size:13.5px; color:var(--white); font-weight:600; letter-spacing:-0.3px; }
+.empty-sub { font-size:12px; color:var(--g2); }
+/* compact empty — for small panels */
+.empty-compact { padding:22px 16px; text-align:center; font-size:12px; color:var(--g2); }
 
 /* ── TWO-COL ── */
-.two-col { display:grid; grid-template-columns:1fr 1fr; gap:48px; }
+.two-col { display:grid; grid-template-columns:1fr 1fr; gap:40px; }
 
 /* ── KANBAN ── */
 .kanban { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
-.k-col { background:var(--s1); border:1px solid var(--line); border-radius:10px; overflow:hidden; }
-.k-col-head { padding:14px 18px; border-bottom:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; }
-.k-col-name { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.6px; color:var(--g2); }
-.k-col-n { font-size:11px; color:var(--g3); background:var(--s3); padding:1px 7px; border-radius:10px; }
-.k-cards { padding:12px; display:flex; flex-direction:column; gap:8px; min-height:80px; }
-.k-card { padding:14px 16px; border:1px solid var(--line); border-radius:8px; background:var(--black); cursor:pointer; transition:border-color 0.15s,background 0.15s,transform 0.15s; }
-.k-card:hover { border-color:var(--line2); background:var(--s1); transform:translateY(-1px); }
-.k-card-tag { font-size:10px; font-weight:600; letter-spacing:0.4px; text-transform:uppercase; color:var(--accent); margin-bottom:6px; }
-.k-card-title { font-size:12.5px; font-weight:500; color:var(--white); margin-bottom:8px; line-height:1.4; }
-.k-card-foot { display:flex; align-items:center; justify-content:space-between; font-size:11px; color:var(--g3); }
+.k-col { background:var(--s1); border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+.k-col-head { padding:13px 16px; border-bottom:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; }
+.k-col-name { font-size:11.5px; font-weight:600; letter-spacing:-0.1px; color:var(--white); }
+.k-col-n { font-size:11px; color:var(--g2); font-variant-numeric:tabular-nums; background:var(--s3); border:1px solid var(--line2); border-radius:4px; padding:1px 6px; }
+.k-cards { padding:10px; display:flex; flex-direction:column; gap:6px; min-height:60px; }
+.k-card { padding:13px 14px; border:1px solid var(--line); border-radius:9px; background:var(--s2); cursor:pointer; transition:border-color 0.15s,background 0.15s; }
+.k-card:hover { border-color:var(--line2); background:var(--s3); }
+.k-card-tag { font-size:10px; font-weight:500; letter-spacing:0.1px; color:var(--g2); margin-bottom:7px; text-transform:uppercase; }
+.k-card-title { font-size:13px; font-weight:500; color:var(--white); margin-bottom:10px; line-height:1.45; }
+.k-card-foot { display:flex; align-items:center; justify-content:space-between; font-size:11.5px; color:var(--g2); }
 .k-card-prog { margin-top:10px; }
-.k-card-prog-top { display:flex; justify-content:space-between; font-size:10px; color:var(--g3); margin-bottom:4px; }
-.k-card-del { font-size:10px; color:var(--g3); cursor:pointer; padding:2px 4px; opacity:0; transition:opacity 0.15s; }
+.k-card-prog-top { display:flex; justify-content:space-between; font-size:10.5px; color:var(--g2); margin-bottom:5px; }
+.k-card-del { font-size:11px; color:var(--g2); cursor:pointer; padding:2px 6px; opacity:0; transition:all 0.12s; border-radius:4px; }
 .k-card:hover .k-card-del { opacity:1; }
-.k-card-del:hover { color:var(--white); }
-.k-col-empty { padding:24px 16px; text-align:center; font-size:11px; color:var(--g3); }
+.k-card-del:hover { color:#f87171; background:rgba(248,113,113,0.08); }
+.k-col-empty { padding:24px 16px; text-align:center; font-size:11.5px; color:var(--g2); }
 
 /* ── FUNNEL ── */
 .funnel-header-row { display:flex; align-items:center; gap:24px; padding:0 0 10px; border-bottom:1px solid var(--line); margin-bottom:0; }
-.funnel-row { display:flex; align-items:center; gap:24px; padding:20px 0; border-bottom:1px solid var(--line); cursor:default; }
+.funnel-row { display:flex; align-items:center; gap:24px; padding:18px 0; border-bottom:1px solid var(--line); cursor:default; transition:background 0.1s; }
 .funnel-row:last-child { border-bottom:none; }
-.f-name { width:160px; flex-shrink:0; font-size:13px; font-weight:500; color:var(--white); }
+.f-name { width:180px; flex-shrink:0; font-size:13.5px; font-weight:500; color:var(--white); }
 .f-bar-wrap { flex:1; }
-.f-bar-outer { height:3px; background:var(--s4); border-radius:3px; }
-.f-bar-inner { height:3px; background:var(--accent); border-radius:3px; transition:width 0.6s ease; }
-.f-n { width:40px; text-align:right; font-size:20px; font-weight:700; letter-spacing:-0.5px; font-variant-numeric:tabular-nums; }
-.f-conv { width:52px; text-align:right; font-size:12px; color:var(--g2); }
-.f-amt { width:96px; text-align:right; font-size:12px; color:var(--g2); font-variant-numeric:tabular-nums; }
+.f-bar-outer { height:2px; background:rgba(255,255,255,0.07); border-radius:2px; overflow:hidden; }
+.f-bar-inner { height:2px; background:rgba(255,255,255,0.5); border-radius:2px; transition:width 0.7s cubic-bezier(.16,1,.3,1); }
+.f-n { width:44px; text-align:right; font-size:20px; font-weight:700; letter-spacing:-0.6px; font-variant-numeric:tabular-nums; }
+.f-conv { width:60px; text-align:right; font-size:12.5px; color:var(--g1); }
+.f-amt { width:110px; text-align:right; font-size:12.5px; color:var(--g1); font-variant-numeric:tabular-nums; }
 
 /* ── FINANCE ── */
-.fin-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:10px; overflow:hidden; margin-bottom:36px; }
-.fin-card { padding:24px 28px; background:var(--s1); }
-.fin-label { font-size:10px; color:var(--g2); text-transform:uppercase; letter-spacing:0.6px; margin-bottom:10px; font-weight:600; }
-.fin-value { font-size:26px; font-weight:700; letter-spacing:-0.8px; color:var(--white); font-variant-numeric:tabular-nums; }
-.fin-delta { font-size:11px; color:var(--g3); margin-top:6px; }
-.inv-status { font-size:11px; font-weight:600; letter-spacing:0.3px; }
-.inv-status.paid { color:#4ade80; }
-.inv-status.pending { color:var(--g2); }
-.inv-status.overdue { color:#f87171; }
+.fin-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:32px; }
+.fin-card { padding:20px 20px 18px; background:var(--s1); border:1px solid var(--line); border-radius:12px; transition:border-color 0.15s; }
+.fin-card:hover { border-color:var(--line2); }
+.fin-label { font-size:11px; color:var(--g1); letter-spacing:0.2px; text-transform:uppercase; margin-bottom:12px; font-weight:600; }
+.fin-value { font-size:26px; font-weight:700; letter-spacing:-1px; color:var(--white); font-variant-numeric:tabular-nums; line-height:1; }
+.fin-delta { font-size:11.5px; color:var(--g2); margin-top:7px; }
+.inv-status { font-size:11px; font-weight:600; padding:2px 8px; border-radius:5px; display:inline-block; letter-spacing:0; }
+.inv-status.paid    { color:#4ade80; background:rgba(74,222,128,0.1); border:1px solid rgba(74,222,128,0.18); }
+.inv-status.pending { color:var(--g1); background:var(--s3); border:1px solid var(--line2); }
+.inv-status.overdue { color:#f87171; background:rgba(248,113,113,0.1); border:1px solid rgba(248,113,113,0.18); }
 
 /* ── CHART ── */
-.chart-area { border:1px solid var(--line); border-radius:10px; padding:28px 32px; margin-bottom:36px; background:var(--s1); }
-.chart-header { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:28px; }
-.chart-label { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; color:var(--g2); }
-.chart-num { font-size:32px; font-weight:700; letter-spacing:-1.2px; color:var(--white); font-variant-numeric:tabular-nums; }
-.chart-sub { font-size:11px; color:var(--g3); margin-top:3px; }
-.chart-body { display:flex; align-items:flex-end; gap:6px; height:100px; }
-.chart-col { flex:1; display:flex; flex-direction:column; align-items:center; gap:6px; height:100%; justify-content:flex-end; }
-.chart-bar { width:100%; border-radius:3px 3px 0 0; background:var(--s3); min-height:4px; transition:background 0.2s; }
-.chart-bar.active { background:var(--accent); }
-.chart-bar:not(.active):hover { background:var(--s4); }
-.chart-lbl { font-size:9px; color:var(--g3); text-transform:uppercase; letter-spacing:0.3px; }
-.chart-lbl.active { color:var(--g2); }
+.chart-area { border:1px solid var(--line); border-radius:12px; padding:26px 30px 22px; margin-bottom:32px; background:var(--s1); }
+.chart-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px; }
+.chart-total-row { display:flex; align-items:center; gap:10px; }
+.chart-num { font-size:32px; font-weight:700; letter-spacing:-1.4px; color:var(--white); font-variant-numeric:tabular-nums; line-height:1; }
+.chart-badge { font-size:10.5px; font-weight:600; padding:2px 7px; border-radius:5px; align-self:center; }
+.chart-badge.up   { background:rgba(74,222,128,0.1); color:#4ade80; border:1px solid rgba(74,222,128,0.18); }
+.chart-badge.down { background:rgba(248,113,113,0.1); color:#f87171; border:1px solid rgba(248,113,113,0.18); }
+.chart-badge.flat { background:var(--s3); color:var(--g1); border:1px solid var(--line2); }
+.chart-sub { font-size:11.5px; color:var(--g2); margin-top:5px; }
+.chart-periods { display:flex; gap:2px; background:var(--s3); border:1px solid var(--line); border-radius:7px; padding:3px; }
+.chart-period { background:none; border:none; color:var(--g1); font-size:11.5px; font-weight:500; padding:4px 12px; border-radius:5px; cursor:pointer; font-family:inherit; transition:all 0.15s; letter-spacing:-0.1px; }
+.chart-period:hover { color:var(--white); }
+.chart-period.active { background:var(--s4); color:var(--white); border:1px solid var(--line2); }
 
 /* ── TABS ── */
-.tabs { display:flex; gap:0; margin-bottom:28px; border-bottom:1px solid var(--line); }
-.tab { font-size:12px; font-weight:500; padding:8px 16px; color:var(--g3); cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px; transition:color 0.1s; }
+.tabs { display:flex; gap:0; margin-bottom:24px; border-bottom:1px solid var(--line); }
+.tab { font-size:12px; font-weight:500; padding:8px 14px; color:var(--g2); cursor:pointer; border-bottom:1.5px solid transparent; margin-bottom:-1px; transition:color 0.1s; letter-spacing:-0.1px; }
 .tab:first-child { padding-left:0; }
 .tab:hover { color:var(--g1); }
-.tab.active { color:var(--white); border-bottom-color:var(--accent); }
+.tab.active { color:var(--white); border-bottom-color:rgba(255,255,255,0.7); }
 
 /* ── CALENDAR ── */
-.cal-nav { display:flex; align-items:center; justify-content:space-between; margin-bottom:28px; }
-.cal-nav-title { font-size:16px; font-weight:700; letter-spacing:-0.3px; }
+.cal-nav { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; }
+.cal-nav-title { font-size:15px; font-weight:700; letter-spacing:-0.4px; }
 .cal-nav-btns { display:flex; gap:4px; }
-.cal-nav-btn { width:32px; height:32px; background:var(--s1); border:1px solid var(--line); border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; color:var(--g1); font-size:14px; transition:all 0.1s; }
-.cal-nav-btn:hover { border-color:var(--line2); color:var(--white); }
-.cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:10px; overflow:hidden; }
-.cal-day-head { background:var(--s1); padding:12px 8px; text-align:center; font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.6px; color:var(--g3); }
-.cal-day { background:var(--black); min-height:90px; padding:10px; position:relative; transition:background 0.1s; }
-.cal-day:hover { background:var(--s1); }
+.cal-nav-btn { width:30px; height:30px; background:var(--s2); border:1px solid var(--line); border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; color:var(--g1); font-size:13px; transition:all 0.1s; }
+.cal-nav-btn:hover { border-color:var(--line2); color:var(--white); background:var(--s3); }
+.cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:var(--r-lg); overflow:hidden; }
+.cal-day-head { background:var(--s2); padding:10px 8px; text-align:center; font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.6px; color:var(--g2); }
+.cal-day { background:var(--s1); min-height:88px; padding:9px; position:relative; transition:background 0.1s; }
+.cal-day:hover { background:var(--s2); }
 .cal-day.other-month .cal-day-num { color:var(--g3); }
-.cal-day.today { background:var(--s1); }
-.cal-day.today .cal-day-num { background:var(--accent); color:var(--black); border-radius:50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-weight:700; }
-.cal-day-num { font-size:12px; font-weight:500; color:var(--g1); margin-bottom:6px; line-height:22px; }
-.cal-event { font-size:10px; font-weight:500; padding:2px 6px; border-radius:3px; margin-bottom:2px; background:var(--accent-dim); color:var(--accent); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer; }
-.cal-event:hover { background:rgba(167,139,250,0.25); }
-.cal-event.deadline { background:rgba(248,113,113,0.15); color:#f87171; }
+.cal-day.today { background:var(--s2); }
+.cal-day.today .cal-day-num { background:var(--accent); color:#050505; border-radius:50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-weight:700; }
+.cal-day-num { font-size:12px; font-weight:500; color:var(--g1); margin-bottom:5px; line-height:22px; }
+.cal-event { font-size:10px; font-weight:500; padding:2px 6px; border-radius:4px; margin-bottom:2px; background:var(--accent-dim); color:var(--g1); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer; }
+.cal-event:hover { background:rgba(255,255,255,0.1); color:var(--white); }
+.cal-event.deadline { background:rgba(248,113,113,0.12); color:#f87171; }
 
 /* ── MODAL ── */
-.overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.88); z-index:200; align-items:center; justify-content:center; backdrop-filter:blur(8px); }
+.overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:200; align-items:center; justify-content:center; backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); }
 .overlay.open { display:flex; }
-.modal { background:var(--s1); border:1px solid var(--line2); border-radius:12px; padding:32px; width:460px; max-width:95vw; box-shadow:0 32px 100px rgba(0,0,0,0.9); animation:fadeup .2s ease; max-height:90vh; overflow-y:auto; }
-.modal-title { font-size:16px; font-weight:700; letter-spacing:-0.3px; margin-bottom:24px; }
+.modal { background:var(--s2); border:1px solid rgba(255,255,255,0.1); border-radius:16px; width:480px; max-width:95vw; box-shadow:0 32px 80px rgba(0,0,0,0.9),0 4px 20px rgba(0,0,0,0.5); animation:fadeup .2s cubic-bezier(.16,1,.3,1); max-height:90vh; overflow:hidden; display:flex; flex-direction:column; }
+.modal-head { display:flex; align-items:center; justify-content:space-between; padding:20px 24px; border-bottom:1px solid var(--line); flex-shrink:0; }
+.modal-title { font-size:14px; font-weight:600; letter-spacing:-0.3px; color:var(--white); }
+.modal-close { width:26px; height:26px; border-radius:6px; background:transparent; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; color:var(--g2); transition:all 0.12s; flex-shrink:0; padding:0; font-family:inherit; }
+.modal-close:hover { background:var(--s4); color:var(--white); }
+.modal-close svg { width:13px; height:13px; }
+.modal-inner { padding:22px 24px; overflow-y:auto; flex:1; }
+.modal-foot { display:flex; justify-content:flex-end; gap:8px; padding:16px 24px; border-top:1px solid var(--line); flex-shrink:0; margin-top:0; }
 .field { margin-bottom:14px; }
-.field-label { font-size:10px; color:var(--g2); margin-bottom:6px; display:block; text-transform:uppercase; letter-spacing:0.5px; font-weight:600; }
-.field-input { width:100%; background:var(--black); border:1px solid var(--line); border-radius:6px; padding:9px 12px; color:var(--white); font-size:13px; outline:none; transition:border-color 0.15s; font-family:inherit; }
-.field-input:focus { border-color:var(--accent); }
-.field-input::placeholder { color:var(--g3); }
-select.field-input option { background:var(--s1); }
+.field-label { font-size:11px; color:var(--g1); margin-bottom:6px; display:block; letter-spacing:0.2px; font-weight:600; text-transform:uppercase; }
+.field-input { width:100%; background:var(--s3); border:1px solid var(--line2); border-radius:8px; padding:9px 12px; color:var(--white); font-size:13.5px; outline:none; transition:border-color 0.15s,background 0.15s,box-shadow 0.15s; font-family:inherit; -webkit-appearance:none; appearance:none; }
+.field-input:focus { border-color:rgba(255,255,255,0.22); box-shadow:0 0 0 3px rgba(255,255,255,0.04); background:var(--s4); }
+.field-input::placeholder { color:var(--g2); }
+textarea.field-input { resize:vertical; min-height:80px; line-height:1.5; }
+select.field-input { cursor:pointer; }
+select.field-input option { background:var(--s3); color:var(--white); }
 .field-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-.modal-foot { display:flex; justify-content:flex-end; gap:8px; margin-top:28px; }
-.modal-err { font-size:12px; color:var(--white); background:rgba(248,113,113,0.1); border:1px solid rgba(248,113,113,0.3); border-radius:6px; padding:10px 12px; margin-bottom:16px; display:none; }
+.modal-err { font-size:12.5px; color:#fca5a5; background:rgba(248,113,113,0.08); border:1px solid rgba(248,113,113,0.2); border-radius:8px; padding:10px 14px; margin-bottom:14px; display:none; }
 .modal-err.show { display:block; }
 
 /* ── TOAST ── */
-.toast { position:fixed; bottom:28px; left:50%; transform:translateX(-50%); background:var(--s2); border:1px solid var(--line2); border-radius:8px; padding:10px 20px; font-size:12px; font-weight:500; color:var(--white); z-index:999; opacity:0; transition:opacity 0.2s,transform 0.2s; pointer-events:none; }
-.toast.show { opacity:1; }
+.toast { position:fixed; bottom:32px; left:50%; transform:translateX(-50%) translateY(8px); background:#1c1c20; border:1px solid rgba(255,255,255,0.12); border-radius:10px; padding:10px 18px; font-size:12.5px; font-weight:500; color:var(--white); z-index:999; opacity:0; transition:opacity 0.18s,transform 0.22s cubic-bezier(.16,1,.3,1); pointer-events:none; box-shadow:0 8px 32px rgba(0,0,0,0.6); letter-spacing:-0.1px; }
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 
 ::-webkit-scrollbar { width:3px; height:3px; }
 ::-webkit-scrollbar-track { background:transparent; }
 ::-webkit-scrollbar-thumb { background:var(--s4); border-radius:3px; }
 
-/* ── DASH CARD ── */
-.dash-project-item { display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid var(--line); cursor:pointer; }
-.dash-project-item:last-child { border-bottom:none; }
-.dash-project-item:hover .dpi-title { color:var(--white); }
-.dpi-title { font-size:13px; font-weight:500; color:var(--white); margin-bottom:2px; }
-.dpi-sub { font-size:11px; color:var(--g3); }
-.dpi-right { text-align:right; }
-.dpi-date { font-size:11px; color:var(--g3); }
-.dpi-status { font-size:10px; font-weight:600; color:var(--accent); margin-top:2px; }
+/* ── DASH BOTTOM GRID ── */
+.dash-bottom { display:grid; grid-template-columns:1fr 1fr 1fr; gap:20px; margin-top:32px; }
+.dash-panel { background:var(--s1); border:1px solid var(--line); border-radius:12px; padding:16px 18px; }
+.dash-panel-title { font-size:12px; font-weight:600; letter-spacing:-0.1px; color:var(--white); padding-bottom:11px; border-bottom:1px solid var(--line); margin-bottom:0; display:flex; align-items:center; justify-content:space-between; }
+.dash-panel-link { font-size:11px; color:var(--g2); cursor:pointer; transition:color 0.1s; font-weight:400; }
+.dash-panel-link:hover { color:var(--white); }
+.dash-row { display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--line); }
+.dash-row:last-child { border-bottom:none; }
+.dash-row-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+.dash-row-dot.active { background:#4ade80; box-shadow:0 0 5px rgba(74,222,128,0.5); }
+.dash-row-dot.review { background:rgba(255,255,255,0.6); }
+.dash-row-dot.queue  { background:var(--g3); }
+.dash-row-body { flex:1; min-width:0; }
+.dash-row-title { font-size:13px; font-weight:500; color:var(--white); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.dash-row-sub { font-size:12px; color:var(--g2); margin-top:2px; }
+.dash-row-right { font-size:12px; color:var(--g2); flex-shrink:0; text-align:right; }
+.dash-row-right.urgent { color:#f87171; font-weight:600; }
+.dash-pay-btn { font-size:11px; font-weight:600; padding:4px 10px; border-radius:6px; background:var(--s3); color:var(--g1); border:1px solid var(--line2); cursor:pointer; transition:all 0.15s; font-family:inherit; flex-shrink:0; }
+.dash-pay-btn:hover { background:var(--white); color:#050505; border-color:var(--white); }
 
+/* ── REVENUE GOAL ── */
+.goal-bar-wrap { background:var(--s1); border:1px solid var(--line); border-radius:var(--r-lg); padding:22px 26px 20px; margin-bottom:24px; }
+.goal-bar-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+.goal-bar-label { font-size:12.5px; font-weight:500; color:var(--g1); }
+.goal-bar-right { display:flex; align-items:center; gap:10px; }
+.goal-amount { font-size:16px; font-weight:700; letter-spacing:-0.5px; color:var(--white); font-variant-numeric:tabular-nums; }
+.goal-sep { font-size:12px; color:var(--g2); }
+.goal-target { font-size:14px; font-weight:600; color:var(--g1); font-variant-numeric:tabular-nums; }
+.goal-edit-btn { font-size:11.5px; font-weight:600; padding:4px 12px; border-radius:6px; background:transparent; border:1px solid var(--line2); color:var(--g1); cursor:pointer; font-family:inherit; transition:all 0.15s; }
+.goal-edit-btn:hover { color:var(--white); border-color:var(--line3); }
+.goal-track { height:6px; background:var(--s4); border-radius:6px; overflow:hidden; margin-bottom:10px; }
+.goal-fill { height:100%; background:linear-gradient(90deg, rgba(255,255,255,0.5), var(--white)); border-radius:6px; transition:width 0.8s cubic-bezier(.16,1,.3,1); }
+.goal-fill.done { background:linear-gradient(90deg, #4ade80, #22c55e); }
+.goal-pct { font-size:12px; color:var(--g2); }
+
+/* ── STAFF STATUS ── */
+.staff-status { font-size:11px; font-weight:600; padding:2px 8px; border-radius:5px; display:inline-block; }
+.staff-status.active   { color:#4ade80; background:rgba(74,222,128,0.1); border:1px solid rgba(74,222,128,0.18); }
+.staff-status.inactive { color:var(--g1); background:var(--s3); border:1px solid var(--line2); }
+
+/* ── SETTINGS ── */
+.settings-wrap { display:grid; grid-template-columns:1fr 380px; gap:16px; align-items:start; }
+.set-card { background:var(--s1); border:1px solid var(--line); border-radius:var(--r-lg); overflow:hidden; }
+.set-card-top { padding:18px 20px; display:flex; align-items:center; justify-content:space-between; }
+.set-tabs { display:flex; background:var(--s3); border-radius:8px; padding:3px; gap:2px; }
+.set-tab { font-size:13px; font-weight:500; padding:6px 16px; border-radius:6px; cursor:pointer; color:var(--g1); transition:all 0.15s; border:none; background:transparent; font-family:inherit; }
+.set-tab.active { background:var(--s4); color:var(--white); }
+.set-save-btn { font-size:13px; font-weight:600; padding:7px 18px; border-radius:8px; background:var(--s3); color:var(--white); border:1px solid var(--line2); cursor:pointer; font-family:inherit; transition:all 0.15s; }
+.set-save-btn:hover { background:var(--s4); border-color:var(--line3); }
+.set-body { padding:22px 24px; display:flex; flex-direction:column; gap:0; }
+.set-avatar-row { display:flex; align-items:center; gap:20px; margin-bottom:24px; }
+.set-avatar { width:72px; height:72px; border-radius:50%; background:linear-gradient(135deg,#3b3b45,#222228); border:1px solid var(--line2); display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:700; color:var(--white); letter-spacing:-0.5px; flex-shrink:0; }
+.set-avatar-info { display:flex; flex-direction:column; gap:2px; }
+.set-avatar-name { font-size:15px; font-weight:600; letter-spacing:-0.4px; }
+.set-avatar-email { font-size:12px; color:var(--g1); }
+.set-fields { display:flex; flex-direction:column; gap:14px; }
+.set-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.set-field { display:flex; flex-direction:column; gap:6px; }
+.set-label { font-size:11.5px; font-weight:500; color:var(--g1); letter-spacing:-0.1px; }
+.set-input { background:var(--s2); border:1px solid var(--line2); border-radius:8px; padding:9px 13px; color:var(--white); font-size:13.5px; outline:none; font-family:inherit; transition:border-color 0.15s,box-shadow 0.15s; width:100%; }
+.set-input:focus { border-color:var(--line3); box-shadow:0 0 0 3px rgba(255,255,255,0.04); }
+.set-input:disabled { opacity:0.35; cursor:not-allowed; }
+.set-input option { background:var(--s3); }
+.set-divider { height:1px; background:var(--line); margin:20px 0; }
+.set-toggle-row { display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:var(--s2); border-radius:10px; margin-bottom:10px; }
+.set-toggle-row:last-child { margin-bottom:0; }
+.set-toggle-left { display:flex; align-items:center; gap:12px; }
+.set-toggle-icon { width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.set-toggle-title { font-size:13.5px; font-weight:500; color:var(--white); }
+.set-toggle-sub { font-size:11.5px; color:var(--g2); margin-top:2px; }
+.set-toggle { position:relative; width:44px; height:24px; flex-shrink:0; }
+.set-toggle input { opacity:0; width:0; height:0; }
+.set-toggle-slider { position:absolute; inset:0; background:var(--s4); border-radius:24px; cursor:pointer; transition:background 0.2s; border:1px solid var(--line2); }
+.set-toggle-slider::before { content:''; position:absolute; width:18px; height:18px; left:2px; top:2px; background:var(--g1); border-radius:50%; transition:transform 0.2s,background 0.2s; }
+.set-toggle input:checked + .set-toggle-slider { background:rgba(255,255,255,0.15); border-color:var(--line3); }
+.set-toggle input:checked + .set-toggle-slider::before { transform:translateX(20px); background:var(--white); }
+.lang-switcher { display:flex; gap:6px; }
+.lang-btn { display:flex; align-items:center; gap:6px; padding:8px 14px; border-radius:8px; border:1px solid var(--line2); background:var(--s2); color:var(--g1); font-size:13px; font-weight:500; cursor:pointer; transition:all 0.15s; font-family:inherit; flex:1; justify-content:center; letter-spacing:-0.1px; }
+.lang-btn:hover { border-color:var(--line3); color:var(--white); background:var(--s3); }
+.lang-btn.active { background:var(--s4); border-color:var(--line3); color:var(--white); box-shadow:var(--sh-sm); }
+.lang-flag { font-size:15px; line-height:1; }
+.set-msg { font-size:12px; padding:6px 12px; border-radius:6px; display:none; }
+.set-msg.ok  { display:block; color:#4ade80; background:rgba(74,222,128,0.08); border:1px solid rgba(74,222,128,0.2); }
+.set-msg.err { display:block; color:#f87171; background:rgba(248,113,113,0.08); border:1px solid rgba(248,113,113,0.2); }
+.set-footer { padding:14px 24px; border-top:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.set-right { display:flex; flex-direction:column; gap:12px; }
+.set-right-card { background:var(--s1); border:1px solid var(--line); border-radius:var(--r-lg); overflow:hidden; }
+.set-right-head { padding:16px 20px; border-bottom:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; }
+.set-right-title { font-size:13px; font-weight:600; letter-spacing:-0.3px; }
+.set-right-sub { font-size:11.5px; color:var(--g2); margin-top:2px; }
+.set-right-body { padding:18px 20px; display:flex; flex-direction:column; gap:12px; }
+.settings-nav-btn { display:flex; align-items:center; gap:8px; padding:8px 10px; margin:1px 10px; border-radius:8px; font-size:13px; color:var(--g1); cursor:pointer; transition:color 0.12s,background 0.12s; letter-spacing:-0.1px; }
+.settings-nav-btn:hover { color:var(--white); background:rgba(255,255,255,0.05); }
+.settings-nav-btn.active { color:var(--white); background:rgba(255,255,255,0.08); }
+
+@media(max-width:1100px) {
+  .dash-layout { grid-template-columns:260px 1fr; }
+}
 @media(max-width:960px) {
   .metrics,.fin-grid { grid-template-columns:1fr 1fr; }
-  .two-col { grid-template-columns:1fr; gap:32px; }
+  .two-col { grid-template-columns:1fr; gap:28px; }
   .kanban { grid-template-columns:1fr 1fr; }
-  .cal-grid { grid-template-columns:repeat(7,1fr); }
+  .dash-bottom { grid-template-columns:1fr; }
+  .dash-layout { grid-template-columns:1fr; }
+  .dash-btm { grid-template-columns:1fr 1fr !important; }
 }
+@media(max-width:600px) {
+  .dash-btm { grid-template-columns:1fr !important; }
+}
+
+/* ── PLAN BADGE ── */
+.plan-badge { font-size:10px; font-weight:700; padding:2px 9px; border-radius:20px; letter-spacing:0.5px; text-transform:uppercase; display:inline-block; }
+.plan-free  { background:var(--s4); color:var(--g2); border:1px solid var(--line2); }
+.plan-pro   { background:rgba(139,92,246,0.15); color:#a78bfa; border:1px solid rgba(139,92,246,0.3); }
+.plan-max   { background:rgba(251,191,36,0.12); color:#fbbf24; border:1px solid rgba(251,191,36,0.3); }
+
+/* ── DASHBOARD BOTTOM GRID ── */
+.dash-btm { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-top:20px; }
+.dash-btm .dash-panel { margin-bottom:0; }
+
+/* ── QUICK NOTES ── */
+.notes-pad { width:100%; background:transparent; border:none; resize:none; font-family:inherit; font-size:13px; color:var(--g1); outline:none; line-height:1.7; padding:12px 0 0; min-height:120px; max-height:180px; }
+.notes-pad::placeholder { color:var(--g3); font-style:italic; }
+.notes-pad:focus { color:var(--white); }
+.notes-saved-label { font-size:10.5px; color:var(--g3); padding-top:4px; text-align:right; transition:color 0.5s; }
+
+/* ── ENHANCED KANBAN ── */
+.k-card { border-left:3px solid transparent; }
+.k-card.st-queue      { border-left-color:var(--g3); }
+.k-card.st-inprogress { border-left-color:rgba(255,255,255,0.22); }
+.k-card.st-review     { border-left-color:#fbbf24; }
+.k-card.st-done       { border-left-color:#4ade80; }
+.k-dl-badge { font-size:10.5px; padding:2px 8px; border-radius:6px; font-weight:600; white-space:nowrap; }
+.k-dl-badge.overdue { background:rgba(248,113,113,0.12); color:#f87171; }
+.k-dl-badge.urgent  { background:rgba(251,191,36,0.12); color:#fbbf24; }
+.k-dl-badge.ok      { background:var(--s4); color:var(--g2); }
+.k-client-chip { display:inline-flex; align-items:center; gap:5px; min-width:0; overflow:hidden; }
+.k-av { width:16px; height:16px; border-radius:50%; background:var(--s4); border:1px solid var(--line); font-size:8px; font-weight:700; color:var(--g1); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.k-budget-tag { font-size:12px; font-weight:600; color:var(--g2); font-variant-numeric:tabular-nums; flex-shrink:0; }
+.k-card-foot { display:flex; align-items:center; justify-content:space-between; gap:6px; margin-top:10px; }
+
+/* ── ACTIVITY FEED ── */
+.act-row { display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--line); }
+.act-row:last-child { border-bottom:none; }
+.act-icon { width:28px; height:28px; border-radius:8px; background:var(--s3); display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:13px; }
+.act-body { flex:1; min-width:0; }
+.act-title { font-size:12.5px; font-weight:500; color:var(--white); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.act-sub { font-size:11px; color:var(--g2); margin-top:1px; }
+.act-time { font-size:11px; color:var(--g3); flex-shrink:0; }
+
+/* ── BIGGER CHART ── */
+.dash-chart-full { background:var(--s1); border:1px solid var(--line); border-radius:var(--r-lg); padding:28px 32px 24px; margin-bottom:20px; }
+.dash-chart-full:hover { border-color:var(--line2); }
+.chart-head-row { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:6px; }
+.chart-stat-group { display:flex; align-items:center; gap:16px; margin-top:4px; }
+.chart-stat-item { display:flex; flex-direction:column; gap:2px; }
+.chart-stat-val  { font-size:13px; font-weight:600; color:var(--white); font-variant-numeric:tabular-nums; }
+.chart-stat-lbl  { font-size:11px; color:var(--g2); }
 </style>
 </head>
 <body>
@@ -244,7 +464,7 @@ select.field-input option { background:var(--s1); }
 <aside class="sidebar">
   <div class="brand">
     <div class="brand-logo">
-      <svg viewBox="0 0 613 384" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M526.127 383.766C480.839 383.768 436.198 383.584 391.564 383.986C384.302 384.051 380.731 381.32 377.449 375.756C355.717 338.909 333.766 302.182 311.842 265.44C310.355 262.95 308.509 260.659 306.016 257.119C296.737 272.686 288.063 287.324 279.303 301.914C263.854 327.645 248.436 353.396 232.72 378.976C231.368 381.176 227.903 383.504 225.406 383.518C176.967 383.794 128.526 383.735 80.0859 383.727C79.3577 383.727 78.6294 383.499 76.1968 383.094C101.686 340.653 126.82 298.804 152.691 255.727C101.215 255.727 51.2272 255.727 0 255.727C3.54499 249.3 6.29222 243.902 9.41748 238.717C42.9535 183.072 76.5747 127.474 110.116 71.8322C122.986 50.4819 135.847 29.1243 148.406 7.60357C151.582 2.16026 155.195 -0.0190267 162.008 0.000125042C259.147 0.273305 356.288 0.252474 453.427 0.0701478C458.5 0.060616 461.04 1.7099 463.41 5.68191C486.347 44.1217 509.423 82.4844 532.524 120.833C535.076 125.07 536.055 128.657 532.986 133.488C523.424 148.545 514.442 163.948 505.343 179.276C493.589 199.075 481.955 218.94 470.236 238.758C467.263 243.784 464.163 248.739 460.304 255.066C511.488 255.066 561.381 255.066 613 255.066C605.979 267.032 599.922 277.541 593.684 287.948C576.059 317.357 558.119 346.592 540.892 376.215C537.377 382.258 533.554 384.83 526.127 383.766Z" fill="#f5f5f5"/><path d="M305.19 256.168L152.215 255.434L75.3462 383.885H229.844L305.19 256.168Z" fill="#f5f5f5"/></svg>
+      <img src="/logo.png" alt="Reloxy">
     </div>
     <div>
       <div class="brand-name">Reloxy</div>
@@ -253,13 +473,13 @@ select.field-input option { background:var(--s1); }
   </div>
   <nav class="nav">
     <div class="nav-group">
-      <div class="nav-group-label">Обзор</div>
+      <div class="nav-group-label" data-i18n="grp_overview">Overview</div>
       <div class="nav-item active" onclick="go('dashboard',this)">
         <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
           <rect x="1" y="1" width="6" height="6" rx="1.5"/><rect x="9" y="1" width="6" height="6" rx="1.5"/>
           <rect x="1" y="9" width="6" height="6" rx="1.5"/><rect x="9" y="9" width="6" height="6" rx="1.5"/>
         </svg>
-        Дашборд
+        <span data-i18n="nav_dashboard">Dashboard</span>
       </div>
       <div class="nav-item" onclick="go('calendar',this)">
         <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -268,35 +488,44 @@ select.field-input option { background:var(--s1); }
           <line x1="5" y1="1" x2="5" y2="4"/>
           <line x1="11" y1="1" x2="11" y2="4"/>
         </svg>
-        Календарь
+        <span data-i18n="nav_calendar">Calendar</span>
       </div>
       <div class="nav-item" onclick="go('clients',this)">
         <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
           <circle cx="8" cy="5" r="3"/>
           <path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/>
         </svg>
-        Клиенты <span class="nav-count" id="nc-clients">0</span>
+        <span data-i18n="nav_clients">Clients</span> <span class="nav-count" id="nc-clients">0</span>
       </div>
     </div>
     <div class="nav-group">
-      <div class="nav-group-label">Работа</div>
+      <div class="nav-group-label" data-i18n="grp_work">Work</div>
       <div class="nav-item" onclick="go('projects',this)">
         <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
           <rect x="1" y="1" width="14" height="10" rx="2"/>
           <line x1="4" y1="14" x2="12" y2="14"/>
           <line x1="8" y1="11" x2="8" y2="14"/>
         </svg>
-        Проекты <span class="nav-count" id="nc-projects">0</span>
+        <span data-i18n="nav_projects">Projects</span> <span class="nav-count" id="nc-projects">0</span>
       </div>
       <div class="nav-item" onclick="go('funnel',this)">
         <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
           <path d="M2 2h12l-4.5 6v5l-3-2V8L2 2z"/>
         </svg>
-        Воронка
+        <span data-i18n="nav_pipeline">Pipeline</span>
+      </div>
+      <div class="nav-item" onclick="go('team',this)">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="5.5" cy="5" r="2.5"/>
+          <circle cx="10.5" cy="5" r="2.5"/>
+          <path d="M1 14c0-2.5 2-4.5 4.5-4.5S10 11.5 10 14"/>
+          <path d="M10 11.5c.8-.6 1.9-1 3-1 2 0 3 1.5 3 3.5" stroke-dasharray="2 1"/>
+        </svg>
+        <span data-i18n="nav_team">Team</span> <span class="nav-count" id="nc-team">0</span>
       </div>
     </div>
     <div class="nav-group">
-      <div class="nav-group-label">Деньги</div>
+      <div class="nav-group-label" data-i18n="grp_finance_g">Finance</div>
       <div class="nav-item" onclick="go('finance',this)">
         <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
           <rect x="1" y="3" width="14" height="10" rx="2"/>
@@ -304,117 +533,265 @@ select.field-input option { background:var(--s1); }
           <line x1="1" y1="6" x2="15" y2="6"/>
           <line x1="1" y1="10" x2="15" y2="10"/>
         </svg>
-        Финансы
+        <span data-i18n="nav_finance">Finance</span>
       </div>
     </div>
   </nav>
   <div class="sidebar-bottom">
-    <div class="user-row">
-      <div class="user-avatar" id="sb-initials">—</div>
-      <div>
-        <div class="user-name" id="sb-name">...</div>
-        <div class="user-role">Администратор</div>
+    <!-- User popup menu -->
+    <div class="user-popup" id="user-popup">
+      <div class="user-popup-header">
+        <div class="user-popup-avatar" id="popup-initials">—</div>
+        <div style="min-width:0">
+          <div class="user-popup-name" id="popup-name">...</div>
+          <div class="user-popup-email" id="popup-email">...</div>
+        </div>
+      </div>
+      <div class="user-popup-list">
+        <div class="user-popup-item" onclick="popupGoSettings()">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="8" cy="8" r="2.5"/>
+            <path d="M8 1v1.5M8 13.5V15M1 8h1.5M13.5 8H15M3.05 3.05l1.06 1.06M11.89 11.89l1.06 1.06M3.05 12.95l1.06-1.06M11.89 4.11l1.06-1.06"/>
+          </svg>
+          <span data-i18n="nav_settings">Settings</span>
+        </div>
+        <div class="user-popup-item" onclick="popupGoPage('finance')">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="1" y="3" width="14" height="10" rx="2"/>
+            <circle cx="8" cy="8" r="2.5"/>
+            <line x1="1" y1="6" x2="15" y2="6"/><line x1="1" y1="10" x2="15" y2="10"/>
+          </svg>
+          <span data-i18n="nav_finance">Finance</span>
+        </div>
+        <div class="user-popup-item" onclick="popupGoPage('team')">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="5.5" cy="5" r="2.5"/>
+            <circle cx="10.5" cy="5" r="2.5"/>
+            <path d="M1 14c0-2.5 2-4.5 4.5-4.5S10 11.5 10 14"/>
+            <path d="M10 11.5c.8-.6 1.9-1 3-1 2 0 3 1.5 3 3.5" stroke-dasharray="2 1"/>
+          </svg>
+          <span data-i18n="nav_team">Team</span>
+        </div>
+        <div class="user-popup-divider"></div>
+        <div class="user-popup-item danger" onclick="logout()">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M6 2H3a1 1 0 00-1 1v10a1 1 0 001 1h3M10 11l3-3-3-3M13 8H6"/>
+          </svg>
+          <span data-i18n="sign_out">Sign out</span>
+        </div>
       </div>
     </div>
-    <div class="logout-btn" onclick="logout()">
-      <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-        <path d="M6 2H3a1 1 0 00-1 1v10a1 1 0 001 1h3M10 11l3-3-3-3M13 8H6"/>
+    <!-- User row trigger -->
+    <div class="user-row" id="settings-nav-btn" onclick="toggleUserPopup(event)">
+      <div class="user-avatar" id="sb-initials">—</div>
+      <div style="flex:1;min-width:0">
+        <div class="user-name" id="sb-name">...</div>
+        <span class="plan-badge plan-free" id="sb-plan">Free</span>
+      </div>
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:0.25;flex-shrink:0;transition:transform 0.2s" id="popup-chevron">
+        <path d="M4 6l4-4 4 4M4 10l4 4 4-4"/>
       </svg>
-      Выйти
     </div>
   </div>
 </aside>
 
 <main class="main">
   <div class="topbar">
-    <div class="topbar-title" id="topbar-title">Дашборд</div>
+    <div class="topbar-title" id="topbar-title">Dashboard</div>
     <div class="search">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
         <circle cx="6.5" cy="6.5" r="4.5"/><line x1="10" y1="10" x2="14" y2="14"/>
       </svg>
-      <input placeholder="Поиск..." id="search-input" oninput="doSearch(this.value)">
+      <input placeholder="Search..." id="search-input" data-i18n-ph="search_ph" oninput="doSearch(this.value)">
     </div>
-    <button class="btn btn-white" id="add-btn" onclick="openAddModal()">+ Добавить</button>
+    <div class="topbar-actions">
+      <!-- Notifications -->
+      <div class="topbar-btn topbar-notif" title="Notifications">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M8 1a5 5 0 015 5v3l1.5 2.5H1.5L3 9V6a5 5 0 015-5z"/>
+          <path d="M6.5 13a1.5 1.5 0 003 0"/>
+        </svg>
+      </div>
+      <!-- Topbar user chip -->
+      <div style="display:flex;align-items:center;gap:8px;padding:4px 10px;border-radius:8px;background:var(--s3);border:1px solid var(--line);cursor:pointer;margin-left:6px" onclick="popupGoSettings()">
+        <div style="width:24px;height:24px;border-radius:50%;background:var(--s4);border:1px solid var(--line2);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--g1)" id="topbar-avatar">—</div>
+        <div style="font-size:12px;font-weight:500;color:var(--white);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="topbar-username">...</div>
+      </div>
+    </div>
+    <button class="btn btn-white" id="add-btn" onclick="openAddModal()" data-i18n="btn_add">+ Add new</button>
   </div>
 
   <div class="content">
 
     <!-- DASHBOARD -->
     <div class="page active" id="page-dashboard">
-      <div class="metrics">
-        <div class="metric">
-          <div class="metric-label">
-            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 12l3-4 3 2 3-5 3 3"/></svg>
-            Выручка
-          </div>
-          <div class="metric-value" id="m-revenue">—</div>
-          <div class="metric-sub">Текущий месяц</div>
+
+      <!-- Header row -->
+      <div class="dash-header">
+        <div>
+          <h1 class="dash-title" data-i18n="page_dashboard">Dashboard</h1>
+          <div class="dash-period-label" id="dash-period-label">This month</div>
         </div>
-        <div class="metric">
-          <div class="metric-label">
-            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="14" height="10" rx="2"/></svg>
-            Проекты
+        <div style="display:flex;align-items:center;gap:10px">
+          <!-- Revenue Goal compact -->
+          <div id="goal-wrap-mini" style="display:none;align-items:center;gap:10px;background:var(--s2);border:1px solid var(--line);border-radius:9px;padding:7px 14px;cursor:pointer" onclick="openGoalModal()">
+            <div style="font-size:11px;color:var(--g2)" data-i18n="goal_label">Revenue Goal</div>
+            <div style="display:flex;align-items:center;gap:6px">
+              <div style="font-size:13px;font-weight:700;color:var(--white);font-variant-numeric:tabular-nums" id="goal-mini-current">₽ 0</div>
+              <div style="font-size:11px;color:var(--g2)">/</div>
+              <div style="font-size:12px;color:var(--g1);font-variant-numeric:tabular-nums" id="goal-mini-target">₽ 0</div>
+            </div>
+            <div style="width:60px;height:3px;background:var(--s4);border-radius:2px;overflow:hidden">
+              <div id="goal-mini-fill" style="height:100%;width:0%;background:linear-gradient(90deg,rgba(255,255,255,0.4),var(--white));transition:width 0.8s;border-radius:2px"></div>
+            </div>
           </div>
-          <div class="metric-value" id="m-projects">0</div>
-          <div class="metric-sub">Активных</div>
-        </div>
-        <div class="metric">
-          <div class="metric-label">
-            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>
-            Клиенты
+          <div class="chart-periods">
+            <button class="chart-period" onclick="setChartPeriod('week',this)" data-i18n="period_week">Week</button>
+            <button class="chart-period active" onclick="setChartPeriod('month',this)" data-i18n="period_month">Month</button>
+            <button class="chart-period" onclick="setChartPeriod('year',this)" data-i18n="period_year">Year</button>
           </div>
-          <div class="metric-value" id="m-clients">0</div>
-          <div class="metric-sub">Всего</div>
-        </div>
-        <div class="metric">
-          <div class="metric-label">
-            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 2h12l-4.5 6v5l-3-2V8L2 2z"/></svg>
-            Лиды
-          </div>
-          <div class="metric-value" id="m-leads">0</div>
-          <div class="metric-sub">В воронке</div>
         </div>
       </div>
 
-      <div class="chart-area">
-        <div class="chart-header">
-          <div>
-            <div class="chart-label">Выручка <span id="chart-year">2026</span></div>
-            <div class="chart-sub" id="chart-sub">Загрузка...</div>
+      <!-- 4 metric cards -->
+      <div class="metrics" style="margin-bottom:16px">
+        <div class="metric">
+          <div class="metric-top">
+            <div class="metric-name" data-i18n="metric_revenue">Revenue</div>
+            <div class="metric-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="14" height="10" rx="2"/><circle cx="8" cy="8" r="2.5"/></svg></div>
           </div>
-          <div class="chart-num" id="chart-total">₽ —</div>
+          <div class="metric-val-row">
+            <div class="metric-value" id="m-revenue">—</div>
+            <div class="metric-badge" id="mb-revenue"></div>
+          </div>
+          <div class="metric-sub" data-i18n="metric_this_period">This period</div>
         </div>
-        <div class="chart-body" id="chart-bars"></div>
+        <div class="metric">
+          <div class="metric-top">
+            <div class="metric-name" data-i18n="metric_projects">Active projects</div>
+            <div class="metric-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="14" height="10" rx="2"/><line x1="4" y1="14" x2="12" y2="14"/><line x1="8" y1="11" x2="8" y2="14"/></svg></div>
+          </div>
+          <div class="metric-val-row">
+            <div class="metric-value" id="m-projects">0</div>
+            <div class="metric-badge" id="mb-projects"></div>
+          </div>
+          <div class="metric-sub" data-i18n="metric_inprogress_sub">In progress & review</div>
+        </div>
+        <div class="metric">
+          <div class="metric-top">
+            <div class="metric-name" data-i18n="metric_clients">Clients</div>
+            <div class="metric-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg></div>
+          </div>
+          <div class="metric-val-row">
+            <div class="metric-value" id="m-clients">0</div>
+            <div class="metric-badge" id="mb-clients"></div>
+          </div>
+          <div class="metric-sub" data-i18n="metric_clients_sub">Total in base</div>
+        </div>
+        <div class="metric">
+          <div class="metric-top">
+            <div class="metric-name" data-i18n="metric_leads">Open deals</div>
+            <div class="metric-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 2h12l-4.5 6v5l-3-2V8L2 2z"/></svg></div>
+          </div>
+          <div class="metric-val-row">
+            <div class="metric-value" id="m-leads">0</div>
+            <div class="metric-badge" id="mb-leads"></div>
+          </div>
+          <div class="metric-sub" data-i18n="metric_leads_sub">Active pipeline</div>
+        </div>
       </div>
 
-      <div class="two-col">
-        <div class="section">
-          <div class="section-header">
-            <div class="section-title">Последние проекты</div>
-            <span class="section-action" onclick="go('projects',document.querySelectorAll('.nav-item')[3])">Все →</span>
+      <!-- 2-column: side panels LEFT + chart RIGHT -->
+      <div class="dash-layout">
+
+        <!-- Left column: 3 panels stacked -->
+        <div class="dash-side">
+          <div class="dash-panel">
+            <div class="dash-panel-title">
+              <span data-i18n="dash_inprogress">In progress</span>
+              <span class="dash-panel-link" onclick="go('projects',document.querySelectorAll('.nav-item')[3])" data-i18n="dash_all">All →</span>
+            </div>
+            <div id="dash-inprogress"></div>
           </div>
-          <div id="dash-projects"><div class="empty"><div class="empty-title">Проектов нет</div></div></div>
-        </div>
-        <div class="section">
-          <div class="section-header">
-            <div class="section-title">Последние клиенты</div>
-            <span class="section-action" onclick="go('clients',document.querySelectorAll('.nav-item')[2])">Все →</span>
+          <div class="dash-panel">
+            <div class="dash-panel-title">
+              <span data-i18n="dash_deadlines">Deadlines</span>
+              <span class="dash-panel-link" onclick="go('calendar',document.querySelectorAll('.nav-item')[1])" data-i18n="dash_calendar">Calendar →</span>
+            </div>
+            <div id="dash-deadlines"></div>
           </div>
-          <div id="dash-clients"><div class="empty"><div class="empty-title">Клиентов нет</div></div></div>
+          <!-- Quick Notes -->
+          <div class="dash-panel">
+            <div class="dash-panel-title">
+              <span>Quick Notes</span>
+              <span class="notes-saved-label" id="notes-saved" style="display:none"></span>
+            </div>
+            <textarea class="notes-pad" id="quick-notes-area" placeholder="Jot down anything..." oninput="saveNote(this)"></textarea>
+          </div>
         </div>
+
+        <!-- Right column: Revenue chart + unpaid invoices -->
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <!-- Chart card -->
+          <div class="dash-chart-wrap">
+            <div class="dash-chart-head">
+              <div>
+                <div class="dash-chart-title"><span data-i18n="metric_revenue">Revenue</span> · <span id="dash-chart-period-label">This month</span></div>
+                <div style="display:flex;align-items:center;gap:10px;margin-top:4px">
+                  <div class="chart-num" id="chart-total" style="font-size:28px;letter-spacing:-1px">₽ —</div>
+                  <div class="chart-badge" id="chart-badge"></div>
+                </div>
+                <div class="chart-sub" id="chart-sub" style="margin-top:3px"></div>
+              </div>
+              <div id="dash-chart-stats" style="display:flex;flex-direction:column;align-items:flex-end;gap:6px"></div>
+            </div>
+            <div style="position:relative;height:260px;margin-top:16px">
+              <canvas id="revenue-chart"></canvas>
+            </div>
+          </div>
+          <!-- Unpaid invoices -->
+          <div class="dash-panel">
+            <div class="dash-panel-title">
+              <span data-i18n="dash_unpaid">Unpaid invoices</span>
+              <span class="dash-panel-link" onclick="go('finance',document.querySelectorAll('.nav-item')[6])" data-i18n="dash_all">All →</span>
+            </div>
+            <div id="dash-unpaid"></div>
+          </div>
+        </div>
+
+      </div><!-- /dash-layout -->
+
+      <!-- Hidden goal bar (full, shown only if goal set) -->
+      <div class="goal-bar-wrap" id="goal-wrap" style="display:none;margin-top:16px">
+        <div class="goal-bar-header">
+          <div class="goal-bar-label"><span data-i18n="goal_label">Revenue Goal</span> · <span id="goal-period-label">This month</span></div>
+          <div class="goal-bar-right">
+            <span class="goal-amount" id="goal-current">₽ 0</span>
+            <span class="goal-sep" data-i18n="goal_of">of</span>
+            <span class="goal-target" id="goal-target-label">₽ 0</span>
+            <button class="goal-edit-btn" onclick="openGoalModal()" data-i18n="btn_edit_goal">Edit goal</button>
+          </div>
+        </div>
+        <div class="goal-track"><div class="goal-fill" id="goal-fill" style="width:0%"></div></div>
+        <div class="goal-pct" id="goal-pct"></div>
       </div>
+      <!-- Hidden ids for metric compat -->
+      <div style="display:none">
+        <div id="m-avg-budget"></div><div id="m-completion"></div>
+      </div>
+
     </div>
 
     <!-- CALENDAR -->
     <div class="page" id="page-calendar">
       <div class="page-header">
-        <div><h1>Календарь</h1><p>Дедлайны проектов и важные даты</p></div>
+        <div><h1 data-i18n="page_calendar">Calendar</h1><p data-i18n="cal_sub">Project deadlines and important dates</p></div>
       </div>
       <div class="cal-nav">
-        <div class="cal-nav-title" id="cal-month-title">Май 2026</div>
+        <div class="cal-nav-title" id="cal-month-title"></div>
         <div class="cal-nav-btns">
           <div class="cal-nav-btn" onclick="calPrev()">←</div>
-          <div class="cal-nav-btn" onclick="calToday()">Сег.</div>
+          <div class="cal-nav-btn" onclick="calToday()" data-i18n="cal_today">Today</div>
           <div class="cal-nav-btn" onclick="calNext()">→</div>
         </div>
       </div>
@@ -424,91 +801,306 @@ select.field-input option { background:var(--s1); }
     <!-- CLIENTS -->
     <div class="page" id="page-clients">
       <div class="page-header">
-        <div><h1>Клиенты</h1><p>Все компании и контакты студии</p></div>
-        <button class="btn btn-white" onclick="openAddModal()">+ Новый клиент</button>
+        <div><h1 data-i18n="page_clients">Clients</h1><p data-i18n="clients_sub">All companies and contacts</p></div>
+        <button class="btn btn-white" onclick="openAddModal()" data-i18n="btn_new_client">+ New client</button>
       </div>
       <div class="tabs">
-        <div class="tab active" onclick="filterClients('all',this)">Все</div>
-        <div class="tab" onclick="filterClients('active',this)">Активные</div>
-        <div class="tab" onclick="filterClients('lead',this)">Потенциальные</div>
-        <div class="tab" onclick="filterClients('archive',this)">Архив</div>
+        <div class="tab active" onclick="filterClients('all',this)" data-i18n="tab_all">All</div>
+        <div class="tab" onclick="filterClients('active',this)" data-i18n="tab_active">Active</div>
+        <div class="tab" onclick="filterClients('lead',this)" data-i18n="tab_leads">Leads</div>
+        <div class="tab" onclick="filterClients('archive',this)" data-i18n="tab_archive">Archive</div>
       </div>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Компания</th><th>Контакт</th><th>Email</th><th>Статус</th><th>Проекты</th><th>Оборот</th><th></th></tr></thead>
+          <thead><tr><th data-i18n="col_company">Company</th><th data-i18n="col_contact">Contact</th><th data-i18n="col_email">Email</th><th data-i18n="col_status">Status</th><th data-i18n="col_projects">Projects</th><th data-i18n="col_revenue">Revenue</th><th></th></tr></thead>
           <tbody id="clients-tbody"></tbody>
         </table>
       </div>
-      <div id="clients-empty" class="empty" style="display:none">
-        <div class="empty-title">Клиентов нет</div>
-        <div class="empty-sub">Нажмите «+ Новый клиент»</div>
-      </div>
+      <div id="clients-empty" style="display:none"></div>
     </div>
 
-    <!-- PROJECTS -->
+    <!-- PROJECTS (Kanban) -->
     <div class="page" id="page-projects">
       <div class="page-header">
-        <div><h1>Проекты</h1><p>Задачи и проекты студии</p></div>
-        <button class="btn btn-white" onclick="openAddModal()">+ Новый проект</button>
+        <div><h1 data-i18n="page_projects">Projects</h1><p data-i18n="projects_sub">Studio projects and tasks</p></div>
+        <button class="btn btn-white" onclick="openAddModal()" data-i18n="btn_new_project">+ New project</button>
       </div>
       <div class="kanban" id="kanban-board">
         <div class="k-col">
-          <div class="k-col-head"><div class="k-col-name">Очередь</div><div class="k-col-n" id="kn-queue">0</div></div>
+          <div class="k-col-head"><div class="k-col-name" data-i18n="k_backlog">Backlog</div><div class="k-col-n" id="kn-queue">0</div></div>
           <div class="k-cards" id="kc-queue"></div>
         </div>
         <div class="k-col">
-          <div class="k-col-head"><div class="k-col-name">В работе</div><div class="k-col-n" id="kn-inprogress">0</div></div>
+          <div class="k-col-head"><div class="k-col-name" data-i18n="k_inprogress">In Progress</div><div class="k-col-n" id="kn-inprogress">0</div></div>
           <div class="k-cards" id="kc-inprogress"></div>
         </div>
         <div class="k-col">
-          <div class="k-col-head"><div class="k-col-name">Согласование</div><div class="k-col-n" id="kn-review">0</div></div>
+          <div class="k-col-head"><div class="k-col-name" data-i18n="k_review">Review</div><div class="k-col-n" id="kn-review">0</div></div>
           <div class="k-cards" id="kc-review"></div>
         </div>
         <div class="k-col">
-          <div class="k-col-head"><div class="k-col-name">Готово</div><div class="k-col-n" id="kn-done">0</div></div>
+          <div class="k-col-head"><div class="k-col-name" data-i18n="k_done">Done</div><div class="k-col-n" id="kn-done">0</div></div>
           <div class="k-cards" id="kc-done"></div>
         </div>
       </div>
     </div>
 
-    <!-- FUNNEL -->
+    <!-- PIPELINE -->
     <div class="page" id="page-funnel">
       <div class="page-header">
-        <div><h1>Воронка</h1><p>Стадии продаж и конверсия</p></div>
-        <button class="btn btn-white" onclick="openAddModal()">+ Новый лид</button>
+        <div><h1 data-i18n="page_pipeline">Pipeline</h1><p data-i18n="pipeline_sub">Sales stages and conversion</p></div>
+        <button class="btn btn-white" onclick="openAddModal()" data-i18n="btn_new_lead">+ New lead</button>
       </div>
       <div class="metrics" style="margin-bottom:36px">
-        <div class="metric"><div class="metric-label">Закрыто</div><div class="metric-value" id="f-closed">₽ —</div><div class="metric-sub">За месяц</div></div>
-        <div class="metric"><div class="metric-label">Конверсия</div><div class="metric-value" id="f-conv">—</div><div class="metric-sub">Лид → сделка</div></div>
-        <div class="metric"><div class="metric-label">Средний чек</div><div class="metric-value" id="f-avg">₽ —</div><div class="metric-sub">Закрытых</div></div>
-        <div class="metric"><div class="metric-label">Всего лидов</div><div class="metric-value" id="f-total">0</div><div class="metric-sub">В работе</div></div>
+        <div class="metric"><div class="metric-name" data-i18n="f_closed">Closed</div><div class="metric-value" id="f-closed">₽ —</div><div class="metric-sub" data-i18n="f_this_month">This month</div></div>
+        <div class="metric"><div class="metric-name" data-i18n="f_conversion">Conversion</div><div class="metric-value" id="f-conv">—</div><div class="metric-sub" data-i18n="f_lead_deal">Lead → deal</div></div>
+        <div class="metric"><div class="metric-name" data-i18n="f_avg">Avg. deal size</div><div class="metric-value" id="f-avg">₽ —</div><div class="metric-sub" data-i18n="f_closed_deals">Closed deals</div></div>
+        <div class="metric"><div class="metric-name" data-i18n="f_open">Open leads</div><div class="metric-value" id="f-total">0</div><div class="metric-sub" data-i18n="f_active">Active</div></div>
       </div>
       <div id="funnel-list"></div>
+    </div>
+
+    <!-- TEAM -->
+    <div class="page" id="page-team">
+      <div class="page-header">
+        <div><h1 data-i18n="page_team">Team</h1><p data-i18n="team_sub">Your studio staff members</p></div>
+        <button class="btn btn-white" onclick="openAddModal()" data-i18n="btn_add_member">+ Add member</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th data-i18n="col_name">Name</th><th data-i18n="col_position">Position</th><th data-i18n="col_email">Email</th><th data-i18n="col_phone">Phone</th><th data-i18n="col_status">Status</th><th></th></tr></thead>
+          <tbody id="team-tbody"></tbody>
+        </table>
+      </div>
+      <div id="team-empty" style="display:none"></div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="page" id="page-settings">
+      <div class="page-header">
+        <div><h1 data-i18n="page_settings">Settings</h1><p data-i18n="settings_sub">Account and CRM preferences</p></div>
+      </div>
+      <div class="settings-wrap">
+
+        <!-- LEFT CARD -->
+        <div class="set-card">
+          <div class="set-card-top">
+            <div class="set-tabs">
+              <button class="set-tab active" onclick="switchSetTab('profile',this)" data-i18n="tab_profile">Profile</button>
+              <button class="set-tab" onclick="switchSetTab('studio',this)" data-i18n="tab_studio">Studio</button>
+            </div>
+            <button class="set-save-btn" onclick="saveCurrentTab()" data-i18n="btn_save_settings">Save settings</button>
+          </div>
+
+          <!-- PROFILE TAB -->
+          <div id="set-tab-profile">
+            <div class="set-body">
+              <div class="set-avatar-row">
+                <div class="set-avatar" id="set-big-avatar">—</div>
+                <div class="set-avatar-info">
+                  <div class="set-avatar-name" id="set-avatar-name">...</div>
+                  <div class="set-avatar-email" id="set-avatar-email">...</div>
+                </div>
+              </div>
+              <div class="set-fields">
+                <div class="set-row">
+                  <div class="set-field">
+                    <label class="set-label" data-i18n="set_name">Name</label>
+                    <input class="set-input" id="set-name" placeholder="Victoria">
+                  </div>
+                  <div class="set-field">
+                    <label class="set-label" data-i18n="set_phone">Phone</label>
+                    <input class="set-input" id="set-phone" placeholder="+1 555...">
+                  </div>
+                </div>
+                <div class="set-field">
+                  <label class="set-label" data-i18n="set_email">Email</label>
+                  <input class="set-input" id="set-email" disabled>
+                </div>
+                <div class="set-row">
+                  <div class="set-field">
+                    <label class="set-label" data-i18n="set_currency">Currency</label>
+                    <select class="set-input" id="set-currency">
+                      <option value="RUB">₽ Russian Ruble</option>
+                      <option value="USD">$ US Dollar</option>
+                      <option value="EUR">€ Euro</option>
+                      <option value="GBP">£ British Pound</option>
+                    </select>
+                  </div>
+                  <div class="set-field">
+                    <label class="set-label" data-i18n="set_language">Language</label>
+                    <div class="lang-switcher" id="lang-switcher">
+                      <button class="lang-btn" data-lang="en" onclick="setLang('en',this)">
+                        <span class="lang-flag">🇬🇧</span> EN
+                      </button>
+                      <button class="lang-btn" data-lang="ru" onclick="setLang('ru',this)">
+                        <span class="lang-flag">🇷🇺</span> RU
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="set-divider"></div>
+              <!-- Notification toggles -->
+              <div class="set-toggle-row">
+                <div class="set-toggle-left">
+                  <div class="set-toggle-icon" style="background:rgba(38,134,255,0.15)">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="#2688ff"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.869 4.326-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.83.941z"/></svg>
+                  </div>
+                  <div>
+                    <div class="set-toggle-title" data-i18n="set_tg">Telegram</div>
+                    <div class="set-toggle-sub" id="tg-toggle-sub" data-i18n="set_tg_off">Not configured</div>
+                  </div>
+                </div>
+                <label class="set-toggle">
+                  <input type="checkbox" id="tg-toggle" onchange="onTgToggle(this)">
+                  <span class="set-toggle-slider"></span>
+                </label>
+              </div>
+              <div class="set-toggle-row" id="tg-fields-wrap" style="display:none;flex-direction:column;align-items:stretch;gap:10px;padding:16px">
+                <div class="set-field">
+                  <label class="set-label" data-i18n="set_tg_token">Bot token (from @BotFather)</label>
+                  <input class="set-input" id="set-tg-token" placeholder="1234567890:AAF...">
+                </div>
+                <div class="set-field">
+                  <label class="set-label" data-i18n="set_tg_chat">Chat ID (from @userinfobot)</label>
+                  <input class="set-input" id="set-tg-chat" placeholder="-1001234567890">
+                </div>
+                <button class="set-save-btn" onclick="saveTelegram()" style="align-self:flex-end" data-i18n="btn_tg_test">Send test message</button>
+                <span class="set-msg" id="tg-msg"></span>
+              </div>
+            </div>
+            <div class="set-footer">
+              <span class="set-msg" id="profile-msg"></span>
+              <button class="set-save-btn" onclick="saveProfile()" data-i18n="btn_save_profile">Save profile</button>
+            </div>
+          </div>
+
+          <!-- STUDIO TAB -->
+          <div id="set-tab-studio" style="display:none">
+            <div class="set-body">
+              <div class="set-fields">
+                <div class="set-field">
+                  <label class="set-label" data-i18n="set_studio_name">Studio name</label>
+                  <input class="set-input" id="set-studio" placeholder="My Design Studio">
+                </div>
+                <div class="set-row">
+                  <div class="set-field">
+                    <label class="set-label">Industry</label>
+                    <select class="set-input" id="set-industry">
+                      <option value="design">Design</option>
+                      <option value="web">Web development</option>
+                      <option value="marketing">Marketing</option>
+                      <option value="branding">Branding</option>
+                      <option value="video">Video production</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                  <div class="set-field">
+                    <label class="set-label">Team size</label>
+                    <select class="set-input" id="set-team-size">
+                      <option value="1">Solo</option>
+                      <option value="2-5">2–5 people</option>
+                      <option value="6-15">6–15 people</option>
+                      <option value="16+">16+ people</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="set-field">
+                  <label class="set-label">Website</label>
+                  <input class="set-input" id="set-website" placeholder="https://mystudio.com">
+                </div>
+                <div class="set-field">
+                  <label class="set-label">Description</label>
+                  <input class="set-input" id="set-description" placeholder="Short description of your studio">
+                </div>
+              </div>
+            </div>
+            <div class="set-footer">
+              <span class="set-msg" id="studio-msg"></span>
+              <button class="set-save-btn" onclick="saveStudio()" data-i18n="btn_save_studio">Save studio</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT CARDS -->
+        <div class="set-right">
+
+          <!-- Security -->
+          <div class="set-right-card">
+            <div class="set-right-head">
+              <div>
+                <div class="set-right-title" data-i18n="set_security">Security</div>
+                <div class="set-right-sub" data-i18n="set_security_sub">Change your password</div>
+              </div>
+            </div>
+            <div class="set-right-body">
+              <div class="set-field">
+                <label class="set-label" data-i18n="set_cur_pass">Current password</label>
+                <input class="set-input" id="set-cur-pass" type="password" placeholder="••••••••" data-i18n-ph="ph_password">
+              </div>
+              <div class="set-field">
+                <label class="set-label" data-i18n="set_new_pass">New password</label>
+                <input class="set-input" id="set-new-pass" type="password" placeholder="min 6 characters" data-i18n-ph="ph_min6">
+              </div>
+              <div class="set-field">
+                <label class="set-label" data-i18n="set_confirm_pass">Confirm password</label>
+                <input class="set-input" id="set-confirm-pass" type="password" placeholder="repeat password" data-i18n-ph="ph_repeat">
+              </div>
+              <span class="set-msg" id="password-msg"></span>
+              <button class="set-save-btn" onclick="savePassword()" style="align-self:flex-start" data-i18n="btn_update_pass">Update password</button>
+            </div>
+          </div>
+
+          <!-- Revenue Goal -->
+          <div class="set-right-card">
+            <div class="set-right-head">
+              <div>
+                <div class="set-right-title" data-i18n="set_goal">Revenue Goal</div>
+                <div class="set-right-sub" data-i18n="set_goal_sub">Track progress on dashboard</div>
+              </div>
+            </div>
+            <div class="set-right-body">
+              <div class="set-field">
+                <label class="set-label" data-i18n="set_goal_amount">Target amount ₽</label>
+                <input class="set-input" id="set-goal-amount" type="number" placeholder="500 000">
+              </div>
+              <div class="set-field">
+                <label class="set-label" data-i18n="set_period">Period</label>
+                <select class="set-input" id="set-goal-period">
+                  <option value="month" data-i18n="set_monthly">Monthly</option>
+                  <option value="year" data-i18n="set_yearly">Yearly</option>
+                </select>
+              </div>
+              <span class="set-msg" id="goal-msg"></span>
+              <button class="set-save-btn" onclick="saveGoalSettings()" style="align-self:flex-start" data-i18n="btn_save_goal">Save goal</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
     </div>
 
     <!-- FINANCE -->
     <div class="page" id="page-finance">
       <div class="page-header">
-        <div><h1>Финансы</h1><p>Счета и доходы студии</p></div>
-        <button class="btn btn-white" onclick="openAddModal()">+ Счёт</button>
+        <div><h1 data-i18n="page_finance">Finance</h1><p data-i18n="finance_sub">Invoices and studio revenue</p></div>
+        <button class="btn btn-white" onclick="openAddModal()" data-i18n="btn_new_invoice">+ New invoice</button>
       </div>
       <div class="fin-grid">
-        <div class="fin-card"><div class="fin-label">Доход</div><div class="fin-value" id="fi-income">₽ —</div><div class="fin-delta">Текущий месяц</div></div>
-        <div class="fin-card"><div class="fin-label">К оплате</div><div class="fin-value" id="fi-pending">₽ —</div><div class="fin-delta" id="fi-pending-n">0 счетов</div></div>
-        <div class="fin-card"><div class="fin-label">Просрочено</div><div class="fin-value" id="fi-overdue">₽ —</div><div class="fin-delta" id="fi-overdue-n">0 счетов</div></div>
-        <div class="fin-card"><div class="fin-label">Всего оплачено</div><div class="fin-value" id="fi-total">₽ —</div><div class="fin-delta">За всё время</div></div>
+        <div class="fin-card"><div class="fin-label" data-i18n="fi_income">Income</div><div class="fin-value" id="fi-income">₽ —</div><div class="fin-delta" data-i18n="f_this_month">This month</div></div>
+        <div class="fin-card"><div class="fin-label" data-i18n="fi_pending">Pending</div><div class="fin-value" id="fi-pending">₽ —</div><div class="fin-delta" id="fi-pending-n">0 invoices</div></div>
+        <div class="fin-card"><div class="fin-label" data-i18n="fi_overdue">Overdue</div><div class="fin-value" id="fi-overdue">₽ —</div><div class="fin-delta" id="fi-overdue-n">0 invoices</div></div>
+        <div class="fin-card"><div class="fin-label" data-i18n="fi_total">Total paid</div><div class="fin-value" id="fi-total">₽ —</div><div class="fin-delta" data-i18n="fi_all_time">All time</div></div>
       </div>
-      <div class="section-header"><div class="section-title">Счета</div></div>
+      <div class="section-header"><div class="section-title" data-i18n="fi_invoices">Invoices</div></div>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Номер</th><th>Клиент</th><th>Сумма</th><th>Выставлен</th><th>Срок</th><th>Статус</th><th></th></tr></thead>
+          <thead><tr><th data-i18n="col_num">#</th><th data-i18n="col_client">Client</th><th data-i18n="col_amount">Amount</th><th data-i18n="col_issued">Issued</th><th data-i18n="col_due">Due</th><th data-i18n="col_status">Status</th><th></th></tr></thead>
           <tbody id="invoices-tbody"></tbody>
         </table>
       </div>
-      <div id="invoices-empty" class="empty" style="display:none">
-        <div class="empty-title">Счетов нет</div>
-        <div class="empty-sub">Выставьте первый счёт</div>
-      </div>
+      <div id="invoices-empty" style="display:none"></div>
     </div>
 
   </div>
@@ -517,12 +1109,41 @@ select.field-input option { background:var(--s1); }
 <!-- MODAL -->
 <div class="overlay" id="overlay" onclick="closeOverlay(event)">
   <div class="modal" id="modal-box">
-    <div class="modal-title" id="modal-title">Добавить</div>
-    <div class="modal-err" id="modal-err"></div>
-    <div id="modal-body"></div>
+    <div class="modal-head">
+      <div class="modal-title" id="modal-title">Add</div>
+      <button class="modal-close" onclick="closeModal()" aria-label="Close">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="2" y1="2" x2="12" y2="12"/><line x1="12" y1="2" x2="2" y2="12"/></svg>
+      </button>
+    </div>
+    <div class="modal-inner">
+      <div class="modal-err" id="modal-err"></div>
+      <div id="modal-body"></div>
+    </div>
     <div class="modal-foot">
-      <button class="btn btn-ghost" onclick="closeModal()">Отмена</button>
-      <button class="btn btn-white" id="modal-save" onclick="saveModal()">Сохранить</button>
+      <button class="btn btn-ghost" onclick="closeModal()" data-i18n="btn_cancel">Cancel</button>
+      <button class="btn btn-white" id="modal-save" onclick="saveModal()" data-i18n="btn_save">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- GOAL MODAL -->
+<div class="overlay" id="goal-overlay" onclick="if(event.target===this)closeGoalModal()">
+  <div class="modal" style="width:400px">
+    <div class="modal-title">Revenue Goal</div>
+    <div class="field">
+      <label class="field-label">Period</label>
+      <select class="field-input" id="goal-modal-period">
+        <option value="month">Monthly</option>
+        <option value="year">Yearly</option>
+      </select>
+    </div>
+    <div class="field">
+      <label class="field-label">Target amount (₽)</label>
+      <input class="field-input" id="goal-modal-amount" type="number" placeholder="e.g. 500000" min="0">
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeGoalModal()">Cancel</button>
+      <button class="btn btn-white" onclick="saveGoal()">Save goal</button>
     </div>
   </div>
 </div>
@@ -540,12 +1161,245 @@ let clients  = [];
 let projects = [];
 let deals    = [];
 let invoices = [];
+let staff    = [];
 let calYear  = new Date().getFullYear();
 let calMonth = new Date().getMonth();
 
-const MONTHS = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
-const MONTHS_SHORT = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
-const DAYS = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+const MONTHS       = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const DAYS         = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+
+// ─── I18N ──────────────────────────────────────────────────────────────────
+let currentLang = localStorage.getItem('reloxy_lang') || 'en';
+
+const TRANS = {
+  en: {
+    grp_overview:'Overview', grp_work:'Work', grp_finance_g:'Finance',
+    nav_dashboard:'Dashboard', nav_calendar:'Calendar', nav_clients:'Clients',
+    nav_projects:'Projects', nav_pipeline:'Pipeline', nav_team:'Team',
+    nav_finance:'Finance', nav_settings:'Settings', sign_out:'Sign out',
+    search_ph:'Search...', btn_add:'+ Add new',
+    page_dashboard:'Dashboard', page_calendar:'Calendar', page_clients:'Clients',
+    page_projects:'Projects', page_pipeline:'Pipeline', page_team:'Team',
+    page_finance:'Finance', page_settings:'Settings',
+    period_week:'Week', period_month:'Month', period_year:'Year',
+    goal_label:'Revenue Goal', goal_of:'of', btn_edit_goal:'Edit goal',
+    goal_empty:'Set a revenue goal to track your progress',
+    metric_revenue:'Revenue', metric_this_period:'This period',
+    metric_projects:'Active projects', metric_inprogress_sub:'In progress & review',
+    metric_clients:'Clients', metric_clients_sub:'Total in base',
+    metric_leads:'Open deals', metric_leads_sub:'Active pipeline',
+    dash_inprogress:'In progress', dash_deadlines:'Deadlines',
+    dash_unpaid:'Unpaid invoices', dash_all:'All →', dash_calendar:'Calendar →',
+    dash_no_projects:'No active projects', dash_no_deadlines:'No upcoming deadlines',
+    dash_all_paid:'All invoices paid 🎉', dash_mark_paid:'Mark paid',
+    dash_today:'Today', dash_tomorrow:'Tomorrow',
+    cal_sub:'Project deadlines and important dates', cal_today:'Today',
+    clients_sub:'All companies and contacts', btn_new_client:'+ New client',
+    tab_all:'All', tab_active:'Active', tab_leads:'Leads', tab_archive:'Archive',
+    col_company:'Company', col_contact:'Contact', col_email:'Email', col_phone:'Phone',
+    col_status:'Status', col_projects:'Projects', col_revenue:'Revenue',
+    col_name:'Name', col_position:'Position', col_num:'#',
+    col_client:'Client', col_amount:'Amount', col_issued:'Issued', col_due:'Due',
+    no_clients:'No clients yet', no_clients_sub:'Click "+ New client" to add your first one',
+    projects_sub:'Studio projects and tasks', btn_new_project:'+ New project',
+    k_backlog:'Backlog', k_inprogress:'In Progress', k_review:'Review', k_done:'Done',
+    k_empty:'Empty', k_progress:'Progress',
+    pipeline_sub:'Sales stages and conversion', btn_new_lead:'+ New lead',
+    f_closed:'Closed', f_this_month:'This month', f_conversion:'Conversion',
+    f_lead_deal:'Lead → deal', f_avg:'Avg. deal size', f_closed_deals:'Closed deals',
+    f_open:'Open leads', f_active:'Active',
+    funnel_stage:'Stage', funnel_leads:'Leads', funnel_conv:'Conv.', funnel_value:'Value',
+    stage_new:'New lead', stage_qualify:'Qualification', stage_proposal:'Proposal sent',
+    stage_negotiate:'Negotiation', stage_closed:'Closed',
+    team_sub:'Your studio staff members', btn_add_member:'+ Add member',
+    no_team:'No team members yet', no_team_sub:'Add your first team member',
+    st_active:'Active', st_inactive:'Inactive', st_lead:'Lead', st_archive:'Archive',
+    st_queue:'Backlog', st_inprogress:'In Progress', st_review:'Review', st_done:'Done',
+    st_paid:'Paid', st_pending:'Pending', st_overdue:'Overdue',
+    finance_sub:'Invoices and studio revenue', btn_new_invoice:'+ New invoice',
+    fi_income:'Income', fi_pending:'Pending', fi_overdue:'Overdue',
+    fi_total:'Total paid', fi_all_time:'All time', fi_invoices:'Invoices',
+    fi_inv_count: n => `${n} invoice${n===1?'':'s'}`,
+    no_invoices:'No invoices yet', no_invoices_sub:'Create your first invoice',
+    page_settings:'Settings', settings_sub:'Account and CRM preferences',
+    tab_profile:'Profile', tab_studio:'Studio', btn_save_settings:'Save settings',
+    set_name:'Name', set_phone:'Phone', set_email:'Email',
+    set_currency:'Currency', set_language:'Language',
+    set_tg:'Telegram', set_tg_off:'Not configured', set_tg_on:'Connected',
+    set_tg_token:'Bot token (from @BotFather)', set_tg_chat:'Chat ID (from @userinfobot)',
+    btn_tg_test:'Send test message', btn_save_profile:'Save profile',
+    set_studio_name:'Studio name', btn_save_studio:'Save studio',
+    set_security:'Security', set_security_sub:'Change your password',
+    set_cur_pass:'Current password', set_new_pass:'New password', set_confirm_pass:'Confirm password',
+    btn_update_pass:'Update password',
+    set_goal:'Revenue Goal', set_goal_sub:'Track progress on dashboard',
+    set_goal_amount:'Target amount ₽', set_period:'Period',
+    set_monthly:'Monthly', set_yearly:'Yearly', btn_save_goal:'Save goal',
+    btn_cancel:'Cancel', btn_save:'Save',
+    act_edit:'Edit', act_delete:'Delete', act_pdf:'PDF',
+    toast_client_added:'Client added', toast_client_updated:'Client updated', toast_client_deleted:'Client deleted',
+    toast_project_added:'Project added', toast_project_updated:'Project updated', toast_project_deleted:'Project deleted',
+    toast_deal_added:'Deal added', toast_deal_updated:'Deal updated', toast_deal_deleted:'Deal deleted',
+    toast_invoice_added:'Invoice added', toast_invoice_updated:'Invoice updated', toast_invoice_deleted:'Invoice deleted',
+    toast_member_added:'Member added', toast_member_updated:'Member updated', toast_member_removed:'Member removed',
+    modal_new_client:'New client', modal_edit_client:'Edit client',
+    modal_new_project:'New project', modal_edit_project:'Edit project',
+    modal_new_deal:'New lead', modal_edit_deal:'Edit lead',
+    modal_new_invoice:'New invoice', modal_edit_invoice:'Edit invoice',
+    modal_new_member:'Add team member', modal_edit_member:'Edit member',
+    modal_goal:'Revenue Goal',
+    f_company:'Company *', f_industry:'Industry', f_contact:'Contact',
+    f_title:'Title *', f_type:'Type', f_client:'Client', f_status:'Status',
+    f_deadline:'Deadline', f_budget:'Budget ₽', f_progress:'Progress %',
+    f_stage:'Stage', f_value:'Value ₽', f_desc:'Description',
+    f_amount:'Amount ₽', f_issued:'Issue date', f_due:'Due date',
+    f_name:'Name *', f_position:'Position', f_goal_period:'Period',
+    f_phone:'Phone', f_email:'Email', f_number:'Number', opt_none:'— none —',
+    toast_mark_paid:'Invoice marked as paid',
+    confirm_del_client:'Delete this client?', confirm_del_project:'Delete this project?',
+    confirm_del_deal:'Delete this deal?', confirm_del_invoice:'Delete this invoice?',
+    confirm_del_member:'Delete this team member?',
+    ph_password:'••••••••', ph_min6:'min 6 characters', ph_repeat:'repeat password',
+    msg_profile_saved:'Profile saved ✓', msg_studio_saved:'Studio saved ✓',
+    msg_pass_updated:'Password updated ✓', msg_goal_saved:'Goal saved ✓',
+    msg_tg_sent:'Test message sent ✓', msg_lang_set:'Language set to English ✓',
+    err_name_req:'Name is required', err_fill_all:'Fill in all fields',
+    err_min6:'Min 6 characters', err_passwords:'Passwords do not match',
+    err_valid_amount:'Enter a valid amount', err_tg_fill:'Fill in both fields',
+    goal_period_month:'This month', goal_period_year:'This year',
+    goal_achieved: n => `🎉 Goal achieved! You hit ₽ ${fmtNum(n)}`,
+    goal_progress: (pct, rem) => `${pct}% complete · ₽ ${fmtNum(rem)} to go`,
+  },
+  ru: {
+    grp_overview:'Обзор', grp_work:'Работа', grp_finance_g:'Финансы',
+    nav_dashboard:'Дашборд', nav_calendar:'Календарь', nav_clients:'Клиенты',
+    nav_projects:'Проекты', nav_pipeline:'Воронка', nav_team:'Команда',
+    nav_finance:'Финансы', nav_settings:'Настройки', sign_out:'Выйти',
+    search_ph:'Поиск...', btn_add:'+ Добавить',
+    page_dashboard:'Дашборд', page_calendar:'Календарь', page_clients:'Клиенты',
+    page_projects:'Проекты', page_pipeline:'Воронка', page_team:'Команда',
+    page_finance:'Финансы', page_settings:'Настройки',
+    period_week:'Неделя', period_month:'Месяц', period_year:'Год',
+    goal_label:'Цель по выручке', goal_of:'из', btn_edit_goal:'Изменить цель',
+    goal_empty:'Установите цель по выручке для отслеживания',
+    metric_revenue:'Выручка', metric_this_period:'Этот период',
+    metric_projects:'Активные проекты', metric_inprogress_sub:'В работе и на ревью',
+    metric_clients:'Клиенты', metric_clients_sub:'Всего в базе',
+    metric_leads:'Открытые сделки', metric_leads_sub:'Активная воронка',
+    dash_inprogress:'В работе', dash_deadlines:'Дедлайны',
+    dash_unpaid:'Неоплаченные счета', dash_all:'Все →', dash_calendar:'Календарь →',
+    dash_no_projects:'Нет активных проектов', dash_no_deadlines:'Нет дедлайнов',
+    dash_all_paid:'Все счета оплачены 🎉', dash_mark_paid:'Оплачено',
+    dash_today:'Сегодня', dash_tomorrow:'Завтра',
+    cal_sub:'Дедлайны проектов и важные даты', cal_today:'Сегодня',
+    clients_sub:'Все компании и контакты', btn_new_client:'+ Новый клиент',
+    tab_all:'Все', tab_active:'Активные', tab_leads:'Лиды', tab_archive:'Архив',
+    col_company:'Компания', col_contact:'Контакт', col_email:'Email', col_phone:'Телефон',
+    col_status:'Статус', col_projects:'Проекты', col_revenue:'Выручка',
+    col_name:'Имя', col_position:'Должность', col_num:'№',
+    col_client:'Клиент', col_amount:'Сумма', col_issued:'Выставлен', col_due:'До',
+    no_clients:'Клиентов пока нет', no_clients_sub:'Нажмите "+ Новый клиент" чтобы добавить первого',
+    projects_sub:'Проекты и задачи студии', btn_new_project:'+ Новый проект',
+    k_backlog:'Очередь', k_inprogress:'В работе', k_review:'Ревью', k_done:'Готово',
+    k_empty:'Пусто', k_progress:'Прогресс',
+    pipeline_sub:'Этапы продаж и конверсия', btn_new_lead:'+ Новая сделка',
+    f_closed:'Закрыто', f_this_month:'Этот месяц', f_conversion:'Конверсия',
+    f_lead_deal:'Лид → сделка', f_avg:'Средний чек', f_closed_deals:'Закрытые сделки',
+    f_open:'Открытых сделок', f_active:'Активных',
+    funnel_stage:'Этап', funnel_leads:'Лиды', funnel_conv:'Конв.', funnel_value:'Сумма',
+    stage_new:'Новый', stage_qualify:'Квалификация', stage_proposal:'Предложение',
+    stage_negotiate:'Переговоры', stage_closed:'Закрыт',
+    team_sub:'Сотрудники студии', btn_add_member:'+ Добавить',
+    no_team:'Команда пока пуста', no_team_sub:'Добавьте первого сотрудника',
+    st_active:'Активен', st_inactive:'Неактивен', st_lead:'Лид', st_archive:'Архив',
+    st_queue:'Очередь', st_inprogress:'В работе', st_review:'Ревью', st_done:'Готово',
+    st_paid:'Оплачен', st_pending:'Ожидает', st_overdue:'Просрочен',
+    finance_sub:'Счета и выручка студии', btn_new_invoice:'+ Новый счёт',
+    fi_income:'Доход', fi_pending:'Ожидают', fi_overdue:'Просрочено',
+    fi_total:'Всего оплачено', fi_all_time:'За всё время', fi_invoices:'Счета',
+    fi_inv_count: n => `${n} ${n===1?'счёт':n<5?'счёта':'счетов'}`,
+    no_invoices:'Счетов пока нет', no_invoices_sub:'Создайте первый счёт',
+    page_settings:'Настройки', settings_sub:'Аккаунт и параметры CRM',
+    tab_profile:'Профиль', tab_studio:'Студия', btn_save_settings:'Сохранить',
+    set_name:'Имя', set_phone:'Телефон', set_email:'Email',
+    set_currency:'Валюта', set_language:'Язык',
+    set_tg:'Telegram', set_tg_off:'Не настроен', set_tg_on:'Подключён',
+    set_tg_token:'Токен бота (от @BotFather)', set_tg_chat:'Chat ID (от @userinfobot)',
+    btn_tg_test:'Отправить тест', btn_save_profile:'Сохранить профиль',
+    set_studio_name:'Название студии', btn_save_studio:'Сохранить студию',
+    set_security:'Безопасность', set_security_sub:'Смена пароля',
+    set_cur_pass:'Текущий пароль', set_new_pass:'Новый пароль', set_confirm_pass:'Подтвердите пароль',
+    btn_update_pass:'Обновить пароль',
+    set_goal:'Цель по выручке', set_goal_sub:'Отображается на дашборде',
+    set_goal_amount:'Сумма ₽', set_period:'Период',
+    set_monthly:'Ежемесячно', set_yearly:'Ежегодно', btn_save_goal:'Сохранить цель',
+    btn_cancel:'Отмена', btn_save:'Сохранить',
+    act_edit:'Изменить', act_delete:'Удалить', act_pdf:'PDF',
+    toast_client_added:'Клиент добавлен', toast_client_updated:'Клиент обновлён', toast_client_deleted:'Клиент удалён',
+    toast_project_added:'Проект добавлен', toast_project_updated:'Проект обновлён', toast_project_deleted:'Проект удалён',
+    toast_deal_added:'Сделка добавлена', toast_deal_updated:'Сделка обновлена', toast_deal_deleted:'Сделка удалена',
+    toast_invoice_added:'Счёт создан', toast_invoice_updated:'Счёт обновлён', toast_invoice_deleted:'Счёт удалён',
+    toast_member_added:'Сотрудник добавлен', toast_member_updated:'Сотрудник обновлён', toast_member_removed:'Сотрудник удалён',
+    modal_new_client:'Новый клиент', modal_edit_client:'Редактировать клиента',
+    modal_new_project:'Новый проект', modal_edit_project:'Редактировать проект',
+    modal_new_deal:'Новая сделка', modal_edit_deal:'Редактировать сделку',
+    modal_new_invoice:'Новый счёт', modal_edit_invoice:'Редактировать счёт',
+    modal_new_member:'Добавить сотрудника', modal_edit_member:'Редактировать сотрудника',
+    modal_goal:'Цель по выручке',
+    f_company:'Компания *', f_industry:'Отрасль', f_contact:'Контакт',
+    f_title:'Название *', f_type:'Тип', f_client:'Клиент', f_status:'Статус',
+    f_deadline:'Дедлайн', f_budget:'Бюджет ₽', f_progress:'Прогресс %',
+    f_stage:'Этап', f_value:'Сумма ₽', f_desc:'Описание',
+    f_amount:'Сумма ₽', f_issued:'Дата выставления', f_due:'Дата оплаты',
+    f_name:'Имя *', f_position:'Должность', f_goal_period:'Период',
+    f_phone:'Телефон', f_email:'Email', f_number:'Номер счёта', opt_none:'— нет —',
+    toast_mark_paid:'Счёт отмечен как оплаченный',
+    confirm_del_client:'Удалить клиента?', confirm_del_project:'Удалить проект?',
+    confirm_del_deal:'Удалить сделку?', confirm_del_invoice:'Удалить счёт?',
+    confirm_del_member:'Удалить сотрудника?',
+    ph_password:'••••••••', ph_min6:'мин. 6 символов', ph_repeat:'повторите пароль',
+    msg_profile_saved:'Профиль сохранён ✓', msg_studio_saved:'Студия сохранена ✓',
+    msg_pass_updated:'Пароль обновлён ✓', msg_goal_saved:'Цель сохранена ✓',
+    msg_tg_sent:'Тестовое сообщение отправлено ✓', msg_lang_set:'Язык изменён на Русский ✓',
+    err_name_req:'Введите имя', err_fill_all:'Заполните все поля',
+    err_min6:'Мин. 6 символов', err_passwords:'Пароли не совпадают',
+    err_valid_amount:'Введите корректную сумму', err_tg_fill:'Заполните оба поля',
+    goal_period_month:'Этот месяц', goal_period_year:'Этот год',
+    goal_achieved: n => `🎉 Цель достигнута! Вы заработали ₽ ${fmtNum(n)}`,
+    goal_progress: (pct, rem) => `${pct}% выполнено · ещё ₽ ${fmtNum(rem)}`,
+  }
+};
+
+function t(key) {
+  const tr = TRANS[currentLang] || TRANS.en;
+  return tr[key] !== undefined ? tr[key] : (TRANS.en[key] !== undefined ? TRANS.en[key] : key);
+}
+
+function applyLang(lang) {
+  currentLang = lang;
+  localStorage.setItem('reloxy_lang', lang);
+  // Static elements
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const val = t(el.getAttribute('data-i18n'));
+    if (typeof val === 'string') el.textContent = val;
+  });
+  // Placeholder attributes
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+    const val = t(el.getAttribute('data-i18n-ph'));
+    if (typeof val === 'string') el.placeholder = val;
+  });
+  // Update TITLES map
+  TITLES.dashboard = t('page_dashboard'); TITLES.calendar  = t('page_calendar');
+  TITLES.clients   = t('page_clients');   TITLES.projects  = t('page_projects');
+  TITLES.funnel    = t('page_pipeline');  TITLES.team      = t('page_team');
+  TITLES.finance   = t('page_finance');   TITLES.settings  = t('page_settings');
+  // Update topbar title for current page
+  const titleEl = document.getElementById('topbar-title');
+  if (titleEl && currentPage && TITLES[currentPage]) titleEl.textContent = TITLES[currentPage];
+  // Re-render current page for dynamic content
+  if (currentPage) renderPage(currentPage);
+}
 
 // ─── INIT ──────────────────────────────────────────────────────────────────
 async function init() {
@@ -557,25 +1411,48 @@ async function init() {
   } catch { return logout(); }
 
   const initials = user.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
-  document.getElementById('sb-initials').textContent = initials;
-  document.getElementById('sb-name').textContent = user.name;
-  if (user.studioName) document.getElementById('sb-studio').textContent = user.studioName;
+  document.getElementById('sb-initials').textContent  = initials;
+  document.getElementById('sb-name').textContent      = user.name;
+  document.getElementById('popup-initials').textContent = initials;
+  document.getElementById('popup-name').textContent   = user.name;
+  document.getElementById('popup-email').textContent  = user.email || '';
 
-  document.getElementById('chart-year').textContent = new Date().getFullYear();
+  // Topbar user chip
+  const tbAv = document.getElementById('topbar-avatar');
+  const tbName = document.getElementById('topbar-username');
+  if (tbAv) tbAv.textContent = initials;
+  if (tbName) tbName.textContent = user.name;
+
+  // Plan badge
+  const plan = user.plan || localStorage.getItem('reloxy_plan') || 'free';
+  const planEl = document.getElementById('sb-plan');
+  if (planEl) { planEl.textContent = plan.charAt(0).toUpperCase()+plan.slice(1); planEl.className = 'plan-badge plan-'+plan; }
+
+  // Quick notes
+  const notesEl = document.getElementById('quick-notes-area');
+  if (notesEl) { notesEl.value = localStorage.getItem('reloxy_notes') || ''; }
+  const savedLbl = document.getElementById('notes-saved');
+  if (savedLbl) savedLbl.style.display = 'none';
+
   await loadAll();
-  renderPage('dashboard');
+  applyLang(currentLang);
 }
 
 async function loadAll() {
-  const [c, p, d, i, s] = await Promise.all([
+  const [c, p, d, i, s, t] = await Promise.allSettled([
     api('GET', '/api/clients'),
     api('GET', '/api/projects'),
     api('GET', '/api/deals'),
     api('GET', '/api/invoices'),
     api('GET', '/api/stats'),
+    api('GET', '/api/staff'),
   ]);
-  clients  = c; projects = p; deals = d; invoices = i;
-  renderStats(s);
+  if (c.status==='fulfilled') clients  = c.value;
+  if (p.status==='fulfilled') projects = p.value;
+  if (d.status==='fulfilled') deals    = d.value;
+  if (i.status==='fulfilled') invoices = i.value;
+  if (s.status==='fulfilled') renderStats(s.value);
+  if (t.status==='fulfilled') staff    = t.value;
   renderCounts();
 }
 
@@ -585,20 +1462,69 @@ async function api(method, url, body) {
   if (body) opts.body = JSON.stringify(body);
   const res  = await fetch(API + url, opts);
   const data = await res.json();
-  if (!res.ok) throw new Error(data.error || 'Ошибка сервера');
+  if (!res.ok) throw new Error(data.error || 'Server error');
   return data;
 }
 
 // ─── NAV ───────────────────────────────────────────────────────────────────
-const TITLES = { dashboard:'Дашборд', calendar:'Календарь', clients:'Клиенты', projects:'Проекты', funnel:'Воронка', finance:'Финансы' };
+const TITLES = { dashboard:'Dashboard', calendar:'Calendar', clients:'Clients', projects:'Projects', funnel:'Pipeline', team:'Team', finance:'Finance', settings:'Settings' };
 function go(id, el) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('settings-nav-btn').classList.remove('active');
   document.getElementById('page-' + id).classList.add('active');
   if (el) el.classList.add('active');
   document.getElementById('topbar-title').textContent = TITLES[id] || id;
   currentPage = id;
   renderPage(id);
+}
+function toggleUserPopup(e) {
+  e.stopPropagation();
+  const popup   = document.getElementById('user-popup');
+  const row     = document.getElementById('settings-nav-btn');
+  const chevron = document.getElementById('popup-chevron');
+  const isOpen  = popup.classList.contains('open');
+  popup.classList.toggle('open', !isOpen);
+  row.classList.toggle('active', !isOpen);
+  chevron.style.transform = isOpen ? '' : 'rotate(180deg)';
+}
+
+// ─── QUICK NOTES ───────────────────────────────────────────────────────────
+let _noteTimer = null;
+function saveNote(el) {
+  localStorage.setItem('reloxy_notes', el.value);
+  const lbl = document.getElementById('notes-saved');
+  if (!lbl) return;
+  lbl.style.display = 'block'; lbl.textContent = 'saving...'; lbl.style.color = 'var(--g2)';
+  clearTimeout(_noteTimer);
+  _noteTimer = setTimeout(() => { lbl.textContent = '✓ saved'; lbl.style.color = 'var(--g3)'; }, 600);
+}
+
+function closeUserPopup() {
+  document.getElementById('user-popup').classList.remove('open');
+  document.getElementById('settings-nav-btn').classList.remove('active');
+  document.getElementById('popup-chevron').style.transform = '';
+}
+
+function popupGoSettings() {
+  closeUserPopup();
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-settings').classList.add('active');
+  document.getElementById('topbar-title').textContent = t('page_settings');
+  currentPage = 'settings';
+  renderSettings();
+}
+
+function popupGoPage(pageId) {
+  closeUserPopup();
+  const navMap = { finance:'finance', team:'team' };
+  const navItem = [...document.querySelectorAll('.nav-item')].find(el => el.getAttribute('onclick')?.includes(`'${pageId}'`));
+  if (navItem) go(pageId, navItem);
+}
+
+function goSettings(el) {
+  popupGoSettings();
 }
 
 function renderPage(id) {
@@ -607,71 +1533,438 @@ function renderPage(id) {
   if (id === 'clients')   renderClients();
   if (id === 'projects')  renderProjects();
   if (id === 'funnel')    renderFunnel();
+  if (id === 'team')      renderTeam();
   if (id === 'finance')   renderFinance();
 }
 
 function renderCounts() {
   document.getElementById('nc-clients').textContent  = clients.length;
   document.getElementById('nc-projects').textContent = projects.filter(p=>p.status!=='done').length;
+  document.getElementById('nc-team').textContent     = staff.length;
 }
 
 // ─── STATS ─────────────────────────────────────────────────────────────────
+function setBadge(id, cur, prev) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = ''; el.className = 'metric-badge';
+  if (!prev || prev === 0) return;
+  const pct = Math.round((cur - prev) / prev * 100);
+  if (pct > 0)      { el.textContent = '+' + pct + '%'; el.className = 'metric-badge up'; }
+  else if (pct < 0) { el.textContent = pct + '%';       el.className = 'metric-badge down'; }
+  else              { el.textContent = '0%';             el.className = 'metric-badge flat'; }
+}
+
 function renderStats(s) {
   document.getElementById('m-revenue').textContent  = fmt(s.revenue);
   document.getElementById('m-projects').textContent = s.activeProjects;
   document.getElementById('m-clients').textContent  = s.totalClients;
   document.getElementById('m-leads').textContent    = s.totalLeads;
+
+  // Revenue badge — current vs previous period
+  const curRev  = getChartData(currentChartPeriod).data.reduce((a,b) => a+b, 0);
+  const prevRev = getPrevPeriodTotal(currentChartPeriod);
+  setBadge('mb-revenue', curRev, prevRev);
+
+  // Clients badge — new this month vs last month
+  const now = new Date();
+  const thisMon = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0,7);
+  const lastMon = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString().slice(0,7);
+  const newThisMon = clients.filter(c => (c.created_at||'').startsWith(thisMon)).length;
+  const newLastMon = clients.filter(c => (c.created_at||'').startsWith(lastMon)).length;
+  setBadge('mb-clients', newThisMon, newLastMon);
+
+  // Projects badge — active this month vs last month
+  const projThisMon = projects.filter(p => ['active','review'].includes(p.status) && (p.created_at||'').startsWith(thisMon)).length;
+  const projLastMon = projects.filter(p => ['active','review'].includes(p.status) && (p.created_at||'').startsWith(lastMon)).length;
+  setBadge('mb-projects', projThisMon, projLastMon);
+
   renderChart(s.monthly);
 }
 
-function renderChart(monthly) {
-  const max   = Math.max(...monthly, 1);
-  const total = monthly.reduce((a,b) => a+b, 0);
-  const nowM  = new Date().getMonth();
+let revenueChartInstance = null;
+let currentChartPeriod = 'month';
+
+function getChartData(period) {
+  const now = new Date();
+  const paid = invoices.filter(i => i.status === 'paid' && i.issued_at);
+
+  if (period === 'week') {
+    const labels = [], data = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now); d.setDate(d.getDate() - i); d.setHours(0,0,0,0);
+      const next = new Date(d); next.setDate(next.getDate() + 1);
+      const key = d.toISOString().slice(0,10);
+      const dayName = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()];
+      labels.push(i === 0 ? 'Today' : dayName);
+      data.push(paid.filter(inv => inv.issued_at >= key && inv.issued_at < next.toISOString().slice(0,10)).reduce((s,inv)=>s+(inv.amount||0),0));
+    }
+    return { labels, data };
+  }
+
+  if (period === 'month') {
+    const labels = [], data = [];
+    const MON_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date(now); d.setDate(d.getDate() - i); d.setHours(0,0,0,0);
+      const key = d.toISOString().slice(0,10);
+      const next = new Date(d); next.setDate(next.getDate() + 1);
+      labels.push(String(d.getDate()).padStart(2,'0') + ' ' + MON_SHORT[d.getMonth()]);
+      data.push(paid.filter(inv => inv.issued_at >= key && inv.issued_at < next.toISOString().slice(0,10)).reduce((s,inv)=>s+(inv.amount||0),0));
+    }
+    return { labels, data };
+  }
+
+  // year — 12 months
+  const labels = [], data = [];
+  for (let i = 11; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,'0');
+    labels.push(MONTHS_SHORT[d.getMonth()]);
+    data.push(paid.filter(inv => inv.issued_at && inv.issued_at.startsWith(`${y}-${m}`)).reduce((s,inv)=>s+(inv.amount||0),0));
+  }
+  return { labels, data };
+}
+
+function setChartPeriod(period, el) {
+  currentChartPeriod = period;
+  document.querySelectorAll('.chart-period').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  const labels = { week: 'This week', month: 'This month', year: 'This year' };
+  document.querySelectorAll('#dash-period-label,#dash-chart-period-label').forEach(e => e.textContent = labels[period]);
+  document.getElementById('goal-period-label').textContent = labels[period];
+  drawRevenueChart(period);
+}
+
+function drawRevenueChart(period) {
+  const { labels, data } = getChartData(period);
+  const total = data.reduce((a,b) => a+b, 0);
+
+  // Compute vs previous period
+  const prevData = getPrevPeriodTotal(period);
+  const diff = prevData > 0 ? Math.round((total - prevData) / prevData * 100) : null;
+  const badge = document.getElementById('chart-badge');
+  if (diff !== null) {
+    badge.textContent = (diff >= 0 ? '+' : '') + diff + '%';
+    badge.className = 'chart-badge ' + (diff > 0 ? 'up' : diff < 0 ? 'down' : 'flat');
+  } else {
+    badge.textContent = '';
+    badge.className = 'chart-badge';
+  }
+
   document.getElementById('chart-total').textContent = '₽ ' + fmtNum(total);
-  document.getElementById('chart-sub').textContent   = total ? 'Общая выручка за год' : 'Данные появятся после первой сделки';
-  document.getElementById('chart-bars').innerHTML = MONTHS_SHORT.map((m,i) => {
-    const h = Math.max(Math.round((monthly[i]/max)*100), 4);
-    const active = i === nowM;
-    return `<div class="chart-col">
-      <div class="chart-bar${active?' active':''}" style="height:${h}%"></div>
-      <div class="chart-lbl${active?' active':''}">${m}</div>
-    </div>`;
-  }).join('');
+  const subPeriodLabel = period === 'week' ? t('period_week') : period === 'month' ? t('period_month') : t('period_year');
+  document.getElementById('chart-sub').textContent = total
+    ? subPeriodLabel
+    : (currentLang === 'ru' ? 'Появится после первого оплаченного счёта' : 'Will appear after your first paid invoice');
+
+  const canvas = document.getElementById('revenue-chart');
+  if (!canvas) return;
+  if (revenueChartInstance) { revenueChartInstance.destroy(); revenueChartInstance = null; }
+
+  const ctx = canvas.getContext('2d');
+  const canvasH = canvas.parentElement?.clientHeight || 260;
+  const grad = ctx.createLinearGradient(0, 0, 0, canvasH);
+  grad.addColorStop(0,   'rgba(74,222,128,0.2)');
+  grad.addColorStop(0.6, 'rgba(74,222,128,0.05)');
+  grad.addColorStop(1,   'rgba(74,222,128,0)');
+
+  // Plugin: dashed horizontal grid lines
+  const dashedGridPlugin = {
+    id: 'dashedGrid',
+    beforeDraw(chart) {
+      const { ctx, chartArea, scales } = chart;
+      const yScale = scales.y;
+      if (!yScale || !chartArea) return;
+      ctx.save();
+      ctx.setLineDash([4, 6]);
+      ctx.strokeStyle = 'rgba(255,255,255,0.07)';
+      ctx.lineWidth = 1;
+      yScale.ticks.forEach((tick, i) => {
+        const y = yScale.getPixelForTick(i);
+        if (y < chartArea.top || y > chartArea.bottom) return;
+        ctx.beginPath();
+        ctx.moveTo(chartArea.left, y);
+        ctx.lineTo(chartArea.right, y);
+        ctx.stroke();
+      });
+      ctx.restore();
+    }
+  };
+
+  revenueChartInstance = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        data,
+        borderColor: '#4ade80',
+        borderWidth: 2,
+        backgroundColor: grad,
+        fill: true,
+        tension: 0.4,
+        pointRadius: 0,
+        pointHoverRadius: 4,
+        pointHoverBackgroundColor: '#4ade80',
+        pointHoverBorderColor: 'rgba(74,222,128,0.3)',
+        pointHoverBorderWidth: 4,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#18181c',
+          borderColor: 'rgba(255,255,255,0.12)',
+          borderWidth: 1,
+          titleColor: '#7a7a82',
+          bodyColor: '#f0f0f0',
+          padding: { x: 16, y: 12 },
+          cornerRadius: 10,
+          displayColors: false,
+          titleFont: { size: 11, family: 'Inter' },
+          bodyFont: { size: 14, family: 'Inter', weight: '700' },
+          callbacks: {
+            title: items => items[0].label,
+            label: item => item.raw > 0 ? '₽ ' + fmtNum(item.raw) : '—'
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          border: { display: false },
+          ticks: {
+            color: '#4a4a52',
+            font: { size: 10, family: 'Inter' },
+            maxRotation: 0,
+            autoSkip: true,
+            maxTicksLimit: period === 'month' ? 7 : period === 'week' ? 7 : 12,
+            callback: function(val, idx) {
+              if (period === 'month') {
+                // Show ticks every ~5 days: indices 0,5,10,15,20,25,29
+                return (idx % 5 === 0 || idx === labels.length - 1) ? this.getLabelForValue(val) : '';
+              }
+              return this.getLabelForValue(val);
+            }
+          }
+        },
+        y: {
+          display: true,
+          position: 'left',
+          min: 0,
+          grid: { display: false },
+          border: { display: false },
+          ticks: {
+            color: '#4a4a52',
+            font: { size: 10, family: 'Inter' },
+            maxTicksLimit: 5,
+            callback: v => v >= 1000000 ? '₽'+(v/1000000).toFixed(1)+'M' : v >= 1000 ? '₽'+(v/1000).toFixed(0)+'K' : v > 0 ? '₽'+v : '0',
+          }
+        }
+      },
+      animation: { duration: 500, easing: 'easeOutQuart' }
+    },
+    plugins: [dashedGridPlugin]
+  });
+}
+
+function getPrevPeriodTotal(period) {
+  const now = new Date();
+  const paid = invoices.filter(i => i.status === 'paid' && i.issued_at);
+  if (period === 'week') {
+    const start = new Date(now); start.setDate(start.getDate() - 14);
+    const end   = new Date(now); end.setDate(end.getDate() - 7);
+    return paid.filter(i => i.issued_at >= start.toISOString().slice(0,10) && i.issued_at < end.toISOString().slice(0,10)).reduce((s,i)=>s+(i.amount||0),0);
+  }
+  if (period === 'month') {
+    const start = new Date(now); start.setDate(start.getDate() - 60);
+    const end   = new Date(now); end.setDate(end.getDate() - 30);
+    return paid.filter(i => i.issued_at >= start.toISOString().slice(0,10) && i.issued_at < end.toISOString().slice(0,10)).reduce((s,i)=>s+(i.amount||0),0);
+  }
+  // year: prev 12 months
+  const cutoff = new Date(now.getFullYear() - 1, now.getMonth(), 1);
+  const cutoff2 = new Date(now.getFullYear() - 2, now.getMonth(), 1);
+  return paid.filter(i => { const d = i.issued_at; return d >= cutoff2.toISOString().slice(0,7) && d < cutoff.toISOString().slice(0,7); }).reduce((s,i)=>s+(i.amount||0),0);
+}
+
+function renderChart(monthly) {
+  // Called from renderStats — just trigger the current period view
+  drawRevenueChart(currentChartPeriod);
+}
+
+// ─── REVENUE GOAL ──────────────────────────────────────────────────────────
+function loadGoal() {
+  return JSON.parse(localStorage.getItem('reloxy_goal') || '{"amount":0,"period":"month"}');
+}
+function saveGoal() {
+  const amount = parseFloat(document.getElementById('goal-modal-amount').value) || 0;
+  const period = document.getElementById('goal-modal-period').value;
+  localStorage.setItem('reloxy_goal', JSON.stringify({ amount, period }));
+  closeGoalModal();
+  renderGoal();
+}
+function openGoalModal() {
+  const g = loadGoal();
+  document.getElementById('goal-modal-amount').value = g.amount || '';
+  document.getElementById('goal-modal-period').value = g.period || 'month';
+  document.getElementById('goal-overlay').classList.add('open');
+}
+function closeGoalModal() { document.getElementById('goal-overlay').classList.remove('open'); }
+
+function renderGoal() {
+  const g = loadGoal();
+  const periodLabel = g.period === 'year' ? t('goal_period_year') : t('goal_period_month');
+  document.getElementById('goal-period-label').textContent = periodLabel;
+
+  // Current revenue for goal period
+  const now = new Date();
+  const paid = invoices.filter(i => i.status === 'paid' && i.issued_at);
+  let current = 0;
+  if (g.period === 'month') {
+    const ym = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+    current = paid.filter(i => i.issued_at.startsWith(ym)).reduce((a,b) => a+(b.amount||0), 0);
+  } else {
+    const yr = String(now.getFullYear());
+    current = paid.filter(i => i.issued_at.startsWith(yr)).reduce((a,b) => a+(b.amount||0), 0);
+  }
+
+  document.getElementById('goal-current').textContent = '₽ ' + fmtNum(current);
+  document.getElementById('goal-target-label').textContent = g.amount ? '₽ ' + fmtNum(g.amount) : 'not set';
+
+  const fill = document.getElementById('goal-fill');
+  const pctEl = document.getElementById('goal-pct');
+  if (!g.amount) {
+    fill.style.width = '0%';
+    pctEl.textContent = t('goal_empty');
+    fill.classList.remove('done');
+    return;
+  }
+  const pct = Math.min(Math.round(current / g.amount * 100), 100);
+  fill.style.width = pct + '%';
+  fill.classList.toggle('done', pct >= 100);
+  const remaining = Math.max(g.amount - current, 0);
+  pctEl.textContent = pct >= 100
+    ? t('goal_achieved')(g.amount)
+    : t('goal_progress')(pct, remaining);
+
+  // Mini goal in header
+  const miniWrap = document.getElementById('goal-wrap-mini');
+  if (miniWrap) {
+    miniWrap.style.display = 'flex';
+    document.getElementById('goal-mini-current').textContent = '₽ ' + fmtNum(current);
+    document.getElementById('goal-mini-target').textContent  = '₽ ' + fmtNum(g.amount);
+    document.getElementById('goal-mini-fill').style.width = pct + '%';
+  }
+}
+
+// ─── EMPTY STATE HELPER ─────────────────────────────────────────────────────
+function emptySkel(title, sub) {
+  const rows = [
+    { w1:'66%', w2:'42%', op:1 },
+    { w1:'54%', w2:'36%', op:0.5 },
+    { w1:'44%', w2:'28%', op:0.22 },
+  ];
+  return `<div class="empty">
+    <div class="empty-skel">
+      ${rows.map(r => `<div class="empty-skel-row" style="opacity:${r.op}">
+        <div class="empty-skel-av"></div>
+        <div class="empty-skel-lines">
+          <div class="empty-skel-line" style="width:${r.w1}"></div>
+          <div class="empty-skel-line" style="width:${r.w2}"></div>
+        </div>
+      </div>`).join('')}
+    </div>
+    <div class="empty-texts">
+      <div class="empty-title">${title}</div>
+      ${sub ? `<div class="empty-sub">${sub}</div>` : ''}
+    </div>
+  </div>`;
 }
 
 // ─── DASHBOARD ─────────────────────────────────────────────────────────────
 function renderDashboard() {
-  const dp = document.getElementById('dash-projects');
-  if (!projects.length) {
-    dp.innerHTML = '<div class="empty"><div class="empty-title">Проектов нет</div><div class="empty-sub">Добавьте первый проект</div></div>';
-  } else {
-    dp.innerHTML = projects.slice(0,5).map(p => `
-      <div class="dash-project-item">
-        <div>
-          <div class="dpi-title">${esc(p.title)}</div>
-          <div class="dpi-sub">${esc(p.client_name||'—')} · ${statusLabel(p.status)}</div>
-        </div>
-        <div class="dpi-right">
-          <div class="dpi-date">${p.deadline||'—'}</div>
-          ${p.progress>0?`<div class="dpi-status">${p.progress}%</div>`:''}
-        </div>
-      </div>`).join('');
-  }
+  renderGoal();
 
-  const dc = document.getElementById('dash-clients');
-  if (!clients.length) {
-    dc.innerHTML = '<div class="empty"><div class="empty-title">Клиентов нет</div><div class="empty-sub">Добавьте первого клиента</div></div>';
-  } else {
-    dc.innerHTML = clients.slice(0,5).map(c => `
-      <div class="dash-project-item">
-        <div>
-          <div class="dpi-title">${esc(c.name)}</div>
-          <div class="dpi-sub">${esc(c.industry||'—')}</div>
-        </div>
-        <div class="status"><div class="dot ${c.status==='active'?'dot-hi':c.status==='archive'?'dot-lo':'dot-mid'}"></div>${statusClientLabel(c.status)}</div>
-      </div>`).join('');
-  }
+  // Extra metric cards
+  const budgeted = projects.filter(p => p.budget > 0);
+  const avgBudget = budgeted.length ? Math.round(budgeted.reduce((s,p)=>s+(p.budget||0),0)/budgeted.length) : 0;
+  const done = projects.filter(p => p.status === 'done').length;
+  const completion = projects.length ? Math.round(done/projects.length*100) : 0;
+  const avgEl = document.getElementById('m-avg-budget');
+  if (avgEl) avgEl.textContent = avgBudget ? fmt(avgBudget) : '—';
+  const compEl = document.getElementById('m-completion');
+  if (compEl) compEl.textContent = projects.length ? completion+'%' : '—';
+
+  // Chart side stats
+  const paidTotal = invoices.filter(i=>i.status==='paid').reduce((s,i)=>s+(i.amount||0),0);
+  const pendingTotal = invoices.filter(i=>i.status==='pending').reduce((s,i)=>s+(i.amount||0),0);
+  const statsEl = document.getElementById('dash-chart-stats');
+  if (statsEl) statsEl.innerHTML = [
+    { label: 'Total earned', val: fmt(paidTotal) },
+    { label: 'Pending', val: fmt(pendingTotal) },
+    { label: 'Projects', val: projects.length },
+  ].map(s=>`<div class="chart-stat-item"><div class="chart-stat-val">${s.val}</div><div class="chart-stat-lbl">${s.label}</div></div>`).join('');
+
+  const empty = (msg, sub) => `<div class="empty-compact">${msg}${sub ? `<div style="margin-top:4px;font-size:11px;color:var(--g3)">${sub}</div>` : ''}</div>`;
+
+  // In progress
+  const inprog = projects.filter(p => p.status === 'inprogress' || p.status === 'in-progress' || p.status === 'active' || p.status === 'review').slice(0, 5);
+  const elIP = document.getElementById('dash-inprogress');
+  elIP.innerHTML = inprog.length ? inprog.map(p => `
+    <div class="dash-row">
+      <div class="dash-row-dot ${p.status === 'review' ? 'review' : 'active'}"></div>
+      <div class="dash-row-body">
+        <div class="dash-row-title">${esc(p.title)}</div>
+        <div class="dash-row-sub">${esc(p.client_name||'—')}</div>
+      </div>
+      ${p.progress>0 ? `<div class="dash-row-right">${p.progress}%</div>` : ''}
+    </div>`).join('') : empty(t('dash_no_projects'));
+
+  // Upcoming deadlines
+  const today = new Date(); today.setHours(0,0,0,0);
+  const deadlines = projects
+    .filter(p => p.deadline && p.status !== 'done')
+    .map(p => ({ ...p, _d: new Date(p.deadline+'T00:00:00') }))
+    .filter(p => p._d >= today)
+    .sort((a,b) => a._d - b._d)
+    .slice(0, 5);
+  const elDL = document.getElementById('dash-deadlines');
+  elDL.innerHTML = deadlines.length ? deadlines.map(p => {
+    const diff = Math.ceil((p._d - today) / 86400000);
+    const label = diff === 0 ? t('dash_today') : diff === 1 ? t('dash_tomorrow') : `${diff}d`;
+    const urgent = diff <= 3;
+    return `<div class="dash-row">
+      <div class="dash-row-dot ${urgent ? 'review' : 'queue'}"></div>
+      <div class="dash-row-body">
+        <div class="dash-row-title">${esc(p.title)}</div>
+        <div class="dash-row-sub">${esc(p.client_name||'—')}</div>
+      </div>
+      <div class="dash-row-right ${urgent ? 'urgent' : ''}">${label}</div>
+    </div>`;
+  }).join('') : empty(t('dash_no_deadlines'));
+
+  // Unpaid invoices
+  const unpaid = invoices.filter(i => i.status !== 'paid').slice(0, 5);
+  const elUP = document.getElementById('dash-unpaid');
+  elUP.innerHTML = unpaid.length ? unpaid.map(i => `
+    <div class="dash-row">
+      <div class="dash-row-dot queue"></div>
+      <div class="dash-row-body">
+        <div class="dash-row-title">${esc(i.client_name||i.number||'Invoice')}</div>
+        <div class="dash-row-sub">${i.number||''}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="dash-row-right">${i.amount ? '₽ '+Number(i.amount).toLocaleString('en') : '—'}</div>
+        <button class="dash-pay-btn" onclick="markPaid(${i.id})">${t('dash_mark_paid')}</button>
+      </div>
+    </div>`).join('') : `<div class="empty"><div class="empty-title">${t('dash_all_paid')}</div></div>`;
+
+  // Always redraw chart with current data
+  drawRevenueChart(currentChartPeriod);
 }
 
 // ─── CALENDAR ──────────────────────────────────────────────────────────────
@@ -742,7 +2035,11 @@ function renderClients(list) {
   const data  = (list || clients).filter(c => clientFilter==='all' || c.status===clientFilter);
   const tbody = document.getElementById('clients-tbody');
   const empty = document.getElementById('clients-empty');
-  if (!data.length) { tbody.innerHTML=''; empty.style.display='flex'; return; }
+  if (!data.length) {
+    tbody.innerHTML='';
+    empty.innerHTML = emptySkel(t('no_clients'), t('no_clients_sub'));
+    empty.style.display='block'; return;
+  }
   empty.style.display = 'none';
   tbody.innerHTML = data.map(c => `
     <tr>
@@ -753,8 +2050,10 @@ function renderClients(list) {
       <td>${c.project_count||0}</td>
       <td style="font-variant-numeric:tabular-nums">${fmt(c.total_paid||0)}</td>
       <td>
-        <span class="td-action" onclick="editClient(${c.id})" style="margin-right:12px">Ред.</span>
-        <span class="td-action" onclick="deleteClient(${c.id})">Удал.</span>
+        <div class="td-actions">
+          <span class="td-action" onclick="editClient(${c.id})">${t('act_edit')}</span>
+          <span class="td-action danger" onclick="deleteClient(${c.id})">${t('act_delete')}</span>
+        </div>
       </td>
     </tr>`).join('');
 }
@@ -766,31 +2065,56 @@ function renderProjects() {
     const k = p.status==='in-progress'?'inprogress':p.status;
     if (cols[k]) cols[k].push(p); else cols.queue.push(p);
   });
+  const today = new Date(); today.setHours(0,0,0,0);
   for (const [k, arr] of Object.entries(cols)) {
     document.getElementById('kn-'+k).textContent = arr.length;
-    document.getElementById('kc-'+k).innerHTML = arr.length ? arr.map(p => `
-      <div class="k-card" onclick="editProject(${p.id})">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start">
-          <div class="k-card-tag">${esc(p.type||'ПРОЕКТ')}</div>
-          <span class="k-card-del" onclick="deleteProject(${p.id},event)">✕</span>
+    document.getElementById('kc-'+k).innerHTML = arr.length ? arr.map(p => {
+      // Deadline badge
+      let dlBadge = '';
+      if (p.deadline && p.status !== 'done') {
+        const d = new Date(p.deadline+'T00:00:00');
+        const diff = Math.ceil((d - today) / 86400000);
+        if (diff < 0)       dlBadge = `<span class="k-dl-badge overdue">Overdue</span>`;
+        else if (diff === 0)dlBadge = `<span class="k-dl-badge overdue">Today</span>`;
+        else if (diff <= 5) dlBadge = `<span class="k-dl-badge urgent">${diff}d</span>`;
+        else                dlBadge = `<span class="k-dl-badge ok">${p.deadline}</span>`;
+      }
+      // Client chip
+      const av = p.client_name ? `<span class="k-av">${p.client_name[0].toUpperCase()}</span>` : '';
+      const stClass = 'st-'+(k==='inprogress'?'inprogress':k);
+      // Progress bar color
+      const barColor = p.progress>=100 ? '#4ade80' : k==='review' ? '#fbbf24' : 'rgba(255,255,255,0.7)';
+      return `<div class="k-card ${stClass}" onclick="editProject(${p.id})">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+          <div class="k-card-tag" style="background:var(--s3);padding:2px 8px;border-radius:5px">${esc(p.type||'PROJECT')}</div>
+          <span class="k-card-del" onclick="deleteProject(${p.id},event)" style="font-size:12px">✕</span>
         </div>
-        <div class="k-card-title">${esc(p.title)}</div>
-        ${p.progress>0?`<div class="k-card-prog"><div class="k-card-prog-top"><span>Прогресс</span><span>${p.progress}%</span></div><div class="bar"><div class="bar-fill" style="width:${p.progress}%"></div></div></div>`:''}
+        <div class="k-card-title" style="font-size:14px;font-weight:600;line-height:1.4;margin-bottom:${p.progress>0?'12px':'10px'}">${esc(p.title)}</div>
+        ${p.progress>0?`<div class="k-card-prog" style="margin-bottom:10px"><div class="k-card-prog-top" style="margin-bottom:5px"><span style="font-size:11px;color:var(--g2)">${t('k_progress')}</span><span style="font-size:11px;font-weight:700;color:var(--white)">${p.progress}%</span></div><div class="bar" style="height:3px"><div class="bar-fill" style="width:${p.progress}%;background:${barColor}"></div></div></div>`:''}
         <div class="k-card-foot">
-          <span>${esc(p.client_name||'—')}</span>
-          <span>${p.deadline||''}</span>
+          <div class="k-client-chip">${av}<span style="font-size:12px;color:var(--g2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p.client_name||'—')}</span></div>
+          <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+            ${p.budget ? `<span class="k-budget-tag">${fmt(p.budget)}</span>` : ''}
+            ${dlBadge}
+          </div>
         </div>
-      </div>`).join('') : `<div class="k-col-empty">Пусто</div>`;
+      </div>`;
+    }).join('') : `<div class="k-col-empty" style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:20px 12px">
+      <div style="width:28px;height:28px;border-radius:50%;background:var(--s3);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;opacity:0.5">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:10px;height:10px;opacity:0.5"><line x1="8" y1="3" x2="8" y2="13"/><line x1="3" y1="8" x2="13" y2="8"/></svg>
+      </div>
+      <div style="font-size:11px;color:var(--g2)">${t('k_empty')}</div>
+    </div>`;
   }
 }
 
 // ─── FUNNEL ────────────────────────────────────────────────────────────────
 const STAGES = [
-  { key:'new',       label:'Новый лид' },
-  { key:'qualify',   label:'Квалификация' },
-  { key:'proposal',  label:'КП отправлено' },
-  { key:'negotiate', label:'Переговоры' },
-  { key:'closed',    label:'Закрыта' },
+  { key:'new',       i18n:'stage_new' },
+  { key:'qualify',   i18n:'stage_qualify' },
+  { key:'proposal',  i18n:'stage_proposal' },
+  { key:'negotiate', i18n:'stage_negotiate' },
+  { key:'closed',    i18n:'stage_closed' },
 ];
 
 function renderFunnel() {
@@ -813,17 +2137,17 @@ function renderFunnel() {
   const maxC = Math.max(...Object.values(counts), 1);
   document.getElementById('funnel-list').innerHTML = `
     <div class="funnel-header-row">
-      <div style="width:160px;flex-shrink:0;font-size:10px;text-transform:uppercase;letter-spacing:0.6px;color:var(--g3);font-weight:600">Стадия</div>
+      <div style="width:180px;flex-shrink:0;font-size:11px;color:var(--g1);font-weight:500">${t('funnel_stage')}</div>
       <div style="flex:1"></div>
-      <div style="width:40px;text-align:right;font-size:10px;text-transform:uppercase;letter-spacing:0.6px;color:var(--g3);font-weight:600">Лидов</div>
-      <div style="width:52px;text-align:right;font-size:10px;text-transform:uppercase;letter-spacing:0.6px;color:var(--g3);font-weight:600">Конв.</div>
-      <div style="width:96px;text-align:right;font-size:10px;text-transform:uppercase;letter-spacing:0.6px;color:var(--g3);font-weight:600">Сумма</div>
+      <div style="width:44px;text-align:right;font-size:11px;color:var(--g1);font-weight:500">${t('funnel_leads')}</div>
+      <div style="width:60px;text-align:right;font-size:11px;color:var(--g1);font-weight:500">${t('funnel_conv')}</div>
+      <div style="width:110px;text-align:right;font-size:11px;color:var(--g1);font-weight:500">${t('funnel_value')}</div>
     </div>
     ${STAGES.map(s => {
       const pct  = total ? Math.round(counts[s.key]/total*100) : 0;
       const barW = Math.round(counts[s.key]/maxC*100);
       return `<div class="funnel-row">
-        <div class="f-name">${s.label}</div>
+        <div class="f-name">${t(s.i18n)}</div>
         <div class="f-bar-wrap"><div class="f-bar-outer"><div class="f-bar-inner" style="width:${barW}%"></div></div></div>
         <div class="f-n">${counts[s.key]}</div>
         <div class="f-conv">${pct}%</div>
@@ -844,25 +2168,233 @@ function renderFinance() {
 
   document.getElementById('fi-income').textContent    = fmt(monthPaid.reduce((a,b)=>a+(b.amount||0),0));
   document.getElementById('fi-pending').textContent   = fmt(pending.reduce((a,b)=>a+(b.amount||0),0));
-  document.getElementById('fi-pending-n').textContent = `${pending.length} счетов`;
+  document.getElementById('fi-pending-n').textContent = t('fi_inv_count')(pending.length);
   document.getElementById('fi-overdue').textContent   = fmt(overdue.reduce((a,b)=>a+(b.amount||0),0));
-  document.getElementById('fi-overdue-n').textContent = `${overdue.length} счетов`;
+  document.getElementById('fi-overdue-n').textContent = t('fi_inv_count')(overdue.length);
   document.getElementById('fi-total').textContent     = fmt(paid.reduce((a,b)=>a+(b.amount||0),0));
 
   const tbody = document.getElementById('invoices-tbody');
   const empty = document.getElementById('invoices-empty');
-  if (!invoices.length) { tbody.innerHTML=''; empty.style.display='flex'; return; }
+  if (!invoices.length) {
+    tbody.innerHTML='';
+    empty.innerHTML = emptySkel(t('no_invoices'), t('no_invoices_sub'));
+    empty.style.display='block'; return;
+  }
   empty.style.display = 'none';
   tbody.innerHTML = invoices.map(i => `
     <tr>
       <td class="td-primary" style="font-variant-numeric:tabular-nums">${esc(i.number||'—')}</td>
       <td>${esc(i.client_name||'—')}</td>
       <td style="font-variant-numeric:tabular-nums;font-weight:500;color:var(--white)">${fmt(i.amount)}</td>
-      <td style="font-size:12px">${i.issued_at||'—'}</td>
-      <td style="font-size:12px">${i.due_at||'—'}</td>
+      <td style="font-size:13px">${i.issued_at||'—'}</td>
+      <td style="font-size:13px">${i.due_at||'—'}</td>
       <td><div class="inv-status ${i.status}">${invLabel(i.status)}</div></td>
-      <td><span class="td-action" onclick="deleteInvoice(${i.id})">Удал.</span></td>
+      <td>
+        <div class="td-actions">
+          ${i.status !== 'paid' ? `<span class="td-action" onclick="markPaid(${i.id})" style="color:#4ade80">✓ Paid</span>` : ''}
+          <span class="td-action" onclick="editInvoice(${i.id})">${t('act_edit')}</span>
+          <span class="td-action" onclick="printInvoice(${i.id})">PDF</span>
+          <span class="td-action danger" onclick="deleteInvoice(${i.id})">${t('act_delete')}</span>
+        </div>
+      </td>
     </tr>`).join('');
+}
+
+// ─── SETTINGS ──────────────────────────────────────────────────────────────
+let currentSetTab = 'profile';
+
+function setLang(lang, btn) {
+  applyLang(lang);
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
+  setMsg('profile-msg', t('msg_lang_set'), 'ok');
+}
+
+function switchSetTab(tab, btn) {
+  currentSetTab = tab;
+  document.querySelectorAll('.set-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('set-tab-profile').style.display = tab==='profile' ? '' : 'none';
+  document.getElementById('set-tab-studio').style.display  = tab==='studio'  ? '' : 'none';
+}
+
+function saveCurrentTab() {
+  if (currentSetTab === 'profile') saveProfile();
+  else saveStudio();
+}
+
+function onTgToggle(cb) {
+  document.getElementById('tg-fields-wrap').style.display = cb.checked ? 'flex' : 'none';
+}
+
+function renderSettings() {
+  // Profile tab
+  document.getElementById('set-name').value   = user?.name  || '';
+  document.getElementById('set-email').value  = user?.email || '';
+  document.getElementById('set-phone').value  = user?.phone || '';
+  // Big avatar
+  const initials = (user?.name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  document.getElementById('set-big-avatar').textContent  = initials;
+  document.getElementById('set-avatar-name').textContent  = user?.name  || '';
+  document.getElementById('set-avatar-email').textContent = user?.email || '';
+  // Studio tab
+  document.getElementById('set-studio').value = user?.studio_name || '';
+  // Language
+  const savedLang = localStorage.getItem('reloxy_lang') || 'en';
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === savedLang));
+  // Revenue goal
+  const g = JSON.parse(localStorage.getItem('reloxy_goal') || 'null');
+  if (g) {
+    document.getElementById('set-goal-amount').value = g.amount || '';
+    document.getElementById('set-goal-period').value = g.period || 'month';
+  }
+  // Telegram
+  const tgToken = localStorage.getItem('tg_token_hint') || '';
+  const tgChat  = localStorage.getItem('tg_chat_hint')  || '';
+  document.getElementById('set-tg-token').value = tgToken;
+  document.getElementById('set-tg-chat').value  = tgChat;
+  const hasTg = !!(tgToken && tgChat);
+  document.getElementById('tg-toggle').checked = hasTg;
+  document.getElementById('tg-fields-wrap').style.display = hasTg ? 'flex' : 'none';
+  document.getElementById('tg-toggle-sub').textContent = hasTg ? t('set_tg_on') : t('set_tg_off');
+  // clear msgs
+  ['profile-msg','password-msg','goal-msg','tg-msg','studio-msg'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.className = 'set-msg'; el.textContent = ''; }
+  });
+}
+
+function setMsg(id, text, type) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = text;
+  el.className = 'set-msg ' + type;
+  setTimeout(() => { el.className = 'set-msg'; el.textContent = ''; }, 3500);
+}
+
+async function saveProfile() {
+  const name = document.getElementById('set-name').value.trim();
+  if (!name) { setMsg('profile-msg', t('err_name_req'), 'err'); return; }
+  try {
+    const updated = await api('PUT', '/api/me', { name, studio_name: user?.studio_name || '' });
+    user = { ...user, ...updated };
+    localStorage.setItem('crm_user', JSON.stringify(user));
+    document.getElementById('sb-name').textContent = user.name;
+    document.getElementById('sb-role').textContent = user.studio_name || 'Studio';
+    const ini = user.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    document.getElementById('sb-initials').textContent = ini;
+    document.getElementById('popup-initials').textContent = ini;
+    document.getElementById('popup-name').textContent = user.name;
+    document.getElementById('set-big-avatar').textContent = ini;
+    document.getElementById('set-avatar-name').textContent = user.name;
+    setMsg('profile-msg', t('msg_profile_saved'), 'ok');
+  } catch(e) { setMsg('profile-msg', e.message, 'err'); }
+}
+
+async function saveStudio() {
+  const studio = document.getElementById('set-studio').value.trim();
+  try {
+    const updated = await api('PUT', '/api/me', { name: user?.name || '', studio_name: studio });
+    user = { ...user, ...updated };
+    localStorage.setItem('crm_user', JSON.stringify(user));
+    document.getElementById('sb-role').textContent = studio || 'Studio';
+    setMsg('studio-msg', t('msg_studio_saved'), 'ok');
+  } catch(e) { setMsg('studio-msg', e.message, 'err'); }
+}
+
+async function savePassword() {
+  const cur     = document.getElementById('set-cur-pass').value;
+  const newPass = document.getElementById('set-new-pass').value;
+  const confirm = document.getElementById('set-confirm-pass').value;
+  if (!cur || !newPass) { setMsg('password-msg', t('err_fill_all'), 'err'); return; }
+  if (newPass.length < 6) { setMsg('password-msg', t('err_min6'), 'err'); return; }
+  if (newPass !== confirm) { setMsg('password-msg', t('err_passwords'), 'err'); return; }
+  try {
+    await api('PUT', '/api/me/password', { currentPassword: cur, newPassword: newPass });
+    ['set-cur-pass','set-new-pass','set-confirm-pass'].forEach(id => document.getElementById(id).value = '');
+    setMsg('password-msg', t('msg_pass_updated'), 'ok');
+  } catch(e) { setMsg('password-msg', e.message, 'err'); }
+}
+
+function saveGoalSettings() {
+  const amount = parseFloat(document.getElementById('set-goal-amount').value);
+  const period = document.getElementById('set-goal-period').value;
+  if (!amount || amount <= 0) { setMsg('goal-msg', t('err_valid_amount'), 'err'); return; }
+  localStorage.setItem('reloxy_goal', JSON.stringify({ amount, period }));
+  setMsg('goal-msg', t('msg_goal_saved'), 'ok');
+  renderGoal();
+}
+
+async function saveTelegram() {
+  const tkn    = document.getElementById('set-tg-token').value.trim();
+  const chatId = document.getElementById('set-tg-chat').value.trim();
+  if (!tkn || !chatId) { setMsg('tg-msg', t('err_tg_fill'), 'err'); return; }
+  localStorage.setItem('tg_token_hint', tkn);
+  localStorage.setItem('tg_chat_hint', chatId);
+  document.getElementById('tg-toggle-sub').textContent = t('set_tg_on');
+  try {
+    await api('POST', '/api/telegram/test', { token: tkn, chatId });
+    setMsg('tg-msg', 'Test message sent ✓', 'ok');
+  } catch(e) { setMsg('tg-msg', 'Saved locally. Set env vars on Render to activate.', 'err'); }
+}
+
+// ─── TEAM ──────────────────────────────────────────────────────────────────
+function renderTeam() {
+  const tbody = document.getElementById('team-tbody');
+  const empty = document.getElementById('team-empty');
+  if (!staff.length) {
+    tbody.innerHTML='';
+    empty.innerHTML = emptySkel(t('no_team'), t('no_team_sub'));
+    empty.style.display='block'; return;
+  }
+  empty.style.display = 'none';
+  tbody.innerHTML = staff.map(m => `
+    <tr>
+      <td>
+        <div class="td-primary">${esc(m.name)}</div>
+      </td>
+      <td>${esc(m.position||'—')}</td>
+      <td style="font-size:13px">${esc(m.email||'—')}</td>
+      <td style="font-size:13px">${esc(m.phone||'—')}</td>
+      <td><span class="staff-status ${m.status||'active'}">${m.status==='inactive'?t('st_inactive'):t('st_active')}</span></td>
+      <td>
+        <div class="td-actions">
+          <span class="td-action" onclick="editStaff(${m.id})">${t('act_edit')}</span>
+          <span class="td-action danger" onclick="deleteStaff(${m.id})">${t('act_delete')}</span>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+function openStaffModal(m) {
+  showModal(m ? t('modal_edit_member') : t('modal_new_member'), `
+    <div class="field-row">
+      <div class="field"><label class="field-label">${t('f_name')}</label><input class="field-input" id="m-name" value="${esc(m?.name||'')}" placeholder="Full name"></div>
+      <div class="field"><label class="field-label">${t('f_position')}</label><input class="field-input" id="m-position" value="${esc(m?.position||'')}" placeholder="Designer"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label class="field-label">${t('f_email')}</label><input class="field-input" id="m-email" value="${esc(m?.email||'')}" placeholder="email@studio.com"></div>
+      <div class="field"><label class="field-label">${t('f_phone')}</label><input class="field-input" id="m-phone" value="${esc(m?.phone||'')}" placeholder="+1 555..."></div>
+    </div>
+    <div class="field">
+      <label class="field-label">${t('f_status')}</label>
+      <select class="field-input" id="m-status">
+        <option value="active" ${(!m||m.status==='active')?'selected':''}>${t('st_active')}</option>
+        <option value="inactive" ${m?.status==='inactive'?'selected':''}>${t('st_inactive')}</option>
+      </select>
+    </div>`, async () => {
+    const data = { name: val('m-name'), position: val('m-position'), email: val('m-email'), phone: val('m-phone'), status: val('m-status') };
+    if (!data.name) { showErr(t('err_name_req')); return; }
+    try {
+      if (m) { const updated = await api('PUT', `/api/staff/${m.id}`, data); staff = staff.map(s=>s.id===m.id?updated:s); }
+      else   { const created = await api('POST', '/api/staff', data); staff.push(created); }
+      renderTeam(); renderCounts(); closeModal(); toast(m ? t('toast_member_updated') : t('toast_member_added'));
+    } catch(e) { showErr(e.message); }
+  });
+}
+function editStaff(id)   { openStaffModal(staff.find(s=>s.id===id)); }
+async function deleteStaff(id) {
+  if (!confirm(t('confirm_del_member'))) return;
+  try { await api('DELETE', `/api/staff/${id}`); staff = staff.filter(s=>s.id!==id); renderTeam(); renderCounts(); toast(t('toast_member_removed')); } catch(e) { toast(e.message); }
 }
 
 // ─── MODALS ────────────────────────────────────────────────────────────────
@@ -872,6 +2404,7 @@ function openAddModal() {
   else if (currentPage==='projects') openProjectModal();
   else if (currentPage==='funnel')   openDealModal();
   else if (currentPage==='finance')  openInvoiceModal();
+  else if (currentPage==='team')     openStaffModal();
   else openClientModal();
 }
 
@@ -889,65 +2422,83 @@ async function saveModal() {
 }
 
 function openClientModal(c) {
-  showModal(c?'Редактировать клиента':'Новый клиент', `
+  showModal(c?t('modal_edit_client'):t('modal_new_client'), `
     <div class="field-row">
-      <div class="field"><label class="field-label">Компания *</label><input class="field-input" id="m-name" value="${esc(c?.name||'')}" placeholder="Название"></div>
-      <div class="field"><label class="field-label">Отрасль</label><input class="field-input" id="m-industry" value="${esc(c?.industry||'')}" placeholder="IT / SaaS"></div>
+      <div class="field"><label class="field-label">${t('f_company')}</label><input class="field-input" id="m-name" value="${esc(c?.name||'')}" placeholder="Studio name"></div>
+      <div class="field"><label class="field-label">${t('f_industry')}</label><input class="field-input" id="m-industry" value="${esc(c?.industry||'')}" placeholder="IT / SaaS"></div>
     </div>
     <div class="field-row">
-      <div class="field"><label class="field-label">Контакт</label><input class="field-input" id="m-contact" value="${esc(c?.contact_name||'')}" placeholder="Имя"></div>
-      <div class="field"><label class="field-label">Email</label><input class="field-input" id="m-email" value="${esc(c?.email||'')}" placeholder="email@co.ru"></div>
+      <div class="field"><label class="field-label">${t('f_contact')}</label><input class="field-input" id="m-contact" value="${esc(c?.contact_name||'')}" placeholder="Full name"></div>
+      <div class="field"><label class="field-label">${t('f_email')}</label><input class="field-input" id="m-email" value="${esc(c?.email||'')}" placeholder="email@company.com"></div>
     </div>
     <div class="field-row">
-      <div class="field"><label class="field-label">Телефон</label><input class="field-input" id="m-phone" value="${esc(c?.phone||'')}" placeholder="+7 999..."></div>
-      <div class="field"><label class="field-label">Статус</label><select class="field-input" id="m-status">
-        <option value="active" ${c?.status==='active'?'selected':''}>Активный</option>
-        <option value="lead" ${c?.status==='lead'?'selected':''}>Потенциальный</option>
-        <option value="archive" ${c?.status==='archive'?'selected':''}>Архив</option>
+      <div class="field"><label class="field-label">${t('f_phone')}</label><input class="field-input" id="m-phone" value="${esc(c?.phone||'')}" placeholder="+1 555..."></div>
+      <div class="field"><label class="field-label">${t('f_status')}</label><select class="field-input" id="m-status">
+        <option value="active" ${c?.status==='active'?'selected':''}>${t('st_active')}</option>
+        <option value="lead" ${c?.status==='lead'?'selected':''}>${t('st_lead')}</option>
+        <option value="archive" ${c?.status==='archive'?'selected':''}>${t('st_archive')}</option>
       </select></div>
     </div>`, async () => {
     const body = { name:val('m-name'), industry:val('m-industry'), contact_name:val('m-contact'), email:val('m-email'), phone:val('m-phone'), status:val('m-status') };
     try {
-      if (c) await api('PUT', `/api/clients/${c.id}`, body);
-      else   await api('POST', '/api/clients', body);
-      closeModal(); await loadAll(); renderClients(); toast(c?'Клиент обновлён':'Клиент добавлен');
+      if (c) {
+        const updated = await api('PUT', `/api/clients/${c.id}`, body);
+        clients = clients.map(x => x.id===c.id ? updated : x);
+      } else {
+        const created = await api('POST', '/api/clients', body);
+        clients.push(created);
+      }
+      closeModal(); renderClients(); renderCounts(); toast(c?t('toast_client_updated'):t('toast_client_added'));
+      loadAll();
     } catch(e) { showErr(e.message); }
   });
 }
 
 function editClient(id)    { openClientModal(clients.find(c=>c.id===id)); }
 async function deleteClient(id) {
-  if (!confirm('Удалить клиента?')) return;
-  try { await api('DELETE', `/api/clients/${id}`); await loadAll(); renderClients(); toast('Клиент удалён'); } catch(e) { toast(e.message); }
+  if (!confirm(t('confirm_del_client'))) return;
+  try {
+    await api('DELETE', `/api/clients/${id}`);
+    clients = clients.filter(c=>c.id!==id);
+    renderClients(); renderCounts(); toast(t('toast_client_deleted')); loadAll();
+  } catch(e) { toast(e.message); }
 }
 
 function openProjectModal(p) {
   const clientOpts = clients.map(c=>`<option value="${c.id}" ${p?.client_id==c.id?'selected':''}>${esc(c.name)}</option>`).join('');
-  showModal(p?'Редактировать проект':'Новый проект', `
+  showModal(p?t('modal_edit_project'):t('modal_new_project'), `
     <div class="field-row">
-      <div class="field"><label class="field-label">Название *</label><input class="field-input" id="m-title" value="${esc(p?.title||'')}" placeholder="Ребрендинг..."></div>
-      <div class="field"><label class="field-label">Тип</label><input class="field-input" id="m-type" value="${esc(p?.type||'')}" placeholder="БРЕНД / ВЕБ..."></div>
+      <div class="field"><label class="field-label">${t('f_title')}</label><input class="field-input" id="m-title" value="${esc(p?.title||'')}" placeholder="Rebrand..."></div>
+      <div class="field"><label class="field-label">${t('f_type')}</label><input class="field-input" id="m-type" value="${esc(p?.type||'')}" placeholder="BRAND / WEB..."></div>
     </div>
     <div class="field-row">
-      <div class="field"><label class="field-label">Клиент</label><select class="field-input" id="m-client"><option value="">— не выбран —</option>${clientOpts}</select></div>
-      <div class="field"><label class="field-label">Статус</label><select class="field-input" id="m-status">
-        <option value="queue" ${p?.status==='queue'?'selected':''}>Очередь</option>
-        <option value="in-progress" ${p?.status==='in-progress'?'selected':''}>В работе</option>
-        <option value="review" ${p?.status==='review'?'selected':''}>Согласование</option>
-        <option value="done" ${p?.status==='done'?'selected':''}>Готово</option>
+      <div class="field"><label class="field-label">${t('f_client')}</label><select class="field-input" id="m-client"><option value="">${t('opt_none')}</option>${clientOpts}</select></div>
+      <div class="field"><label class="field-label">${t('f_status')}</label><select class="field-input" id="m-status">
+        <option value="queue" ${p?.status==='queue'?'selected':''}>${t('st_queue')}</option>
+        <option value="in-progress" ${p?.status==='in-progress'?'selected':''}>${t('st_inprogress')}</option>
+        <option value="review" ${p?.status==='review'?'selected':''}>${t('st_review')}</option>
+        <option value="done" ${p?.status==='done'?'selected':''}>${t('st_done')}</option>
       </select></div>
     </div>
     <div class="field-row">
-      <div class="field"><label class="field-label">Прогресс %</label><input class="field-input" id="m-progress" type="number" min="0" max="100" value="${p?.progress||0}"></div>
-      <div class="field"><label class="field-label">Дедлайн</label><input class="field-input" id="m-deadline" type="date" value="${p?.deadline||''}"></div>
+      <div class="field"><label class="field-label">${t('f_progress')}</label><input class="field-input" id="m-progress" type="number" min="0" max="100" value="${p?.progress||0}"></div>
+      <div class="field"><label class="field-label">${t('f_deadline')}</label><input class="field-input" id="m-deadline" type="date" value="${p?.deadline||''}"></div>
     </div>
-    <div class="field"><label class="field-label">Бюджет ₽</label><input class="field-input" id="m-budget" type="number" value="${p?.budget||0}" placeholder="0"></div>
+    <div class="field"><label class="field-label">${t('f_budget')}</label><input class="field-input" id="m-budget" type="number" value="${p?.budget||0}" placeholder="0"></div>
   `, async () => {
     const body = { title:val('m-title'), type:val('m-type'), client_id:val('m-client')||null, status:val('m-status'), progress:+val('m-progress'), deadline:val('m-deadline'), budget:+val('m-budget') };
     try {
-      if (p) await api('PUT', `/api/projects/${p.id}`, body);
-      else   await api('POST', '/api/projects', body);
-      closeModal(); await loadAll(); renderProjects(); toast(p?'Проект обновлён':'Проект добавлен');
+      if (p) {
+        const updated = await api('PUT', `/api/projects/${p.id}`, body);
+        updated.client_name = clients.find(c=>c.id==updated.client_id)?.name || p.client_name || null;
+        projects = projects.map(x => x.id===p.id ? updated : x);
+      } else {
+        const created = await api('POST', '/api/projects', body);
+        created.client_name = clients.find(c=>c.id==created.client_id)?.name || null;
+        projects.push(created);
+      }
+      closeModal(); renderProjects(); renderCounts(); toast(p?t('toast_project_updated'):t('toast_project_added'));
+      loadAll();
     } catch(e) { showErr(e.message); }
   });
 }
@@ -955,61 +2506,219 @@ function openProjectModal(p) {
 function editProject(id)    { openProjectModal(projects.find(p=>p.id===id)); }
 async function deleteProject(id, e) {
   e.stopPropagation();
-  if (!confirm('Удалить проект?')) return;
-  try { await api('DELETE', `/api/projects/${id}`); await loadAll(); renderProjects(); toast('Проект удалён'); } catch(e2) { toast(e2.message); }
+  if (!confirm(t('confirm_del_project'))) return;
+  try {
+    await api('DELETE', `/api/projects/${id}`);
+    projects = projects.filter(p=>p.id!==id);
+    renderProjects(); renderCounts(); toast(t('toast_project_deleted')); loadAll();
+  } catch(e2) { toast(e2.message); }
 }
 
 function openDealModal(d) {
   const clientOpts = clients.map(c=>`<option value="${c.id}" ${d?.client_id==c.id?'selected':''}>${esc(c.name)}</option>`).join('');
-  showModal(d?'Редактировать сделку':'Новый лид', `
-    <div class="field"><label class="field-label">Название *</label><input class="field-input" id="m-title" value="${esc(d?.title||'')}" placeholder="Ребрендинг..."></div>
+  showModal(d?t('modal_edit_deal'):t('modal_new_deal'), `
+    <div class="field"><label class="field-label">${t('f_title')}</label><input class="field-input" id="m-title" value="${esc(d?.title||'')}" placeholder="Rebranding..."></div>
     <div class="field-row">
-      <div class="field"><label class="field-label">Клиент</label><select class="field-input" id="m-client"><option value="">— не выбран —</option>${clientOpts}</select></div>
-      <div class="field"><label class="field-label">Стадия</label><select class="field-input" id="m-stage">
-        <option value="new" ${d?.stage==='new'?'selected':''}>Новый лид</option>
-        <option value="qualify" ${d?.stage==='qualify'?'selected':''}>Квалификация</option>
-        <option value="proposal" ${d?.stage==='proposal'?'selected':''}>КП отправлено</option>
-        <option value="negotiate" ${d?.stage==='negotiate'?'selected':''}>Переговоры</option>
-        <option value="closed" ${d?.stage==='closed'?'selected':''}>Закрыта</option>
+      <div class="field"><label class="field-label">${t('f_client')}</label><select class="field-input" id="m-client"><option value="">${t('opt_none')}</option>${clientOpts}</select></div>
+      <div class="field"><label class="field-label">${t('f_stage')}</label><select class="field-input" id="m-stage">
+        ${STAGES.map(s=>`<option value="${s.key}" ${d?.stage===s.key?'selected':''}>${t(s.i18n)}</option>`).join('')}
       </select></div>
     </div>
-    <div class="field"><label class="field-label">Сумма ₽</label><input class="field-input" id="m-value" type="number" value="${d?.value||0}" placeholder="0"></div>
+    <div class="field"><label class="field-label">${t('f_value')}</label><input class="field-input" id="m-value" type="number" value="${d?.value||0}" placeholder="0"></div>
   `, async () => {
     const body = { title:val('m-title'), client_id:val('m-client')||null, stage:val('m-stage'), value:+val('m-value') };
     try {
-      if (d) await api('PUT', `/api/deals/${d.id}`, body);
-      else   await api('POST', '/api/deals', body);
-      closeModal(); await loadAll(); renderFunnel(); toast(d?'Сделка обновлена':'Лид добавлен');
+      if (d) {
+        const updated = await api('PUT', `/api/deals/${d.id}`, body);
+        updated.client_name = clients.find(c=>c.id==updated.client_id)?.name || d.client_name || null;
+        deals = deals.map(x => x.id===d.id ? updated : x);
+      } else {
+        const created = await api('POST', '/api/deals', body);
+        created.client_name = clients.find(c=>c.id==created.client_id)?.name || null;
+        deals.push(created);
+      }
+      closeModal(); renderFunnel(); toast(d?t('toast_deal_updated'):t('toast_deal_added'));
+      loadAll();
     } catch(e) { showErr(e.message); }
   });
 }
 
-function openInvoiceModal() {
-  const clientOpts = clients.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');
-  showModal('Новый счёт', `
+function openInvoiceModal(inv) {
+  const clientOpts = clients.map(c=>`<option value="${c.id}" ${inv?.client_id==c.id?'selected':''}>${esc(c.name)}</option>`).join('');
+  showModal(inv ? t('modal_edit_invoice') : t('modal_new_invoice'), `
     <div class="field-row">
-      <div class="field"><label class="field-label">Номер</label><input class="field-input" id="m-number" placeholder="#2026-001"></div>
-      <div class="field"><label class="field-label">Клиент</label><select class="field-input" id="m-client"><option value="">— не выбран —</option>${clientOpts}</select></div>
+      <div class="field"><label class="field-label">${t('f_number')}</label><input class="field-input" id="m-number" placeholder="#2026-001" value="${esc(inv?.number||'')}"></div>
+      <div class="field"><label class="field-label">${t('f_client')}</label><select class="field-input" id="m-client"><option value="">${t('opt_none')}</option>${clientOpts}</select></div>
     </div>
-    <div class="field"><label class="field-label">Сумма ₽</label><input class="field-input" id="m-amount" type="number" placeholder="0"></div>
+    <div class="field"><label class="field-label">${t('f_amount')}</label><input class="field-input" id="m-amount" type="number" placeholder="0" value="${inv?.amount||''}"></div>
     <div class="field-row">
-      <div class="field"><label class="field-label">Выставлен</label><input class="field-input" id="m-issued" type="date"></div>
-      <div class="field"><label class="field-label">Срок оплаты</label><input class="field-input" id="m-due" type="date"></div>
+      <div class="field"><label class="field-label">${t('f_issued')}</label><input class="field-input" id="m-issued" type="date" value="${inv?.issued_at||''}"></div>
+      <div class="field"><label class="field-label">${t('f_due')}</label><input class="field-input" id="m-due" type="date" value="${inv?.due_at||''}"></div>
     </div>
-    <div class="field"><label class="field-label">Статус</label><select class="field-input" id="m-status">
-      <option value="pending">Ожидает</option>
-      <option value="paid">Оплачен</option>
-      <option value="overdue">Просрочен</option>
+    <div class="field"><label class="field-label">${t('f_status')}</label><select class="field-input" id="m-status">
+      <option value="pending" ${inv?.status==='pending'?'selected':''}>${t('st_pending')}</option>
+      <option value="paid"    ${inv?.status==='paid'   ?'selected':''}>${t('st_paid')}</option>
+      <option value="overdue" ${inv?.status==='overdue'?'selected':''}>${t('st_overdue')}</option>
     </select></div>
   `, async () => {
     const body = { number:val('m-number'), client_id:val('m-client')||null, amount:+val('m-amount'), issued_at:val('m-issued'), due_at:val('m-due'), status:val('m-status') };
-    try { await api('POST', '/api/invoices', body); closeModal(); await loadAll(); renderFinance(); toast('Счёт добавлен'); } catch(e) { showErr(e.message); }
+    try {
+      if (inv) {
+        const updated = await api('PUT', `/api/invoices/${inv.id}`, body);
+        updated.client_name = clients.find(c=>c.id==updated.client_id)?.name || inv.client_name || null;
+        invoices = invoices.map(x => x.id===inv.id ? updated : x);
+        closeModal(); renderFinance(); renderDashboard(); toast(t('toast_invoice_updated')); loadAll();
+      } else {
+        const created = await api('POST', '/api/invoices', body);
+        created.client_name = clients.find(c=>c.id==created.client_id)?.name || null;
+        invoices.push(created);
+        closeModal(); renderFinance(); toast(t('toast_invoice_added')); loadAll();
+      }
+    } catch(e) { showErr(e.message); }
   });
 }
 
+function editInvoice(id) { openInvoiceModal(invoices.find(i=>i.id===id)); }
+
+async function markPaid(id) {
+  try {
+    await api('PUT', `/api/invoices/${id}`, { status: 'paid' });
+    await loadAll(); renderFinance(); renderDashboard(); toast(t('toast_mark_paid'));
+  } catch(e) { toast(e.message); }
+}
+
 async function deleteInvoice(id) {
-  if (!confirm('Удалить счёт?')) return;
-  try { await api('DELETE', `/api/invoices/${id}`); await loadAll(); renderFinance(); toast('Счёт удалён'); } catch(e) { toast(e.message); }
+  if (!confirm(t('confirm_del_invoice'))) return;
+  try { await api('DELETE', `/api/invoices/${id}`); await loadAll(); renderFinance(); toast(t('toast_invoice_deleted')); } catch(e) { toast(e.message); }
+}
+
+function printInvoice(id) {
+  const i = invoices.find(x => x.id === id);
+  if (!i) return;
+  const studioName = (user && user.studio_name) ? user.studio_name : (user && user.name ? user.name : 'Reloxy Studio');
+  const statusMap = { paid: 'Paid', pending: 'Pending', overdue: 'Overdue' };
+  const statusColor = { paid: '#4ade80', pending: '#facc15', overdue: '#f87171' };
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Invoice ${esc(i.number||'')}</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',-apple-system,sans-serif;background:#fff;color:#111;font-size:13px;-webkit-font-smoothing:antialiased;padding:0}
+  .page{max-width:720px;margin:0 auto;padding:56px 64px}
+  .header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:56px}
+  .logo-wrap{display:flex;align-items:center;gap:10px}
+  .logo-wrap svg{width:44px;height:27px}
+  .logo-name{font-size:18px;font-weight:700;letter-spacing:-0.5px;color:#000}
+  .inv-meta{text-align:right}
+  .inv-title{font-size:28px;font-weight:700;letter-spacing:-0.8px;color:#000}
+  .inv-number{font-size:13px;color:#888;margin-top:4px}
+  .parties{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-bottom:48px}
+  .party-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.6px;color:#aaa;margin-bottom:8px}
+  .party-name{font-size:15px;font-weight:600;color:#000;margin-bottom:4px}
+  .party-sub{font-size:12px;color:#888;line-height:1.6}
+  .divider{height:1px;background:#e5e5e5;margin-bottom:32px}
+  .items-header{display:grid;grid-template-columns:1fr auto auto;gap:24px;padding-bottom:10px;border-bottom:1px solid #e5e5e5;margin-bottom:0}
+  .items-header span{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.6px;color:#aaa}
+  .items-header span:not(:first-child){text-align:right}
+  .item-row{display:grid;grid-template-columns:1fr auto auto;gap:24px;padding:16px 0;border-bottom:1px solid #f0f0f0}
+  .item-desc{font-size:13px;color:#111;font-weight:500}
+  .item-qty{font-size:13px;color:#888;text-align:right}
+  .item-amt{font-size:13px;font-weight:600;color:#000;text-align:right;font-variant-numeric:tabular-nums}
+  .total-block{display:flex;justify-content:flex-end;margin-top:24px;margin-bottom:48px}
+  .total-inner{min-width:220px}
+  .total-row{display:flex;justify-content:space-between;padding:6px 0;font-size:13px;color:#888}
+  .total-row.main{border-top:2px solid #000;padding-top:14px;margin-top:6px;font-size:16px;font-weight:700;color:#000}
+  .total-row.main span:last-child{font-variant-numeric:tabular-nums}
+  .dates-block{display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;background:#f9f9f9;border-radius:10px;padding:20px 24px;margin-bottom:48px}
+  .date-item-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.6px;color:#aaa;margin-bottom:4px}
+  .date-item-val{font-size:13px;font-weight:600;color:#000}
+  .status-chip{display:inline-block;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:${statusColor[i.status]||'#e5e5e5'}1a;color:${statusColor[i.status]||'#888'};border:1px solid ${statusColor[i.status]||'#e5e5e5'}44}
+  .footer{text-align:center;font-size:11px;color:#bbb;border-top:1px solid #f0f0f0;padding-top:24px}
+  @media print{
+    body{padding:0}
+    .page{padding:32px 40px}
+    @page{margin:0;size:A4}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="header">
+    <div class="logo-wrap">
+      <svg viewBox="0 0 613 384" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M526.127 383.766C480.839 383.768 436.198 383.584 391.564 383.986C384.302 384.051 380.731 381.32 377.449 375.756C355.717 338.909 333.766 302.182 311.842 265.44C310.355 262.95 308.509 260.659 306.016 257.119C296.737 272.686 288.063 287.324 279.303 301.914C263.854 327.645 248.436 353.396 232.72 378.976C231.368 381.176 227.903 383.504 225.406 383.518C176.967 383.794 128.526 383.735 80.0859 383.727C79.3577 383.727 78.6294 383.499 76.1968 383.094C101.686 340.653 126.82 298.804 152.691 255.727C101.215 255.727 51.2272 255.727 0 255.727C3.54499 249.3 6.29222 243.902 9.41748 238.717C42.9535 183.072 76.5747 127.474 110.116 71.8322C122.986 50.4819 135.847 29.1243 148.406 7.60357C151.582 2.16026 155.195 -0.0190267 162.008 0.000125042C259.147 0.273305 356.288 0.252474 453.427 0.0701478C458.5 0.060616 461.04 1.7099 463.41 5.68191C486.347 44.1217 509.423 82.4844 532.524 120.833C535.076 125.07 536.055 128.657 532.986 133.488C523.424 148.545 514.442 163.948 505.343 179.276C493.589 199.075 481.955 218.94 470.236 238.758C467.263 243.784 464.163 248.739 460.304 255.066C511.488 255.066 561.381 255.066 613 255.066C605.979 267.032 599.922 277.541 593.684 287.948C576.059 317.357 558.119 346.592 540.892 376.215C537.377 382.258 533.554 384.83 526.127 383.766Z" fill="#000"/><path d="M305.19 256.168L152.215 255.434L75.3462 383.885H229.844L305.19 256.168Z" fill="#000"/></svg>
+      <div class="logo-name">Reloxy</div>
+    </div>
+    <div class="inv-meta">
+      <div class="inv-title">Invoice</div>
+      <div class="inv-number">${esc(i.number||'—')}</div>
+    </div>
+  </div>
+
+  <div class="parties">
+    <div>
+      <div class="party-label">From</div>
+      <div class="party-name">${esc(studioName)}</div>
+    </div>
+    <div>
+      <div class="party-label">To</div>
+      <div class="party-name">${esc(i.client_name||'—')}</div>
+    </div>
+  </div>
+
+  <div class="dates-block">
+    <div class="date-item">
+      <div class="date-item-label">Issued</div>
+      <div class="date-item-val">${i.issued_at||'—'}</div>
+    </div>
+    <div class="date-item">
+      <div class="date-item-label">Due date</div>
+      <div class="date-item-val">${i.due_at||'—'}</div>
+    </div>
+    <div class="date-item">
+      <div class="date-item-label">Status</div>
+      <div class="date-item-val"><span class="status-chip">${statusMap[i.status]||i.status}</span></div>
+    </div>
+  </div>
+
+  <div class="items-header">
+    <span>Description</span>
+    <span>Qty</span>
+    <span>Amount</span>
+  </div>
+  <div class="item-row">
+    <div class="item-desc">Project services</div>
+    <div class="item-qty">1</div>
+    <div class="item-amt">${fmtRaw(i.amount)}</div>
+  </div>
+
+  <div class="total-block">
+    <div class="total-inner">
+      <div class="total-row"><span>Subtotal</span><span>${fmtRaw(i.amount)}</span></div>
+      <div class="total-row main"><span>Total due</span><span>${fmtRaw(i.amount)}</span></div>
+    </div>
+  </div>
+
+  <div class="footer">${esc(studioName)} · Generated by Reloxy CRM</div>
+</div>
+<script>window.onload=()=>window.print()<\/script>
+</body>
+</html>`;
+
+  const blob = new Blob([html], { type: 'text/html' });
+  const url  = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.target = '_blank'; a.rel = 'noopener';
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 1000);
+}
+
+function fmtRaw(n) {
+  if (!n) return '₽ 0';
+  return '₽ ' + Number(n).toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 // ─── SEARCH ────────────────────────────────────────────────────────────────
@@ -1029,13 +2738,16 @@ function fmtNum(n) {
   return String(Math.round(n));
 }
 function statusLabel(s) {
-  return { queue:'Очередь', 'in-progress':'В работе', review:'Согласование', done:'Готово' }[s] || s;
+  const map = { queue:'st_queue', 'in-progress':'st_inprogress', review:'st_review', done:'st_done' };
+  return map[s] ? t(map[s]) : s;
 }
 function statusClientLabel(s) {
-  return { active:'Активный', lead:'Потенциальный', archive:'Архив' }[s] || s;
+  const map = { active:'st_active', lead:'st_lead', archive:'st_archive' };
+  return map[s] ? t(map[s]) : s;
 }
 function invLabel(s) {
-  return { paid:'Оплачен', pending:'Ожидает', overdue:'Просрочен' }[s] || s;
+  const map = { paid:'st_paid', pending:'st_pending', overdue:'st_overdue' };
+  return map[s] ? t(map[s]) : s;
 }
 function showErr(msg) {
   const el = document.getElementById('modal-err');
@@ -1052,7 +2764,13 @@ function logout() {
   window.location.href = '/';
 }
 
-document.addEventListener('keydown', e => { if (e.key==='Escape') closeModal(); });
+document.addEventListener('keydown', e => { if (e.key==='Escape') { closeModal(); closeUserPopup(); } });
+document.addEventListener('click', e => {
+  const popup = document.getElementById('user-popup');
+  if (popup?.classList.contains('open') && !popup.contains(e.target) && !document.getElementById('settings-nav-btn').contains(e.target)) {
+    closeUserPopup();
+  }
+});
 
 init();
 </script>

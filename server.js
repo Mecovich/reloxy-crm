@@ -1,452 +1,619 @@
-require('dotenv').config();
-const express  = require('express');
+const express = require('express');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const cors = require('cors');
+const path = require('path');
 const { createClient } = require('@libsql/client');
-const bcrypt   = require('bcryptjs');
-const jwt      = require('jsonwebtoken');
-const cors     = require('cors');
-const path     = require('path');
 
-const app      = express();
-const PORT     = process.env.PORT || 3000;
-const SECRET   = process.env.JWT_SECRET || 'reloxy-dev-secret';
-const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || '').toLowerCase().trim();
+// Turso returns BigInt for row IDs — teach JSON how to serialize them
+BigInt.prototype.toJSON = function() { return Number(this); };
 
-// ─── TELEGRAM ────────────────────────────────────────────────────────────────
-async function tg(text) {
-  const token  = process.env.TELEGRAM_BOT_TOKEN;
+const app = express();
+app.use(cors());
+app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
+
+// ─── Turso DB ───────────────────────────────────────────────────────────────
+const db = createClient({
+  url: process.env.TURSO_URL,
+  authToken: process.env.TURSO_AUTH_TOKEN,
+});
+
+// ─── Telegram ────────────────────────────────────────────────────────────────
+async function sendTelegram(text) {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
   const chatId = process.env.TELEGRAM_CHAT_ID;
   if (!token || !chatId) return;
   try {
     await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: chatId, text, parse_mode: 'HTML' })
+      body: JSON.stringify({ chat_id: chatId, text, parse_mode: 'HTML' }),
     });
-  } catch (e) { console.error('Telegram error:', e.message); }
+  } catch (e) {
+    console.error('Telegram error:', e.message);
+  }
 }
 
-// ─── DATABASE ────────────────────────────────────────────────────────────────
-const db = createClient({
-  url:       process.env.TURSO_URL       || 'file:studio.db',
-  authToken: process.env.TURSO_AUTH_TOKEN || undefined
-});
-
-// Helpers — mimic better-sqlite3 API but async
-async function run(sql, args = []) {
-  return await db.execute({ sql, args });
-}
-async function get(sql, args = []) {
-  const r = await db.execute({ sql, args });
-  return r.rows[0] || null;
-}
-async function all(sql, args = []) {
-  const r = await db.execute({ sql, args });
-  return r.rows;
-}
-
+// ─── Init DB ─────────────────────────────────────────────────────────────────
 async function initDB() {
-  await db.batch([
+  const tables = [
     `CREATE TABLE IF NOT EXISTS users (
-      id          INTEGER PRIMARY KEY AUTOINCREMENT,
-      name        TEXT    NOT NULL,
-      email       TEXT    UNIQUE NOT NULL,
-      password    TEXT    NOT NULL,
-      studio_name TEXT    DEFAULT '',
-      role        TEXT    DEFAULT 'user',
-      created_at  TEXT    DEFAULT (datetime('now'))
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      email TEXT UNIQUE NOT NULL,
+      password TEXT NOT NULL,
+      role TEXT DEFAULT 'user',
+      plan TEXT DEFAULT 'free',
+      studio_name TEXT DEFAULT '',
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )`,
     `CREATE TABLE IF NOT EXISTS clients (
-      id           INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_id      INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-      name         TEXT    NOT NULL,
-      industry     TEXT    DEFAULT '',
-      contact_name TEXT    DEFAULT '',
-      email        TEXT    DEFAULT '',
-      phone        TEXT    DEFAULT '',
-      status       TEXT    DEFAULT 'active',
-      notes        TEXT    DEFAULT '',
-      created_at   TEXT    DEFAULT (datetime('now'))
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      name TEXT NOT NULL,
+      industry TEXT,
+      contact_name TEXT,
+      email TEXT,
+      phone TEXT,
+      status TEXT DEFAULT 'active',
+      notes TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users(id)
     )`,
     `CREATE TABLE IF NOT EXISTS projects (
-      id          INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_id     INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-      client_id   INTEGER REFERENCES clients(id) ON DELETE SET NULL,
-      title       TEXT    NOT NULL,
-      type        TEXT    DEFAULT '',
-      status      TEXT    DEFAULT 'queue',
-      progress    INTEGER DEFAULT 0,
-      deadline    TEXT    DEFAULT '',
-      budget      REAL    DEFAULT 0,
-      created_at  TEXT    DEFAULT (datetime('now'))
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      client_id INTEGER,
+      title TEXT NOT NULL,
+      type TEXT,
+      status TEXT DEFAULT 'queue',
+      progress INTEGER DEFAULT 0,
+      deadline TEXT,
+      budget REAL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users(id),
+      FOREIGN KEY (client_id) REFERENCES clients(id)
+    )`,
+    `CREATE TABLE IF NOT EXISTS tasks (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      project_id INTEGER,
+      title TEXT NOT NULL,
+      description TEXT,
+      status TEXT DEFAULT 'todo',
+      priority TEXT DEFAULT 'medium',
+      due_date TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users(id),
+      FOREIGN KEY (project_id) REFERENCES projects(id)
     )`,
     `CREATE TABLE IF NOT EXISTS deals (
-      id          INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_id     INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-      client_id   INTEGER REFERENCES clients(id) ON DELETE SET NULL,
-      title       TEXT    NOT NULL,
-      stage       TEXT    DEFAULT 'new',
-      value       REAL    DEFAULT 0,
-      created_at  TEXT    DEFAULT (datetime('now'))
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      client_id INTEGER,
+      title TEXT NOT NULL,
+      value REAL,
+      stage TEXT DEFAULT 'new',
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users(id),
+      FOREIGN KEY (client_id) REFERENCES clients(id)
     )`,
     `CREATE TABLE IF NOT EXISTS invoices (
-      id          INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_id     INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-      client_id   INTEGER REFERENCES clients(id) ON DELETE SET NULL,
-      project_id  INTEGER REFERENCES projects(id) ON DELETE SET NULL,
-      number      TEXT    DEFAULT '',
-      amount      REAL    DEFAULT 0,
-      status      TEXT    DEFAULT 'pending',
-      issued_at   TEXT    DEFAULT '',
-      due_at      TEXT    DEFAULT '',
-      created_at  TEXT    DEFAULT (datetime('now'))
-    )`
-  ], 'write');
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      client_id INTEGER,
+      number TEXT,
+      amount REAL,
+      issued_at TEXT,
+      due_at TEXT,
+      status TEXT DEFAULT 'pending',
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users(id),
+      FOREIGN KEY (client_id) REFERENCES clients(id)
+    )`,
+    `CREATE TABLE IF NOT EXISTS events (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      title TEXT NOT NULL,
+      description TEXT,
+      date TEXT NOT NULL,
+      time TEXT,
+      color TEXT DEFAULT '#000000',
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users(id)
+    )`,
+    `CREATE TABLE IF NOT EXISTS staff (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      name TEXT NOT NULL,
+      position TEXT,
+      email TEXT,
+      phone TEXT,
+      status TEXT DEFAULT 'active',
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users(id)
+    )`,
+  ];
+  for (const sql of tables) {
+    await db.execute({ sql, args: [] });
+  }
 
-  // Migration: add role column if missing
-  try { await run(`ALTER TABLE users ADD COLUMN role TEXT DEFAULT 'user'`); } catch {}
+  // ─── Migrations: add new columns to existing tables ───────────────────────
+  const migrations = [
+    `ALTER TABLE users ADD COLUMN plan TEXT DEFAULT 'free'`,
+    `ALTER TABLE users ADD COLUMN studio_name TEXT DEFAULT ''`,
+    `ALTER TABLE clients ADD COLUMN industry TEXT DEFAULT ''`,
+    `ALTER TABLE clients ADD COLUMN contact_name TEXT DEFAULT ''`,
+    `ALTER TABLE clients ADD COLUMN status TEXT DEFAULT 'active'`,
+    `ALTER TABLE projects ADD COLUMN type TEXT DEFAULT ''`,
+    `ALTER TABLE projects ADD COLUMN progress INTEGER DEFAULT 0`,
+    `ALTER TABLE deals ADD COLUMN value REAL`,
+    `ALTER TABLE deals ADD COLUMN stage TEXT DEFAULT 'new'`,
+    `ALTER TABLE invoices ADD COLUMN issued_at TEXT`,
+    `ALTER TABLE invoices ADD COLUMN due_at TEXT`,
+  ];
+  for (const sql of migrations) {
+    try { await db.execute({ sql, args: [] }); } catch (_) { /* column already exists */ }
+  }
+
+  console.log('✅ DB initialized');
 }
 
-// ─── MIDDLEWARE ───────────────────────────────────────────────────────────────
-app.use(cors());
-app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
-
-function auth(req, res, next) {
-  const header = req.headers.authorization || '';
-  const token  = header.startsWith('Bearer ') ? header.slice(7) : null;
-  if (!token) return res.status(401).json({ error: 'Необходима авторизация' });
-  try { req.user = jwt.verify(token, SECRET); next(); }
-  catch { res.status(401).json({ error: 'Токен недействителен' }); }
+// ─── Auth Middleware ──────────────────────────────────────────────────────────
+function authMiddleware(req, res, next) {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) return res.status(401).json({ error: 'No token' });
+  try {
+    req.user = jwt.verify(token, process.env.JWT_SECRET || 'secret');
+    next();
+  } catch {
+    res.status(401).json({ error: 'Invalid token' });
+  }
 }
 
-function adminOnly(req, res, next) {
-  if (req.user.role !== 'admin')
-    return res.status(403).json({ error: 'Доступ запрещён' });
+function adminMiddleware(req, res, next) {
+  if (req.user.role !== 'admin') return res.status(403).json({ error: 'Admin only' });
   next();
 }
 
-// ─── AUTH ─────────────────────────────────────────────────────────────────────
-app.post('/api/auth/register', async (req, res) => {
+// ─── AUTH ROUTES ─────────────────────────────────────────────────────────────
+async function handleRegister(req, res) {
   try {
     const { name, email, password, studioName } = req.body;
-    if (!name || !email || !password)
-      return res.status(400).json({ error: 'Заполните все обязательные поля' });
-    if (password.length < 6)
-      return res.status(400).json({ error: 'Пароль должен быть минимум 6 символов' });
+    if (!name || !email || !password) return res.status(400).json({ error: 'All fields required' });
 
-    const emailClean = email.toLowerCase().trim();
-    const exists = await get('SELECT id FROM users WHERE email = ?', [emailClean]);
-    if (exists) return res.status(400).json({ error: 'Email уже зарегистрирован' });
+    const existing = await db.execute({ sql: 'SELECT id FROM users WHERE email = ?', args: [email] });
+    if (existing.rows.length > 0) return res.status(400).json({ error: 'Email already exists' });
 
     const hash = await bcrypt.hash(password, 10);
-    const role = (ADMIN_EMAIL && emailClean === ADMIN_EMAIL) ? 'admin' : 'user';
-    const result = await run(
-      'INSERT INTO users (name, email, password, studio_name, role) VALUES (?, ?, ?, ?, ?)',
-      [name, emailClean, hash, studioName || '', role]
+    const role = email === process.env.ADMIN_EMAIL ? 'admin' : 'user';
+
+    const result = await db.execute({
+      sql: 'INSERT INTO users (name, email, password, role, studio_name) VALUES (?, ?, ?, ?, ?)',
+      args: [name, email, hash, role, studioName || ''],
+    });
+
+    const token = jwt.sign(
+      { id: result.lastInsertRowid, email, role, name },
+      process.env.JWT_SECRET || 'secret',
+      { expiresIn: '30d' }
     );
 
-    const userId = Number(result.lastInsertRowid);
-    const user   = { id: userId, name, email: emailClean, studioName: studioName || '', role };
-    const token  = jwt.sign({ id: userId, email: emailClean, name, role }, SECRET, { expiresIn: '30d' });
+    await sendTelegram(`🆕 <b>New user</b>\nName: ${name}\nEmail: ${email}`);
 
-    tg(`🆕 <b>Новая регистрация</b>\n👤 ${name}\n📧 ${emailClean}\n🏢 ${studioName || '—'}`);
+    res.json({ token, user: { id: result.lastInsertRowid, name, email, role, studioName: studioName || '' } });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: e.message });
+  }
+}
 
-    res.json({ token, user });
-  } catch (e) { console.error(e); res.status(500).json({ error: 'Ошибка сервера' }); }
-});
-
-app.post('/api/auth/login', async (req, res) => {
+async function handleLogin(req, res) {
   try {
     const { email, password } = req.body;
-    if (!email || !password)
-      return res.status(400).json({ error: 'Введите email и пароль' });
+    const result = await db.execute({ sql: 'SELECT * FROM users WHERE email = ?', args: [email] });
+    const user = result.rows[0];
+    if (!user) return res.status(400).json({ error: 'User not found' });
 
-    const emailClean = email.toLowerCase().trim();
-    const row = await get('SELECT * FROM users WHERE email = ?', [emailClean]);
-    if (!row) return res.status(401).json({ error: 'Неверный email или пароль' });
+    const valid = await bcrypt.compare(password, user.password);
+    if (!valid) return res.status(400).json({ error: 'Wrong password' });
 
-    const ok = await bcrypt.compare(password, row.password);
-    if (!ok) return res.status(401).json({ error: 'Неверный email или пароль' });
+    const token = jwt.sign(
+      { id: user.id, email: user.email, role: user.role, name: user.name },
+      process.env.JWT_SECRET || 'secret',
+      { expiresIn: '30d' }
+    );
 
-    // Auto-upgrade to admin if email matches ADMIN_EMAIL
-    let role = row.role || 'user';
-    if (ADMIN_EMAIL && emailClean === ADMIN_EMAIL && role !== 'admin') {
-      await run('UPDATE users SET role=? WHERE id=?', ['admin', row.id]);
-      role = 'admin';
-    }
+    res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role, plan: user.plan } });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+}
 
-    const user  = { id: row.id, name: row.name, email: row.email, studioName: row.studio_name, role };
-    const token = jwt.sign({ id: row.id, email: row.email, name: row.name, role }, SECRET, { expiresIn: '30d' });
-    res.json({ token, user });
-  } catch (e) { console.error(e); res.status(500).json({ error: 'Ошибка сервера' }); }
+app.post('/api/auth/register', handleRegister);
+app.post('/api/auth/login',    handleLogin);
+app.get('/api/auth/me', authMiddleware, async (req, res) => {
+  const result = await db.execute({ sql: 'SELECT id, name, email, role, plan, studio_name, created_at FROM users WHERE id = ?', args: [req.user.id] });
+  res.json(result.rows[0]);
 });
 
-app.get('/api/auth/me', auth, async (req, res) => {
-  try {
-    const row = await get('SELECT id, name, email, studio_name, role FROM users WHERE id = ?', [req.user.id]);
-    if (!row) return res.status(404).json({ error: 'Пользователь не найден' });
-    res.json({ id: row.id, name: row.name, email: row.email, studioName: row.studio_name, role: row.role || 'user' });
-  } catch (e) { res.status(500).json({ error: 'Ошибка сервера' }); }
-});
-
-// ─── ADMIN ────────────────────────────────────────────────────────────────────
-app.get('/api/admin/stats', auth, adminOnly, async (req, res) => {
-  try {
-    const totalUsers    = (await get('SELECT COUNT(*) AS v FROM users')).v;
-    const totalClients  = (await get('SELECT COUNT(*) AS v FROM clients')).v;
-    const totalProjects = (await get('SELECT COUNT(*) AS v FROM projects')).v;
-    const totalRevenue  = (await get(`SELECT COALESCE(SUM(amount),0) AS v FROM invoices WHERE status='paid'`)).v;
-    res.json({ totalUsers, totalClients, totalProjects, totalRevenue });
-  } catch (e) { res.status(500).json({ error: 'Ошибка сервера' }); }
-});
-
-app.get('/api/admin/users', auth, adminOnly, async (req, res) => {
-  try {
-    const rows = await all(`
-      SELECT u.id, u.name, u.email, u.studio_name, u.role, u.created_at,
-        (SELECT COUNT(*) FROM clients  WHERE user_id = u.id) AS clients_count,
-        (SELECT COUNT(*) FROM projects WHERE user_id = u.id) AS projects_count,
-        (SELECT COALESCE(SUM(amount),0) FROM invoices WHERE user_id = u.id AND status='paid') AS revenue
-      FROM users u ORDER BY u.created_at DESC
-    `);
-    res.json(rows);
-  } catch (e) { res.status(500).json({ error: 'Ошибка сервера' }); }
-});
-
-app.delete('/api/admin/users/:id', auth, adminOnly, async (req, res) => {
-  try {
-    if (Number(req.params.id) === req.user.id)
-      return res.status(400).json({ error: 'Нельзя удалить себя' });
-    await run('DELETE FROM users WHERE id = ?', [req.params.id]);
-    res.json({ ok: true });
-  } catch (e) { res.status(500).json({ error: 'Ошибка сервера' }); }
-});
-
-app.put('/api/admin/users/:id/role', auth, adminOnly, async (req, res) => {
-  try {
-    const { role } = req.body;
-    if (!['admin','user'].includes(role))
-      return res.status(400).json({ error: 'Неверная роль' });
-    await run('UPDATE users SET role=? WHERE id=?', [role, req.params.id]);
-    res.json({ ok: true });
-  } catch (e) { res.status(500).json({ error: 'Ошибка сервера' }); }
-});
-
-// ─── STATS ───────────────────────────────────────────────────────────────────
-app.get('/api/stats', auth, async (req, res) => {
-  try {
-    const uid  = req.user.id;
-    const now  = new Date();
-    const year = now.getFullYear();
-    const m    = String(now.getMonth() + 1).padStart(2, '0');
-    const from = `${year}-${m}-01`;
-
-    const revenue        = (await get(`SELECT COALESCE(SUM(amount),0) AS v FROM invoices WHERE user_id=? AND status='paid' AND issued_at >= ?`, [uid, from])).v;
-    const activeProjects = (await get(`SELECT COUNT(*) AS v FROM projects WHERE user_id=? AND status != 'done'`, [uid])).v;
-    const totalClients   = (await get(`SELECT COUNT(*) AS v FROM clients WHERE user_id=?`, [uid])).v;
-    const totalLeads     = (await get(`SELECT COUNT(*) AS v FROM deals WHERE user_id=? AND stage != 'closed'`, [uid])).v;
-
-    const monthly = [];
-    for (let i = 0; i < 12; i++) {
-      const mm = String(i + 1).padStart(2, '0');
-      const v = (await get(
-        `SELECT COALESCE(SUM(amount),0) AS v FROM invoices WHERE user_id=? AND status='paid' AND issued_at >= ? AND issued_at <= ?`,
-        [uid, `${year}-${mm}-01`, `${year}-${mm}-31`]
-      )).v;
-      monthly.push(v);
-    }
-
-    res.json({ revenue, activeProjects, totalClients, totalLeads, monthly });
-  } catch (e) { console.error(e); res.status(500).json({ error: 'Ошибка сервера' }); }
+app.post('/api/register', handleRegister);
+app.post('/api/login',    handleLogin);
+app.get('/api/me', authMiddleware, async (req, res) => {
+  const result = await db.execute({ sql: 'SELECT id, name, email, role, plan, studio_name, created_at FROM users WHERE id = ?', args: [req.user.id] });
+  res.json(result.rows[0]);
 });
 
 // ─── CLIENTS ─────────────────────────────────────────────────────────────────
-app.get('/api/clients', auth, async (req, res) => {
-  try {
-    const rows = await all(`
-      SELECT c.*,
-        (SELECT COUNT(*) FROM projects WHERE client_id = c.id) AS project_count,
-        (SELECT COALESCE(SUM(amount),0) FROM invoices WHERE client_id = c.id AND status='paid') AS total_paid
-      FROM clients c WHERE c.user_id = ? ORDER BY c.created_at DESC
-    `, [req.user.id]);
-    res.json(rows);
-  } catch (e) { res.status(500).json({ error: 'Ошибка сервера' }); }
+app.get('/api/clients', authMiddleware, async (req, res) => {
+  const result = await db.execute({ sql: 'SELECT * FROM clients WHERE user_id = ? ORDER BY created_at DESC', args: [req.user.id] });
+  res.json(result.rows);
 });
 
-app.post('/api/clients', auth, async (req, res) => {
-  try {
-    const { name, industry, contact_name, email, phone, status, notes } = req.body;
-    if (!name) return res.status(400).json({ error: 'Укажите название компании' });
-    const r = await run(
-      `INSERT INTO clients (user_id,name,industry,contact_name,email,phone,status,notes) VALUES (?,?,?,?,?,?,?,?)`,
-      [req.user.id, name, industry||'', contact_name||'', email||'', phone||'', status||'active', notes||'']
-    );
-    res.json({ id: Number(r.lastInsertRowid), name, industry, contact_name, email, phone, status: status||'active', notes, project_count: 0, total_paid: 0 });
-  } catch (e) { res.status(500).json({ error: 'Ошибка сервера' }); }
+app.post('/api/clients', authMiddleware, async (req, res) => {
+  const { name, industry, contact_name, email, phone, status, notes } = req.body;
+  const result = await db.execute({
+    sql: 'INSERT INTO clients (user_id, name, industry, contact_name, email, phone, status, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+    args: [req.user.id, name, industry||'', contact_name||'', email||'', phone||'', status||'active', notes||''],
+  });
+  const row = await db.execute({ sql: 'SELECT * FROM clients WHERE id = ?', args: [result.lastInsertRowid] });
+  res.json(row.rows[0]);
 });
 
-app.put('/api/clients/:id', auth, async (req, res) => {
-  try {
-    const { name, industry, contact_name, email, phone, status, notes } = req.body;
-    await run(
-      `UPDATE clients SET name=?,industry=?,contact_name=?,email=?,phone=?,status=?,notes=? WHERE id=? AND user_id=?`,
-      [name, industry||'', contact_name||'', email||'', phone||'', status||'active', notes||'', req.params.id, req.user.id]
-    );
-    res.json({ ok: true });
-  } catch (e) { res.status(500).json({ error: 'Ошибка сервера' }); }
+app.put('/api/clients/:id', authMiddleware, async (req, res) => {
+  const { name, industry, contact_name, email, phone, status, notes } = req.body;
+  await db.execute({
+    sql: 'UPDATE clients SET name=?, industry=?, contact_name=?, email=?, phone=?, status=?, notes=? WHERE id=? AND user_id=?',
+    args: [name, industry||'', contact_name||'', email||'', phone||'', status||'active', notes||'', req.params.id, req.user.id],
+  });
+  const row = await db.execute({ sql: 'SELECT * FROM clients WHERE id = ?', args: [req.params.id] });
+  res.json(row.rows[0]);
 });
 
-app.delete('/api/clients/:id', auth, async (req, res) => {
-  try {
-    await run('DELETE FROM clients WHERE id=? AND user_id=?', [req.params.id, req.user.id]);
-    res.json({ ok: true });
-  } catch (e) { res.status(500).json({ error: 'Ошибка сервера' }); }
+app.delete('/api/clients/:id', authMiddleware, async (req, res) => {
+  await db.execute({ sql: 'DELETE FROM clients WHERE id=? AND user_id=?', args: [req.params.id, req.user.id] });
+  res.json({ ok: true });
 });
 
 // ─── PROJECTS ────────────────────────────────────────────────────────────────
-app.get('/api/projects', auth, async (req, res) => {
-  try {
-    const rows = await all(
-      `SELECT p.*, c.name AS client_name FROM projects p LEFT JOIN clients c ON p.client_id = c.id WHERE p.user_id = ? ORDER BY p.created_at DESC`,
-      [req.user.id]
-    );
-    res.json(rows);
-  } catch (e) { res.status(500).json({ error: 'Ошибка сервера' }); }
+app.get('/api/projects', authMiddleware, async (req, res) => {
+  const result = await db.execute({
+    sql: `SELECT p.*, c.name as client_name FROM projects p
+          LEFT JOIN clients c ON p.client_id = c.id
+          WHERE p.user_id = ? ORDER BY p.created_at DESC`,
+    args: [req.user.id],
+  });
+  res.json(result.rows);
 });
 
-app.post('/api/projects', auth, async (req, res) => {
-  try {
-    const { title, type, client_id, status, progress, deadline, budget } = req.body;
-    if (!title) return res.status(400).json({ error: 'Укажите название проекта' });
-    const r = await run(
-      `INSERT INTO projects (user_id,title,type,client_id,status,progress,deadline,budget) VALUES (?,?,?,?,?,?,?,?)`,
-      [req.user.id, title, type||'', client_id||null, status||'queue', progress||0, deadline||'', budget||0]
-    );
-    res.json({ id: Number(r.lastInsertRowid), title, type, client_id, status: status||'queue', progress: progress||0, deadline, budget: budget||0 });
-  } catch (e) { res.status(500).json({ error: 'Ошибка сервера' }); }
+app.post('/api/projects', authMiddleware, async (req, res) => {
+  const { title, type, client_id, status, progress, deadline, budget } = req.body;
+  const result = await db.execute({
+    sql: 'INSERT INTO projects (user_id, client_id, title, type, status, progress, deadline, budget) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+    args: [req.user.id, client_id||null, title, type||'', status||'queue', progress||0, deadline||null, budget||null],
+  });
+  const row = await db.execute({ sql: 'SELECT * FROM projects WHERE id = ?', args: [result.lastInsertRowid] });
+  res.json(row.rows[0]);
 });
 
-app.put('/api/projects/:id', auth, async (req, res) => {
-  try {
-    const { title, type, client_id, status, progress, deadline, budget } = req.body;
-    await run(
-      `UPDATE projects SET title=?,type=?,client_id=?,status=?,progress=?,deadline=?,budget=? WHERE id=? AND user_id=?`,
-      [title, type||'', client_id||null, status||'queue', progress||0, deadline||'', budget||0, req.params.id, req.user.id]
-    );
-    res.json({ ok: true });
-  } catch (e) { res.status(500).json({ error: 'Ошибка сервера' }); }
+app.put('/api/projects/:id', authMiddleware, async (req, res) => {
+  const { title, type, client_id, status, progress, deadline, budget } = req.body;
+  await db.execute({
+    sql: 'UPDATE projects SET title=?, type=?, client_id=?, status=?, progress=?, deadline=?, budget=? WHERE id=? AND user_id=?',
+    args: [title, type||'', client_id||null, status||'queue', progress||0, deadline||null, budget||null, req.params.id, req.user.id],
+  });
+  const row = await db.execute({ sql: 'SELECT * FROM projects WHERE id = ?', args: [req.params.id] });
+  res.json(row.rows[0]);
 });
 
-app.delete('/api/projects/:id', auth, async (req, res) => {
-  try {
-    await run('DELETE FROM projects WHERE id=? AND user_id=?', [req.params.id, req.user.id]);
-    res.json({ ok: true });
-  } catch (e) { res.status(500).json({ error: 'Ошибка сервера' }); }
+app.delete('/api/projects/:id', authMiddleware, async (req, res) => {
+  await db.execute({ sql: 'DELETE FROM projects WHERE id=? AND user_id=?', args: [req.params.id, req.user.id] });
+  res.json({ ok: true });
+});
+
+// ─── TASKS (Kanban) ──────────────────────────────────────────────────────────
+app.get('/api/tasks', authMiddleware, async (req, res) => {
+  const result = await db.execute({
+    sql: `SELECT t.*, p.title as project_title FROM tasks t
+          LEFT JOIN projects p ON t.project_id = p.id
+          WHERE t.user_id = ? ORDER BY t.created_at DESC`,
+    args: [req.user.id],
+  });
+  res.json(result.rows);
+});
+
+app.post('/api/tasks', authMiddleware, async (req, res) => {
+  const { title, description, project_id, status, priority, due_date } = req.body;
+  const result = await db.execute({
+    sql: 'INSERT INTO tasks (user_id, project_id, title, description, status, priority, due_date) VALUES (?, ?, ?, ?, ?, ?, ?)',
+    args: [req.user.id, project_id || null, title, description || '', status || 'todo', priority || 'medium', due_date || null],
+  });
+  const row = await db.execute({ sql: 'SELECT * FROM tasks WHERE id = ?', args: [result.lastInsertRowid] });
+  res.json(row.rows[0]);
+});
+
+app.put('/api/tasks/:id', authMiddleware, async (req, res) => {
+  const { title, description, project_id, status, priority, due_date } = req.body;
+  await db.execute({
+    sql: 'UPDATE tasks SET title=?, description=?, project_id=?, status=?, priority=?, due_date=? WHERE id=? AND user_id=?',
+    args: [title, description || '', project_id || null, status || 'todo', priority || 'medium', due_date || null, req.params.id, req.user.id],
+  });
+  const row = await db.execute({ sql: 'SELECT * FROM tasks WHERE id = ?', args: [req.params.id] });
+  res.json(row.rows[0]);
+});
+
+app.delete('/api/tasks/:id', authMiddleware, async (req, res) => {
+  await db.execute({ sql: 'DELETE FROM tasks WHERE id=? AND user_id=?', args: [req.params.id, req.user.id] });
+  res.json({ ok: true });
 });
 
 // ─── DEALS ───────────────────────────────────────────────────────────────────
-app.get('/api/deals', auth, async (req, res) => {
-  try {
-    const rows = await all(
-      `SELECT d.*, c.name AS client_name FROM deals d LEFT JOIN clients c ON d.client_id = c.id WHERE d.user_id = ? ORDER BY d.created_at DESC`,
-      [req.user.id]
-    );
-    res.json(rows);
-  } catch (e) { res.status(500).json({ error: 'Ошибка сервера' }); }
+app.get('/api/deals', authMiddleware, async (req, res) => {
+  const result = await db.execute({
+    sql: `SELECT d.*, c.name as client_name FROM deals d
+          LEFT JOIN clients c ON d.client_id = c.id
+          WHERE d.user_id = ? ORDER BY d.created_at DESC`,
+    args: [req.user.id],
+  });
+  res.json(result.rows);
 });
 
-app.post('/api/deals', auth, async (req, res) => {
-  try {
-    const { title, client_id, stage, value } = req.body;
-    if (!title) return res.status(400).json({ error: 'Укажите название сделки' });
-    const r = await run(
-      `INSERT INTO deals (user_id,title,client_id,stage,value) VALUES (?,?,?,?,?)`,
-      [req.user.id, title, client_id||null, stage||'new', value||0]
-    );
-    res.json({ id: Number(r.lastInsertRowid), title, client_id, stage: stage||'new', value: value||0 });
-  } catch (e) { res.status(500).json({ error: 'Ошибка сервера' }); }
+app.post('/api/deals', authMiddleware, async (req, res) => {
+  const { title, client_id, value, stage } = req.body;
+  const result = await db.execute({
+    sql: 'INSERT INTO deals (user_id, client_id, title, value, stage) VALUES (?, ?, ?, ?, ?)',
+    args: [req.user.id, client_id||null, title, value||null, stage||'new'],
+  });
+  const row = await db.execute({ sql: 'SELECT * FROM deals WHERE id = ?', args: [result.lastInsertRowid] });
+  res.json(row.rows[0]);
 });
 
-app.put('/api/deals/:id', auth, async (req, res) => {
-  try {
-    const { title, client_id, stage, value } = req.body;
-    await run(
-      `UPDATE deals SET title=?,client_id=?,stage=?,value=? WHERE id=? AND user_id=?`,
-      [title, client_id||null, stage||'new', value||0, req.params.id, req.user.id]
-    );
-    res.json({ ok: true });
-  } catch (e) { res.status(500).json({ error: 'Ошибка сервера' }); }
+app.put('/api/deals/:id', authMiddleware, async (req, res) => {
+  const { title, client_id, value, stage } = req.body;
+  await db.execute({
+    sql: 'UPDATE deals SET title=?, client_id=?, value=?, stage=? WHERE id=? AND user_id=?',
+    args: [title, client_id||null, value||null, stage||'new', req.params.id, req.user.id],
+  });
+  const row = await db.execute({ sql: 'SELECT * FROM deals WHERE id = ?', args: [req.params.id] });
+  res.json(row.rows[0]);
 });
 
-app.delete('/api/deals/:id', auth, async (req, res) => {
-  try {
-    await run('DELETE FROM deals WHERE id=? AND user_id=?', [req.params.id, req.user.id]);
-    res.json({ ok: true });
-  } catch (e) { res.status(500).json({ error: 'Ошибка сервера' }); }
+app.delete('/api/deals/:id', authMiddleware, async (req, res) => {
+  await db.execute({ sql: 'DELETE FROM deals WHERE id=? AND user_id=?', args: [req.params.id, req.user.id] });
+  res.json({ ok: true });
 });
 
 // ─── INVOICES ────────────────────────────────────────────────────────────────
-app.get('/api/invoices', auth, async (req, res) => {
-  try {
-    const rows = await all(
-      `SELECT i.*, c.name AS client_name FROM invoices i LEFT JOIN clients c ON i.client_id = c.id WHERE i.user_id = ? ORDER BY i.created_at DESC`,
-      [req.user.id]
-    );
-    res.json(rows);
-  } catch (e) { res.status(500).json({ error: 'Ошибка сервера' }); }
+app.get('/api/invoices', authMiddleware, async (req, res) => {
+  const result = await db.execute({
+    sql: `SELECT i.*, c.name as client_name, p.title as project_title FROM invoices i
+          LEFT JOIN clients c ON i.client_id = c.id
+          LEFT JOIN projects p ON i.project_id = p.id
+          WHERE i.user_id = ? ORDER BY i.created_at DESC`,
+    args: [req.user.id],
+  });
+  res.json(result.rows);
 });
 
-app.post('/api/invoices', auth, async (req, res) => {
-  try {
-    const { number, client_id, project_id, amount, status, issued_at, due_at } = req.body;
-    const r = await run(
-      `INSERT INTO invoices (user_id,number,client_id,project_id,amount,status,issued_at,due_at) VALUES (?,?,?,?,?,?,?,?)`,
-      [req.user.id, number||'', client_id||null, project_id||null, amount||0, status||'pending', issued_at||'', due_at||'']
-    );
-
-    if (status === 'paid') {
-      const u = await get('SELECT name FROM users WHERE id=?', [req.user.id]);
-      tg(`💰 <b>Оплачен счёт</b>\n👤 ${u?.name || req.user.email}\n🧾 ${number || '—'}\n💵 ₽${amount || 0}`);
-    }
-
-    res.json({ id: Number(r.lastInsertRowid), ...req.body });
-  } catch (e) { res.status(500).json({ error: 'Ошибка сервера' }); }
+app.post('/api/invoices', authMiddleware, async (req, res) => {
+  const { number, client_id, amount, issued_at, due_at, status } = req.body;
+  const result = await db.execute({
+    sql: 'INSERT INTO invoices (user_id, client_id, number, amount, issued_at, due_at, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
+    args: [req.user.id, client_id||null, number||'', amount||null, issued_at||null, due_at||null, status||'pending'],
+  });
+  const row = await db.execute({ sql: 'SELECT * FROM invoices WHERE id = ?', args: [result.lastInsertRowid] });
+  res.json(row.rows[0]);
 });
 
-app.put('/api/invoices/:id', auth, async (req, res) => {
+app.put('/api/invoices/:id', authMiddleware, async (req, res) => {
+  const { number, client_id, amount, issued_at, due_at, status } = req.body;
+  await db.execute({
+    sql: 'UPDATE invoices SET number=?, client_id=?, amount=?, issued_at=?, due_at=?, status=? WHERE id=? AND user_id=?',
+    args: [number||'', client_id||null, amount||null, issued_at||null, due_at||null, status||'pending', req.params.id, req.user.id],
+  });
+  const row = await db.execute({ sql: 'SELECT * FROM invoices WHERE id = ?', args: [req.params.id] });
+  res.json(row.rows[0]);
+});
+
+app.delete('/api/invoices/:id', authMiddleware, async (req, res) => {
+  await db.execute({ sql: 'DELETE FROM invoices WHERE id=? AND user_id=?', args: [req.params.id, req.user.id] });
+  res.json({ ok: true });
+});
+
+app.put('/api/invoices/:id/pay', authMiddleware, async (req, res) => {
+  await db.execute({
+    sql: 'UPDATE invoices SET status=? WHERE id=? AND user_id=?',
+    args: ['paid', req.params.id, req.user.id],
+  });
+  const row = await db.execute({ sql: 'SELECT * FROM invoices WHERE id = ?', args: [req.params.id] });
+  const inv = row.rows[0];
+  await sendTelegram(`💰 <b>Payment received!</b>\nInvoice: ${inv.number}\nAmount: ${inv.amount}`);
+  res.json(inv);
+});
+
+// ─── EVENTS (Calendar) ───────────────────────────────────────────────────────
+app.get('/api/events', authMiddleware, async (req, res) => {
+  const result = await db.execute({
+    sql: 'SELECT * FROM events WHERE user_id = ? ORDER BY date ASC, time ASC',
+    args: [req.user.id],
+  });
+  res.json(result.rows);
+});
+
+app.post('/api/events', authMiddleware, async (req, res) => {
+  const { title, description, date, time, color } = req.body;
+  const result = await db.execute({
+    sql: 'INSERT INTO events (user_id, title, description, date, time, color) VALUES (?, ?, ?, ?, ?, ?)',
+    args: [req.user.id, title, description || '', date, time || '', color || '#000000'],
+  });
+  const row = await db.execute({ sql: 'SELECT * FROM events WHERE id = ?', args: [result.lastInsertRowid] });
+  res.json(row.rows[0]);
+});
+
+app.put('/api/events/:id', authMiddleware, async (req, res) => {
+  const { title, description, date, time, color } = req.body;
+  await db.execute({
+    sql: 'UPDATE events SET title=?, description=?, date=?, time=?, color=? WHERE id=? AND user_id=?',
+    args: [title, description || '', date, time || '', color || '#000000', req.params.id, req.user.id],
+  });
+  const row = await db.execute({ sql: 'SELECT * FROM events WHERE id = ?', args: [req.params.id] });
+  res.json(row.rows[0]);
+});
+
+app.delete('/api/events/:id', authMiddleware, async (req, res) => {
+  await db.execute({ sql: 'DELETE FROM events WHERE id=? AND user_id=?', args: [req.params.id, req.user.id] });
+  res.json({ ok: true });
+});
+
+// ─── USER STATS ──────────────────────────────────────────────────────────────
+app.get('/api/stats', authMiddleware, async (req, res) => {
   try {
-    const { number, client_id, project_id, amount, status, issued_at, due_at } = req.body;
-    const prev = await get('SELECT status FROM invoices WHERE id=? AND user_id=?', [req.params.id, req.user.id]);
-    await run(
-      `UPDATE invoices SET number=?,client_id=?,project_id=?,amount=?,status=?,issued_at=?,due_at=? WHERE id=? AND user_id=?`,
-      [number||'', client_id||null, project_id||null, amount||0, status||'pending', issued_at||'', due_at||'', req.params.id, req.user.id]
-    );
+    const uid = req.user.id;
+    const [cls, prj, dls, invs] = await Promise.all([
+      db.execute({ sql: 'SELECT COUNT(*) as n FROM clients WHERE user_id=?', args: [uid] }),
+      db.execute({ sql: "SELECT COUNT(*) as n FROM projects WHERE user_id=? AND status != 'done'", args: [uid] }),
+      db.execute({ sql: "SELECT COUNT(*) as n FROM deals WHERE user_id=? AND stage NOT IN ('won','lost')", args: [uid] }),
+      db.execute({ sql: "SELECT SUM(amount) as total FROM invoices WHERE user_id=? AND status='paid'", args: [uid] }),
+    ]);
+    res.json({
+      totalClients:   cls.rows[0].n,
+      activeProjects: prj.rows[0].n,
+      totalLeads:     dls.rows[0].n,
+      revenue:        invs.rows[0].total || 0,
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
 
-    if (prev && prev.status !== 'paid' && status === 'paid') {
-      const u = await get('SELECT name FROM users WHERE id=?', [req.user.id]);
-      tg(`💰 <b>Оплачен счёт</b>\n👤 ${u?.name || req.user.email}\n🧾 ${number || '—'}\n💵 ₽${amount || 0}`);
-    }
+// ─── PROFILE UPDATE ──────────────────────────────────────────────────────────
+app.put('/api/me', authMiddleware, async (req, res) => {
+  try {
+    const { name, studio_name } = req.body;
+    if (!name) return res.status(400).json({ error: 'Name is required' });
+    await db.execute({
+      sql: 'UPDATE users SET name=?, studio_name=? WHERE id=?',
+      args: [name, studio_name || '', req.user.id],
+    });
+    const row = await db.execute({ sql: 'SELECT id, name, email, role, plan, studio_name FROM users WHERE id=?', args: [req.user.id] });
+    res.json(row.rows[0]);
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
 
+app.put('/api/me/password', authMiddleware, async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const row = await db.execute({ sql: 'SELECT * FROM users WHERE id=?', args: [req.user.id] });
+    const u = row.rows[0];
+    if (!u) return res.status(404).json({ error: 'User not found' });
+    const valid = await bcrypt.compare(currentPassword, u.password);
+    if (!valid) return res.status(400).json({ error: 'Current password is wrong' });
+    if (!newPassword || newPassword.length < 6) return res.status(400).json({ error: 'Min 6 characters' });
+    const hash = await bcrypt.hash(newPassword, 10);
+    await db.execute({ sql: 'UPDATE users SET password=? WHERE id=?', args: [hash, req.user.id] });
     res.json({ ok: true });
-  } catch (e) { res.status(500).json({ error: 'Ошибка сервера' }); }
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-app.delete('/api/invoices/:id', auth, async (req, res) => {
+app.post('/api/telegram/test', authMiddleware, async (req, res) => {
   try {
-    await run('DELETE FROM invoices WHERE id=? AND user_id=?', [req.params.id, req.user.id]);
+    const { token, chatId } = req.body;
+    const r = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: chatId, text: '✅ Reloxy CRM connected!' }),
+    });
+    if (!r.ok) throw new Error('Telegram error');
     res.json({ ok: true });
-  } catch (e) { res.status(500).json({ error: 'Ошибка сервера' }); }
+  } catch(e) { res.status(400).json({ error: e.message }); }
 });
 
-// ─── ROUTES ──────────────────────────────────────────────────────────────────
+// ─── STAFF ───────────────────────────────────────────────────────────────────
+app.get('/api/staff', authMiddleware, async (req, res) => {
+  const result = await db.execute({ sql: 'SELECT * FROM staff WHERE user_id = ? ORDER BY created_at DESC', args: [req.user.id] });
+  res.json(result.rows);
+});
+
+app.post('/api/staff', authMiddleware, async (req, res) => {
+  const { name, position, email, phone, status } = req.body;
+  if (!name) return res.status(400).json({ error: 'Name required' });
+  const result = await db.execute({
+    sql: 'INSERT INTO staff (user_id, name, position, email, phone, status) VALUES (?, ?, ?, ?, ?, ?)',
+    args: [req.user.id, name, position || '', email || '', phone || '', status || 'active'],
+  });
+  const row = await db.execute({ sql: 'SELECT * FROM staff WHERE id = ?', args: [result.lastInsertRowid] });
+  res.json(row.rows[0]);
+});
+
+app.put('/api/staff/:id', authMiddleware, async (req, res) => {
+  const { name, position, email, phone, status } = req.body;
+  await db.execute({
+    sql: 'UPDATE staff SET name=?, position=?, email=?, phone=?, status=? WHERE id=? AND user_id=?',
+    args: [name, position || '', email || '', phone || '', status || 'active', req.params.id, req.user.id],
+  });
+  const row = await db.execute({ sql: 'SELECT * FROM staff WHERE id = ?', args: [req.params.id] });
+  res.json(row.rows[0]);
+});
+
+app.delete('/api/staff/:id', authMiddleware, async (req, res) => {
+  await db.execute({ sql: 'DELETE FROM staff WHERE id=? AND user_id=?', args: [req.params.id, req.user.id] });
+  res.json({ ok: true });
+});
+
+// ─── ADMIN ROUTES ────────────────────────────────────────────────────────────
+app.get('/api/admin/users', authMiddleware, adminMiddleware, async (req, res) => {
+  const result = await db.execute({ sql: 'SELECT id, name, email, role, plan, created_at FROM users ORDER BY created_at DESC', args: [] });
+  res.json(result.rows);
+});
+
+app.put('/api/admin/users/:id', authMiddleware, adminMiddleware, async (req, res) => {
+  const { role, plan } = req.body;
+  await db.execute({
+    sql: 'UPDATE users SET role=?, plan=? WHERE id=?',
+    args: [role, plan, req.params.id],
+  });
+  res.json({ ok: true });
+});
+
+app.put('/api/admin/users/:id/role', authMiddleware, adminMiddleware, async (req, res) => {
+  const { role } = req.body;
+  await db.execute({ sql: 'UPDATE users SET role=? WHERE id=?', args: [role, req.params.id] });
+  res.json({ ok: true });
+});
+
+app.delete('/api/admin/users/:id', authMiddleware, adminMiddleware, async (req, res) => {
+  await db.execute({ sql: 'DELETE FROM users WHERE id=?', args: [req.params.id] });
+  res.json({ ok: true });
+});
+
+app.get('/api/admin/stats', authMiddleware, adminMiddleware, async (req, res) => {
+  const [users, clients, projects, invoices, staff] = await Promise.all([
+    db.execute({ sql: 'SELECT COUNT(*) as count FROM users', args: [] }),
+    db.execute({ sql: 'SELECT COUNT(*) as count FROM clients', args: [] }),
+    db.execute({ sql: 'SELECT COUNT(*) as count FROM projects', args: [] }),
+    db.execute({ sql: 'SELECT SUM(amount) as total FROM invoices WHERE status=?', args: ['paid'] }),
+    db.execute({ sql: 'SELECT COUNT(*) as count FROM staff', args: [] }),
+  ]);
+  res.json({
+    totalUsers: users.rows[0].count,
+    totalClients: clients.rows[0].count,
+    totalProjects: projects.rows[0].count,
+    totalRevenue: invoices.rows[0].total || 0,
+    totalStaff: staff.rows[0].count,
+  });
+});
+
+// ─── Static pages ────────────────────────────────────────────────────────────
 app.get('/app',   (req, res) => res.sendFile(path.join(__dirname, 'public', 'app.html')));
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
 app.get('*',      (req, res) => res.sendFile(path.join(__dirname, 'public', 'login.html')));
 
-// ─── START ───────────────────────────────────────────────────────────────────
-async function start() {
-  await initDB();
-  app.listen(PORT, () => console.log(`\n  Reloxy CRM → http://localhost:${PORT}\n`));
-}
-
-start().catch(e => { console.error('Startup error:', e); process.exit(1); });
+// ─── Start ───────────────────────────────────────────────────────────────────
+const PORT = process.env.PORT || 3000;
+initDB().then(() => {
+  app.listen(PORT, () => console.log(`🚀 Reloxy CRM running on port ${PORT}`));
+}).catch(err => {
+  console.error('DB init failed:', err);
+  process.exit(1);
+});
