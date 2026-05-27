@@ -969,8 +969,8 @@ select.field-input option { background:#1a1a1e; color:var(--white); }
                     <input class="set-input" id="set-name" placeholder="Victoria">
                   </div>
                   <div class="set-field">
-                    <label class="set-label" data-i18n="set_phone">Phone</label>
-                    <input class="set-input" id="set-phone" placeholder="+1 555...">
+                    <label class="set-label" data-i18n="set_phone">Telegram</label>
+                    <input class="set-input" id="set-phone" placeholder="@username">
                   </div>
                 </div>
                 <div class="set-field">
@@ -1306,7 +1306,7 @@ const TRANS = {
     cal_sub:'Project deadlines and important dates', cal_today:'Today',
     clients_sub:'All companies and contacts', btn_new_client:'+ New client',
     tab_all:'All', tab_active:'Active', tab_leads:'Leads', tab_archive:'Archive',
-    col_company:'Company', col_contact:'Contact', col_email:'Email', col_phone:'Phone',
+    col_company:'Company', col_contact:'Contact', col_email:'Email', col_phone:'Telegram',
     col_status:'Status', col_projects:'Projects', col_revenue:'Revenue',
     col_name:'Name', col_position:'Position', col_num:'#',
     col_client:'Client', col_amount:'Amount', col_issued:'Issued', col_due:'Due',
@@ -1333,7 +1333,7 @@ const TRANS = {
     no_invoices:'No invoices yet', no_invoices_sub:'Create your first invoice',
     page_settings:'Settings', settings_sub:'Account and CRM preferences',
     tab_profile:'Profile', tab_studio:'Studio', btn_save_settings:'Save settings',
-    set_name:'Name', set_phone:'Phone', set_email:'Email',
+    set_name:'Name', set_phone:'Telegram', set_email:'Email',
     set_currency:'Currency', set_language:'Language',
     set_tg:'Telegram', set_tg_off:'Not configured', set_tg_on:'Connected',
     set_tg_token:'Bot token (from @BotFather)', set_tg_chat:'Chat ID (from @userinfobot)',
@@ -1364,7 +1364,7 @@ const TRANS = {
     f_stage:'Stage', f_value:'Value ₽', f_desc:'Description',
     f_amount:'Amount ₽', f_issued:'Issue date', f_due:'Due date',
     f_name:'Name *', f_position:'Position', f_goal_period:'Period',
-    f_phone:'Phone', f_username:'@Username', f_email:'Email', f_number:'Number', opt_none:'— none —',
+    f_phone:'@Telegram', f_username:'@Telegram', f_email:'Email', f_number:'Number', opt_none:'— none —',
     toast_mark_paid:'Invoice marked as paid',
     confirm_del_client:'Delete this client?', confirm_del_project:'Delete this project?',
     confirm_del_deal:'Delete this deal?', confirm_del_invoice:'Delete this invoice?',
@@ -1404,7 +1404,7 @@ const TRANS = {
     cal_sub:'Дедлайны проектов и важные даты', cal_today:'Сегодня',
     clients_sub:'Все компании и контакты', btn_new_client:'+ Новый клиент',
     tab_all:'Все', tab_active:'Активные', tab_leads:'Лиды', tab_archive:'Архив',
-    col_company:'Компания', col_contact:'Контакт', col_email:'Email', col_phone:'Телефон',
+    col_company:'Компания', col_contact:'Контакт', col_email:'Email', col_phone:'Telegram',
     col_status:'Статус', col_projects:'Проекты', col_revenue:'Выручка',
     col_name:'Имя', col_position:'Должность', col_num:'№',
     col_client:'Клиент', col_amount:'Сумма', col_issued:'Выставлен', col_due:'До',
@@ -1431,7 +1431,7 @@ const TRANS = {
     no_invoices:'Счетов пока нет', no_invoices_sub:'Создайте первый счёт',
     page_settings:'Настройки', settings_sub:'Аккаунт и параметры CRM',
     tab_profile:'Профиль', tab_studio:'Студия', btn_save_settings:'Сохранить',
-    set_name:'Имя', set_phone:'Телефон', set_email:'Email',
+    set_name:'Имя', set_phone:'Telegram', set_email:'Email',
     set_currency:'Валюта', set_language:'Язык',
     set_tg:'Telegram', set_tg_off:'Не настроен', set_tg_on:'Подключён',
     set_tg_token:'Токен бота (от @BotFather)', set_tg_chat:'Chat ID (от @userinfobot)',
@@ -1462,7 +1462,7 @@ const TRANS = {
     f_stage:'Этап', f_value:'Сумма ₽', f_desc:'Описание',
     f_amount:'Сумма ₽', f_issued:'Дата выставления', f_due:'Дата оплаты',
     f_name:'Имя *', f_position:'Должность', f_goal_period:'Период',
-    f_phone:'Телефон', f_username:'@Username', f_email:'Email', f_number:'Номер счёта', opt_none:'— нет —',
+    f_phone:'@Telegram', f_username:'@Telegram', f_email:'Email', f_number:'Номер счёта', opt_none:'— нет —',
     toast_mark_paid:'Счёт отмечен как оплаченный',
     confirm_del_client:'Удалить клиента?', confirm_del_project:'Удалить проект?',
     confirm_del_deal:'Удалить сделку?', confirm_del_invoice:'Удалить счёт?',
@@ -2553,7 +2553,7 @@ function renderTeam() {
       </td>
       <td>${esc(m.position||'—')}</td>
       <td style="font-size:13px">${esc(m.email||'—')}</td>
-      <td style="font-size:13px">${esc(m.phone||'—')}</td>
+      <td style="font-size:13px">${m.phone ? `<a href="https://t.me/${m.phone.replace(/^@/,'')}" target="_blank" style="color:var(--g1);text-decoration:none" onmouseover="this.style.color='var(--white)'" onmouseout="this.style.color='var(--g1)'">@${m.phone.replace(/^@/,'')}</a>` : '—'}</td>
       <td><span class="staff-status ${m.status||'active'}">${m.status==='inactive'?t('st_inactive'):t('st_active')}</span></td>
       <td>
         <div class="td-actions">
@@ -2572,7 +2572,7 @@ function openStaffModal(m) {
     </div>
     <div class="field-row">
       <div class="field"><label class="field-label">${t('f_email')}</label><input class="field-input" id="m-email" value="${esc(m?.email||'')}" placeholder="email@studio.com"></div>
-      <div class="field"><label class="field-label">${t('f_phone')}</label><input class="field-input" id="m-phone" value="${esc(m?.phone||'')}" placeholder="+1 555..."></div>
+      <div class="field"><label class="field-label">${t('f_phone')}</label><input class="field-input" id="m-phone" value="${esc(m?.phone||'')}" placeholder="@handle"></div>
     </div>
     <div class="field">
       <label class="field-label">${t('f_status')}</label>
