@@ -209,25 +209,37 @@ tr:hover td { background:transparent; }
 
 /* ── KANBAN ── */
 .kanban { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; align-items:start; }
-.k-col { background:var(--s1); border:1px solid var(--line); border-radius:14px; overflow:hidden; display:flex; flex-direction:column; }
-.k-col-head { padding:12px 14px 11px; display:flex; align-items:center; justify-content:space-between; }
+.k-stats-bar { display:flex; align-items:center; gap:8px; margin-bottom:18px; }
+.k-stat-item { font-size:12px; color:var(--g2); }
+.k-stat-item b { color:var(--g1); font-weight:500; }
+.k-stat-sep { color:var(--g3); font-size:11px; }
+.k-col { background:var(--s1); border:1px solid var(--line); border-radius:14px; overflow:hidden; display:flex; flex-direction:column; position:relative; }
+.k-col::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; border-radius:2px 2px 0 0; z-index:1; }
+.k-col[data-col="queue"]::before      { background:var(--g3); }
+.k-col[data-col="inprogress"]::before { background:rgba(255,255,255,0.28); }
+.k-col[data-col="review"]::before     { background:rgba(255,255,255,0.5); }
+.k-col[data-col="done"]::before       { background:var(--white); }
+.k-col-head { padding:14px 14px 12px; display:flex; align-items:flex-start; justify-content:space-between; }
 .k-col-name { font-size:11px; font-weight:600; letter-spacing:0.4px; text-transform:uppercase; color:var(--g1); }
-.k-col-n { font-size:10.5px; color:var(--g2); font-variant-numeric:tabular-nums; background:var(--s3); border:1px solid var(--line); border-radius:5px; padding:1px 7px; min-width:20px; text-align:center; }
-.k-cards { padding:6px 8px 10px; display:flex; flex-direction:column; gap:5px; min-height:48px; flex:1; }
+.k-col-sub { font-size:10.5px; color:var(--g2); margin-top:3px; font-variant-numeric:tabular-nums; }
+.k-col-n { font-size:10.5px; color:var(--g2); font-variant-numeric:tabular-nums; background:var(--s3); border:1px solid var(--line); border-radius:5px; padding:1px 7px; min-width:20px; text-align:center; flex-shrink:0; margin-top:1px; }
+.k-col-sep { height:1px; background:var(--line); margin:0; }
+.k-cards { padding:8px 8px 10px; display:flex; flex-direction:column; gap:5px; min-height:48px; flex:1; }
 .k-card { padding:12px 13px; border:1px solid var(--line); border-radius:10px; background:var(--s2); cursor:pointer; transition:border-color 0.15s,transform 0.15s,box-shadow 0.15s; position:relative; }
-.k-card:hover { border-color:var(--line2); transform:translateY(-1px); box-shadow:0 4px 16px rgba(0,0,0,0.25); }
-.k-card-tag { font-size:9.5px; font-weight:600; letter-spacing:0.3px; color:var(--g2); margin-bottom:6px; text-transform:uppercase; }
-.k-card-title { font-size:13px; font-weight:500; color:var(--white); margin-bottom:0; line-height:1.45; letter-spacing:-0.2px; }
-.k-card-foot { display:flex; align-items:center; justify-content:space-between; font-size:11.5px; color:var(--g2); margin-top:10px; }
+.k-card:hover { border-color:var(--line2); transform:translateY(-1px); box-shadow:0 6px 20px rgba(0,0,0,0.3); }
+.k-card-meta { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; gap:6px; }
+.k-card-type { font-size:9.5px; font-weight:600; letter-spacing:0.4px; color:var(--g2); text-transform:uppercase; }
+.k-card-title { font-size:13px; font-weight:600; color:var(--white); line-height:1.4; letter-spacing:-0.3px; }
+.k-card-foot { display:flex; align-items:center; justify-content:space-between; gap:6px; margin-top:10px; }
 .k-card-prog { margin-top:10px; }
 .k-card-prog-top { display:flex; justify-content:space-between; font-size:10px; color:var(--g2); margin-bottom:5px; letter-spacing:-0.1px; }
-.k-prog-bar { height:3px; background:var(--s4); border-radius:3px; overflow:hidden; }
-.k-prog-fill { height:100%; border-radius:3px; transition:width 0.6s cubic-bezier(.16,1,.3,1); }
+.k-prog-bar { height:2px; background:var(--s4); border-radius:2px; overflow:hidden; }
+.k-prog-fill { height:100%; border-radius:2px; transition:width 0.6s cubic-bezier(.16,1,.3,1); }
 .k-card-del { font-size:10.5px; color:var(--g2); cursor:pointer; padding:2px 6px; opacity:0; transition:all 0.12s; border-radius:4px; position:absolute; top:10px; right:10px; }
 .k-card:hover .k-card-del { opacity:1; }
 .k-card-del:hover { color:#f87171; background:rgba(248,113,113,0.08); }
-.k-col-empty { padding:32px 14px; text-align:center; }
-.k-col-sep { height:1px; background:var(--line); margin:0 8px; }
+.k-col-empty { padding:24px 12px; text-align:center; opacity:0.5; }
+.k-col-sep { height:1px; background:var(--line); margin:0; }
 
 /* ── FUNNEL ── */
 .funnel-header-row { display:flex; align-items:center; gap:24px; padding:0 0 10px; border-bottom:1px solid var(--line); margin-bottom:0; }
@@ -476,19 +488,18 @@ select.field-input option { background:#1a1a1e; color:var(--white); }
 .notes-saved-label { font-size:10.5px; color:var(--g3); padding-top:4px; text-align:right; transition:color 0.5s; }
 
 /* ── ENHANCED KANBAN ── */
-.k-card { border-left:3px solid transparent; }
+.k-card { border-left:2px solid transparent; }
 .k-card.st-queue      { border-left-color:var(--g3); }
-.k-card.st-inprogress { border-left-color:rgba(255,255,255,0.22); }
-.k-card.st-review     { border-left-color:rgba(255,255,255,0.35); }
-.k-card.st-done       { border-left-color:var(--white); }
-.k-dl-badge { font-size:10.5px; padding:2px 8px; border-radius:6px; font-weight:600; white-space:nowrap; }
-.k-dl-badge.overdue { background:rgba(248,113,113,0.12); color:#f87171; }
-.k-dl-badge.urgent  { background:var(--s4); color:var(--g1); }
-.k-dl-badge.ok      { background:var(--s4); color:var(--g2); }
+.k-card.st-inprogress { border-left-color:rgba(255,255,255,0.25); }
+.k-card.st-review     { border-left-color:rgba(255,255,255,0.45); }
+.k-card.st-done       { border-left-color:rgba(255,255,255,0.75); }
+.k-dl-badge { font-size:10px; padding:1px 7px; border-radius:5px; font-weight:600; white-space:nowrap; }
+.k-dl-badge.overdue { background:rgba(248,113,113,0.1); color:#f87171; border:1px solid rgba(248,113,113,0.15); }
+.k-dl-badge.urgent  { background:var(--s4); color:var(--g1); border:1px solid var(--line2); }
+.k-dl-badge.ok      { background:var(--s3); color:var(--g2); border:1px solid var(--line); }
 .k-client-chip { display:inline-flex; align-items:center; gap:5px; min-width:0; overflow:hidden; }
 .k-av { width:16px; height:16px; border-radius:50%; background:var(--s4); border:1px solid var(--line); font-size:8px; font-weight:700; color:var(--g1); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-.k-budget-tag { font-size:12px; font-weight:600; color:var(--g2); font-variant-numeric:tabular-nums; flex-shrink:0; }
-.k-card-foot { display:flex; align-items:center; justify-content:space-between; gap:6px; margin-top:10px; }
+.k-budget-tag { font-size:12px; font-weight:600; color:var(--g1); font-variant-numeric:tabular-nums; flex-shrink:0; letter-spacing:-0.2px; }
 
 /* ── ACTIVITY FEED ── */
 .act-row { display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--line); }
@@ -824,21 +835,44 @@ select.field-input option { background:#1a1a1e; color:var(--white); }
         <div><h1 data-i18n="page_projects">Projects</h1><p data-i18n="projects_sub">Studio projects and tasks</p></div>
         <button class="btn btn-white" onclick="openAddModal()" data-i18n="btn_new_project">+ New project</button>
       </div>
+      <div class="k-stats-bar" id="k-stats-bar">
+        <span class="k-stat-item"><b id="ks-total">0</b> projects</span>
+        <span class="k-stat-sep">·</span>
+        <span class="k-stat-item"><b id="ks-active">0</b> in progress</span>
+        <span class="k-stat-sep">·</span>
+        <span class="k-stat-item"><b id="ks-budget">₽ 0</b> total budget</span>
+      </div>
       <div class="kanban" id="kanban-board">
-        <div class="k-col">
-          <div class="k-col-head"><div class="k-col-name" data-i18n="k_backlog">Backlog</div><div class="k-col-n" id="kn-queue">0</div></div>
+        <div class="k-col" data-col="queue">
+          <div class="k-col-head">
+            <div><div class="k-col-name" data-i18n="k_backlog">Backlog</div><div class="k-col-sub" id="kb-queue"></div></div>
+            <div class="k-col-n" id="kn-queue">0</div>
+          </div>
+          <div class="k-col-sep"></div>
           <div class="k-cards" id="kc-queue"></div>
         </div>
-        <div class="k-col">
-          <div class="k-col-head"><div class="k-col-name" data-i18n="k_inprogress">In Progress</div><div class="k-col-n" id="kn-inprogress">0</div></div>
+        <div class="k-col" data-col="inprogress">
+          <div class="k-col-head">
+            <div><div class="k-col-name" data-i18n="k_inprogress">In Progress</div><div class="k-col-sub" id="kb-inprogress"></div></div>
+            <div class="k-col-n" id="kn-inprogress">0</div>
+          </div>
+          <div class="k-col-sep"></div>
           <div class="k-cards" id="kc-inprogress"></div>
         </div>
-        <div class="k-col">
-          <div class="k-col-head"><div class="k-col-name" data-i18n="k_review">Review</div><div class="k-col-n" id="kn-review">0</div></div>
+        <div class="k-col" data-col="review">
+          <div class="k-col-head">
+            <div><div class="k-col-name" data-i18n="k_review">Review</div><div class="k-col-sub" id="kb-review"></div></div>
+            <div class="k-col-n" id="kn-review">0</div>
+          </div>
+          <div class="k-col-sep"></div>
           <div class="k-cards" id="kc-review"></div>
         </div>
-        <div class="k-col">
-          <div class="k-col-head"><div class="k-col-name" data-i18n="k_done">Done</div><div class="k-col-n" id="kn-done">0</div></div>
+        <div class="k-col" data-col="done">
+          <div class="k-col-head">
+            <div><div class="k-col-name" data-i18n="k_done">Done</div><div class="k-col-sub" id="kb-done"></div></div>
+            <div class="k-col-n" id="kn-done">0</div>
+          </div>
+          <div class="k-col-sep"></div>
           <div class="k-cards" id="kc-done"></div>
         </div>
       </div>
@@ -1330,7 +1364,7 @@ const TRANS = {
     f_stage:'Stage', f_value:'Value ₽', f_desc:'Description',
     f_amount:'Amount ₽', f_issued:'Issue date', f_due:'Due date',
     f_name:'Name *', f_position:'Position', f_goal_period:'Period',
-    f_phone:'Phone', f_email:'Email', f_number:'Number', opt_none:'— none —',
+    f_phone:'Phone', f_username:'@Username', f_email:'Email', f_number:'Number', opt_none:'— none —',
     toast_mark_paid:'Invoice marked as paid',
     confirm_del_client:'Delete this client?', confirm_del_project:'Delete this project?',
     confirm_del_deal:'Delete this deal?', confirm_del_invoice:'Delete this invoice?',
@@ -1428,7 +1462,7 @@ const TRANS = {
     f_stage:'Этап', f_value:'Сумма ₽', f_desc:'Описание',
     f_amount:'Сумма ₽', f_issued:'Дата выставления', f_due:'Дата оплаты',
     f_name:'Имя *', f_position:'Должность', f_goal_period:'Период',
-    f_phone:'Телефон', f_email:'Email', f_number:'Номер счёта', opt_none:'— нет —',
+    f_phone:'Телефон', f_username:'@Username', f_email:'Email', f_number:'Номер счёта', opt_none:'— нет —',
     toast_mark_paid:'Счёт отмечен как оплаченный',
     confirm_del_client:'Удалить клиента?', confirm_del_project:'Удалить проект?',
     confirm_del_deal:'Удалить сделку?', confirm_del_invoice:'Удалить счёт?',
@@ -2183,8 +2217,24 @@ function renderProjects() {
     if (cols[k]) cols[k].push(p); else cols.queue.push(p);
   });
   const today = new Date(); today.setHours(0,0,0,0);
+
+  // Stats bar
+  const totalBudget = projects.reduce((s,p) => s + (p.budget||0), 0);
+  const totalActive = (cols.inprogress||[]).length;
+  const ksTotal = document.getElementById('ks-total');
+  const ksActive = document.getElementById('ks-active');
+  const ksBudget = document.getElementById('ks-budget');
+  if (ksTotal)  ksTotal.textContent  = projects.length;
+  if (ksActive) ksActive.textContent = totalActive;
+  if (ksBudget) ksBudget.textContent = fmt(totalBudget);
+
   for (const [k, arr] of Object.entries(cols)) {
     document.getElementById('kn-'+k).textContent = arr.length;
+    // Column budget sub
+    const colBudget = arr.reduce((s,p) => s + (p.budget||0), 0);
+    const kbEl = document.getElementById('kb-'+k);
+    if (kbEl) kbEl.textContent = colBudget > 0 ? fmt(colBudget) : '';
+
     document.getElementById('kc-'+k).innerHTML = arr.length ? arr.map(p => {
       // Deadline badge
       let dlBadge = '';
@@ -2193,34 +2243,33 @@ function renderProjects() {
         const diff = Math.ceil((d - today) / 86400000);
         if (diff < 0)       dlBadge = `<span class="k-dl-badge overdue">Overdue</span>`;
         else if (diff === 0)dlBadge = `<span class="k-dl-badge overdue">Today</span>`;
-        else if (diff <= 5) dlBadge = `<span class="k-dl-badge urgent">${diff}d</span>`;
-        else                dlBadge = `<span class="k-dl-badge ok">${p.deadline}</span>`;
+        else if (diff <= 5) dlBadge = `<span class="k-dl-badge urgent">${diff}d left</span>`;
       }
       // Client chip
       const av = p.client_name ? `<span class="k-av">${p.client_name[0].toUpperCase()}</span>` : '';
       const stClass = 'st-'+(k==='inprogress'?'inprogress':k);
-      const progColor = p.progress >= 100 ? 'var(--white)' : 'rgba(255,255,255,0.65)';
+      const progColor = p.progress >= 100 ? 'var(--white)' : 'rgba(255,255,255,0.7)';
       return `<div class="k-card ${stClass}" onclick="editProject(${p.id})">
-        <div class="k-card-tag">${esc(p.type||'Project')}</div>
         <span class="k-card-del" onclick="deleteProject(${p.id},event)">✕</span>
+        <div class="k-card-meta">
+          <span class="k-card-type">${esc(p.type||'Project')}</span>
+          ${dlBadge}
+        </div>
         <div class="k-card-title">${esc(p.title)}</div>
         ${p.progress > 0 ? `
         <div class="k-card-prog">
           <div class="k-card-prog-top">
-            <span>${t('k_progress')}</span>
-            <span style="font-weight:600;color:var(--white)">${p.progress}%</span>
+            <span style="color:var(--g2)">${t('k_progress')}</span>
+            <span style="font-weight:600;color:var(--white);font-size:10.5px">${p.progress}%</span>
           </div>
           <div class="k-prog-bar"><div class="k-prog-fill" style="width:${p.progress}%;background:${progColor}"></div></div>
         </div>` : ''}
         <div class="k-card-foot">
-          <div class="k-client-chip">${av}<span style="font-size:11.5px;color:var(--g2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p.client_name||'—')}</span></div>
-          <div style="display:flex;align-items:center;gap:5px;flex-shrink:0">
-            ${p.budget ? `<span class="k-budget-tag">${fmt(p.budget)}</span>` : ''}
-            ${dlBadge}
-          </div>
+          <div class="k-client-chip">${av}<span style="font-size:11px;color:var(--g2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p.client_name||'—')}</span></div>
+          ${p.budget ? `<span class="k-budget-tag">${fmt(p.budget)}</span>` : ''}
         </div>
       </div>`;
-    }).join('') : `<div class="k-col-empty">${emptySkel(t('k_empty'),'')}</div>`;
+    }).join('') : `<div class="k-col-empty"><div style="font-size:12px;color:var(--g2)">${t('k_empty')}</div></div>`;
   }
 }
 
@@ -2582,7 +2631,7 @@ function openClientModal(c) {
       <div class="field"><label class="field-label">${t('f_email')}</label><input class="field-input" id="m-email" value="${esc(c?.email||'')}" placeholder="email@company.com"></div>
     </div>
     <div class="field-row">
-      <div class="field"><label class="field-label">${t('f_phone')}</label><input class="field-input" id="m-phone" value="${esc(c?.phone||'')}" placeholder="+1 555..."></div>
+      <div class="field"><label class="field-label">${t('f_username')}</label><input class="field-input" id="m-phone" value="${esc(c?.phone||'')}" placeholder="@handle"></div>
       <div class="field"><label class="field-label">${t('f_status')}</label><select class="field-input" id="m-status">
         <option value="active" ${c?.status==='active'?'selected':''}>${t('st_active')}</option>
         <option value="lead" ${c?.status==='lead'?'selected':''}>${t('st_lead')}</option>
