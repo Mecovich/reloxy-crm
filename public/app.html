@@ -1469,24 +1469,54 @@ async function init() {
   const savedLbl = document.getElementById('notes-saved');
   if (savedLbl) savedLbl.style.display = 'none';
 
+  applyStaffMode();
   await loadAll();
   applyLang(currentLang);
 }
 
+// ── Staff role restrictions ──────────────────────────────────────
+function applyStaffMode() {
+  if (user?.role !== 'staff') return;
+
+  // Hide nav items staff shouldn't see
+  document.querySelectorAll('.nav-item').forEach(el => {
+    const onclick = el.getAttribute('onclick') || '';
+    if (onclick.includes("'finance'") || onclick.includes("'team'") || onclick.includes("'funnel'")) {
+      el.style.display = 'none';
+    }
+  });
+
+  // Hide entire nav sections if empty
+  document.querySelectorAll('.nav-section-label').forEach(lbl => {
+    const label = lbl.textContent.trim().toUpperCase();
+    if (label === 'ФИНАНСЫ' || label === 'FINANCES') lbl.style.display = 'none';
+  });
+
+  // Hide add button for restricted pages, show staff badge in topbar
+  const tbName = document.getElementById('topbar-username');
+  if (tbName) tbName.textContent = user.name + ' · Staff';
+
+  // Remove settings from popup
+  const addBtn = document.getElementById('add-btn');
+  if (addBtn) addBtn.style.display = 'none';
+}
+
 async function loadAll() {
-  const [c, p, d, i, s, t] = await Promise.allSettled([
+  const isStaff = user?.role === 'staff';
+  const fetches = [
     api('GET', '/api/clients'),
     api('GET', '/api/projects'),
-    api('GET', '/api/deals'),
-    api('GET', '/api/invoices'),
-    api('GET', '/api/stats'),
-    api('GET', '/api/staff'),
-  ]);
+    isStaff ? Promise.resolve([]) : api('GET', '/api/deals'),
+    isStaff ? Promise.resolve([]) : api('GET', '/api/invoices'),
+    isStaff ? Promise.resolve(null) : api('GET', '/api/stats'),
+    isStaff ? Promise.resolve([]) : api('GET', '/api/staff'),
+  ];
+  const [c, p, d, i, s, t] = await Promise.allSettled(fetches);
   if (c.status==='fulfilled') clients  = c.value;
   if (p.status==='fulfilled') projects = p.value;
   if (d.status==='fulfilled') deals    = d.value;
   if (i.status==='fulfilled') invoices = i.value;
-  if (s.status==='fulfilled') renderStats(s.value);
+  if (s.status==='fulfilled' && s.value) renderStats(s.value);
   if (t.status==='fulfilled') staff    = t.value;
   renderCounts();
 }
@@ -1504,6 +1534,8 @@ async function api(method, url, body) {
 // ─── NAV ───────────────────────────────────────────────────────────────────
 const TITLES = { dashboard:'Dashboard', calendar:'Calendar', clients:'Clients', projects:'Projects', funnel:'Pipeline', team:'Team', finance:'Finance', settings:'Settings' };
 function go(id, el) {
+  const staffBlocked = ['finance','team','funnel'];
+  if (user?.role === 'staff' && staffBlocked.includes(id)) return;
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('settings-nav-btn')?.classList.remove('active');

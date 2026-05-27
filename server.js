@@ -153,7 +153,8 @@ async function initDB() {
     `ALTER TABLE invoices ADD COLUMN issued_at TEXT`,
     `ALTER TABLE invoices ADD COLUMN due_at TEXT`,
     `ALTER TABLE users ADD COLUMN invite_token TEXT DEFAULT ''`,
-    `ALTER TABLE staff ADD COLUMN invite_email TEXT DEFAULT ''`,
+    `ALTER TABLE users ADD COLUMN owner_id INTEGER DEFAULT NULL`,
+    `ALTER TABLE projects ADD COLUMN assigned_to INTEGER DEFAULT NULL`,
   ];
   for (const sql of migrations) {
     try { await db.execute({ sql, args: [] }); } catch (_) { /* column already exists */ }
@@ -222,12 +223,12 @@ async function handleLogin(req, res) {
     if (!valid) return res.status(400).json({ error: 'Wrong password' });
 
     const token = jwt.sign(
-      { id: user.id, email: user.email, role: user.role, name: user.name },
+      { id: user.id, email: user.email, role: user.role, name: user.name, owner_id: user.owner_id || null },
       process.env.JWT_SECRET || 'secret',
       { expiresIn: '30d' }
     );
 
-    res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role, plan: user.plan } });
+    res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role, plan: user.plan, owner_id: user.owner_id || null } });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -236,20 +237,25 @@ async function handleLogin(req, res) {
 app.post('/api/auth/register', handleRegister);
 app.post('/api/auth/login',    handleLogin);
 app.get('/api/auth/me', authMiddleware, async (req, res) => {
-  const result = await db.execute({ sql: 'SELECT id, name, email, role, plan, studio_name, created_at FROM users WHERE id = ?', args: [req.user.id] });
+  const result = await db.execute({ sql: 'SELECT id, name, email, role, plan, studio_name, owner_id, created_at FROM users WHERE id = ?', args: [req.user.id] });
   res.json(result.rows[0]);
 });
 
 app.post('/api/register', handleRegister);
 app.post('/api/login',    handleLogin);
 app.get('/api/me', authMiddleware, async (req, res) => {
-  const result = await db.execute({ sql: 'SELECT id, name, email, role, plan, studio_name, created_at FROM users WHERE id = ?', args: [req.user.id] });
+  const result = await db.execute({ sql: 'SELECT id, name, email, role, plan, studio_name, owner_id, created_at FROM users WHERE id = ?', args: [req.user.id] });
   res.json(result.rows[0]);
 });
 
+// ─── Role helpers ─────────────────────────────────────────────────────────────
+function ownerId(req)  { return req.user.owner_id || req.user.id; }
+function isStaff(req)  { return req.user.role === 'staff'; }
+function denyStaff(req, res) { if (isStaff(req)) { res.status(403).json({ error: 'Staff access denied' }); return true; } return false; }
+
 // ─── CLIENTS ─────────────────────────────────────────────────────────────────
 app.get('/api/clients', authMiddleware, async (req, res) => {
-  const result = await db.execute({ sql: 'SELECT * FROM clients WHERE user_id = ? ORDER BY created_at DESC', args: [req.user.id] });
+  const result = await db.execute({ sql: 'SELECT * FROM clients WHERE user_id = ? ORDER BY created_at DESC', args: [ownerId(req)] });
   res.json(result.rows);
 });
 
@@ -280,38 +286,59 @@ app.delete('/api/clients/:id', authMiddleware, async (req, res) => {
 
 // ─── PROJECTS ────────────────────────────────────────────────────────────────
 app.get('/api/projects', authMiddleware, async (req, res) => {
-  const result = await db.execute({
-    sql: `SELECT p.*, c.name as client_name FROM projects p
-          LEFT JOIN clients c ON p.client_id = c.id
-          WHERE p.user_id = ? ORDER BY p.created_at DESC`,
-    args: [req.user.id],
-  });
+  const uid = ownerId(req);
+  let sql, args;
+  if (isStaff(req)) {
+    sql = `SELECT p.*, c.name as client_name FROM projects p
+           LEFT JOIN clients c ON p.client_id = c.id
+           WHERE p.user_id = ? AND p.assigned_to = ? ORDER BY p.created_at DESC`;
+    args = [uid, req.user.id];
+  } else {
+    sql = `SELECT p.*, c.name as client_name FROM projects p
+           LEFT JOIN clients c ON p.client_id = c.id
+           WHERE p.user_id = ? ORDER BY p.created_at DESC`;
+    args = [uid];
+  }
+  const result = await db.execute({ sql, args });
   res.json(result.rows);
 });
 
 app.post('/api/projects', authMiddleware, async (req, res) => {
-  const { title, type, client_id, status, progress, deadline, budget } = req.body;
+  if (denyStaff(req, res)) return;
+  const { title, type, client_id, status, progress, deadline, budget, assigned_to } = req.body;
   const result = await db.execute({
-    sql: 'INSERT INTO projects (user_id, client_id, title, type, status, progress, deadline, budget) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-    args: [req.user.id, client_id||null, title, type||'', status||'queue', progress||0, deadline||null, budget||null],
+    sql: 'INSERT INTO projects (user_id, client_id, title, type, status, progress, deadline, budget, assigned_to) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+    args: [req.user.id, client_id||null, title, type||'', status||'queue', progress||0, deadline||null, budget||null, assigned_to||null],
   });
   const row = await db.execute({ sql: 'SELECT * FROM projects WHERE id = ?', args: [result.lastInsertRowid] });
   res.json(row.rows[0]);
 });
 
 app.put('/api/projects/:id', authMiddleware, async (req, res) => {
-  const { title, type, client_id, status, progress, deadline, budget } = req.body;
+  if (denyStaff(req, res)) return;
+  const { title, type, client_id, status, progress, deadline, budget, assigned_to } = req.body;
   await db.execute({
-    sql: 'UPDATE projects SET title=?, type=?, client_id=?, status=?, progress=?, deadline=?, budget=? WHERE id=? AND user_id=?',
-    args: [title, type||'', client_id||null, status||'queue', progress||0, deadline||null, budget||null, req.params.id, req.user.id],
+    sql: 'UPDATE projects SET title=?, type=?, client_id=?, status=?, progress=?, deadline=?, budget=?, assigned_to=? WHERE id=? AND user_id=?',
+    args: [title, type||'', client_id||null, status||'queue', progress||0, deadline||null, budget||null, assigned_to||null, req.params.id, req.user.id],
   });
   const row = await db.execute({ sql: 'SELECT * FROM projects WHERE id = ?', args: [req.params.id] });
   res.json(row.rows[0]);
 });
 
 app.delete('/api/projects/:id', authMiddleware, async (req, res) => {
+  if (denyStaff(req, res)) return;
   await db.execute({ sql: 'DELETE FROM projects WHERE id=? AND user_id=?', args: [req.params.id, req.user.id] });
   res.json({ ok: true });
+});
+
+// GET staff list with their user_ids (for assignment dropdown)
+app.get('/api/staff-accounts', authMiddleware, async (req, res) => {
+  if (denyStaff(req, res)) return;
+  const result = await db.execute({
+    sql: 'SELECT id, name, email FROM users WHERE owner_id = ? ORDER BY name ASC',
+    args: [req.user.id],
+  });
+  res.json(result.rows);
 });
 
 // ─── TASKS (Kanban) ──────────────────────────────────────────────────────────
@@ -388,6 +415,7 @@ app.delete('/api/deals/:id', authMiddleware, async (req, res) => {
 
 // ─── INVOICES ────────────────────────────────────────────────────────────────
 app.get('/api/invoices', authMiddleware, async (req, res) => {
+  if (denyStaff(req, res)) return;
   const result = await db.execute({
     sql: `SELECT i.*, c.name as client_name, p.title as project_title FROM invoices i
           LEFT JOIN clients c ON i.client_id = c.id
@@ -632,28 +660,43 @@ app.get('/api/invite/:token', async (req, res) => {
   res.json({ owner_name: u.name, studio_name: u.studio_name || u.name });
 });
 
-// POST /api/invite/:token — public: staff accepts invite and registers
+// POST /api/invite/:token — public: staff accepts invite, creates a real user account
 app.post('/api/invite/:token', async (req, res) => {
-  const { name, email, password } = req.body;
-  if (!name || !email || !password) return res.status(400).json({ error: 'Name, email and password required' });
+  try {
+    const { name, email, password } = req.body;
+    if (!name || !email || !password) return res.status(400).json({ error: 'Name, email and password required' });
+    if (password.length < 6) return res.status(400).json({ error: 'Password must be at least 6 characters' });
 
-  const ownerRow = await db.execute({
-    sql: 'SELECT id FROM users WHERE invite_token=?',
-    args: [req.params.token],
-  });
-  if (!ownerRow.rows.length) return res.status(404).json({ error: 'Invalid invite link' });
-  const ownerId = ownerRow.rows[0].id;
+    const ownerRow = await db.execute({
+      sql: 'SELECT id, name, studio_name FROM users WHERE invite_token=?',
+      args: [req.params.token],
+    });
+    if (!ownerRow.rows.length) return res.status(404).json({ error: 'Invalid invite link' });
+    const owner = ownerRow.rows[0];
 
-  // Check email not taken in staff
-  const exists = await db.execute({ sql: 'SELECT id FROM staff WHERE email=? AND user_id=?', args: [email, ownerId] });
-  if (exists.rows.length) return res.status(409).json({ error: 'This email is already in the team' });
+    // Check email not already registered
+    const exists = await db.execute({ sql: 'SELECT id FROM users WHERE email=?', args: [email] });
+    if (exists.rows.length) return res.status(409).json({ error: 'This email is already registered' });
 
-  const hash = await bcrypt.hash(password, 10);
-  await db.execute({
-    sql: 'INSERT INTO staff (user_id, name, email, position, status, invite_email) VALUES (?,?,?,?,?,?)',
-    args: [ownerId, name, email, 'Staff', 'active', email],
-  });
-  res.json({ ok: true });
+    const hash = await bcrypt.hash(password, 10);
+
+    // Create user account with role='staff' and owner_id
+    const result = await db.execute({
+      sql: 'INSERT INTO users (name, email, password, role, owner_id, studio_name) VALUES (?,?,?,?,?,?)',
+      args: [name, email, hash, 'staff', owner.id, owner.studio_name || owner.name],
+    });
+
+    // Also add to staff table so owner can see them in Team page
+    await db.execute({
+      sql: 'INSERT INTO staff (user_id, name, email, position, status) VALUES (?,?,?,?,?)',
+      args: [owner.id, name, email, 'Staff', 'active'],
+    });
+
+    res.json({ ok: true });
+  } catch(e) {
+    console.error('Invite error:', e);
+    res.status(500).json({ error: e.message });
+  }
 });
 
 // ─── Static pages ────────────────────────────────────────────────────────────
