@@ -362,12 +362,12 @@ select.field-input option { background:var(--s3); color:var(--white); }
 .staff-status.inactive { color:var(--g1); background:var(--s3); border:1px solid var(--line2); }
 
 /* ── SETTINGS ── */
-.settings-wrap { display:grid; grid-template-columns:1fr 380px; gap:16px; align-items:start; }
+.settings-wrap { max-width:620px; }
 .set-card { background:var(--s1); border:1px solid var(--line); border-radius:var(--r-lg); overflow:hidden; }
 .set-card-top { padding:18px 20px; display:flex; align-items:center; justify-content:space-between; }
-.set-tabs { display:flex; background:var(--s3); border-radius:8px; padding:3px; gap:2px; }
-.set-tab { font-size:13px; font-weight:500; padding:6px 16px; border-radius:6px; cursor:pointer; color:var(--g1); transition:all 0.15s; border:none; background:transparent; font-family:inherit; }
-.set-tab.active { background:var(--s4); color:var(--white); }
+.set-tabs { display:none; }
+.set-tab { display:none; }
+.set-section-label { font-size:13px; font-weight:600; color:var(--white); letter-spacing:-0.2px; }
 .set-save-btn { font-size:13px; font-weight:600; padding:7px 18px; border-radius:8px; background:var(--s3); color:var(--white); border:1px solid var(--line2); cursor:pointer; font-family:inherit; transition:all 0.15s; }
 .set-save-btn:hover { background:var(--s4); border-color:var(--line3); }
 .set-body { padding:22px 24px; display:flex; flex-direction:column; gap:0; }
@@ -412,9 +412,20 @@ select.field-input option { background:var(--s3); color:var(--white); }
 .set-right-title { font-size:13px; font-weight:600; letter-spacing:-0.3px; }
 .set-right-sub { font-size:11.5px; color:var(--g2); margin-top:2px; }
 .set-right-body { padding:18px 20px; display:flex; flex-direction:column; gap:12px; }
-.settings-nav-btn { display:flex; align-items:center; gap:8px; padding:8px 10px; margin:1px 10px; border-radius:8px; font-size:13px; color:var(--g1); cursor:pointer; transition:color 0.12s,background 0.12s; letter-spacing:-0.1px; }
-.settings-nav-btn:hover { color:var(--white); background:rgba(255,255,255,0.05); }
-.settings-nav-btn.active { color:var(--white); background:rgba(255,255,255,0.08); }
+.settings-nav-btn { display:none; }
+/* ── SETTINGS SECTION PICKER ── */
+.set-picker-wrap { position:relative; }
+.set-picker-btn { display:flex; align-items:center; gap:7px; padding:6px 12px; border-radius:8px; background:var(--s3); border:1px solid var(--line2); cursor:pointer; font-size:12.5px; font-weight:500; color:var(--white); font-family:inherit; transition:background 0.12s,border-color 0.12s; white-space:nowrap; }
+.set-picker-btn:hover { background:var(--s4); border-color:var(--line3); }
+.set-picker-btn svg { opacity:0.4; flex-shrink:0; transition:transform 0.15s; }
+.set-picker-btn.open svg { transform:rotate(180deg); }
+.set-picker-drop { position:absolute; top:calc(100% + 6px); right:0; width:180px; background:var(--s2); border:1px solid var(--line2); border-radius:10px; box-shadow:0 8px 28px rgba(0,0,0,0.5); z-index:100; overflow:hidden; opacity:0; transform:translateY(-4px) scale(0.98); pointer-events:none; transition:opacity 0.14s cubic-bezier(.16,1,.3,1),transform 0.14s cubic-bezier(.16,1,.3,1); transform-origin:top right; }
+.set-picker-drop.open { opacity:1; transform:translateY(0) scale(1); pointer-events:all; }
+.set-picker-item { display:flex; align-items:center; gap:10px; padding:9px 14px; font-size:13px; color:var(--g1); cursor:pointer; transition:color 0.1s,background 0.1s; }
+.set-picker-item:hover { background:rgba(255,255,255,0.05); color:var(--white); }
+.set-picker-item.active { color:var(--white); background:rgba(255,255,255,0.07); }
+.set-picker-item svg { opacity:0.4; flex-shrink:0; }
+.set-picker-item.active svg { opacity:0.7; }
 
 @media(max-width:1100px) {
   .dash-layout { grid-template-columns:260px 1fr; }
@@ -853,18 +864,39 @@ select.field-input option { background:var(--s3); color:var(--white); }
       </div>
       <div class="settings-wrap">
 
-        <!-- LEFT CARD -->
+        <!-- SINGLE CARD -->
         <div class="set-card">
           <div class="set-card-top">
-            <div class="set-tabs">
-              <button class="set-tab active" onclick="switchSetTab('profile',this)" data-i18n="tab_profile">Profile</button>
-              <button class="set-tab" onclick="switchSetTab('studio',this)" data-i18n="tab_studio">Studio</button>
+            <div class="set-section-label" id="set-section-label">Profile</div>
+            <!-- Section picker -->
+            <div class="set-picker-wrap">
+              <button class="set-picker-btn" id="set-picker-btn" onclick="toggleSetPicker(event)">
+                <span id="set-picker-label">Profile</span>
+                <svg width="11" height="11" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 3.5L5 6.5 8 3.5"/></svg>
+              </button>
+              <div class="set-picker-drop" id="set-picker-drop">
+                <div class="set-picker-item active" onclick="switchSetSection('profile',this)">
+                  <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>
+                  Profile
+                </div>
+                <div class="set-picker-item" onclick="switchSetSection('studio',this)">
+                  <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="12" height="9" rx="1.5"/><path d="M5 4V3a1 1 0 011-1h4a1 1 0 011 1v1"/></svg>
+                  Studio
+                </div>
+                <div class="set-picker-item" onclick="switchSetSection('security',this)">
+                  <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="7" width="10" height="7" rx="1.5"/><path d="M5 7V5a3 3 0 016 0v2"/></svg>
+                  Security
+                </div>
+                <div class="set-picker-item" onclick="switchSetSection('goal',this)">
+                  <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><circle cx="8" cy="8" r="3"/><line x1="8" y1="2" x2="8" y2="4"/></svg>
+                  Revenue Goal
+                </div>
+              </div>
             </div>
-            <button class="set-save-btn" onclick="saveCurrentTab()" data-i18n="btn_save_settings">Save settings</button>
           </div>
 
-          <!-- PROFILE TAB -->
-          <div id="set-tab-profile">
+          <!-- PROFILE SECTION -->
+          <div id="set-tab-profile" class="set-section">
             <div class="set-body">
               <div class="set-avatar-row">
                 <div class="set-avatar" id="set-big-avatar">—</div>
@@ -947,8 +979,8 @@ select.field-input option { background:var(--s3); color:var(--white); }
             </div>
           </div>
 
-          <!-- STUDIO TAB -->
-          <div id="set-tab-studio" style="display:none">
+          <!-- STUDIO SECTION -->
+          <div id="set-tab-studio" class="set-section" style="display:none">
             <div class="set-body">
               <div class="set-fields">
                 <div class="set-field">
@@ -994,57 +1026,50 @@ select.field-input option { background:var(--s3); color:var(--white); }
           </div>
         </div>
 
-        <!-- RIGHT CARDS -->
-        <div class="set-right">
-
-          <!-- Security -->
-          <div class="set-right-card">
-            <div class="set-right-head">
-              <div>
-                <div class="set-right-title" data-i18n="set_security">Security</div>
-                <div class="set-right-sub" data-i18n="set_security_sub">Change your password</div>
+          <!-- SECURITY SECTION -->
+          <div id="set-tab-security" class="set-section" style="display:none">
+            <div class="set-body">
+              <div class="set-fields">
+                <div class="set-field">
+                  <label class="set-label" data-i18n="set_cur_pass">Current password</label>
+                  <input class="set-input" id="set-cur-pass" type="password" placeholder="••••••••" data-i18n-ph="ph_password">
+                </div>
+                <div class="set-field">
+                  <label class="set-label" data-i18n="set_new_pass">New password</label>
+                  <input class="set-input" id="set-new-pass" type="password" placeholder="min 6 characters" data-i18n-ph="ph_min6">
+                </div>
+                <div class="set-field">
+                  <label class="set-label" data-i18n="set_confirm_pass">Confirm password</label>
+                  <input class="set-input" id="set-confirm-pass" type="password" placeholder="repeat password" data-i18n-ph="ph_repeat">
+                </div>
               </div>
             </div>
-            <div class="set-right-body">
-              <div class="set-field">
-                <label class="set-label" data-i18n="set_cur_pass">Current password</label>
-                <input class="set-input" id="set-cur-pass" type="password" placeholder="••••••••" data-i18n-ph="ph_password">
-              </div>
-              <div class="set-field">
-                <label class="set-label" data-i18n="set_new_pass">New password</label>
-                <input class="set-input" id="set-new-pass" type="password" placeholder="min 6 characters" data-i18n-ph="ph_min6">
-              </div>
-              <div class="set-field">
-                <label class="set-label" data-i18n="set_confirm_pass">Confirm password</label>
-                <input class="set-input" id="set-confirm-pass" type="password" placeholder="repeat password" data-i18n-ph="ph_repeat">
-              </div>
+            <div class="set-footer">
               <span class="set-msg" id="password-msg"></span>
-              <button class="set-save-btn" onclick="savePassword()" style="align-self:flex-start" data-i18n="btn_update_pass">Update password</button>
+              <button class="set-save-btn" onclick="savePassword()" data-i18n="btn_update_pass">Update password</button>
             </div>
           </div>
 
-          <!-- Revenue Goal -->
-          <div class="set-right-card">
-            <div class="set-right-head">
-              <div>
-                <div class="set-right-title" data-i18n="set_goal">Revenue Goal</div>
-                <div class="set-right-sub" data-i18n="set_goal_sub">Track progress on dashboard</div>
+          <!-- REVENUE GOAL SECTION -->
+          <div id="set-tab-goal" class="set-section" style="display:none">
+            <div class="set-body">
+              <div class="set-fields">
+                <div class="set-field">
+                  <label class="set-label" data-i18n="set_goal_amount">Target amount ₽</label>
+                  <input class="set-input" id="set-goal-amount" type="number" placeholder="500 000">
+                </div>
+                <div class="set-field">
+                  <label class="set-label" data-i18n="set_period">Period</label>
+                  <select class="set-input" id="set-goal-period">
+                    <option value="month" data-i18n="set_monthly">Monthly</option>
+                    <option value="year" data-i18n="set_yearly">Yearly</option>
+                  </select>
+                </div>
               </div>
             </div>
-            <div class="set-right-body">
-              <div class="set-field">
-                <label class="set-label" data-i18n="set_goal_amount">Target amount ₽</label>
-                <input class="set-input" id="set-goal-amount" type="number" placeholder="500 000">
-              </div>
-              <div class="set-field">
-                <label class="set-label" data-i18n="set_period">Period</label>
-                <select class="set-input" id="set-goal-period">
-                  <option value="month" data-i18n="set_monthly">Monthly</option>
-                  <option value="year" data-i18n="set_yearly">Yearly</option>
-                </select>
-              </div>
+            <div class="set-footer">
               <span class="set-msg" id="goal-msg"></span>
-              <button class="set-save-btn" onclick="saveGoalSettings()" style="align-self:flex-start" data-i18n="btn_save_goal">Save goal</button>
+              <button class="set-save-btn" onclick="saveGoalSettings()" data-i18n="btn_save_goal">Save goal</button>
             </div>
           </div>
 
@@ -2190,17 +2215,47 @@ function setLang(lang, btn) {
   setMsg('profile-msg', t('msg_lang_set'), 'ok');
 }
 
-function switchSetTab(tab, btn) {
-  currentSetTab = tab;
-  document.querySelectorAll('.set-tab').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('set-tab-profile').style.display = tab==='profile' ? '' : 'none';
-  document.getElementById('set-tab-studio').style.display  = tab==='studio'  ? '' : 'none';
+// ── SETTINGS SECTION PICKER ────────────────────────────────────
+const SET_SECTION_LABELS = { profile:'Profile', studio:'Studio', security:'Security', goal:'Revenue Goal' };
+
+function toggleSetPicker(e) {
+  e.stopPropagation();
+  const btn  = document.getElementById('set-picker-btn');
+  const drop = document.getElementById('set-picker-drop');
+  const open = drop.classList.contains('open');
+  drop.classList.toggle('open', !open);
+  btn.classList.toggle('open', !open);
 }
 
+function switchSetSection(section, el) {
+  currentSetTab = section;
+  // hide all sections
+  document.querySelectorAll('.set-section').forEach(s => s.style.display = 'none');
+  document.getElementById('set-tab-'+section).style.display = '';
+  // update picker label
+  const label = SET_SECTION_LABELS[section] || section;
+  document.getElementById('set-picker-label').textContent  = label;
+  document.getElementById('set-section-label').textContent = label;
+  // active state
+  document.querySelectorAll('.set-picker-item').forEach(i => i.classList.remove('active'));
+  if (el) el.classList.add('active');
+  // close dropdown
+  document.getElementById('set-picker-drop').classList.remove('open');
+  document.getElementById('set-picker-btn').classList.remove('open');
+}
+
+// close picker on outside click
+document.addEventListener('click', () => {
+  document.getElementById('set-picker-drop')?.classList.remove('open');
+  document.getElementById('set-picker-btn')?.classList.remove('open');
+});
+
+function switchSetTab(tab, btn) { switchSetSection(tab, null); }
 function saveCurrentTab() {
   if (currentSetTab === 'profile') saveProfile();
-  else saveStudio();
+  else if (currentSetTab === 'studio') saveStudio();
+  else if (currentSetTab === 'security') savePassword();
+  else if (currentSetTab === 'goal') saveGoalSettings();
 }
 
 function onTgToggle(cb) {
