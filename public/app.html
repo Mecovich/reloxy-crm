@@ -1364,7 +1364,7 @@ const TRANS = {
     f_stage:'Stage', f_value:'Value ₽', f_desc:'Description',
     f_amount:'Amount ₽', f_issued:'Issue date', f_due:'Due date',
     f_name:'Name *', f_position:'Position', f_goal_period:'Period',
-    f_phone:'@Telegram', f_username:'@Telegram', f_email:'Email', f_number:'Number', opt_none:'— none —',
+    f_phone:'Telegram Username', f_username:'Telegram Username', f_email:'Email', f_number:'Number', opt_none:'— none —',
     toast_mark_paid:'Invoice marked as paid',
     confirm_del_client:'Delete this client?', confirm_del_project:'Delete this project?',
     confirm_del_deal:'Delete this deal?', confirm_del_invoice:'Delete this invoice?',
@@ -1462,7 +1462,7 @@ const TRANS = {
     f_stage:'Этап', f_value:'Сумма ₽', f_desc:'Описание',
     f_amount:'Сумма ₽', f_issued:'Дата выставления', f_due:'Дата оплаты',
     f_name:'Имя *', f_position:'Должность', f_goal_period:'Период',
-    f_phone:'@Telegram', f_username:'@Telegram', f_email:'Email', f_number:'Номер счёта', opt_none:'— нет —',
+    f_phone:'Telegram Username', f_username:'Telegram Username', f_email:'Email', f_number:'Номер счёта', opt_none:'— нет —',
     toast_mark_paid:'Счёт отмечен как оплаченный',
     confirm_del_client:'Удалить клиента?', confirm_del_project:'Удалить проект?',
     confirm_del_deal:'Удалить сделку?', confirm_del_invoice:'Удалить счёт?',
@@ -2572,7 +2572,7 @@ function openStaffModal(m) {
     </div>
     <div class="field-row">
       <div class="field"><label class="field-label">${t('f_email')}</label><input class="field-input" id="m-email" value="${esc(m?.email||'')}" placeholder="email@studio.com"></div>
-      <div class="field"><label class="field-label">${t('f_phone')}</label><input class="field-input" id="m-phone" value="${esc(m?.phone||'')}" placeholder="@handle"></div>
+      <div class="field"><label class="field-label">${t('f_phone')}</label><input class="field-input" id="m-phone" value="${esc(m?.phone||'')}" placeholder="@username"></div>
     </div>
     <div class="field">
       <label class="field-label">${t('f_status')}</label>
@@ -2631,7 +2631,7 @@ function openClientModal(c) {
       <div class="field"><label class="field-label">${t('f_email')}</label><input class="field-input" id="m-email" value="${esc(c?.email||'')}" placeholder="email@company.com"></div>
     </div>
     <div class="field-row">
-      <div class="field"><label class="field-label">${t('f_username')}</label><input class="field-input" id="m-phone" value="${esc(c?.phone||'')}" placeholder="@handle"></div>
+      <div class="field"><label class="field-label">${t('f_username')}</label><input class="field-input" id="m-phone" value="${esc(c?.phone||'')}" placeholder="@username"></div>
       <div class="field"><label class="field-label">${t('f_status')}</label><select class="field-input" id="m-status">
         <option value="active" ${c?.status==='active'?'selected':''}>${t('st_active')}</option>
         <option value="lead" ${c?.status==='lead'?'selected':''}>${t('st_lead')}</option>
