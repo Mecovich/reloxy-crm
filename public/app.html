@@ -1506,7 +1506,7 @@ const TITLES = { dashboard:'Dashboard', calendar:'Calendar', clients:'Clients', 
 function go(id, el) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('settings-nav-btn').classList.remove('active');
+  document.getElementById('settings-nav-btn')?.classList.remove('active');
   document.getElementById('page-' + id).classList.add('active');
   if (el) el.classList.add('active');
   document.getElementById('topbar-title').textContent = TITLES[id] || id;
