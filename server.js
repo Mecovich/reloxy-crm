@@ -152,6 +152,8 @@ async function initDB() {
     `ALTER TABLE deals ADD COLUMN stage TEXT DEFAULT 'new'`,
     `ALTER TABLE invoices ADD COLUMN issued_at TEXT`,
     `ALTER TABLE invoices ADD COLUMN due_at TEXT`,
+    `ALTER TABLE users ADD COLUMN invite_token TEXT DEFAULT ''`,
+    `ALTER TABLE staff ADD COLUMN invite_email TEXT DEFAULT ''`,
   ];
   for (const sql of migrations) {
     try { await db.execute({ sql, args: [] }); } catch (_) { /* column already exists */ }
@@ -604,10 +606,61 @@ app.get('/api/admin/stats', authMiddleware, adminMiddleware, async (req, res) =>
   });
 });
 
+// ─── INVITE SYSTEM ───────────────────────────────────────────────────────────
+const crypto = require('crypto');
+
+// GET /api/invite-link — owner gets (or creates) their invite token
+app.get('/api/invite-link', authMiddleware, async (req, res) => {
+  const row = await db.execute({ sql: 'SELECT invite_token FROM users WHERE id=?', args: [req.user.id] });
+  let token = row.rows[0]?.invite_token;
+  if (!token) {
+    token = crypto.randomBytes(24).toString('hex');
+    await db.execute({ sql: 'UPDATE users SET invite_token=? WHERE id=?', args: [token, req.user.id] });
+  }
+  const base = process.env.APP_URL || `https://${req.hostname}`;
+  res.json({ url: `${base}/invite/${token}` });
+});
+
+// GET /api/invite/:token — public: verify token, return studio info
+app.get('/api/invite/:token', async (req, res) => {
+  const row = await db.execute({
+    sql: 'SELECT id, name, studio_name FROM users WHERE invite_token=?',
+    args: [req.params.token],
+  });
+  if (!row.rows.length) return res.status(404).json({ error: 'Invalid or expired link' });
+  const u = row.rows[0];
+  res.json({ owner_name: u.name, studio_name: u.studio_name || u.name });
+});
+
+// POST /api/invite/:token — public: staff accepts invite and registers
+app.post('/api/invite/:token', async (req, res) => {
+  const { name, email, password } = req.body;
+  if (!name || !email || !password) return res.status(400).json({ error: 'Name, email and password required' });
+
+  const ownerRow = await db.execute({
+    sql: 'SELECT id FROM users WHERE invite_token=?',
+    args: [req.params.token],
+  });
+  if (!ownerRow.rows.length) return res.status(404).json({ error: 'Invalid invite link' });
+  const ownerId = ownerRow.rows[0].id;
+
+  // Check email not taken in staff
+  const exists = await db.execute({ sql: 'SELECT id FROM staff WHERE email=? AND user_id=?', args: [email, ownerId] });
+  if (exists.rows.length) return res.status(409).json({ error: 'This email is already in the team' });
+
+  const hash = await bcrypt.hash(password, 10);
+  await db.execute({
+    sql: 'INSERT INTO staff (user_id, name, email, position, status, invite_email) VALUES (?,?,?,?,?,?)',
+    args: [ownerId, name, email, 'Staff', 'active', email],
+  });
+  res.json({ ok: true });
+});
+
 // ─── Static pages ────────────────────────────────────────────────────────────
-app.get('/app',   (req, res) => res.sendFile(path.join(__dirname, 'public', 'app.html')));
-app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
-app.get('*',      (req, res) => res.sendFile(path.join(__dirname, 'public', 'login.html')));
+app.get('/app',        (req, res) => res.sendFile(path.join(__dirname, 'public', 'app.html')));
+app.get('/admin',      (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
+app.get('/invite/:token', (req, res) => res.sendFile(path.join(__dirname, 'public', 'invite.html')));
+app.get('*',           (req, res) => res.sendFile(path.join(__dirname, 'public', 'login.html')));
 
 // ─── Start ───────────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 3000;

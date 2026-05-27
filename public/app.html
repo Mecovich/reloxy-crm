@@ -208,23 +208,26 @@ tr:hover td { background:transparent; }
 .two-col { display:grid; grid-template-columns:1fr 1fr; gap:40px; }
 
 /* ── KANBAN ── */
-.kanban { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
-.k-col { background:var(--s1); border:1px solid var(--line); border-radius:12px; overflow:hidden; }
-.k-col-head { padding:13px 16px; border-bottom:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; }
-.k-col-name { font-size:11.5px; font-weight:600; letter-spacing:-0.1px; color:var(--white); }
-.k-col-n { font-size:11px; color:var(--g2); font-variant-numeric:tabular-nums; background:var(--s3); border:1px solid var(--line2); border-radius:4px; padding:1px 6px; }
-.k-cards { padding:10px; display:flex; flex-direction:column; gap:6px; min-height:60px; }
-.k-card { padding:13px 14px; border:1px solid var(--line); border-radius:9px; background:var(--s2); cursor:pointer; transition:border-color 0.15s,background 0.15s; }
-.k-card:hover { border-color:var(--line2); background:var(--s3); }
-.k-card-tag { font-size:10px; font-weight:500; letter-spacing:0.1px; color:var(--g2); margin-bottom:7px; text-transform:uppercase; }
-.k-card-title { font-size:13px; font-weight:500; color:var(--white); margin-bottom:10px; line-height:1.45; }
-.k-card-foot { display:flex; align-items:center; justify-content:space-between; font-size:11.5px; color:var(--g2); }
+.kanban { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; align-items:start; }
+.k-col { background:var(--s1); border:1px solid var(--line); border-radius:14px; overflow:hidden; display:flex; flex-direction:column; }
+.k-col-head { padding:12px 14px 11px; display:flex; align-items:center; justify-content:space-between; }
+.k-col-name { font-size:11px; font-weight:600; letter-spacing:0.4px; text-transform:uppercase; color:var(--g1); }
+.k-col-n { font-size:10.5px; color:var(--g2); font-variant-numeric:tabular-nums; background:var(--s3); border:1px solid var(--line); border-radius:5px; padding:1px 7px; min-width:20px; text-align:center; }
+.k-cards { padding:6px 8px 10px; display:flex; flex-direction:column; gap:5px; min-height:48px; flex:1; }
+.k-card { padding:12px 13px; border:1px solid var(--line); border-radius:10px; background:var(--s2); cursor:pointer; transition:border-color 0.15s,transform 0.15s,box-shadow 0.15s; position:relative; }
+.k-card:hover { border-color:var(--line2); transform:translateY(-1px); box-shadow:0 4px 16px rgba(0,0,0,0.25); }
+.k-card-tag { font-size:9.5px; font-weight:600; letter-spacing:0.3px; color:var(--g2); margin-bottom:6px; text-transform:uppercase; }
+.k-card-title { font-size:13px; font-weight:500; color:var(--white); margin-bottom:0; line-height:1.45; letter-spacing:-0.2px; }
+.k-card-foot { display:flex; align-items:center; justify-content:space-between; font-size:11.5px; color:var(--g2); margin-top:10px; }
 .k-card-prog { margin-top:10px; }
-.k-card-prog-top { display:flex; justify-content:space-between; font-size:10.5px; color:var(--g2); margin-bottom:5px; }
-.k-card-del { font-size:11px; color:var(--g2); cursor:pointer; padding:2px 6px; opacity:0; transition:all 0.12s; border-radius:4px; }
+.k-card-prog-top { display:flex; justify-content:space-between; font-size:10px; color:var(--g2); margin-bottom:5px; letter-spacing:-0.1px; }
+.k-prog-bar { height:3px; background:var(--s4); border-radius:3px; overflow:hidden; }
+.k-prog-fill { height:100%; border-radius:3px; transition:width 0.6s cubic-bezier(.16,1,.3,1); }
+.k-card-del { font-size:10.5px; color:var(--g2); cursor:pointer; padding:2px 6px; opacity:0; transition:all 0.12s; border-radius:4px; position:absolute; top:10px; right:10px; }
 .k-card:hover .k-card-del { opacity:1; }
 .k-card-del:hover { color:#f87171; background:rgba(248,113,113,0.08); }
-.k-col-empty { padding:24px 16px; text-align:center; font-size:11.5px; color:var(--g2); }
+.k-col-empty { padding:32px 14px; text-align:center; }
+.k-col-sep { height:1px; background:var(--line); margin:0 8px; }
 
 /* ── FUNNEL ── */
 .funnel-header-row { display:flex; align-items:center; gap:24px; padding:0 0 10px; border-bottom:1px solid var(--line); margin-bottom:0; }
@@ -303,12 +306,13 @@ tr:hover td { background:transparent; }
 .modal-foot { display:flex; justify-content:flex-end; gap:8px; padding:16px 24px; border-top:1px solid var(--line); flex-shrink:0; margin-top:0; }
 .field { margin-bottom:14px; }
 .field-label { font-size:11px; color:var(--g1); margin-bottom:6px; display:block; letter-spacing:0.2px; font-weight:600; text-transform:uppercase; }
-.field-input { width:100%; background:var(--s3); border:1px solid var(--line2); border-radius:8px; padding:9px 12px; color:var(--white); font-size:13.5px; outline:none; transition:border-color 0.15s,background 0.15s,box-shadow 0.15s; font-family:inherit; -webkit-appearance:none; appearance:none; }
-.field-input:focus { border-color:rgba(255,255,255,0.22); box-shadow:0 0 0 3px rgba(255,255,255,0.04); background:var(--s4); }
-.field-input::placeholder { color:var(--g2); }
-textarea.field-input { resize:vertical; min-height:80px; line-height:1.5; }
+.field-input { width:100%; background:var(--s2); border:1px solid var(--line2); border-radius:9px; padding:10px 13px; color:var(--white); font-size:13px; outline:none; transition:border-color 0.15s,background 0.15s,box-shadow 0.15s; font-family:inherit; -webkit-appearance:none; appearance:none; line-height:1.4; }
+.field-input:focus { border-color:rgba(255,255,255,0.28); box-shadow:0 0 0 3px rgba(255,255,255,0.05); background:var(--s3); }
+.field-input:hover:not(:focus) { border-color:var(--line3); }
+.field-input::placeholder { color:var(--g3); font-size:13px; }
+textarea.field-input { resize:vertical; min-height:84px; line-height:1.6; }
 select.field-input { cursor:pointer; }
-select.field-input option { background:var(--s3); color:var(--white); }
+select.field-input option { background:#1a1a1e; color:var(--white); }
 .field-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
 .modal-err { font-size:12.5px; color:#fca5a5; background:rgba(248,113,113,0.08); border:1px solid rgba(248,113,113,0.2); border-radius:8px; padding:10px 14px; margin-bottom:14px; display:none; }
 .modal-err.show { display:block; }
@@ -380,10 +384,12 @@ select.field-input option { background:var(--s3); color:var(--white); }
 .set-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
 .set-field { display:flex; flex-direction:column; gap:6px; }
 .set-label { font-size:11.5px; font-weight:500; color:var(--g1); letter-spacing:-0.1px; }
-.set-input { background:var(--s2); border:1px solid var(--line2); border-radius:8px; padding:9px 13px; color:var(--white); font-size:13.5px; outline:none; font-family:inherit; transition:border-color 0.15s,box-shadow 0.15s; width:100%; }
-.set-input:focus { border-color:var(--line3); box-shadow:0 0 0 3px rgba(255,255,255,0.04); }
+.set-input { background:var(--s2); border:1px solid var(--line2); border-radius:9px; padding:10px 13px; color:var(--white); font-size:13px; outline:none; font-family:inherit; transition:border-color 0.15s,box-shadow 0.15s,background 0.15s; width:100%; line-height:1.4; -webkit-appearance:none; appearance:none; }
+.set-input:focus { border-color:rgba(255,255,255,0.28); box-shadow:0 0 0 3px rgba(255,255,255,0.05); background:var(--s3); }
+.set-input:hover:not(:focus):not(:disabled) { border-color:var(--line3); }
 .set-input:disabled { opacity:0.35; cursor:not-allowed; }
-.set-input option { background:var(--s3); }
+.set-input::placeholder { color:var(--g3); }
+.set-input option { background:#1a1a1e; color:var(--white); }
 .set-divider { height:1px; background:var(--line); margin:20px 0; }
 .set-toggle-row { display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:var(--s2); border-radius:10px; margin-bottom:10px; }
 .set-toggle-row:last-child { margin-bottom:0; }
@@ -413,6 +419,12 @@ select.field-input option { background:var(--s3); color:var(--white); }
 .set-right-sub { font-size:11.5px; color:var(--g2); margin-top:2px; }
 .set-right-body { padding:18px 20px; display:flex; flex-direction:column; gap:12px; }
 .settings-nav-btn { display:none; }
+/* ── INVITE LINK BOX ── */
+.inv-link-box { display:flex; align-items:center; gap:10px; padding:12px 14px; background:var(--s2); border:1px solid var(--line2); border-radius:10px; cursor:pointer; transition:border-color 0.15s,background 0.15s; }
+.inv-link-box:hover { border-color:var(--line3); background:var(--s3); }
+.inv-link-text { font-size:12px; color:var(--g1); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-variant-numeric:tabular-nums; flex:1; }
+.inv-copy-btn { font-size:11.5px; font-weight:600; padding:5px 12px; border-radius:7px; background:var(--s3); border:1px solid var(--line2); color:var(--g1); cursor:pointer; font-family:inherit; transition:all 0.15s; flex-shrink:0; }
+.inv-copy-btn:hover { background:var(--white); color:#050505; border-color:var(--white); }
 /* ── SETTINGS SECTION PICKER ── */
 .set-picker-wrap { position:relative; }
 .set-picker-btn { display:flex; align-items:center; gap:7px; padding:6px 12px; border-radius:8px; background:var(--s3); border:1px solid var(--line2); cursor:pointer; font-size:12.5px; font-weight:500; color:var(--white); font-family:inherit; transition:background 0.12s,border-color 0.12s; white-space:nowrap; }
@@ -846,7 +858,13 @@ select.field-input option { background:var(--s3); color:var(--white); }
     <div class="page" id="page-team">
       <div class="page-header">
         <div><h1 data-i18n="page_team">Team</h1><p data-i18n="team_sub">Your studio staff members</p></div>
-        <button class="btn btn-white" onclick="openAddModal()" data-i18n="btn_add_member">+ Add member</button>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-ghost" onclick="openInviteModal()" style="gap:6px">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 8a4 4 0 10-4 0m4 0c1.5.5 3 1.8 3 4H3c0-2.2 1.5-3.5 3-4"/><line x1="13" y1="3" x2="13" y2="7"/><line x1="11" y1="5" x2="15" y2="5"/></svg>
+            Invite by link
+          </button>
+          <button class="btn btn-white" onclick="openAddModal()" data-i18n="btn_add_member">+ Add member</button>
+        </div>
       </div>
       <div class="table-wrap">
         <table>
@@ -1101,6 +1119,32 @@ select.field-input option { background:var(--s3); color:var(--white); }
 
   </div>
 </main>
+
+<!-- INVITE MODAL -->
+<div class="overlay" id="invite-overlay" onclick="closeInviteModal(event)" style="display:none">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-head">
+      <div class="modal-title">Invite by link</div>
+      <button class="modal-close" onclick="closeInviteModal()">
+        <svg viewBox="0 0 14 14" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="2" y1="2" x2="12" y2="12"/><line x1="12" y1="2" x2="2" y2="12"/></svg>
+      </button>
+    </div>
+    <div class="modal-inner" style="gap:16px">
+      <!-- Link box -->
+      <div class="inv-link-box" id="inv-link-box" onclick="copyInviteLink()" title="Click to copy">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="flex-shrink:0;opacity:0.4"><path d="M6 9a3 3 0 004.24 0l2-2a3 3 0 00-4.24-4.24l-1 1"/><path d="M10 7a3 3 0 00-4.24 0l-2 2a3 3 0 004.24 4.24l1-1"/></svg>
+        <span class="inv-link-text" id="inv-link-text">Generating link...</span>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <span style="font-size:11.5px;color:var(--g2)">Anyone with this link can join your team</span>
+        <button class="inv-copy-btn" id="inv-copy-btn" onclick="copyInviteLink()">Copy link</button>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeInviteModal()">Close</button>
+    </div>
+  </div>
+</div>
 
 <!-- MODAL -->
 <div class="overlay" id="overlay" onclick="closeOverlay(event)">
@@ -2088,29 +2132,28 @@ function renderProjects() {
       // Client chip
       const av = p.client_name ? `<span class="k-av">${p.client_name[0].toUpperCase()}</span>` : '';
       const stClass = 'st-'+(k==='inprogress'?'inprogress':k);
-      // Progress bar color
-      const barColor = p.progress>=100 ? 'var(--white)' : 'rgba(255,255,255,0.7)';
+      const progColor = p.progress >= 100 ? 'var(--white)' : 'rgba(255,255,255,0.65)';
       return `<div class="k-card ${stClass}" onclick="editProject(${p.id})">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
-          <div class="k-card-tag" style="background:var(--s3);padding:2px 8px;border-radius:5px">${esc(p.type||'PROJECT')}</div>
-          <span class="k-card-del" onclick="deleteProject(${p.id},event)" style="font-size:12px">✕</span>
-        </div>
-        <div class="k-card-title" style="font-size:14px;font-weight:600;line-height:1.4;margin-bottom:${p.progress>0?'12px':'10px'}">${esc(p.title)}</div>
-        ${p.progress>0?`<div class="k-card-prog" style="margin-bottom:10px"><div class="k-card-prog-top" style="margin-bottom:5px"><span style="font-size:11px;color:var(--g2)">${t('k_progress')}</span><span style="font-size:11px;font-weight:700;color:var(--white)">${p.progress}%</span></div><div class="bar" style="height:3px"><div class="bar-fill" style="width:${p.progress}%;background:${barColor}"></div></div></div>`:''}
+        <div class="k-card-tag">${esc(p.type||'Project')}</div>
+        <span class="k-card-del" onclick="deleteProject(${p.id},event)">✕</span>
+        <div class="k-card-title">${esc(p.title)}</div>
+        ${p.progress > 0 ? `
+        <div class="k-card-prog">
+          <div class="k-card-prog-top">
+            <span>${t('k_progress')}</span>
+            <span style="font-weight:600;color:var(--white)">${p.progress}%</span>
+          </div>
+          <div class="k-prog-bar"><div class="k-prog-fill" style="width:${p.progress}%;background:${progColor}"></div></div>
+        </div>` : ''}
         <div class="k-card-foot">
-          <div class="k-client-chip">${av}<span style="font-size:12px;color:var(--g2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p.client_name||'—')}</span></div>
-          <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+          <div class="k-client-chip">${av}<span style="font-size:11.5px;color:var(--g2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p.client_name||'—')}</span></div>
+          <div style="display:flex;align-items:center;gap:5px;flex-shrink:0">
             ${p.budget ? `<span class="k-budget-tag">${fmt(p.budget)}</span>` : ''}
             ${dlBadge}
           </div>
         </div>
       </div>`;
-    }).join('') : `<div class="k-col-empty" style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:20px 12px">
-      <div style="width:28px;height:28px;border-radius:50%;background:var(--s3);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;opacity:0.5">
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:10px;height:10px;opacity:0.5"><line x1="8" y1="3" x2="8" y2="13"/><line x1="3" y1="8" x2="13" y2="8"/></svg>
-      </div>
-      <div style="font-size:11px;color:var(--g2)">${t('k_empty')}</div>
-    </div>`;
+    }).join('') : `<div class="k-col-empty">${emptySkel(t('k_empty'),'')}</div>`;
   }
 }
 
@@ -2819,6 +2862,39 @@ function bindSpotlightCards() {
   });
 }
 bindSpotlightCards();
+
+// ── INVITE MODAL ─────────────────────────────────────────────────
+let _inviteUrl = null;
+
+async function openInviteModal() {
+  document.getElementById('invite-overlay').style.display = 'flex';
+  document.getElementById('inv-link-text').textContent = 'Generating link...';
+  document.getElementById('inv-copy-btn').textContent = 'Copy link';
+  try {
+    const d = await api('GET', '/api/invite-link');
+    _inviteUrl = d.url;
+    document.getElementById('inv-link-text').textContent = d.url;
+  } catch(e) {
+    document.getElementById('inv-link-text').textContent = 'Failed to load link';
+  }
+}
+
+function closeInviteModal(e) {
+  if (e && e.target !== document.getElementById('invite-overlay')) return;
+  document.getElementById('invite-overlay').style.display = 'none';
+}
+
+async function copyInviteLink() {
+  if (!_inviteUrl) return;
+  try {
+    await navigator.clipboard.writeText(_inviteUrl);
+    const btn = document.getElementById('inv-copy-btn');
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy link', 2000);
+  } catch(e) {
+    prompt('Copy link:', _inviteUrl);
+  }
+}
 </script>
 </body>
 </html>

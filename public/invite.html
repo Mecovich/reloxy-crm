@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Join — Reloxy</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --black:#0a0a0c;--white:#f0f0f2;
+    --s1:#111114;--s2:#16161a;--s3:#1e1e23;--s4:#27272d;
+    --line:rgba(255,255,255,0.07);--line2:rgba(255,255,255,0.11);--line3:rgba(255,255,255,0.18);
+    --g1:#9191a0;--g2:#66667a;--g3:#44445a;
+    --r:10px;
+  }
+  html,body{height:100%;background:var(--black);color:var(--white);font-family:'Plus Jakarta Sans',-apple-system,sans-serif;-webkit-font-smoothing:antialiased;}
+  body{display:flex;align-items:center;justify-content:center;padding:24px;min-height:100vh;}
+
+  .card{width:100%;max-width:420px;background:var(--s1);border:1px solid var(--line2);border-radius:16px;overflow:hidden;}
+  .card-head{padding:28px 28px 24px;border-bottom:1px solid var(--line);}
+  .card-logo{font-size:13px;font-weight:700;color:var(--g1);letter-spacing:-0.2px;margin-bottom:20px;}
+  .card-studio{font-size:22px;font-weight:700;letter-spacing:-0.5px;line-height:1.25;}
+  .card-sub{font-size:13px;color:var(--g1);margin-top:5px;}
+  .card-body{padding:24px 28px;display:flex;flex-direction:column;gap:16px;}
+  .field{display:flex;flex-direction:column;gap:6px;}
+  .label{font-size:11px;font-weight:600;letter-spacing:0.3px;text-transform:uppercase;color:var(--g1);}
+  .inp{background:var(--s2);border:1px solid var(--line2);border-radius:9px;padding:10px 13px;color:var(--white);font-size:13px;font-family:inherit;outline:none;transition:border-color 0.15s,box-shadow 0.15s,background 0.15s;width:100%;}
+  .inp:focus{border-color:rgba(255,255,255,0.28);box-shadow:0 0 0 3px rgba(255,255,255,0.05);background:var(--s3);}
+  .inp:hover:not(:focus){border-color:var(--line3);}
+  .inp::placeholder{color:var(--g3);}
+  .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px;border-radius:9px;border:none;background:var(--white);color:#0a0a0c;font-size:13.5px;font-weight:700;cursor:pointer;font-family:inherit;transition:opacity 0.15s;}
+  .btn:hover{opacity:0.88;}
+  .btn:disabled{opacity:0.4;cursor:not-allowed;}
+  .err{font-size:12px;color:#f87171;background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.18);border-radius:8px;padding:9px 12px;display:none;}
+  .success{text-align:center;padding:32px 28px;display:none;flex-direction:column;align-items:center;gap:12px;}
+  .success-icon{width:48px;height:48px;border-radius:50%;background:var(--s3);border:1px solid var(--line2);display:flex;align-items:center;justify-content:center;}
+  .success-title{font-size:17px;font-weight:700;letter-spacing:-0.3px;}
+  .success-sub{font-size:13px;color:var(--g1);line-height:1.5;}
+  .success-link{font-size:13px;color:var(--white);font-weight:600;text-decoration:none;padding:10px 20px;border:1px solid var(--line2);border-radius:8px;margin-top:4px;transition:background 0.15s;}
+  .success-link:hover{background:var(--s3);}
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="card-head">
+    <div class="card-logo">Reloxy CRM</div>
+    <div class="card-studio" id="studio-name">Loading...</div>
+    <div class="card-sub" id="card-sub">You've been invited to join the team</div>
+  </div>
+
+  <div class="card-body" id="form-wrap">
+    <div class="err" id="err"></div>
+    <div class="field">
+      <label class="label">Your name</label>
+      <input class="inp" id="name" placeholder="Victoria Ivanova" autocomplete="name">
+    </div>
+    <div class="field">
+      <label class="label">Email</label>
+      <input class="inp" id="email" type="email" placeholder="you@example.com" autocomplete="email">
+    </div>
+    <div class="field">
+      <label class="label">Password</label>
+      <input class="inp" id="password" type="password" placeholder="min 6 characters" autocomplete="new-password">
+    </div>
+    <button class="btn" id="join-btn" onclick="joinTeam()">Join team</button>
+  </div>
+
+  <div class="success" id="success-wrap">
+    <div class="success-icon">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="4 10 8 14 16 6"/>
+      </svg>
+    </div>
+    <div class="success-title">You're in!</div>
+    <div class="success-sub">Your account has been created.<br>The team owner can now assign you projects.</div>
+    <a class="success-link" href="/">Back to login</a>
+  </div>
+</div>
+
+<script>
+const token = location.pathname.split('/invite/')[1];
+
+async function loadInvite() {
+  try {
+    const r = await fetch(`/api/invite/${token}`);
+    if (!r.ok) throw new Error('Invalid or expired invite link');
+    const d = await r.json();
+    document.getElementById('studio-name').textContent = d.studio_name || d.owner_name;
+    document.getElementById('card-sub').textContent = `Invited to join ${d.studio_name || d.owner_name}`;
+  } catch (e) {
+    document.getElementById('studio-name').textContent = 'Invalid link';
+    document.getElementById('card-sub').textContent = e.message;
+    document.getElementById('join-btn').disabled = true;
+  }
+}
+
+async function joinTeam() {
+  const name = document.getElementById('name').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  const errEl = document.getElementById('err');
+  errEl.style.display = 'none';
+
+  if (!name) return showErr('Please enter your name');
+  if (!email) return showErr('Please enter your email');
+  if (password.length < 6) return showErr('Password must be at least 6 characters');
+
+  const btn = document.getElementById('join-btn');
+  btn.disabled = true; btn.textContent = 'Joining...';
+
+  try {
+    const r = await fetch(`/api/invite/${token}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, password }),
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || 'Something went wrong');
+    document.getElementById('form-wrap').style.display = 'none';
+    const sw = document.getElementById('success-wrap');
+    sw.style.display = 'flex';
+  } catch (e) {
+    showErr(e.message);
+    btn.disabled = false; btn.textContent = 'Join team';
+  }
+}
+
+function showErr(msg) {
+  const el = document.getElementById('err');
+  el.textContent = msg; el.style.display = 'block';
+}
+
+loadInvite();
+</script>
+</body>
+</html>
