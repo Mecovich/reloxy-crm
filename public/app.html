@@ -1713,13 +1713,14 @@ const TITLES = { dashboard:'Dashboard', calendar:'Calendar', clients:'Clients', 
 function go(id, el) {
   const staffBlocked = ['finance','team','funnel'];
   if (user?.role === 'staff' && staffBlocked.includes(id)) return;
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p => { p.classList.remove('active'); p.style.display = ''; });
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('settings-nav-btn')?.classList.remove('active');
   document.getElementById('page-' + id).classList.add('active');
   if (el) el.classList.add('active');
   document.getElementById('topbar-title').textContent = TITLES[id] || id;
   currentPage = id;
+  window.scrollTo(0, 0);
   renderPage(id);
   requestAnimationFrame(bindSpotlightCards);
 }
@@ -1751,9 +1752,10 @@ function closeUserPopup() {
 
 function popupGoSettings() {
   closeUserPopup();
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p => { p.classList.remove('active'); p.style.display = ''; });
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-settings').classList.add('active');
+  window.scrollTo(0, 0);
   document.getElementById('topbar-title').textContent = t('page_settings');
   currentPage = 'settings';
   renderSettings();
