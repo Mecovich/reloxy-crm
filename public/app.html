@@ -1636,6 +1636,9 @@ async function init() {
   const savedLbl = document.getElementById('notes-saved');
   if (savedLbl) savedLbl.style.display = 'none';
 
+  // Disable scroll anchoring on content container (Safari workaround)
+  const contentEl = document.querySelector('.content');
+  if (contentEl) contentEl.style.overflowAnchor = 'none';
   // Explicitly set page visibility via inline styles
   document.querySelectorAll('.page').forEach(p => { p.style.display = 'none'; });
   const dashPage = document.getElementById('page-dashboard');
@@ -1708,21 +1711,20 @@ const TITLES = { dashboard:'Dashboard', calendar:'Calendar', clients:'Clients', 
 function go(id, el) {
   const staffBlocked = ['finance','team','funnel'];
   if (user?.role === 'staff' && staffBlocked.includes(id)) return;
-  const contentEl = document.querySelector('.content');
-  // Reset scroll BEFORE DOM change to prevent browser scroll-anchoring
-  if (contentEl) { contentEl.style.overflow = 'hidden'; contentEl.scrollTop = 0; }
   document.querySelectorAll('.page').forEach(p => { p.classList.remove('active'); p.style.display = 'none'; });
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('settings-nav-btn')?.classList.remove('active');
   const activePage = document.getElementById('page-' + id);
   activePage.classList.add('active');
   activePage.style.display = 'block';
-  if (contentEl) { contentEl.scrollTop = 0; contentEl.style.overflow = ''; }
   if (el) el.classList.add('active');
   document.getElementById('topbar-title').textContent = TITLES[id] || id;
   currentPage = id;
   renderPage(id);
-  requestAnimationFrame(() => { if (contentEl) contentEl.scrollTop = 0; bindSpotlightCards(); });
+  requestAnimationFrame(bindSpotlightCards);
+  // Force scroll reset after browser finishes layout (fixes Safari scroll-anchor bug)
+  const c = document.querySelector('.content');
+  if (c) { c.scrollTop = 0; setTimeout(() => { c.scrollTop = 0; }, 0); }
 }
 function toggleUserPopup(e) {
   e.stopPropagation();
