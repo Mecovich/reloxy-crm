@@ -1721,10 +1721,12 @@ function go(id, el) {
   document.getElementById('topbar-title').textContent = TITLES[id] || id;
   currentPage = id;
   renderPage(id);
-  requestAnimationFrame(bindSpotlightCards);
-  // Force scroll reset after browser finishes layout (fixes Safari scroll-anchor bug)
   const c = document.querySelector('.content');
-  if (c) { c.scrollTop = 0; setTimeout(() => { c.scrollTop = 0; }, 0); }
+  // Double rAF: fires after Safari scroll-anchor is applied, then overrides it
+  requestAnimationFrame(() => {
+    if (c) c.scrollTop = 0;
+    requestAnimationFrame(() => { if (c) c.scrollTop = 0; bindSpotlightCards(); });
+  });
 }
 function toggleUserPopup(e) {
   e.stopPropagation();
