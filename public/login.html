@@ -1,24 +1,25 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Reloxy — Вход</title>
+<title>Reloxy — Sign in</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --black:#000; --s1:#0a0a0a; --s2:#111; --s3:#1a1a1a;
-  --line:rgba(255,255,255,0.07); --line2:rgba(255,255,255,0.14);
-  --white:#f5f5f5; --g1:#888; --g2:#555; --g3:#333;
+  --black:#040404; --s1:#0c0c0e; --s2:#111114; --s3:#18181c;
+  --line:rgba(255,255,255,0.06); --line2:rgba(255,255,255,0.12); --line3:rgba(255,255,255,0.2);
+  --white:#f0f0f0; --g1:#7a7a82; --g2:#4a4a52; --g3:#2e2e36;
   --accent:#fff;
 }
 body {
   font-family:'Inter',-apple-system,sans-serif;
   background:var(--black); color:var(--white);
   min-height:100vh; display:flex;
-  font-size:13px; -webkit-font-smoothing:antialiased;
+  font-size:14px; line-height:1.55; -webkit-font-smoothing:antialiased;
+  letter-spacing:-0.1px;
 }
 
 /* ── LEFT PANEL ── */
@@ -31,106 +32,112 @@ body {
 }
 .left::before {
   content:''; position:absolute;
-  top:-120px; left:-80px;
-  width:400px; height:400px;
-  background:radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 70%);
+  top:-160px; left:-100px;
+  width:520px; height:520px;
+  background:radial-gradient(circle, rgba(255,255,255,0.03) 0%, transparent 65%);
+  pointer-events:none;
+}
+.left::after {
+  content:''; position:absolute;
+  bottom:-80px; right:-80px;
+  width:320px; height:320px;
+  background:radial-gradient(circle, rgba(255,255,255,0.02) 0%, transparent 65%);
   pointer-events:none;
 }
 .left-brand { display:flex; align-items:center; gap:12px; margin-bottom:auto; }
-.left-logo {
-  width:60px; height:38px; display:flex; align-items:center;
-}
-.left-logo svg { width:60px; height:38px; }
-.left-brand-name { font-size:18px; font-weight:700; letter-spacing:-0.5px; }
+.left-logo { width:40px; height:40px; display:flex; align-items:center; }
+.left-logo img { width:36px; height:36px; object-fit:contain; }
+.left-brand-name { font-size:17px; font-weight:700; letter-spacing:-0.5px; }
 
 .left-hero { margin:auto 0; }
-.left-title { font-size:28px; font-weight:700; letter-spacing:-0.8px; line-height:1.25; margin-bottom:12px; }
+.left-title { font-size:32px; font-weight:700; letter-spacing:-1.2px; line-height:1.25; margin-bottom:16px; }
 .left-title span { color:var(--accent); }
-.left-desc { font-size:13px; color:var(--g1); line-height:1.6; margin-bottom:36px; }
+.left-desc { font-size:14px; color:var(--g1); line-height:1.7; margin-bottom:36px; }
 
-.feature { display:flex; align-items:center; gap:12px; margin-bottom:16px; }
-.feature-dot { width:6px; height:6px; border-radius:50%; background:var(--accent); flex-shrink:0; }
-.feature-text { font-size:12px; color:var(--g1); }
+.feature { display:flex; align-items:center; gap:11px; margin-bottom:14px; }
+.feature-dot { width:5px; height:5px; border-radius:50%; background:rgba(255,255,255,0.4); flex-shrink:0; }
+.feature-text { font-size:13px; color:var(--g1); }
 
-.left-footer { font-size:11px; color:var(--g3); }
+.left-footer { font-size:12px; color:var(--g2); }
 
 /* ── RIGHT PANEL ── */
 .right {
   flex:1; display:flex; align-items:center; justify-content:center;
-  padding:40px 24px;
+  padding:48px 28px;
 }
 .form-wrap { width:100%; max-width:380px; }
 
-.form-title { font-size:22px; font-weight:700; letter-spacing:-0.5px; margin-bottom:6px; }
-.form-sub   { font-size:13px; color:var(--g2); margin-bottom:32px; }
+.form-title { font-size:26px; font-weight:700; letter-spacing:-0.8px; margin-bottom:6px; }
+.form-sub   { font-size:14px; color:var(--g1); margin-bottom:32px; }
 
 .tabs { display:flex; gap:0; border-bottom:1px solid var(--line); margin-bottom:28px; }
 .tab {
   flex:1; padding:10px 0; text-align:center;
   font-size:13px; font-weight:500; cursor:pointer;
-  color:var(--g3); border-bottom:2px solid transparent;
+  color:var(--g2); border-bottom:2px solid transparent;
   margin-bottom:-1px; transition:color 0.1s;
 }
-.tab.active { color:var(--white); border-bottom-color:var(--accent); }
+.tab.active { color:var(--white); border-bottom-color:var(--white); }
 
 .form { display:none; }
-.form.active { display:block; animation:up .18s ease; }
+.form.active { display:block; animation:up .18s cubic-bezier(.16,1,.3,1); }
 @keyframes up { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
 
-.field { margin-bottom:14px; }
+.field { margin-bottom:16px; }
 .field-label {
-  display:block; font-size:10px; font-weight:600;
-  color:var(--g2); text-transform:uppercase;
-  letter-spacing:0.5px; margin-bottom:6px;
+  display:block; font-size:11.5px; font-weight:500;
+  color:var(--g1); letter-spacing:-0.1px; margin-bottom:7px;
 }
 .field-input {
-  width:100%; background:var(--s1);
-  border:1px solid var(--line); border-radius:7px;
-  padding:10px 13px; color:var(--white);
-  font-size:13px; outline:none; transition:border-color 0.15s;
+  width:100%; background:var(--s2);
+  border:1px solid var(--line2); border-radius:8px;
+  padding:11px 14px; color:var(--white);
+  font-size:14px; outline:none;
+  transition:border-color 0.15s,box-shadow 0.15s;
   font-family:inherit;
 }
-.field-input:focus { border-color:var(--accent); }
-.field-input::placeholder { color:var(--g3); }
+.field-input:focus { border-color:var(--line3); box-shadow:0 0 0 3px rgba(255,255,255,0.05); }
+.field-input::placeholder { color:var(--g2); }
 
-.row2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.row2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
 
 .btn-submit {
   width:100%; padding:12px;
-  background:var(--white); color:var(--black);
-  border:none; border-radius:7px;
-  font-size:13px; font-weight:700;
+  background:var(--white); color:#050505;
+  border:none; border-radius:8px;
+  font-size:14px; font-weight:700;
   cursor:pointer; margin-top:8px;
-  transition:opacity 0.1s; font-family:inherit;
-  letter-spacing:-0.1px;
+  transition:all 0.15s; font-family:inherit;
+  letter-spacing:-0.2px;
+  box-shadow:0 1px 3px rgba(0,0,0,0.4);
 }
-.btn-submit:hover { opacity:0.88; }
-.btn-submit:disabled { opacity:0.35; cursor:not-allowed; }
+.btn-submit:hover { background:#e8e8e8; box-shadow:0 4px 12px rgba(0,0,0,0.5); transform:translateY(-1px); }
+.btn-submit:disabled { opacity:0.35; cursor:not-allowed; transform:none; }
 
 .error-msg {
-  font-size:12px; color:#f87171;
-  background:rgba(248,113,113,0.1);
-  border:1px solid rgba(248,113,113,0.25);
-  border-radius:6px; padding:10px 13px;
-  margin-bottom:14px; display:none;
+  font-size:13px; color:#f87171;
+  background:rgba(248,113,113,0.08);
+  border:1px solid rgba(248,113,113,0.2);
+  border-radius:7px; padding:11px 14px;
+  margin-bottom:16px; display:none;
 }
 .error-msg.show { display:block; }
 
 .remember-row {
   display:flex; align-items:center; gap:8px;
-  margin-bottom:14px;
+  margin-bottom:16px;
 }
-.remember-row input[type=checkbox] { accent-color:var(--accent); width:13px; height:13px; cursor:pointer; }
-.remember-row label { font-size:12px; color:var(--g2); cursor:pointer; }
+.remember-row input[type=checkbox] { accent-color:var(--accent); width:14px; height:14px; cursor:pointer; }
+.remember-row label { font-size:13px; color:var(--g1); cursor:pointer; }
 
-.divider { height:1px; background:var(--line); margin:20px 0; }
-.switch-link { text-align:center; font-size:12px; color:var(--g2); }
+.divider { height:1px; background:var(--line); margin:22px 0; }
+.switch-link { text-align:center; font-size:13px; color:var(--g1); }
 .switch-link a { color:var(--accent); cursor:pointer; text-decoration:none; }
 .switch-link a:hover { text-decoration:underline; }
 
 @media(max-width:700px) {
   .left { display:none; }
-  .right { padding:32px 20px; }
+  .right { padding:36px 24px; }
 }
 </style>
 </head>
@@ -140,32 +147,33 @@ body {
 <div class="left">
   <div class="left-brand">
     <div class="left-logo">
-      <svg viewBox="0 0 613 384" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M526.127 383.766C480.839 383.768 436.198 383.584 391.564 383.986C384.302 384.051 380.731 381.32 377.449 375.756C355.717 338.909 333.766 302.182 311.842 265.44C310.355 262.95 308.509 260.659 306.016 257.119C296.737 272.686 288.063 287.324 279.303 301.914C263.854 327.645 248.436 353.396 232.72 378.976C231.368 381.176 227.903 383.504 225.406 383.518C176.967 383.794 128.526 383.735 80.0859 383.727C79.3577 383.727 78.6294 383.499 76.1968 383.094C101.686 340.653 126.82 298.804 152.691 255.727C101.215 255.727 51.2272 255.727 0 255.727C3.54499 249.3 6.29222 243.902 9.41748 238.717C42.9535 183.072 76.5747 127.474 110.116 71.8322C122.986 50.4819 135.847 29.1243 148.406 7.60357C151.582 2.16026 155.195 -0.0190267 162.008 0.000125042C259.147 0.273305 356.288 0.252474 453.427 0.0701478C458.5 0.060616 461.04 1.7099 463.41 5.68191C486.347 44.1217 509.423 82.4844 532.524 120.833C535.076 125.07 536.055 128.657 532.986 133.488C523.424 148.545 514.442 163.948 505.343 179.276C493.589 199.075 481.955 218.94 470.236 238.758C467.263 243.784 464.163 248.739 460.304 255.066C511.488 255.066 561.381 255.066 613 255.066C605.979 267.032 599.922 277.541 593.684 287.948C576.059 317.357 558.119 346.592 540.892 376.215C537.377 382.258 533.554 384.83 526.127 383.766Z" fill="#f5f5f5"/><path d="M305.19 256.168L152.215 255.434L75.3462 383.885H229.844L305.19 256.168Z" fill="#f5f5f5"/></svg>
+      <img src="/logo.svg" alt="Reloxy">
     </div>
     <div class="left-brand-name">Reloxy</div>
   </div>
 
   <div class="left-hero">
-    <div class="left-title">CRM для<br><span>дизайн-студий</span></div>
-    <div class="left-desc">Управляйте клиентами, проектами и финансами в одном месте. Просто и красиво.</div>
-    <div class="feature"><div class="feature-dot"></div><div class="feature-text">Клиенты и воронка продаж</div></div>
-    <div class="feature"><div class="feature-dot"></div><div class="feature-text">Канбан-доска и дедлайны</div></div>
-    <div class="feature"><div class="feature-dot"></div><div class="feature-text">Счета и финансовая аналитика</div></div>
-    <div class="feature"><div class="feature-dot"></div><div class="feature-text">Telegram-уведомления</div></div>
+    <div class="left-title">CRM for<br><span>design studios</span></div>
+    <div class="left-desc">Manage clients, projects and finances in one place. Simple and beautiful.</div>
+    <div class="feature"><div class="feature-dot"></div><div class="feature-text">Clients and sales pipeline</div></div>
+    <div class="feature"><div class="feature-dot"></div><div class="feature-text">Kanban board and deadlines</div></div>
+    <div class="feature"><div class="feature-dot"></div><div class="feature-text">Invoices and financial analytics</div></div>
+    <div class="feature"><div class="feature-dot"></div><div class="feature-text">Telegram notifications</div></div>
   </div>
 
   <div class="left-footer">Reloxy · Digital Studio CRM</div>
+
 </div>
 
 <!-- RIGHT -->
 <div class="right">
   <div class="form-wrap">
-    <div class="form-title" id="form-heading">С возвращением</div>
-    <div class="form-sub" id="form-subheading">Войдите в свой аккаунт</div>
+    <div class="form-title" id="form-heading">Welcome back</div>
+    <div class="form-sub" id="form-subheading">Sign in to your account</div>
 
     <div class="tabs">
-      <div class="tab active" onclick="switchTab('login')">Войти</div>
-      <div class="tab" onclick="switchTab('register')">Регистрация</div>
+      <div class="tab active" onclick="switchTab('login')">Sign in</div>
+      <div class="tab" onclick="switchTab('register')">Register</div>
     </div>
 
     <!-- LOGIN -->
@@ -173,17 +181,17 @@ body {
       <div class="error-msg" id="err-login"></div>
       <div class="field">
         <label class="field-label">Email</label>
-        <input class="field-input" type="email" id="l-email" placeholder="you@studio.ru" required autocomplete="email">
+        <input class="field-input" type="email" id="l-email" placeholder="you@studio.com" required autocomplete="email">
       </div>
       <div class="field">
-        <label class="field-label">Пароль</label>
+        <label class="field-label">Password</label>
         <input class="field-input" type="password" id="l-pass" placeholder="••••••••" required autocomplete="current-password">
       </div>
       <div class="remember-row">
         <input type="checkbox" id="remember" checked>
-        <label for="remember">Запомнить меня</label>
+        <label for="remember">Remember me</label>
       </div>
-      <button class="btn-submit" type="submit" id="btn-login">Войти</button>
+      <button class="btn-submit" type="submit" id="btn-login">Sign in</button>
     </form>
 
     <!-- REGISTER -->
@@ -191,28 +199,28 @@ body {
       <div class="error-msg" id="err-register"></div>
       <div class="row2">
         <div class="field">
-          <label class="field-label">Ваше имя</label>
-          <input class="field-input" type="text" id="r-name" placeholder="Виктория" required>
+          <label class="field-label">Your name</label>
+          <input class="field-input" type="text" id="r-name" placeholder="Victoria" required>
         </div>
         <div class="field">
-          <label class="field-label">Студия</label>
+          <label class="field-label">Studio</label>
           <input class="field-input" type="text" id="r-studio" placeholder="My Studio">
         </div>
       </div>
       <div class="field">
         <label class="field-label">Email</label>
-        <input class="field-input" type="email" id="r-email" placeholder="you@studio.ru" required>
+        <input class="field-input" type="email" id="r-email" placeholder="you@studio.com" required>
       </div>
       <div class="field">
-        <label class="field-label">Пароль</label>
-        <input class="field-input" type="password" id="r-pass" placeholder="минимум 6 символов" required>
+        <label class="field-label">Password</label>
+        <input class="field-input" type="password" id="r-pass" placeholder="at least 6 characters" required>
       </div>
-      <button class="btn-submit" type="submit" id="btn-register">Создать аккаунт</button>
+      <button class="btn-submit" type="submit" id="btn-register">Create account</button>
     </form>
 
     <div class="divider"></div>
     <div class="switch-link" id="switch-hint">
-      Нет аккаунта? <a onclick="switchTab('register')">Зарегистрироваться</a>
+      No account? <a onclick="switchTab('register')">Create one</a>
     </div>
   </div>
 </div>
@@ -234,11 +242,11 @@ body {
     );
     document.getElementById('form-login').classList.toggle('active', isLogin);
     document.getElementById('form-register').classList.toggle('active', !isLogin);
-    document.getElementById('form-heading').textContent    = isLogin ? 'С возвращением' : 'Создать аккаунт';
-    document.getElementById('form-subheading').textContent = isLogin ? 'Войдите в свой аккаунт' : 'Начните бесплатно';
+    document.getElementById('form-heading').textContent    = isLogin ? 'Welcome back' : 'Create account';
+    document.getElementById('form-subheading').textContent = isLogin ? 'Sign in to your account' : 'Start for free';
     document.getElementById('switch-hint').innerHTML = isLogin
-      ? 'Нет аккаунта? <a onclick="switchTab(\'register\')">Зарегистрироваться</a>'
-      : 'Уже есть аккаунт? <a onclick="switchTab(\'login\')">Войти</a>';
+      ? 'No account? <a onclick="switchTab(\'register\')">Create one</a>'
+      : 'Already have an account? <a onclick="switchTab(\'login\')">Sign in</a>';
   }
 
   function showErr(id, msg) {
@@ -251,7 +259,7 @@ body {
     e.preventDefault();
     hideErr('err-login');
     const btn = document.getElementById('btn-login');
-    btn.disabled = true; btn.textContent = 'Входим...';
+    btn.disabled = true; btn.textContent = 'Signing in...';
     try {
       const res  = await fetch('/api/auth/login', {
         method: 'POST',
@@ -274,7 +282,7 @@ body {
       window.location.href = '/app';
     } catch (err) {
       showErr('err-login', err.message);
-      btn.disabled = false; btn.textContent = 'Войти';
+      btn.disabled = false; btn.textContent = 'Sign in';
     }
   }
 
@@ -282,7 +290,7 @@ body {
     e.preventDefault();
     hideErr('err-register');
     const btn = document.getElementById('btn-register');
-    btn.disabled = true; btn.textContent = 'Создаём...';
+    btn.disabled = true; btn.textContent = 'Creating...';
     try {
       const res  = await fetch('/api/auth/register', {
         method: 'POST',
@@ -302,7 +310,7 @@ body {
       window.location.href = '/app';
     } catch (err) {
       showErr('err-register', err.message);
-      btn.disabled = false; btn.textContent = 'Создать аккаунт';
+      btn.disabled = false; btn.textContent = 'Create account';
     }
   }
 </script>
