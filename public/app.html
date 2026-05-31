@@ -31,7 +31,7 @@ body { font-family:'Plus Jakarta Sans',-apple-system,"Helvetica Neue",sans-serif
 .brand-sub { font-size:10px; color:var(--g2); letter-spacing:0.2px; margin-top:1px; text-transform:uppercase; }
 .nav { flex:1; padding:14px 0 10px; overflow-y:auto; }
 .nav-group { margin-bottom:4px; }
-.nav-group-label { font-size:10px; font-weight:600; letter-spacing:0.5px; text-transform:uppercase; color:var(--g3); padding:14px 22px 7px; }
+.nav-group-label { display:none; }
 .nav-item { display:flex; align-items:center; padding:9px 13px; margin:1px 8px; font-size:13.5px; color:var(--g1); cursor:pointer; transition:color 0.12s,background 0.12s; position:relative; user-select:none; gap:11px; border-radius:8px; letter-spacing:-0.2px; }
 .nav-item:hover { color:var(--white); background:rgba(255,255,255,0.04); }
 .nav-item.active { color:var(--white); background:rgba(255,255,255,0.07); }
@@ -567,7 +567,6 @@ select.field-input option { background:#1a1a1e; color:var(--white); }
   </div>
   <nav class="nav">
     <div class="nav-group">
-      <div class="nav-group-label" data-i18n="grp_overview">Overview</div>
       <div class="nav-item active" onclick="go('dashboard',this)">
         <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
           <rect x="1" y="1" width="6" height="6" rx="1.5"/><rect x="9" y="1" width="6" height="6" rx="1.5"/>
@@ -591,9 +590,6 @@ select.field-input option { background:#1a1a1e; color:var(--white); }
         </svg>
         <span data-i18n="nav_clients">Clients</span> <span class="nav-count" id="nc-clients">0</span>
       </div>
-    </div>
-    <div class="nav-group">
-      <div class="nav-group-label" data-i18n="grp_work">Work</div>
       <div class="nav-item" onclick="go('projects',this)">
         <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
           <rect x="1" y="1" width="14" height="10" rx="2"/>
@@ -617,9 +613,6 @@ select.field-input option { background:#1a1a1e; color:var(--white); }
         </svg>
         <span data-i18n="nav_team">Team</span> <span class="nav-count" id="nc-team">0</span>
       </div>
-    </div>
-    <div class="nav-group">
-      <div class="nav-group-label" data-i18n="grp_finance_g">Finance</div>
       <div class="nav-item" onclick="go('finance',this)">
         <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
           <rect x="1" y="3" width="14" height="10" rx="2"/>
@@ -637,9 +630,6 @@ select.field-input option { background:#1a1a1e; color:var(--white); }
         </svg>
         <span data-i18n="nav_analytics">Analytics</span>
       </div>
-    </div>
-    <div class="nav-group">
-      <div class="nav-group-label" data-i18n="grp_tools">Tools</div>
       <div class="nav-item" onclick="go('notes',this)">
         <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
           <rect x="2" y="1" width="12" height="14" rx="2"/>
@@ -1646,6 +1636,11 @@ async function init() {
   const savedLbl = document.getElementById('notes-saved');
   if (savedLbl) savedLbl.style.display = 'none';
 
+  // Explicitly set page visibility via inline styles
+  document.querySelectorAll('.page').forEach(p => { p.style.display = 'none'; });
+  const dashPage = document.getElementById('page-dashboard');
+  if (dashPage) dashPage.style.display = 'block';
+
   applyStaffMode();
   await loadAll();
   applyLang(currentLang);
@@ -1713,10 +1708,12 @@ const TITLES = { dashboard:'Dashboard', calendar:'Calendar', clients:'Clients', 
 function go(id, el) {
   const staffBlocked = ['finance','team','funnel'];
   if (user?.role === 'staff' && staffBlocked.includes(id)) return;
-  document.querySelectorAll('.page').forEach(p => { p.classList.remove('active'); p.style.display = ''; });
+  document.querySelectorAll('.page').forEach(p => { p.classList.remove('active'); p.style.display = 'none'; });
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('settings-nav-btn')?.classList.remove('active');
-  document.getElementById('page-' + id).classList.add('active');
+  const activePage = document.getElementById('page-' + id);
+  activePage.classList.add('active');
+  activePage.style.display = 'block';
   if (el) el.classList.add('active');
   document.getElementById('topbar-title').textContent = TITLES[id] || id;
   currentPage = id;
@@ -1752,9 +1749,10 @@ function closeUserPopup() {
 
 function popupGoSettings() {
   closeUserPopup();
-  document.querySelectorAll('.page').forEach(p => { p.classList.remove('active'); p.style.display = ''; });
+  document.querySelectorAll('.page').forEach(p => { p.classList.remove('active'); p.style.display = 'none'; });
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('page-settings').classList.add('active');
+  const sp = document.getElementById('page-settings');
+  sp.classList.add('active'); sp.style.display = 'block';
   window.scrollTo(0, 0);
   document.getElementById('topbar-title').textContent = t('page_settings');
   currentPage = 'settings';
