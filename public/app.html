@@ -91,11 +91,11 @@ body { font-family:'Plus Jakarta Sans',-apple-system,"Helvetica Neue",sans-serif
 .btn-white:hover { background:#e2e2e2; }
 .btn-ghost { background:transparent; color:var(--g1); border:1px solid var(--line2); }
 .btn-ghost:hover { border-color:var(--line3); color:var(--white); background:rgba(255,255,255,0.04); }
-.content { padding:32px 40px; flex:1; overflow-y:auto; overflow-x:hidden; }
+.content { flex:1; overflow:hidden; position:relative; }
 
 /* ── PAGES ── */
 .page { display:none; }
-.page.active { display:block; animation:fadeup .22s cubic-bezier(.16,1,.3,1); }
+.page.active { display:block; position:absolute; top:0; left:0; right:0; bottom:0; padding:32px 40px; overflow-y:auto; overflow-x:hidden; animation:fadeup .22s cubic-bezier(.16,1,.3,1); }
 @keyframes fadeup { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
 .page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:32px; }
 .page-header h1 { font-size:22px; font-weight:700; letter-spacing:-0.7px; line-height:1.2; color:var(--white); }
@@ -1717,8 +1717,6 @@ function go(id, el) {
   if (el) el.classList.add('active');
   document.getElementById('topbar-title').textContent = TITLES[id] || id;
   currentPage = id;
-  const contentEl = document.querySelector('.content');
-  if (contentEl) contentEl.scrollTop = 0;
   renderPage(id);
   requestAnimationFrame(bindSpotlightCards);
 }
