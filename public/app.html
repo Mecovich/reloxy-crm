@@ -20,10 +20,10 @@
   --sh-lg:0 16px 48px rgba(0,0,0,0.8),0 4px 16px rgba(0,0,0,0.5);
   --r:10px; --r-sm:7px; --r-lg:14px;
 }
-body { font-family:'Plus Jakarta Sans',-apple-system,"Helvetica Neue",sans-serif; background:var(--black); color:var(--white); display:flex; min-height:100vh; font-size:14px; line-height:1.55; -webkit-font-smoothing:antialiased; letter-spacing:-0.1px; }
+body { font-family:'Plus Jakarta Sans',-apple-system,"Helvetica Neue",sans-serif; background:var(--black); color:var(--white); display:flex; height:100vh; overflow:hidden; font-size:14px; line-height:1.55; -webkit-font-smoothing:antialiased; letter-spacing:-0.1px; }
 
 /* ── SIDEBAR ── */
-.sidebar { width:244px; min-height:100vh; background:var(--s1); border-right:1px solid var(--line); position:fixed; top:0; left:0; bottom:0; display:flex; flex-direction:column; z-index:100; }
+.sidebar { width:244px; height:100vh; background:var(--s1); border-right:1px solid var(--line); position:fixed; top:0; left:0; bottom:0; display:flex; flex-direction:column; z-index:100; overflow:hidden; }
 .brand { padding:20px 18px 16px; border-bottom:1px solid var(--line); display:flex; align-items:center; gap:10px; }
 .brand-logo { width:30px; height:30px; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
 .brand-logo img { width:20px; height:20px; object-fit:contain; }
@@ -67,8 +67,8 @@ body { font-family:'Plus Jakarta Sans',-apple-system,"Helvetica Neue",sans-serif
 .user-popup-item.danger:hover { background:rgba(248,113,113,0.08); color:#f87171; }
 
 /* ── MAIN ── */
-.main { margin-left:244px; flex:1; display:flex; flex-direction:column; min-height:100vh; }
-.topbar { height:56px; border-bottom:1px solid var(--line); display:flex; align-items:center; padding:0 36px; gap:12px; position:sticky; top:0; background:rgba(4,4,4,0.96); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); z-index:50; }
+.main { margin-left:244px; flex:1; display:flex; flex-direction:column; height:100vh; overflow:hidden; }
+.topbar { height:56px; flex-shrink:0; border-bottom:1px solid var(--line); display:flex; align-items:center; padding:0 36px; gap:12px; background:rgba(4,4,4,0.96); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); z-index:50; }
 .topbar-title { font-size:13.5px; font-weight:600; color:var(--g1); flex:1; letter-spacing:-0.2px; }
 .topbar-actions { display:flex; align-items:center; gap:4px; }
 /* ── TOPBAR USER CHIP ── */
@@ -91,7 +91,7 @@ body { font-family:'Plus Jakarta Sans',-apple-system,"Helvetica Neue",sans-serif
 .btn-white:hover { background:#e2e2e2; }
 .btn-ghost { background:transparent; color:var(--g1); border:1px solid var(--line2); }
 .btn-ghost:hover { border-color:var(--line3); color:var(--white); background:rgba(255,255,255,0.04); }
-.content { padding:32px 40px; flex:1; overflow-anchor:none; }
+.content { padding:32px 40px; flex:1; overflow-y:auto; overflow-x:hidden; }
 
 /* ── PAGES ── */
 .page { display:none; }
@@ -1717,14 +1717,10 @@ function go(id, el) {
   if (el) el.classList.add('active');
   document.getElementById('topbar-title').textContent = TITLES[id] || id;
   currentPage = id;
+  const contentEl = document.querySelector('.content');
+  if (contentEl) contentEl.scrollTop = 0;
   renderPage(id);
-  // Scroll after browser reflow to override scroll-anchoring
-  requestAnimationFrame(() => {
-    document.documentElement.scrollTop = 0;
-    document.body.scrollTop = 0;
-    window.scrollTo(0, 0);
-    bindSpotlightCards();
-  });
+  requestAnimationFrame(bindSpotlightCards);
 }
 function toggleUserPopup(e) {
   e.stopPropagation();
