@@ -23,7 +23,9 @@
 body { font-family:'Plus Jakarta Sans',-apple-system,"Helvetica Neue",sans-serif; background:var(--black); color:var(--white); display:flex; height:100vh; overflow:hidden; font-size:14px; line-height:1.55; -webkit-font-smoothing:antialiased; letter-spacing:-0.1px; }
 
 /* ── SIDEBAR ── */
-.sidebar { width:244px; height:100vh; background:var(--s1); border-right:1px solid var(--line); position:fixed; top:0; left:0; bottom:0; display:flex; flex-direction:column; z-index:100; overflow:hidden; }
+.sidebar { width:244px; height:100vh; background:var(--s1); border-right:1px solid var(--line); position:fixed; top:0; left:0; bottom:0; display:flex; flex-direction:column; z-index:100; overflow:hidden; transition:width 0.22s cubic-bezier(.16,1,.3,1),border-color 0.22s; }
+body.sidebar-collapsed .sidebar { width:0; border-color:transparent; }
+body.sidebar-collapsed .main { margin-left:0; }
 .brand { padding:20px 18px 16px; border-bottom:1px solid var(--line); display:flex; align-items:center; gap:10px; }
 .brand-logo { width:30px; height:30px; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
 .brand-logo img { width:20px; height:20px; object-fit:contain; }
@@ -67,8 +69,11 @@ body { font-family:'Plus Jakarta Sans',-apple-system,"Helvetica Neue",sans-serif
 .user-popup-item.danger:hover { background:rgba(248,113,113,0.08); color:#f87171; }
 
 /* ── MAIN ── */
-.main { margin-left:244px; flex:1; display:flex; flex-direction:column; height:100vh; overflow:hidden; }
+.main { margin-left:244px; flex:1; display:flex; flex-direction:column; height:100vh; overflow:hidden; transition:margin-left 0.22s cubic-bezier(.16,1,.3,1); }
 .topbar { height:56px; flex-shrink:0; border-bottom:1px solid var(--line); display:flex; align-items:center; padding:0 36px; gap:12px; background:rgba(4,4,4,0.96); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); z-index:50; }
+.sidebar-toggle { width:32px; height:32px; display:flex; align-items:center; justify-content:center; border:none; background:transparent; border-radius:8px; cursor:pointer; color:var(--g2); transition:color 0.15s,background 0.15s; flex-shrink:0; margin-right:4px; }
+.sidebar-toggle:hover { color:var(--white); background:var(--s3); }
+.sidebar-toggle svg { width:15px; height:15px; }
 .topbar-title { font-size:13.5px; font-weight:600; color:var(--g1); flex:1; letter-spacing:-0.2px; }
 .topbar-actions { display:flex; align-items:center; gap:4px; }
 /* ── TOPBAR USER CHIP ── */
@@ -639,6 +644,12 @@ select.field-input option { background:#1a1a1e; color:var(--white); }
 
 <main class="main">
   <div class="topbar">
+    <button class="sidebar-toggle" onclick="toggleSidebar()" title="Toggle sidebar">
+      <svg id="sidebar-toggle-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+        <rect x="1" y="2" width="14" height="12" rx="2"/>
+        <line x1="6" y1="2" x2="6" y2="14"/>
+      </svg>
+    </button>
     <div class="topbar-title" id="topbar-title">Dashboard</div>
     <div class="search">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -1703,6 +1714,13 @@ function go(id, el) {
   renderPage(id);
   requestAnimationFrame(bindSpotlightCards);
 }
+function toggleSidebar() {
+  const collapsed = document.body.classList.toggle('sidebar-collapsed');
+  localStorage.setItem('reloxy_sidebar', collapsed ? '0' : '1');
+}
+// Restore sidebar state on load
+(function(){ if(localStorage.getItem('reloxy_sidebar')==='0') document.body.classList.add('sidebar-collapsed'); })();
+
 function toggleUserPopup(e) {
   e.stopPropagation();
   const popup  = document.getElementById('user-popup');
