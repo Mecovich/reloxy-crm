@@ -254,16 +254,16 @@ tr:hover td { background:transparent; }
 .f-amt { width:110px; text-align:right; font-size:12.5px; color:var(--g1); font-variant-numeric:tabular-nums; }
 
 /* ── FINANCE ── */
-.fin-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:28px; }
-.fin-card { padding:18px 20px 16px; background:var(--s1); border:1px solid var(--line); border-radius:12px; transition:border-color 0.2s; cursor:default; position:relative; overflow:hidden; }
+.fin-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:20px; }
+.fin-card { padding:22px 24px 20px; background:var(--s1); border:1px solid var(--line); border-radius:16px; transition:border-color 0.2s; cursor:default; position:relative; overflow:hidden; min-height:130px; display:flex; flex-direction:column; justify-content:space-between; }
 .fin-card::before { content:''; position:absolute; inset:0; opacity:0; background:radial-gradient(600px circle at var(--mx,50%) var(--my,50%), rgba(255,255,255,0.055), transparent 55%); transition:opacity 0.3s; pointer-events:none; border-radius:inherit; }
 .fin-card:hover::before { opacity:1; }
 .fin-card:hover { border-color:var(--line2); }
-.fin-card-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+.fin-card-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
 .fin-card-icon { width:28px; height:28px; border-radius:7px; background:var(--s3); border:1px solid var(--line); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
 .fin-card-icon svg { width:13px; height:13px; opacity:0.45; }
-.fin-label { font-size:11.5px; font-weight:500; color:var(--g1); letter-spacing:-0.1px; }
-.fin-value { font-size:26px; font-weight:700; letter-spacing:-1px; color:var(--white); font-variant-numeric:tabular-nums; line-height:1; margin-bottom:5px; }
+.fin-label { font-size:11.5px; font-weight:500; color:var(--g2); letter-spacing:0px; }
+.fin-value { font-size:30px; font-weight:700; letter-spacing:-1.2px; color:var(--white); font-variant-numeric:tabular-nums; line-height:1; margin-bottom:6px; }
 .fin-delta { font-size:11px; color:var(--g2); }
 .inv-status { font-size:11px; font-weight:600; padding:2px 8px; border-radius:5px; display:inline-block; letter-spacing:0; }
 .inv-status.paid    { color:var(--g1); background:var(--s3); border:1px solid var(--line2); }
@@ -520,8 +520,8 @@ select.field-input option { background:#1a1a1e; color:var(--white); }
 .chart-stat-lbl  { font-size:11px; color:var(--g2); }
 
 /* ── ANALYTICS PAGE ── */
-.an-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:28px; }
-.an-card { background:var(--s1); border:1px solid var(--line); border-radius:14px; padding:22px 22px 18px; position:relative; overflow:hidden; transition:border-color 0.2s; }
+.an-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:20px; }
+.an-card { background:var(--s1); border:1px solid var(--line); border-radius:16px; padding:22px 24px 20px; position:relative; overflow:hidden; transition:border-color 0.2s; min-height:130px; }
 .an-card::before { content:''; position:absolute; inset:0; opacity:0; background:radial-gradient(500px circle at var(--mx,50%) var(--my,50%), rgba(255,255,255,0.05), transparent 60%); transition:opacity 0.3s; pointer-events:none; border-radius:inherit; }
 .an-card:hover::before { opacity:1; }
 .an-card:hover { border-color:var(--line2); }
@@ -699,35 +699,8 @@ select.field-input option { background:#1a1a1e; color:var(--white); }
     <!-- DASHBOARD -->
     <div class="page active" id="page-dashboard">
 
-      <!-- Header -->
-      <div class="dash-header">
-        <div>
-          <div class="dash-greeting" id="dash-greeting">Good morning</div>
-          <h1 class="dash-title" data-i18n="page_dashboard">Dashboard</h1>
-        </div>
-        <div style="display:flex;align-items:center;gap:10px">
-          <!-- Revenue Goal compact -->
-          <div id="goal-wrap-mini" style="display:none;align-items:center;gap:10px;background:var(--s2);border:1px solid var(--line);border-radius:9px;padding:7px 14px;cursor:pointer" onclick="openGoalModal()">
-            <div style="font-size:11px;color:var(--g2)" data-i18n="goal_label">Revenue Goal</div>
-            <div style="display:flex;align-items:center;gap:6px">
-              <div style="font-size:13px;font-weight:700;color:var(--white);font-variant-numeric:tabular-nums" id="goal-mini-current">₽ 0</div>
-              <div style="font-size:11px;color:var(--g2)">/</div>
-              <div style="font-size:12px;color:var(--g1);font-variant-numeric:tabular-nums" id="goal-mini-target">₽ 0</div>
-            </div>
-            <div style="width:60px;height:3px;background:var(--s4);border-radius:2px;overflow:hidden">
-              <div id="goal-mini-fill" style="height:100%;width:0%;background:linear-gradient(90deg,rgba(255,255,255,0.4),var(--white));transition:width 0.8s;border-radius:2px"></div>
-            </div>
-          </div>
-          <div class="chart-periods">
-            <button class="chart-period" onclick="setChartPeriod('week',this)" data-i18n="period_week">Week</button>
-            <button class="chart-period active" onclick="setChartPeriod('month',this)" data-i18n="period_month">Month</button>
-            <button class="chart-period" onclick="setChartPeriod('year',this)" data-i18n="period_year">Year</button>
-          </div>
-        </div>
-      </div>
-
       <!-- HERO: Full-width revenue chart -->
-      <div class="dash-hero">
+      <div class="dash-hero" style="margin-bottom:12px">
         <div class="dash-hero-top">
           <div>
             <div class="dash-hero-label"><span data-i18n="metric_revenue">Revenue</span> · <span id="dash-chart-period-label">This month</span></div>
@@ -737,7 +710,23 @@ select.field-input option { background:#1a1a1e; color:var(--white); }
             </div>
             <div class="dash-hero-sub" id="chart-sub"></div>
           </div>
-          <div id="dash-chart-stats"></div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:10px">
+            <div class="chart-periods">
+              <button class="chart-period" onclick="setChartPeriod('week',this)" data-i18n="period_week">Week</button>
+              <button class="chart-period active" onclick="setChartPeriod('month',this)" data-i18n="period_month">Month</button>
+              <button class="chart-period" onclick="setChartPeriod('year',this)" data-i18n="period_year">Year</button>
+            </div>
+            <div id="goal-wrap-mini" style="display:none;align-items:center;gap:10px;background:var(--s3);border:1px solid var(--line2);border-radius:8px;padding:6px 12px;cursor:pointer" onclick="openGoalModal()">
+              <div style="font-size:11px;color:var(--g2)" data-i18n="goal_label">Revenue Goal</div>
+              <div style="display:flex;align-items:center;gap:5px">
+                <div style="font-size:12px;font-weight:700;color:var(--white);font-variant-numeric:tabular-nums" id="goal-mini-current">₽ 0</div>
+                <div style="font-size:10px;color:var(--g2)">/</div>
+                <div style="font-size:11px;color:var(--g1);font-variant-numeric:tabular-nums" id="goal-mini-target">₽ 0</div>
+              </div>
+              <div style="width:50px;height:2px;background:var(--s4);border-radius:2px;overflow:hidden"><div id="goal-mini-fill" style="height:100%;width:0%;background:var(--white);transition:width 0.8s;border-radius:2px"></div></div>
+            </div>
+            <div id="dash-chart-stats"></div>
+          </div>
         </div>
         <div style="position:relative;height:220px;margin-top:20px">
           <canvas id="revenue-chart"></canvas>
@@ -1186,10 +1175,6 @@ select.field-input option { background:#1a1a1e; color:var(--white); }
 
     <!-- FINANCE -->
     <div class="page" id="page-finance">
-      <div class="page-header">
-        <div><h1 data-i18n="page_finance">Finance</h1><p data-i18n="finance_sub">Invoices and studio revenue</p></div>
-        <button class="btn btn-white" onclick="openAddModal()" data-i18n="btn_new_invoice">+ New invoice</button>
-      </div>
       <div class="fin-grid">
         <div class="fin-card">
           <div class="fin-card-top">
@@ -1238,9 +1223,6 @@ select.field-input option { background:#1a1a1e; color:var(--white); }
 
     <!-- ANALYTICS -->
     <div class="page" id="page-analytics">
-      <div class="page-header">
-        <div><h1 data-i18n="nav_analytics">Analytics</h1><p data-i18n="analytics_sub">Revenue, clients and project insights</p></div>
-      </div>
       <div class="an-grid" id="an-grid">
         <div class="an-card"><div class="an-label">Total revenue</div><div class="an-value" id="an-revenue">—</div><div class="an-sub">All paid invoices</div></div>
         <div class="an-card"><div class="an-label">Avg project budget</div><div class="an-value" id="an-avg">—</div><div class="an-sub">Across all projects</div></div>
@@ -1640,6 +1622,9 @@ async function init() {
   document.querySelectorAll('.page').forEach(p => { p.style.display = 'none'; });
   const dashPage = document.getElementById('page-dashboard');
   if (dashPage) dashPage.style.display = 'block';
+  // Hide add button on dashboard (no action needed there)
+  const addBtnInit = document.getElementById('add-btn');
+  if (addBtnInit) addBtnInit.style.display = 'none';
 
   applyStaffMode();
   await loadAll();
@@ -1718,6 +1703,13 @@ function go(id, el) {
   if (el) el.classList.add('active');
   document.getElementById('topbar-title').textContent = TITLES[id] || id;
   currentPage = id;
+  // Update add button label per page
+  const addBtn = document.getElementById('add-btn');
+  if (addBtn) {
+    const labels = { finance:'+ New invoice', clients:'+ New client', projects:'+ New project', funnel:'+ New deal', team:'+ Invite' };
+    addBtn.textContent = labels[id] || '+ Add new';
+    addBtn.style.display = (id === 'analytics' || id === 'notes' || id === 'calendar' || id === 'dashboard') ? 'none' : '';
+  }
   renderPage(id);
   requestAnimationFrame(bindSpotlightCards);
 }
