@@ -208,38 +208,32 @@ tr:hover td { background:transparent; }
 .two-col { display:grid; grid-template-columns:1fr 1fr; gap:40px; }
 
 /* ── KANBAN ── */
-.kanban { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; align-items:start; }
-.k-stats-bar { display:flex; align-items:center; gap:8px; margin-bottom:18px; }
+.kanban { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; align-items:start; }
+.k-stats-bar { display:flex; align-items:center; gap:6px; margin-bottom:16px; }
 .k-stat-item { font-size:12px; color:var(--g2); }
-.k-stat-item b { color:var(--g1); font-weight:500; }
+.k-stat-item b { color:var(--white); font-weight:600; }
 .k-stat-sep { color:var(--g3); font-size:11px; }
-.k-col { background:var(--s1); border:1px solid var(--line); border-radius:14px; overflow:hidden; display:flex; flex-direction:column; position:relative; }
-.k-col::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; border-radius:2px 2px 0 0; z-index:1; }
-.k-col[data-col="queue"]::before      { background:var(--g3); }
-.k-col[data-col="inprogress"]::before { background:rgba(255,255,255,0.28); }
-.k-col[data-col="review"]::before     { background:rgba(255,255,255,0.5); }
-.k-col[data-col="done"]::before       { background:var(--white); }
-.k-col-head { padding:14px 14px 12px; display:flex; align-items:flex-start; justify-content:space-between; }
-.k-col-name { font-size:11px; font-weight:600; letter-spacing:0.4px; text-transform:uppercase; color:var(--g1); }
+.k-col { background:var(--s1); border:1px solid var(--line); border-radius:16px; overflow:hidden; display:flex; flex-direction:column; }
+.k-col-head { padding:16px 16px 14px; display:flex; align-items:center; justify-content:space-between; }
+.k-col-name { font-size:10.5px; font-weight:600; letter-spacing:0.6px; text-transform:uppercase; color:var(--g2); }
 .k-col-sub { font-size:10.5px; color:var(--g2); margin-top:3px; font-variant-numeric:tabular-nums; }
-.k-col-n { font-size:10.5px; color:var(--g2); font-variant-numeric:tabular-nums; background:var(--s3); border:1px solid var(--line); border-radius:5px; padding:1px 7px; min-width:20px; text-align:center; flex-shrink:0; margin-top:1px; }
-.k-col-sep { height:1px; background:var(--line); margin:0; }
-.k-cards { padding:8px 8px 10px; display:flex; flex-direction:column; gap:5px; min-height:48px; flex:1; }
-.k-card { padding:12px 13px; border:1px solid var(--line); border-radius:10px; background:var(--s2); cursor:pointer; transition:border-color 0.15s,transform 0.15s,box-shadow 0.15s; position:relative; }
-.k-card:hover { border-color:var(--line2); transform:translateY(-1px); box-shadow:0 6px 20px rgba(0,0,0,0.3); }
-.k-card-meta { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; gap:6px; }
+.k-col-n { font-size:11px; font-weight:600; color:var(--g1); font-variant-numeric:tabular-nums; background:var(--s3); border:1px solid var(--line2); border-radius:6px; padding:2px 8px; min-width:22px; text-align:center; flex-shrink:0; }
+.k-col-sep { height:1px; background:var(--line); }
+.k-cards { padding:8px 8px 10px; display:flex; flex-direction:column; gap:6px; min-height:60px; flex:1; }
+.k-card { padding:14px 14px 12px; border:1px solid var(--line); border-radius:12px; background:var(--s2); cursor:pointer; transition:border-color 0.15s,background 0.15s,transform 0.12s,box-shadow 0.15s; position:relative; }
+.k-card:hover { border-color:var(--line2); background:var(--s3); transform:translateY(-1px); box-shadow:var(--sh-sm); }
+.k-card-meta { display:flex; align-items:center; justify-content:space-between; margin-bottom:7px; gap:6px; }
 .k-card-type { font-size:9.5px; font-weight:600; letter-spacing:0.4px; color:var(--g2); text-transform:uppercase; }
-.k-card-title { font-size:13px; font-weight:600; color:var(--white); line-height:1.4; letter-spacing:-0.3px; }
+.k-card-title { font-size:13.5px; font-weight:600; color:var(--white); line-height:1.4; letter-spacing:-0.3px; }
 .k-card-foot { display:flex; align-items:center; justify-content:space-between; gap:6px; margin-top:10px; }
 .k-card-prog { margin-top:10px; }
 .k-card-prog-top { display:flex; justify-content:space-between; font-size:10px; color:var(--g2); margin-bottom:5px; letter-spacing:-0.1px; }
 .k-prog-bar { height:2px; background:var(--s4); border-radius:2px; overflow:hidden; }
 .k-prog-fill { height:100%; border-radius:2px; transition:width 0.6s cubic-bezier(.16,1,.3,1); }
-.k-card-del { font-size:10.5px; color:var(--g2); cursor:pointer; padding:2px 6px; opacity:0; transition:all 0.12s; border-radius:4px; position:absolute; top:10px; right:10px; }
+.k-card-del { font-size:10.5px; color:var(--g2); cursor:pointer; padding:2px 7px; opacity:0; transition:all 0.12s; border-radius:4px; position:absolute; top:12px; right:12px; }
 .k-card:hover .k-card-del { opacity:1; }
-.k-card-del:hover { color:#f87171; background:rgba(248,113,113,0.08); }
-.k-col-empty { padding:24px 12px; text-align:center; opacity:0.5; }
-.k-col-sep { height:1px; background:var(--line); margin:0; }
+.k-card-del:hover { color:var(--white); background:var(--s4); }
+.k-col-empty { padding:28px 12px; text-align:center; font-size:12px; color:var(--g3); }
 
 /* ── FUNNEL ── */
 .funnel-header-row { display:flex; align-items:center; gap:24px; padding:0 0 10px; border-bottom:1px solid var(--line); margin-bottom:0; }
@@ -489,10 +483,10 @@ select.field-input option { background:#1a1a1e; color:var(--white); }
 
 /* ── ENHANCED KANBAN ── */
 .k-card { border-left:2px solid transparent; }
-.k-card.st-queue      { border-left-color:var(--g3); }
-.k-card.st-inprogress { border-left-color:rgba(255,255,255,0.25); }
-.k-card.st-review     { border-left-color:rgba(255,255,255,0.45); }
-.k-card.st-done       { border-left-color:rgba(255,255,255,0.75); }
+.k-card.st-queue      { border-left-color:var(--line2); }
+.k-card.st-inprogress { border-left-color:rgba(255,255,255,0.2); }
+.k-card.st-review     { border-left-color:rgba(255,255,255,0.35); }
+.k-card.st-done       { border-left-color:rgba(255,255,255,0.6); }
 .k-dl-badge { font-size:10px; padding:1px 7px; border-radius:5px; font-weight:600; white-space:nowrap; }
 .k-dl-badge.overdue { background:rgba(248,113,113,0.1); color:#f87171; border:1px solid rgba(248,113,113,0.15); }
 .k-dl-badge.urgent  { background:var(--s4); color:var(--g1); border:1px solid var(--line2); }
@@ -870,10 +864,6 @@ select.field-input option { background:#1a1a1e; color:var(--white); }
 
     <!-- PROJECTS (Kanban) -->
     <div class="page" id="page-projects">
-      <div class="page-header">
-        <div><h1 data-i18n="page_projects">Projects</h1><p data-i18n="projects_sub">Studio projects and tasks</p></div>
-        <button class="btn btn-white" onclick="openAddModal()" data-i18n="btn_new_project">+ New project</button>
-      </div>
       <div class="k-stats-bar" id="k-stats-bar">
         <span class="k-stat-item"><b id="ks-total">0</b> projects</span>
         <span class="k-stat-sep">·</span>
