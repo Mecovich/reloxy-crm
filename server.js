@@ -160,6 +160,8 @@ async function initDB() {
     `ALTER TABLE users ADD COLUMN owner_id INTEGER DEFAULT NULL`,
     `ALTER TABLE users ADD COLUMN google_id TEXT DEFAULT NULL`,
     `ALTER TABLE projects ADD COLUMN assigned_to INTEGER DEFAULT NULL`,
+    `ALTER TABLE users ADD COLUMN telegram_chat_id TEXT DEFAULT NULL`,
+    `ALTER TABLE users ADD COLUMN tg_link_code TEXT DEFAULT NULL`,
   ];
   for (const sql of migrations) {
     try { await db.execute({ sql, args: [] }); } catch (_) { /* column already exists */ }
@@ -389,17 +391,34 @@ app.post('/api/projects', authMiddleware, async (req, res) => {
     args: [req.user.id, client_id||null, title, type||'', status||'queue', progress||0, deadline||null, budget||null, assigned_to||null],
   });
   const row = await db.execute({ sql: 'SELECT * FROM projects WHERE id = ?', args: [result.lastInsertRowid] });
+  // Notify assigned staff
+  if (assigned_to) {
+    const deadline_str = deadline ? `\n📅 Deadline: ${deadline}` : '';
+    await notifyUser(assigned_to,
+      `🔔 <b>New project assigned to you</b>\n\n📁 <b>${title}</b>${deadline_str}\n\nAssigned by: ${req.user.name}\n\n→ <a href="https://reloxy.tech/app">Open Reloxy</a>`
+    );
+  }
   res.json(row.rows[0]);
 });
 
 app.put('/api/projects/:id', authMiddleware, async (req, res) => {
   if (denyStaff(req, res)) return;
   const { title, type, client_id, status, progress, deadline, budget, assigned_to } = req.body;
+  // Check previous assignee to detect reassignment
+  const prev = await db.execute({ sql: 'SELECT assigned_to, title FROM projects WHERE id = ?', args: [req.params.id] });
+  const prevAssigned = prev.rows[0]?.assigned_to;
   await db.execute({
     sql: 'UPDATE projects SET title=?, type=?, client_id=?, status=?, progress=?, deadline=?, budget=?, assigned_to=? WHERE id=? AND user_id=?',
     args: [title, type||'', client_id||null, status||'queue', progress||0, deadline||null, budget||null, assigned_to||null, req.params.id, req.user.id],
   });
   const row = await db.execute({ sql: 'SELECT * FROM projects WHERE id = ?', args: [req.params.id] });
+  // Notify if newly assigned or reassigned
+  if (assigned_to && assigned_to != prevAssigned) {
+    const deadline_str = deadline ? `\n📅 Deadline: ${deadline}` : '';
+    await notifyUser(assigned_to,
+      `🔔 <b>Project assigned to you</b>\n\n📁 <b>${title}</b>${deadline_str}\n\nAssigned by: ${req.user.name}\n\n→ <a href="https://reloxy.tech/app">Open Reloxy</a>`
+    );
+  }
   res.json(row.rows[0]);
 });
 
@@ -783,10 +802,103 @@ app.get('/admin',      (req, res) => res.sendFile(path.join(__dirname, 'public',
 app.get('/invite/:token', (req, res) => res.sendFile(path.join(__dirname, 'public', 'invite.html')));
 app.get('*',           (req, res) => res.sendFile(path.join(__dirname, 'public', 'login.html')));
 
+// ─── Telegram Bot ────────────────────────────────────────────────────────────
+const TG_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+const TG_API   = TG_TOKEN ? `https://api.telegram.org/bot${TG_TOKEN}` : null;
+
+async function tgSend(chatId, text) {
+  if (!TG_API || !chatId) return;
+  try {
+    await fetch(`${TG_API}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: chatId, text, parse_mode: 'HTML', disable_web_page_preview: true }),
+    });
+  } catch (e) { console.error('TG send error:', e.message); }
+}
+
+// Send notification to a user by their DB id
+async function notifyUser(userId, text) {
+  if (!userId) return;
+  const r = await db.execute({ sql: 'SELECT telegram_chat_id FROM users WHERE id = ?', args: [userId] });
+  const chatId = r.rows[0]?.telegram_chat_id;
+  if (chatId) await tgSend(chatId, text);
+}
+
+// Generate 6-char link code
+function genCode() { return Math.random().toString(36).slice(2,8).toUpperCase(); }
+
+// API: get or create link code for current user
+app.get('/api/tg/link-code', authMiddleware, async (req, res) => {
+  let r = await db.execute({ sql: 'SELECT tg_link_code, telegram_chat_id FROM users WHERE id = ?', args: [req.user.id] });
+  let { tg_link_code, telegram_chat_id } = r.rows[0] || {};
+  if (!tg_link_code) {
+    tg_link_code = genCode();
+    await db.execute({ sql: 'UPDATE users SET tg_link_code = ? WHERE id = ?', args: [tg_link_code, req.user.id] });
+  }
+  res.json({ code: tg_link_code, linked: !!telegram_chat_id });
+});
+
+// API: unlink telegram
+app.post('/api/tg/unlink', authMiddleware, async (req, res) => {
+  await db.execute({ sql: 'UPDATE users SET telegram_chat_id = NULL, tg_link_code = NULL WHERE id = ?', args: [req.user.id] });
+  res.json({ ok: true });
+});
+
+// Long-polling loop
+let tgOffset = 0;
+async function tgPoll() {
+  if (!TG_API) return;
+  try {
+    const r = await fetch(`${TG_API}/getUpdates?timeout=25&offset=${tgOffset}&allowed_updates=["message"]`);
+    const data = await r.json();
+    if (!data.ok) { await new Promise(r => setTimeout(r, 5000)); tgPoll(); return; }
+    for (const upd of data.result || []) {
+      tgOffset = upd.update_id + 1;
+      const msg = upd.message;
+      if (!msg || !msg.text) continue;
+      const chatId = String(msg.chat.id);
+      const text   = msg.text.trim();
+      const from   = msg.from;
+
+      if (text.startsWith('/start')) {
+        const parts = text.split(' ');
+        const code  = parts[1]?.toUpperCase();
+        if (!code) {
+          await tgSend(chatId, `👋 <b>Welcome to Reloxy!</b>\n\nTo link your account, get your code from the CRM:\n<b>Team → your profile → Telegram</b>\n\nThen send: <code>/start YOUR_CODE</code>`);
+          continue;
+        }
+        // Find user by code
+        const ur = await db.execute({ sql: 'SELECT id, name FROM users WHERE tg_link_code = ?', args: [code] });
+        if (!ur.rows.length) {
+          await tgSend(chatId, '❌ Code not found. Please get a fresh code from Reloxy CRM.');
+          continue;
+        }
+        const u = ur.rows[0];
+        await db.execute({ sql: 'UPDATE users SET telegram_chat_id = ?, tg_link_code = NULL WHERE id = ?', args: [chatId, u.id] });
+        await tgSend(chatId, `✅ <b>Connected!</b>\n\nHi ${u.name}, your Reloxy account is now linked.\n\nYou'll receive notifications here when tasks or projects are assigned to you.`);
+        continue;
+      }
+
+      if (text === '/help' || text === '/status') {
+        const ur2 = await db.execute({ sql: 'SELECT name FROM users WHERE telegram_chat_id = ?', args: [chatId] });
+        if (ur2.rows.length) {
+          await tgSend(chatId, `✅ Linked as <b>${ur2.rows[0].name}</b>\n\nYou'll get notified about new tasks and projects.`);
+        } else {
+          await tgSend(chatId, '❌ Not linked. Get your code from Reloxy → Team → Telegram.');
+        }
+        continue;
+      }
+    }
+  } catch (e) { console.error('TG poll error:', e.message); }
+  setTimeout(tgPoll, 1000);
+}
+
 // ─── Start ───────────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 3000;
 initDB().then(() => {
   app.listen(PORT, () => console.log(`🚀 Reloxy CRM running on port ${PORT}`));
+  tgPoll();
 }).catch(err => {
   console.error('DB init failed:', err);
   process.exit(1);

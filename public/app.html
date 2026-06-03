@@ -1099,6 +1099,10 @@ select.field-input option { background:#1a1a1e; color:var(--white); }
                   <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><circle cx="8" cy="8" r="3"/><line x1="8" y1="2" x2="8" y2="4"/></svg>
                   Revenue Goal
                 </div>
+                <div class="set-picker-item" onclick="switchSetSection('telegram',this)">
+                  <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14.5 2L1.5 6.5l4 1.5 1.5 5 2-2.5 3.5 2.5L14.5 2z"/></svg>
+                  Telegram
+                </div>
               </div>
             </div>
           </div>
@@ -1278,6 +1282,44 @@ select.field-input option { background:#1a1a1e; color:var(--white); }
             <div class="set-footer">
               <span class="set-msg" id="goal-msg"></span>
               <button class="set-save-btn" onclick="saveGoalSettings()" data-i18n="btn_save_goal">Save goal</button>
+            </div>
+          </div>
+
+          <!-- TELEGRAM SECTION -->
+          <div id="set-tab-telegram" class="set-section" style="display:none">
+            <div class="set-body">
+              <div style="display:flex;align-items:center;gap:16px;padding:20px;background:var(--s2);border:1px solid var(--line);border-radius:12px;margin-bottom:16px">
+                <div style="width:44px;height:44px;border-radius:12px;background:var(--s3);border:1px solid var(--line2);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                  <svg width="22" height="22" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.7"><path d="M14.5 2L1.5 6.5l4 1.5 1.5 5 2-2.5 3.5 2.5L14.5 2z"/></svg>
+                </div>
+                <div>
+                  <div style="font-size:14px;font-weight:600;color:var(--white);margin-bottom:3px">Telegram Notifications</div>
+                  <div style="font-size:12px;color:var(--g1)" id="tg-status-text">Not connected</div>
+                </div>
+                <div style="margin-left:auto">
+                  <span id="tg-status-badge" style="font-size:11px;padding:3px 10px;border-radius:20px;background:var(--s3);border:1px solid var(--line2);color:var(--g2)">●  Disconnected</span>
+                </div>
+              </div>
+              <div id="tg-connect-block">
+                <div style="font-size:13px;color:var(--g1);margin-bottom:14px;line-height:1.7">
+                  Connect Telegram to receive notifications when projects are assigned to you, deadlines approach, or invoices are created.
+                </div>
+                <div style="background:var(--s2);border:1px solid var(--line2);border-radius:12px;padding:16px 20px;margin-bottom:16px">
+                  <div style="font-size:11.5px;color:var(--g2);margin-bottom:8px;font-weight:500;text-transform:uppercase;letter-spacing:0.3px">Your link code</div>
+                  <div style="display:flex;align-items:center;gap:12px">
+                    <div id="tg-code-display" style="font-size:28px;font-weight:800;letter-spacing:4px;color:var(--white);font-variant-numeric:tabular-nums">——</div>
+                    <button class="btn btn-ghost" onclick="loadTgCode()" style="font-size:12px">Refresh</button>
+                  </div>
+                </div>
+                <div style="font-size:13px;color:var(--g1);line-height:1.8">
+                  1. Open <a href="https://t.me/ReloxyApp_bot" target="_blank" style="color:var(--white);text-decoration:underline">@ReloxyApp_bot</a> in Telegram<br>
+                  2. Send: <code style="background:var(--s3);padding:2px 8px;border-radius:5px;color:var(--white);font-size:13px">/start <span id="tg-code-inline">YOUR_CODE</span></code>
+                </div>
+              </div>
+              <div id="tg-connected-block" style="display:none">
+                <div style="font-size:13px;color:var(--g1);margin-bottom:16px">Your account is linked. You will receive notifications in Telegram.</div>
+                <button class="btn btn-ghost" onclick="unlinkTelegram()" style="font-size:12px;color:#f87171;border-color:rgba(248,113,113,0.3)">Disconnect Telegram</button>
+              </div>
             </div>
           </div>
 
@@ -3087,7 +3129,7 @@ function setLang(lang, btn) {
 }
 
 // ── SETTINGS SECTION PICKER ────────────────────────────────────
-const SET_SECTION_LABELS = { profile:'Profile', studio:'Studio', security:'Security', goal:'Revenue Goal' };
+const SET_SECTION_LABELS = { profile:'Profile', studio:'Studio', security:'Security', goal:'Revenue Goal', telegram:'Telegram' };
 
 function toggleSetPicker(e) {
   e.stopPropagation();
@@ -3113,6 +3155,8 @@ function switchSetSection(section, el) {
   // close dropdown
   document.getElementById('set-picker-drop').classList.remove('open');
   document.getElementById('set-picker-btn').classList.remove('open');
+  // auto-load telegram code
+  if (section === 'telegram') loadTgCode();
 }
 
 // close picker on outside click
@@ -3219,6 +3263,44 @@ async function savePassword() {
     setMsg('password-msg', t('msg_pass_updated'), 'ok');
   } catch(e) { setMsg('password-msg', e.message, 'err'); }
 }
+
+// ─── TELEGRAM SETTINGS ────────────────────────────────────────────────────
+async function loadTgCode() {
+  try {
+    const data = await api('GET', '/api/tg/link-code');
+    const code = data.code;
+    const linked = data.linked;
+    const codeEl = document.getElementById('tg-code-display');
+    const inlineEl = document.getElementById('tg-code-inline');
+    const badge = document.getElementById('tg-status-badge');
+    const statusText = document.getElementById('tg-status-text');
+    const connectBlock = document.getElementById('tg-connect-block');
+    const connectedBlock = document.getElementById('tg-connected-block');
+    if (codeEl) codeEl.textContent = code || '——';
+    if (inlineEl) inlineEl.textContent = code || 'YOUR_CODE';
+    if (linked) {
+      badge.textContent = '●  Connected'; badge.style.color = 'var(--white)'; badge.style.borderColor = 'var(--line2)';
+      statusText.textContent = 'Your Telegram is linked and active';
+      if (connectBlock) connectBlock.style.display = 'none';
+      if (connectedBlock) connectedBlock.style.display = 'block';
+    } else {
+      badge.textContent = '●  Disconnected'; badge.style.color = 'var(--g2)';
+      statusText.textContent = 'Not connected';
+      if (connectBlock) connectBlock.style.display = 'block';
+      if (connectedBlock) connectedBlock.style.display = 'none';
+    }
+  } catch(e) { console.error('TG code load failed', e); }
+}
+
+async function unlinkTelegram() {
+  if (!confirm('Disconnect Telegram?')) return;
+  await api('POST', '/api/tg/unlink');
+  loadTgCode();
+  toast('Telegram disconnected');
+}
+
+// Auto-load TG code when switching to telegram settings tab
+const _origSwitchSetSection = window.switchSetSection;
 
 function saveGoalSettings() {
   const amount = parseFloat(document.getElementById('set-goal-amount').value);
