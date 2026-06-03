@@ -1423,6 +1423,23 @@ select.field-input option { background:#1a1a1e; color:var(--white); }
 <div class="toast" id="toast"></div>
 
 <script>
+// ─── Handle Google OAuth redirect ──────────────────────────────────────────
+(function() {
+  const p = new URLSearchParams(location.search);
+  const gtoken = p.get('gtoken');
+  if (gtoken) {
+    localStorage.setItem('crm_token', gtoken);
+    localStorage.setItem('crm_user', JSON.stringify({
+      name: decodeURIComponent(p.get('gname') || ''),
+      email: decodeURIComponent(p.get('gemail') || ''),
+      role: p.get('grole') || 'user',
+      plan: p.get('gplan') || 'free',
+    }));
+    localStorage.setItem('reloxy_email', decodeURIComponent(p.get('gemail') || ''));
+    history.replaceState({}, '', '/app');
+  }
+})();
+
 // ─── STATE ─────────────────────────────────────────────────────────────────
 const API = '';
 let token = localStorage.getItem('crm_token');

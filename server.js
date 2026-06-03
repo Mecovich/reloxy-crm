@@ -242,49 +242,76 @@ async function handleLogin(req, res) {
 app.post('/api/auth/register', handleRegister);
 app.post('/api/auth/login',    handleLogin);
 
-// ─── Google OAuth ─────────────────────────────────────────────────────────────
-app.post('/api/auth/google', async (req, res) => {
-  try {
-    const { credential } = req.body;
-    if (!credential) return res.status(400).json({ error: 'No credential' });
+// ─── Google OAuth (redirect flow) ────────────────────────────────────────────
+const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+const GOOGLE_REDIRECT = process.env.GOOGLE_REDIRECT_URI || 'https://reloxy.tech/api/auth/google/callback';
 
-    // Verify Google token
+app.get('/api/auth/google', (req, res) => {
+  const url = new URL('https://accounts.google.com/o/oauth2/v2/auth');
+  url.searchParams.set('client_id', GOOGLE_CLIENT_ID);
+  url.searchParams.set('redirect_uri', GOOGLE_REDIRECT);
+  url.searchParams.set('response_type', 'code');
+  url.searchParams.set('scope', 'openid email profile');
+  url.searchParams.set('access_type', 'offline');
+  url.searchParams.set('prompt', 'select_account');
+  res.redirect(url.toString());
+});
+
+app.get('/api/auth/google/callback', async (req, res) => {
+  try {
+    const { code, error } = req.query;
+    if (error || !code) return res.redirect('/login?error=google_denied');
+
+    // Exchange code for tokens
+    const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        code,
+        client_id: GOOGLE_CLIENT_ID,
+        client_secret: GOOGLE_CLIENT_SECRET,
+        redirect_uri: GOOGLE_REDIRECT,
+        grant_type: 'authorization_code',
+      }),
+    });
+    const tokenData = await tokenRes.json();
+    if (!tokenData.id_token) return res.redirect('/login?error=no_token');
+
+    // Verify ID token to get user info
     const ticket = await googleClient.verifyIdToken({
-      idToken: credential,
+      idToken: tokenData.id_token,
       audience: GOOGLE_CLIENT_ID,
     });
-    const payload = ticket.getPayload();
-    const { sub: googleId, email, name, picture } = payload;
+    const { sub: googleId, email, name } = ticket.getPayload();
 
-    // Find existing user by google_id or email
+    // Find or create user
     let result = await db.execute({ sql: 'SELECT * FROM users WHERE google_id = ? OR email = ?', args: [googleId, email] });
     let user = result.rows[0];
 
     if (!user) {
-      // Create new user
       const role = email === process.env.ADMIN_EMAIL ? 'admin' : 'user';
-      const placeholder = await bcrypt.hash('google_' + googleId, 10);
+      const placeholder = await bcrypt.hash('google_oauth_' + googleId, 10);
       const ins = await db.execute({
         sql: 'INSERT INTO users (name, email, password, role, google_id, studio_name) VALUES (?, ?, ?, ?, ?, ?)',
         args: [name, email, placeholder, role, googleId, ''],
       });
-      user = { id: ins.lastInsertRowid, name, email, role, plan: 'free', google_id: googleId };
+      user = { id: ins.lastInsertRowid, name, email, role, plan: 'free' };
       await sendTelegram(`🆕 <b>New Google user</b>\nName: ${name}\nEmail: ${email}`);
     } else if (!user.google_id) {
-      // Link Google ID to existing email account
       await db.execute({ sql: 'UPDATE users SET google_id = ? WHERE id = ?', args: [googleId, user.id] });
     }
 
-    const token = jwt.sign(
-      { id: user.id, email: user.email, role: user.role, name: user.name },
+    const jwtToken = jwt.sign(
+      { id: user.id, email: user.email || email, role: user.role, name: user.name || name },
       process.env.JWT_SECRET || 'secret',
       { expiresIn: '30d' }
     );
 
-    res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role, plan: user.plan || 'free' } });
+    // Redirect to app with token in URL — frontend picks it up
+    res.redirect(`/app?gtoken=${encodeURIComponent(jwtToken)}&gname=${encodeURIComponent(user.name || name)}&gemail=${encodeURIComponent(user.email || email)}&grole=${user.role}&gplan=${user.plan || 'free'}`);
   } catch (e) {
-    console.error('Google auth error:', e.message);
-    res.status(500).json({ error: 'Google authentication failed' });
+    console.error('Google callback error:', e.message);
+    res.redirect('/login?error=google_failed');
   }
 });
 app.get('/api/auth/me', authMiddleware, async (req, res) => {
