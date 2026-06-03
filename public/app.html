@@ -1953,19 +1953,25 @@ function renderStats(s) {
 let revenueChartInstance = null;
 let currentChartPeriod = 'month';
 
+function getInvDate(inv) {
+  // Use issued_at first, fall back to created_at
+  const raw = inv.issued_at || inv.created_at || '';
+  return raw.slice(0,10); // "YYYY-MM-DD"
+}
+
 function getChartData(period) {
   const now = new Date();
-  const paid = invoices.filter(i => i.status === 'paid' && i.issued_at);
+  const paid = invoices.filter(i => i.status === 'paid');
 
   if (period === 'week') {
     const labels = [], data = [];
     for (let i = 6; i >= 0; i--) {
       const d = new Date(now); d.setDate(d.getDate() - i); d.setHours(0,0,0,0);
-      const next = new Date(d); next.setDate(next.getDate() + 1);
       const key = d.toISOString().slice(0,10);
-      const dayName = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()];
-      labels.push(i === 0 ? 'Today' : dayName);
-      data.push(paid.filter(inv => inv.issued_at >= key && inv.issued_at < next.toISOString().slice(0,10)).reduce((s,inv)=>s+(inv.amount||0),0));
+      const next = new Date(d); next.setDate(next.getDate() + 1);
+      const nextKey = next.toISOString().slice(0,10);
+      labels.push(i === 0 ? 'Today' : ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()]);
+      data.push(paid.filter(inv => { const dt = getInvDate(inv); return dt >= key && dt < nextKey; }).reduce((s,inv)=>s+(inv.amount||0),0));
     }
     return { labels, data };
   }
@@ -1977,8 +1983,9 @@ function getChartData(period) {
       const d = new Date(now); d.setDate(d.getDate() - i); d.setHours(0,0,0,0);
       const key = d.toISOString().slice(0,10);
       const next = new Date(d); next.setDate(next.getDate() + 1);
+      const nextKey = next.toISOString().slice(0,10);
       labels.push(String(d.getDate()).padStart(2,'0') + ' ' + MON_SHORT[d.getMonth()]);
-      data.push(paid.filter(inv => inv.issued_at >= key && inv.issued_at < next.toISOString().slice(0,10)).reduce((s,inv)=>s+(inv.amount||0),0));
+      data.push(paid.filter(inv => { const dt = getInvDate(inv); return dt >= key && dt < nextKey; }).reduce((s,inv)=>s+(inv.amount||0),0));
     }
     return { labels, data };
   }
@@ -1989,7 +1996,7 @@ function getChartData(period) {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
     const y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,'0');
     labels.push(MONTHS_SHORT[d.getMonth()]);
-    data.push(paid.filter(inv => inv.issued_at && inv.issued_at.startsWith(`${y}-${m}`)).reduce((s,inv)=>s+(inv.amount||0),0));
+    data.push(paid.filter(inv => getInvDate(inv).startsWith(`${y}-${m}`)).reduce((s,inv)=>s+(inv.amount||0),0));
   }
   return { labels, data };
 }
@@ -2319,7 +2326,15 @@ function renderDashboard() {
       </div>
     </div>`).join('') : `<div class="empty"><div class="empty-title">${t('dash_all_paid')}</div></div>`;
 
-  // Always redraw chart with current data
+  // Auto-select best period: prefer one that has data
+  const monthTotal = getChartData('month').data.reduce((a,b)=>a+b,0);
+  const yearTotal  = getChartData('year').data.reduce((a,b)=>a+b,0);
+  if (monthTotal === 0 && yearTotal > 0 && currentChartPeriod === 'month') {
+    currentChartPeriod = 'year';
+    document.querySelectorAll('.chart-period').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.chart-period').forEach(b => { if (b.textContent.trim() === 'Year') b.classList.add('active'); });
+    document.querySelectorAll('#dash-chart-period-label').forEach(e => e.textContent = 'This year');
+  }
   drawRevenueChart(currentChartPeriod);
 }
 
