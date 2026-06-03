@@ -4,6 +4,10 @@ const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const path = require('path');
 const { createClient } = require('@libsql/client');
+const { OAuth2Client } = require('google-auth-library');
+
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 
 // Turso returns BigInt for row IDs — teach JSON how to serialize them
 BigInt.prototype.toJSON = function() { return Number(this); };
@@ -154,6 +158,7 @@ async function initDB() {
     `ALTER TABLE invoices ADD COLUMN due_at TEXT`,
     `ALTER TABLE users ADD COLUMN invite_token TEXT DEFAULT ''`,
     `ALTER TABLE users ADD COLUMN owner_id INTEGER DEFAULT NULL`,
+    `ALTER TABLE users ADD COLUMN google_id TEXT DEFAULT NULL`,
     `ALTER TABLE projects ADD COLUMN assigned_to INTEGER DEFAULT NULL`,
   ];
   for (const sql of migrations) {
@@ -236,6 +241,52 @@ async function handleLogin(req, res) {
 
 app.post('/api/auth/register', handleRegister);
 app.post('/api/auth/login',    handleLogin);
+
+// ─── Google OAuth ─────────────────────────────────────────────────────────────
+app.post('/api/auth/google', async (req, res) => {
+  try {
+    const { credential } = req.body;
+    if (!credential) return res.status(400).json({ error: 'No credential' });
+
+    // Verify Google token
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: GOOGLE_CLIENT_ID,
+    });
+    const payload = ticket.getPayload();
+    const { sub: googleId, email, name, picture } = payload;
+
+    // Find existing user by google_id or email
+    let result = await db.execute({ sql: 'SELECT * FROM users WHERE google_id = ? OR email = ?', args: [googleId, email] });
+    let user = result.rows[0];
+
+    if (!user) {
+      // Create new user
+      const role = email === process.env.ADMIN_EMAIL ? 'admin' : 'user';
+      const placeholder = await bcrypt.hash('google_' + googleId, 10);
+      const ins = await db.execute({
+        sql: 'INSERT INTO users (name, email, password, role, google_id, studio_name) VALUES (?, ?, ?, ?, ?, ?)',
+        args: [name, email, placeholder, role, googleId, ''],
+      });
+      user = { id: ins.lastInsertRowid, name, email, role, plan: 'free', google_id: googleId };
+      await sendTelegram(`🆕 <b>New Google user</b>\nName: ${name}\nEmail: ${email}`);
+    } else if (!user.google_id) {
+      // Link Google ID to existing email account
+      await db.execute({ sql: 'UPDATE users SET google_id = ? WHERE id = ?', args: [googleId, user.id] });
+    }
+
+    const token = jwt.sign(
+      { id: user.id, email: user.email, role: user.role, name: user.name },
+      process.env.JWT_SECRET || 'secret',
+      { expiresIn: '30d' }
+    );
+
+    res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role, plan: user.plan || 'free' } });
+  } catch (e) {
+    console.error('Google auth error:', e.message);
+    res.status(500).json({ error: 'Google authentication failed' });
+  }
+});
 app.get('/api/auth/me', authMiddleware, async (req, res) => {
   const result = await db.execute({ sql: 'SELECT id, name, email, role, plan, studio_name, owner_id, created_at FROM users WHERE id = ?', args: [req.user.id] });
   res.json(result.rows[0]);
