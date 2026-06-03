@@ -6,7 +6,7 @@
 <title>Reloxy</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; overflow-anchor: none; }
@@ -20,7 +20,7 @@
   --sh-lg:0 16px 48px rgba(0,0,0,0.8),0 4px 16px rgba(0,0,0,0.5);
   --r:10px; --r-sm:7px; --r-lg:14px;
 }
-body { font-family:'Plus Jakarta Sans',-apple-system,"Helvetica Neue",sans-serif; background:var(--black); color:var(--white); display:flex; height:100vh; overflow:hidden; font-size:14px; line-height:1.55; -webkit-font-smoothing:antialiased; letter-spacing:-0.1px; }
+body { font-family:'Geist',-apple-system,"Helvetica Neue",sans-serif; background:var(--black); color:var(--white); display:flex; height:100vh; overflow:hidden; font-size:14px; line-height:1.55; -webkit-font-smoothing:antialiased; letter-spacing:-0.1px; }
 
 /* ── SIDEBAR ── */
 .sidebar { width:244px; height:100vh; background:var(--s1); border-right:1px solid var(--line); position:fixed; top:0; left:0; bottom:0; display:flex; flex-direction:column; z-index:100; overflow:hidden; transition:width 0.22s cubic-bezier(.16,1,.3,1),border-color 0.22s; }
@@ -550,6 +550,35 @@ select.field-input option { background:#1a1a1e; color:var(--white); }
 .notes-footer { display:flex; align-items:center; justify-content:space-between; padding-top:14px; border-top:1px solid var(--line); margin-top:12px; }
 .notes-save-label { font-size:11px; color:var(--g3); transition:color 0.4s; }
 .notes-char-count { font-size:11px; color:var(--g3); font-variant-numeric:tabular-nums; }
+
+/* ── TASKS ── */
+.tasks-filters { display:flex; align-items:center; gap:8px; margin-bottom:18px; }
+.tasks-filter { font-size:12px; color:var(--g2); padding:4px 12px; border-radius:7px; border:1px solid var(--line); cursor:pointer; transition:all 0.12s; background:transparent; font-family:inherit; }
+.tasks-filter.active,.tasks-filter:hover { color:var(--white); border-color:var(--line2); background:var(--s3); }
+.task-row { display:flex; align-items:flex-start; gap:12px; padding:13px 16px; background:var(--s1); border:1px solid var(--line); border-radius:12px; margin-bottom:6px; transition:border-color 0.12s; cursor:default; }
+.task-row:hover { border-color:var(--line2); }
+.task-row.done { opacity:0.45; }
+.task-check { width:18px; height:18px; border:1.5px solid var(--line2); border-radius:5px; flex-shrink:0; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.12s; margin-top:1px; }
+.task-check:hover { border-color:var(--white); }
+.task-check.checked { background:var(--white); border-color:var(--white); }
+.task-check.checked svg { display:block; }
+.task-check svg { display:none; width:10px; height:10px; }
+.task-body { flex:1; min-width:0; }
+.task-title { font-size:13.5px; font-weight:500; color:var(--white); letter-spacing:-0.2px; line-height:1.4; }
+.task-row.done .task-title { text-decoration:line-through; color:var(--g2); }
+.task-meta { display:flex; align-items:center; gap:8px; margin-top:5px; }
+.task-pri { font-size:10.5px; font-weight:600; padding:1px 7px; border-radius:4px; border:1px solid var(--line2); color:var(--g1); }
+.task-pri.high { border-color:rgba(255,255,255,0.2); color:var(--white); }
+.task-pri.medium { border-color:var(--line2); color:var(--g1); }
+.task-pri.low { border-color:var(--line); color:var(--g2); }
+.task-due { font-size:11px; color:var(--g2); }
+.task-del { font-size:11px; color:var(--g2); cursor:pointer; padding:2px 7px; border-radius:5px; opacity:0; transition:all 0.12s; border:none; background:transparent; font-family:inherit; }
+.task-row:hover .task-del { opacity:1; }
+.task-del:hover { color:var(--white); background:var(--s3); }
+.task-add-row { display:flex; align-items:center; gap:10px; padding:11px 14px; border:1px dashed var(--line2); border-radius:12px; margin-top:10px; cursor:text; }
+.task-add-input { flex:1; background:none; border:none; outline:none; font-size:13px; color:var(--white); font-family:inherit; }
+.task-add-input::placeholder { color:var(--g3); }
+.task-add-pri { font-size:12px; color:var(--g2); background:var(--s3); border:1px solid var(--line); border-radius:6px; padding:3px 10px; cursor:pointer; font-family:inherit; outline:none; }
 </style>
 </head>
 <body>
@@ -637,6 +666,29 @@ select.field-input option { background:#1a1a1e; color:var(--white); }
           <line x1="5" y1="11" x2="8" y2="11"/>
         </svg>
         <span data-i18n="nav_notes">Notes</span>
+      </div>
+      <div class="nav-item" onclick="go('tasks',this)">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <polyline points="2,4 4,6 7,2"/><line x1="10" y1="4" x2="14" y2="4"/>
+          <polyline points="2,9 4,11 7,7"/><line x1="10" y1="9" x2="14" y2="9"/>
+          <polyline points="2,14 4,14 7,12"/><line x1="10" y1="13" x2="14" y2="13"/>
+        </svg>
+        <span>Tasks</span>
+      </div>
+      <div class="nav-item" onclick="go('expenses',this)">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="1" y="3" width="14" height="10" rx="2"/>
+          <line x1="1" y1="7" x2="15" y2="7"/>
+          <circle cx="5" cy="11" r="1" fill="currentColor"/>
+        </svg>
+        <span>Expenses</span>
+      </div>
+      <div class="nav-item" onclick="go('reports',this)">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M2 12 L6 7 L9 10 L13 4"/>
+          <polyline points="10,4 13,4 13,7"/>
+        </svg>
+        <span>Reports</span>
       </div>
     </div>
   </nav>
@@ -1256,6 +1308,47 @@ select.field-input option { background:#1a1a1e; color:var(--white); }
       </div>
     </div>
 
+    <!-- TASKS -->
+    <div class="page" id="page-tasks">
+      <div id="tasks-wrap"></div>
+    </div>
+
+    <!-- EXPENSES -->
+    <div class="page" id="page-expenses">
+      <div class="fin-grid" id="exp-metrics"></div>
+      <div class="section-header" style="margin-bottom:16px">
+        <div class="section-title">Expenses</div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Description</th><th>Category</th><th>Amount</th><th>Date</th><th></th></tr></thead>
+          <tbody id="exp-tbody"></tbody>
+        </table>
+      </div>
+      <div id="exp-empty" style="display:none"></div>
+    </div>
+
+    <!-- REPORTS -->
+    <div class="page" id="page-reports">
+      <div class="an-grid" id="rep-kpi"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:0">
+        <div class="an-section">
+          <div class="an-section-title">Revenue by month</div>
+          <div style="position:relative;height:200px;margin-top:14px"><canvas id="rep-chart"></canvas></div>
+        </div>
+        <div class="an-section">
+          <div class="an-section-title">Top clients</div>
+          <div id="rep-clients"></div>
+        </div>
+      </div>
+      <div style="margin-top:14px">
+        <div class="an-section">
+          <div class="an-section-title">Expenses by category</div>
+          <div id="rep-exp-cats" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px"></div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </main>
 
@@ -1690,7 +1783,7 @@ async function api(method, url, body) {
 }
 
 // ─── NAV ───────────────────────────────────────────────────────────────────
-const TITLES = { dashboard:'Dashboard', calendar:'Calendar', clients:'Clients', projects:'Projects', funnel:'Pipeline', team:'Team', finance:'Finance', settings:'Settings', analytics:'Analytics', notes:'Notes' };
+const TITLES = { dashboard:'Dashboard', calendar:'Calendar', clients:'Clients', projects:'Projects', funnel:'Pipeline', team:'Team', finance:'Finance', settings:'Settings', analytics:'Analytics', notes:'Notes', tasks:'Tasks', expenses:'Expenses', reports:'Reports' };
 function go(id, el) {
   const staffBlocked = ['finance','team','funnel'];
   if (user?.role === 'staff' && staffBlocked.includes(id)) return;
@@ -1709,7 +1802,9 @@ function go(id, el) {
   if (addBtn) {
     const labels = { finance:'+ New invoice', clients:'+ New client', projects:'+ New project', funnel:'+ New deal', team:'+ Invite' };
     addBtn.textContent = labels[id] || '+ Add new';
-    addBtn.style.display = (id === 'analytics' || id === 'notes' || id === 'calendar' || id === 'dashboard') ? 'none' : '';
+    const noBtn = ['analytics','notes','calendar','dashboard','tasks','expenses','reports'];
+    addBtn.style.display = noBtn.includes(id) ? 'none' : '';
+    if (id === 'expenses') { addBtn.style.display = ''; addBtn.textContent = '+ Add expense'; }
   }
   renderPage(id);
   requestAnimationFrame(bindSpotlightCards);
@@ -1780,6 +1875,9 @@ function renderPage(id) {
   if (id === 'finance')   renderFinance();
   if (id === 'analytics') renderAnalytics();
   if (id === 'notes')     renderNotes();
+  if (id === 'tasks')     renderTasks();
+  if (id === 'expenses')  renderExpenses();
+  if (id === 'reports')   renderReports();
 }
 
 function renderCounts() {
@@ -2314,6 +2412,196 @@ function clearNotes() {
   if (area) area.value = '';
 }
 
+// ─── TASKS ─────────────────────────────────────────────────────────────────
+let taskFilter = 'all';
+function getTasks() { try { return JSON.parse(localStorage.getItem('reloxy_tasks')||'[]'); } catch{ return []; } }
+function saveTasks(t) { localStorage.setItem('reloxy_tasks', JSON.stringify(t)); }
+
+function renderTasks() {
+  const all = getTasks();
+  const shown = taskFilter === 'done' ? all.filter(t=>t.done) : taskFilter === 'active' ? all.filter(t=>!t.done) : all;
+  const done = all.filter(t=>t.done).length;
+  const wrap = document.getElementById('tasks-wrap');
+  if (!wrap) return;
+  wrap.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+      <div style="display:flex;gap:6px">
+        ${['all','active','done'].map(f=>`<button class="tasks-filter${taskFilter===f?' active':''}" onclick="taskFilter='${f}';renderTasks()">${f==='all'?'All tasks':f==='active'?'Active':'Completed'}</button>`).join('')}
+      </div>
+      <div style="font-size:12px;color:var(--g2)">${done}/${all.length} done</div>
+    </div>
+    ${shown.length ? shown.map((t,i)=>`
+      <div class="task-row${t.done?' done':''}">
+        <div class="task-check${t.done?' checked':''}" onclick="toggleTask(${t.id})">
+          <svg viewBox="0 0 10 10" fill="none" stroke="#000" stroke-width="2"><polyline points="1.5,5 4,7.5 8.5,2"/></svg>
+        </div>
+        <div class="task-body">
+          <div class="task-title">${esc(t.title)}</div>
+          <div class="task-meta">
+            <span class="task-pri ${t.priority}">${t.priority}</span>
+            ${t.due?`<span class="task-due">Due ${t.due}</span>`:''}
+          </div>
+        </div>
+        <button class="task-del" onclick="deleteTask(${t.id})">Delete</button>
+      </div>`).join('') : `<div style="padding:32px;text-align:center;color:var(--g2);font-size:13px">${taskFilter==='done'?'No completed tasks yet':'No tasks — add one below'}</div>`}
+    <div class="task-add-row" onclick="document.getElementById('task-inp').focus()">
+      <div style="color:var(--g2);font-size:16px">+</div>
+      <input class="task-add-input" id="task-inp" placeholder="Add a task..." onkeydown="addTaskKey(event)">
+      <select class="task-add-pri" id="task-pri-sel">
+        <option value="medium">Medium</option>
+        <option value="high">High</option>
+        <option value="low">Low</option>
+      </select>
+      <input type="date" id="task-due-inp" style="background:var(--s3);border:1px solid var(--line);border-radius:6px;padding:3px 8px;color:var(--g1);font-size:12px;font-family:inherit;outline:none">
+    </div>`;
+}
+
+function addTaskKey(e) {
+  if (e.key !== 'Enter') return;
+  const title = document.getElementById('task-inp').value.trim();
+  if (!title) return;
+  const tasks = getTasks();
+  tasks.unshift({ id: Date.now(), title, priority: document.getElementById('task-pri-sel').value, due: document.getElementById('task-due-inp').value, done: false, created: new Date().toISOString() });
+  saveTasks(tasks);
+  renderTasks();
+}
+
+function toggleTask(id) {
+  const tasks = getTasks().map(t => t.id === id ? {...t, done: !t.done} : t);
+  saveTasks(tasks);
+  renderTasks();
+}
+
+function deleteTask(id) {
+  saveTasks(getTasks().filter(t => t.id !== id));
+  renderTasks();
+}
+
+// ─── EXPENSES ──────────────────────────────────────────────────────────────
+const EXP_CATS = ['Software','Hardware','Marketing','Office','Travel','Services','Other'];
+function getExpenses() { try { return JSON.parse(localStorage.getItem('reloxy_expenses')||'[]'); } catch{ return []; } }
+function saveExpenses(e) { localStorage.setItem('reloxy_expenses', JSON.stringify(e)); }
+
+function renderExpenses() {
+  const exps = getExpenses();
+  const total = exps.reduce((s,e)=>s+e.amount,0);
+  const month = exps.filter(e=>e.date && e.date.slice(0,7)===new Date().toISOString().slice(0,7)).reduce((s,e)=>s+e.amount,0);
+  const cats = {};
+  exps.forEach(e=>{ cats[e.category]=(cats[e.category]||0)+e.amount; });
+  const topCat = Object.entries(cats).sort((a,b)=>b[1]-a[1])[0];
+
+  const metrics = document.getElementById('exp-metrics');
+  if (metrics) metrics.innerHTML = [
+    { label:'Total expenses', val: fmt(total), sub:'All time' },
+    { label:'This month', val: fmt(month), sub:'Current period' },
+    { label:'Top category', val: topCat?topCat[0]:'—', sub: topCat?fmt(topCat[1]):'' },
+    { label:'Transactions', val: exps.length, sub:'All records' },
+  ].map(c=>`<div class="fin-card"><div class="fin-card-top"><div class="fin-label">${c.label}</div></div><div class="fin-value">${c.val}</div><div class="fin-delta">${c.sub}</div></div>`).join('');
+
+  const tbody = document.getElementById('exp-tbody');
+  const empty = document.getElementById('exp-empty');
+  if (!exps.length) {
+    if (tbody) tbody.innerHTML = '';
+    if (empty) { empty.style.display='block'; empty.innerHTML=`<div class="empty-compact">No expenses yet. Click "+ Add expense" to start tracking.</div>`; }
+    return;
+  }
+  if (empty) empty.style.display='none';
+  if (tbody) tbody.innerHTML = [...exps].sort((a,b)=>b.date.localeCompare(a.date)).map((e,i)=>`
+    <tr>
+      <td class="td-primary">${i+1}</td>
+      <td class="td-primary">${esc(e.description)}</td>
+      <td><span class="badge badge-gray">${e.category}</span></td>
+      <td class="td-primary" style="font-variant-numeric:tabular-nums">${fmt(e.amount)}</td>
+      <td>${e.date||'—'}</td>
+      <td><button class="td-action danger" onclick="deleteExpense(${e.id})">Delete</button></td>
+    </tr>`).join('');
+}
+
+function openAddModal() {
+  if (currentPage === 'expenses') { openExpenseModal(); return; }
+  // fallback to original openAddModal logic handled by page context
+  _openAddModal();
+}
+
+function openExpenseModal() {
+  const desc = prompt('Description:');
+  if (!desc) return;
+  const amtStr = prompt('Amount (₽):');
+  if (!amtStr) return;
+  const amount = parseFloat(amtStr.replace(/[^\d.]/g,''));
+  if (isNaN(amount)) { alert('Invalid amount'); return; }
+  const category = prompt('Category:\n'+EXP_CATS.map((c,i)=>`${i+1}. ${c}`).join('\n')+'\n\nEnter category name or number:') || 'Other';
+  const cat = EXP_CATS[parseInt(category)-1] || (EXP_CATS.includes(category) ? category : 'Other');
+  const date = new Date().toISOString().slice(0,10);
+  const exps = getExpenses();
+  exps.push({ id: Date.now(), description: desc, amount, category: cat, date });
+  saveExpenses(exps);
+  renderExpenses();
+}
+
+function deleteExpense(id) {
+  saveExpenses(getExpenses().filter(e=>e.id!==id));
+  renderExpenses();
+}
+
+// ─── REPORTS ───────────────────────────────────────────────────────────────
+let repChart = null;
+function renderReports() {
+  // KPI cards
+  const paid = invoices.filter(i=>i.status==='paid');
+  const totalRev = paid.reduce((s,i)=>s+(i.amount||0),0);
+  const totalExp = getExpenses().reduce((s,e)=>s+e.amount,0);
+  const profit = totalRev - totalExp;
+  const activeProj = projects.filter(p=>p.status==='inprogress'||p.status==='active'||p.status==='review').length;
+
+  const kpi = document.getElementById('rep-kpi');
+  if (kpi) kpi.innerHTML = [
+    { label:'Total revenue', val: fmt(totalRev), sub:'All paid invoices' },
+    { label:'Total expenses', val: fmt(totalExp), sub:'All recorded' },
+    { label:'Net profit', val: fmt(profit), sub:'Revenue − expenses' },
+    { label:'Active projects', val: activeProj, sub:'In progress' },
+  ].map(c=>`<div class="an-card"><div class="an-label">${c.label}</div><div class="an-value">${c.val}</div><div class="an-sub">${c.sub}</div></div>`).join('');
+
+  // Revenue by month chart
+  const byMonth = {};
+  paid.forEach(inv => {
+    const d = inv.created_at||inv.date||'';
+    const m = d.slice(0,7);
+    if (m) byMonth[m] = (byMonth[m]||0) + (inv.amount||0);
+  });
+  const months = Object.keys(byMonth).sort().slice(-6);
+  const ctx = document.getElementById('rep-chart');
+  if (ctx) {
+    if (repChart) { repChart.destroy(); repChart = null; }
+    repChart = new Chart(ctx, {
+      type:'bar',
+      data: { labels: months.map(m=>{ const [y,mo]=m.split('-'); return new Date(+y,+mo-1).toLocaleString('en',{month:'short'})+' '+y.slice(2); }), datasets:[{ data: months.map(m=>byMonth[m]||0), backgroundColor:'rgba(255,255,255,0.12)', borderColor:'rgba(255,255,255,0.35)', borderWidth:1, borderRadius:6 }] },
+      options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{ x:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#7a7a82',font:{size:11}}}, y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#7a7a82',font:{size:11},callback:v=>fmt(v)}} } }
+    });
+  }
+
+  // Top clients
+  const clientRev = {};
+  paid.forEach(inv=>{ const n=inv.client_name||inv.client||'Unknown'; clientRev[n]=(clientRev[n]||0)+(inv.amount||0); });
+  const topClients = Object.entries(clientRev).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const maxC = topClients[0]?.[1]||1;
+  const repCl = document.getElementById('rep-clients');
+  if (repCl) repCl.innerHTML = topClients.length ? topClients.map(([name,val])=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)">
+      <div style="flex:1;font-size:13px;color:var(--white);font-weight:500">${esc(name)}</div>
+      <div style="width:120px;height:2px;background:var(--s4);border-radius:2px;overflow:hidden"><div style="height:100%;width:${Math.round(val/maxC*100)}%;background:var(--white);border-radius:2px"></div></div>
+      <div style="font-size:12px;color:var(--g1);font-variant-numeric:tabular-nums;min-width:70px;text-align:right">${fmt(val)}</div>
+    </div>`).join('') : '<div style="padding:20px 0;color:var(--g2);font-size:13px">No data yet</div>';
+
+  // Expenses by category
+  const expCats = {};
+  getExpenses().forEach(e=>{ expCats[e.category]=(expCats[e.category]||0)+e.amount; });
+  const repEC = document.getElementById('rep-exp-cats');
+  if (repEC) repEC.innerHTML = Object.entries(expCats).length ? Object.entries(expCats).sort((a,b)=>b[1]-a[1]).map(([cat,val])=>`
+    <div class="an-card"><div class="an-label">${cat}</div><div class="an-value" style="font-size:20px">${fmt(val)}</div></div>`).join('')
+    : '<div style="color:var(--g2);font-size:13px;padding:16px 0">No expense data</div>';
+}
+
 // ─── CALENDAR ──────────────────────────────────────────────────────────────
 function calPrev()  { calMonth--; if (calMonth<0) { calMonth=11; calYear--; } renderCalendar(); }
 function calNext()  { calMonth++; if (calMonth>11) { calMonth=0; calYear++; } renderCalendar(); }
@@ -2793,7 +3081,7 @@ async function deleteStaff(id) {
 }
 
 // ─── MODALS ────────────────────────────────────────────────────────────────
-function openAddModal() {
+function _openAddModal() {
   document.getElementById('modal-err').classList.remove('show');
   if (currentPage==='clients')  openClientModal();
   else if (currentPage==='projects') openProjectModal();
