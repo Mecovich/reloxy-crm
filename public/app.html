@@ -1157,32 +1157,36 @@ select.field-input option { background:#1a1a1e; color:var(--white); }
               </div>
               <div class="set-divider"></div>
               <!-- Notification toggles -->
-              <div class="set-toggle-row">
-                <div class="set-toggle-left">
-                  <div class="set-toggle-icon" style="background:rgba(38,134,255,0.15)">
+              <!-- Telegram linking block -->
+              <div style="border:1px solid var(--line);border-radius:12px;overflow:hidden">
+                <div style="display:flex;align-items:center;gap:14px;padding:16px 18px;background:var(--s3)">
+                  <div style="width:36px;height:36px;border-radius:10px;background:rgba(38,134,255,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="#2688ff"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.869 4.326-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.83.941z"/></svg>
                   </div>
-                  <div>
-                    <div class="set-toggle-title" data-i18n="set_tg">Telegram</div>
-                    <div class="set-toggle-sub" id="tg-toggle-sub" data-i18n="set_tg_off">Not configured</div>
+                  <div style="flex:1">
+                    <div style="font-size:13.5px;font-weight:600;color:var(--white)">Telegram Notifications</div>
+                    <div style="font-size:12px;color:var(--g1);margin-top:2px" id="tg-status-text">Not connected</div>
+                  </div>
+                  <span id="tg-status-badge" style="font-size:11px;padding:3px 10px;border-radius:20px;background:var(--s4);border:1px solid var(--line2);color:var(--g2)">● Disconnected</span>
+                </div>
+                <div style="padding:18px" id="tg-connect-block">
+                  <div style="font-size:12.5px;color:var(--g1);margin-bottom:14px;line-height:1.7">Get notified in Telegram when projects are assigned to you or deadlines are near.</div>
+                  <div style="background:var(--s2);border:1px solid var(--line2);border-radius:10px;padding:14px 18px;margin-bottom:14px">
+                    <div style="font-size:10.5px;color:var(--g2);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.4px;font-weight:600">Your link code</div>
+                    <div style="display:flex;align-items:center;gap:12px">
+                      <div id="tg-code-display" style="font-size:26px;font-weight:800;letter-spacing:5px;color:var(--white);font-variant-numeric:tabular-nums">——</div>
+                      <button class="btn btn-ghost" onclick="loadTgCode()" style="font-size:11px;padding:5px 12px">Refresh</button>
+                    </div>
+                  </div>
+                  <div style="font-size:12.5px;color:var(--g1);line-height:2">
+                    1. Open <a href="https://t.me/ReloxyCRMBot" target="_blank" style="color:var(--white)">@ReloxyCRMBot</a> in Telegram<br>
+                    2. Send: <code id="tg-code-cmd" style="background:var(--s3);padding:2px 8px;border-radius:5px;color:var(--white)">/start ——</code>
                   </div>
                 </div>
-                <label class="set-toggle">
-                  <input type="checkbox" id="tg-toggle" onchange="onTgToggle(this)">
-                  <span class="set-toggle-slider"></span>
-                </label>
-              </div>
-              <div class="set-toggle-row" id="tg-fields-wrap" style="display:none;flex-direction:column;align-items:stretch;gap:10px;padding:16px">
-                <div class="set-field">
-                  <label class="set-label" data-i18n="set_tg_token">Bot token (from @BotFather)</label>
-                  <input class="set-input" id="set-tg-token" placeholder="1234567890:AAF...">
+                <div style="padding:18px;display:none" id="tg-connected-block">
+                  <div style="font-size:13px;color:var(--g1);margin-bottom:14px">✅ Your Telegram is connected. You will receive notifications for new tasks and projects.</div>
+                  <button class="btn btn-ghost" onclick="unlinkTelegram()" style="font-size:12px;color:#f87171;border-color:rgba(248,113,113,0.25)">Disconnect</button>
                 </div>
-                <div class="set-field">
-                  <label class="set-label" data-i18n="set_tg_chat">Chat ID (from @userinfobot)</label>
-                  <input class="set-input" id="set-tg-chat" placeholder="-1001234567890">
-                </div>
-                <button class="set-save-btn" onclick="saveTelegram()" style="align-self:flex-end" data-i18n="btn_tg_test">Send test message</button>
-                <span class="set-msg" id="tg-msg"></span>
               </div>
             </div>
             <div class="set-footer">
@@ -3198,15 +3202,8 @@ function renderSettings() {
     document.getElementById('set-goal-amount').value = g.amount || '';
     document.getElementById('set-goal-period').value = g.period || 'month';
   }
-  // Telegram
-  const tgToken = localStorage.getItem('tg_token_hint') || '';
-  const tgChat  = localStorage.getItem('tg_chat_hint')  || '';
-  document.getElementById('set-tg-token').value = tgToken;
-  document.getElementById('set-tg-chat').value  = tgChat;
-  const hasTg = !!(tgToken && tgChat);
-  document.getElementById('tg-toggle').checked = hasTg;
-  document.getElementById('tg-fields-wrap').style.display = hasTg ? 'flex' : 'none';
-  document.getElementById('tg-toggle-sub').textContent = hasTg ? t('set_tg_on') : t('set_tg_off');
+  // Load Telegram linking status
+  loadTgCode();
   // clear msgs
   ['profile-msg','password-msg','goal-msg','tg-msg','studio-msg'].forEach(id => {
     const el = document.getElementById(id);
@@ -3278,6 +3275,8 @@ async function loadTgCode() {
     const connectedBlock = document.getElementById('tg-connected-block');
     if (codeEl) codeEl.textContent = code || '——';
     if (inlineEl) inlineEl.textContent = code || 'YOUR_CODE';
+    const cmdEl = document.getElementById('tg-code-cmd');
+    if (cmdEl) cmdEl.textContent = `/start ${code || '——'}`;
     if (linked) {
       badge.textContent = '●  Connected'; badge.style.color = 'var(--white)'; badge.style.borderColor = 'var(--line2)';
       statusText.textContent = 'Your Telegram is linked and active';
