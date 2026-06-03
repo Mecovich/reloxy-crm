@@ -113,34 +113,42 @@ body.sidebar-collapsed .main { margin-left:0; }
 .dash-period-label { font-size:12px; color:var(--g2); margin-top:4px; }
 
 /* ── DASH HERO CHART ── */
-.dash-hero { background:var(--s1); border:1px solid var(--line); border-radius:16px; padding:28px 32px 24px; margin-bottom:14px; position:relative; overflow:hidden; }
-.dash-hero::before { display:none; }
-.dash-hero-top { display:flex; align-items:flex-start; justify-content:space-between; }
-.dash-hero-label { font-size:11.5px; color:var(--g2); font-weight:500; margin-bottom:8px; letter-spacing:0.1px; }
-.dash-hero-amount { display:flex; align-items:center; gap:10px; }
-.dash-hero-num { font-size:38px; font-weight:800; letter-spacing:-1.5px; color:var(--white); font-variant-numeric:tabular-nums; line-height:1; }
-.dash-hero-sub { font-size:11.5px; color:var(--g2); margin-top:6px; }
+.dash-hero {
+  background:var(--s1); border:1px solid var(--line); border-radius:20px;
+  padding:28px 32px 0; margin-bottom:12px; position:relative; overflow:hidden;
+}
+.dash-hero-top { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:24px; }
+.dash-hero-label { font-size:11px; color:var(--g2); font-weight:500; margin-bottom:10px; letter-spacing:0.2px; text-transform:uppercase; }
+.dash-hero-amount { display:flex; align-items:center; gap:12px; }
+.dash-hero-num { font-size:44px; font-weight:800; letter-spacing:-2px; color:var(--white); font-variant-numeric:tabular-nums; line-height:1; }
+.dash-hero-sub { font-size:12px; color:var(--g2); margin-top:8px; }
+.chart-badge { font-size:11px; font-weight:600; padding:3px 8px; border-radius:6px; align-self:center; }
+.chart-badge.up   { background:rgba(255,255,255,0.08); color:var(--white); border:1px solid var(--line2); }
+.chart-badge.down { background:rgba(255,255,255,0.04); color:var(--g1); border:1px solid var(--line); }
+.chart-badge.flat { background:var(--s3); color:var(--g2); border:1px solid var(--line2); }
 
 /* ── DASH BOTTOM GRID ── */
-.dash-grid-2 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-top:14px; }
+.dash-grid-2 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-top:12px; }
 
 /* ── METRICS ── */
-.metrics { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:14px; }
-.metric { padding:18px 20px 16px; background:var(--s1); border:1px solid var(--line); border-radius:12px; transition:border-color 0.2s; cursor:default; position:relative; overflow:hidden; }
-.metric::before { content:''; position:absolute; inset:0; opacity:0; background:radial-gradient(600px circle at var(--mx,50%) var(--my,50%), rgba(255,255,255,0.055), transparent 55%); transition:opacity 0.3s; pointer-events:none; border-radius:inherit; }
-.metric:hover::before { opacity:1; }
-.metric:hover { border-color:var(--line2); }
-.metric-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
-.metric-name { font-size:11.5px; font-weight:500; color:var(--g1); letter-spacing:-0.1px; }
-.metric-icon { width:28px; height:28px; border-radius:7px; background:var(--s3); border:1px solid var(--line); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-.metric-icon svg { width:13px; height:13px; opacity:0.45; }
-.metric-val-row { display:flex; align-items:baseline; gap:8px; margin-bottom:5px; }
-.metric-value { font-size:26px; font-weight:700; letter-spacing:-1px; color:var(--white); line-height:1; font-variant-numeric:tabular-nums; }
-.metric-badge { font-size:10px; font-weight:600; padding:2px 6px; border-radius:4px; align-self:center; }
-.metric-badge.up   { background:rgba(255,255,255,0.07); color:var(--g1); border:1px solid var(--line2); }
+.metrics { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:12px; }
+.metric {
+  padding:20px 22px 18px; background:var(--s1); border:1px solid var(--line);
+  border-radius:16px; transition:border-color 0.2s,background 0.2s; cursor:default;
+  position:relative; overflow:hidden;
+}
+.metric:hover { border-color:var(--line2); background:var(--s2); }
+.metric-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+.metric-name { font-size:11px; font-weight:500; color:var(--g2); letter-spacing:0.1px; text-transform:uppercase; }
+.metric-icon { width:30px; height:30px; border-radius:8px; background:var(--s3); border:1px solid var(--line2); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.metric-icon svg { width:13px; height:13px; opacity:0.5; }
+.metric-val-row { display:flex; align-items:baseline; gap:8px; margin-bottom:6px; }
+.metric-value { font-size:28px; font-weight:700; letter-spacing:-1.2px; color:var(--white); line-height:1; font-variant-numeric:tabular-nums; }
+.metric-badge { font-size:10px; font-weight:600; padding:2px 7px; border-radius:5px; align-self:center; }
+.metric-badge.up   { background:rgba(255,255,255,0.08); color:var(--white); border:1px solid var(--line2); }
 .metric-badge.down { background:rgba(255,255,255,0.04); color:var(--g2); border:1px solid var(--line); }
 .metric-badge.flat { background:var(--s3); color:var(--g2); border:1px solid var(--line2); }
-.metric-sub { font-size:11px; color:var(--g2); }
+.metric-sub { font-size:11px; color:var(--g2); letter-spacing:-0.1px; }
 
 /* ── DASH 2-COL LAYOUT ── */
 .dash-layout { display:grid; grid-template-columns:300px 1fr; gap:16px; align-items:start; }
@@ -343,21 +351,21 @@ select.field-input option { background:#1a1a1e; color:var(--white); }
 
 /* ── DASH BOTTOM GRID ── */
 .dash-bottom { display:grid; grid-template-columns:1fr 1fr 1fr; gap:20px; margin-top:32px; }
-.dash-panel { background:var(--s1); border:1px solid var(--line); border-radius:14px; padding:18px 20px; }
-.dash-panel-title { font-size:11.5px; font-weight:600; letter-spacing:0.1px; text-transform:uppercase; color:var(--g1); padding-bottom:12px; border-bottom:1px solid var(--line); margin-bottom:0; display:flex; align-items:center; justify-content:space-between; }
+.dash-panel { background:var(--s1); border:1px solid var(--line); border-radius:16px; padding:20px 22px; }
+.dash-panel-title { font-size:10.5px; font-weight:600; letter-spacing:0.5px; text-transform:uppercase; color:var(--g2); padding-bottom:14px; border-bottom:1px solid var(--line); margin-bottom:0; display:flex; align-items:center; justify-content:space-between; }
 .dash-panel-link { font-size:11px; color:var(--g2); cursor:pointer; transition:color 0.1s; font-weight:400; text-transform:none; letter-spacing:0; }
 .dash-panel-link:hover { color:var(--white); }
-.dash-row { display:flex; align-items:center; gap:11px; padding:11px 0; border-bottom:1px solid var(--line); }
+.dash-row { display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--line); }
 .dash-row:last-child { border-bottom:none; }
 .dash-row-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
-.dash-row-dot.active { background:rgba(255,255,255,0.85); }
-.dash-row-dot.review { background:rgba(255,255,255,0.5); }
+.dash-row-dot.active { background:rgba(255,255,255,0.9); box-shadow:0 0 6px rgba(255,255,255,0.3); }
+.dash-row-dot.review { background:rgba(255,255,255,0.45); }
 .dash-row-dot.queue  { background:var(--g3); }
 .dash-row-body { flex:1; min-width:0; }
 .dash-row-title { font-size:13px; font-weight:500; color:var(--white); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; letter-spacing:-0.2px; }
 .dash-row-sub { font-size:11px; color:var(--g2); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .dash-row-right { font-size:12px; color:var(--g1); flex-shrink:0; text-align:right; font-variant-numeric:tabular-nums; font-weight:500; }
-.dash-row-right.urgent { color:var(--white); font-weight:700; }
+.dash-row-right.urgent { color:var(--white); font-weight:600; }
 .dash-pay-btn { font-size:10.5px; font-weight:500; padding:3px 9px; border-radius:6px; background:transparent; color:var(--g2); border:1px solid var(--line2); cursor:pointer; transition:all 0.15s; font-family:inherit; flex-shrink:0; }
 .dash-pay-btn:hover { background:var(--white); color:#050505; border-color:var(--white); }
 
@@ -785,7 +793,7 @@ select.field-input option { background:#1a1a1e; color:var(--white); }
             <div id="dash-chart-stats" style="display:none"></div>
           </div>
         </div>
-        <div style="position:relative;height:220px;margin-top:20px">
+        <div style="position:relative;height:260px;margin-top:16px">
           <canvas id="revenue-chart"></canvas>
         </div>
       </div>
@@ -2025,32 +2033,9 @@ function drawRevenueChart(period) {
   const ctx = canvas.getContext('2d');
   const canvasH = canvas.parentElement?.clientHeight || 260;
   const grad = ctx.createLinearGradient(0, 0, 0, canvasH);
-  grad.addColorStop(0,   'rgba(255,255,255,0.15)');
-  grad.addColorStop(0.6, 'rgba(255,255,255,0.04)');
+  grad.addColorStop(0,   'rgba(255,255,255,0.18)');
+  grad.addColorStop(0.5, 'rgba(255,255,255,0.06)');
   grad.addColorStop(1,   'rgba(255,255,255,0)');
-
-  // Plugin: dashed horizontal grid lines
-  const dashedGridPlugin = {
-    id: 'dashedGrid',
-    beforeDraw(chart) {
-      const { ctx, chartArea, scales } = chart;
-      const yScale = scales.y;
-      if (!yScale || !chartArea) return;
-      ctx.save();
-      ctx.setLineDash([4, 6]);
-      ctx.strokeStyle = 'rgba(255,255,255,0.07)';
-      ctx.lineWidth = 1;
-      yScale.ticks.forEach((tick, i) => {
-        const y = yScale.getPixelForTick(i);
-        if (y < chartArea.top || y > chartArea.bottom) return;
-        ctx.beginPath();
-        ctx.moveTo(chartArea.left, y);
-        ctx.lineTo(chartArea.right, y);
-        ctx.stroke();
-      });
-      ctx.restore();
-    }
-  };
 
   revenueChartInstance = new Chart(ctx, {
     type: 'line',
@@ -2058,16 +2043,16 @@ function drawRevenueChart(period) {
       labels,
       datasets: [{
         data,
-        borderColor: 'rgba(255,255,255,0.85)',
-        borderWidth: 2,
+        borderColor: 'rgba(255,255,255,0.9)',
+        borderWidth: 1.5,
         backgroundColor: grad,
         fill: true,
-        tension: 0.4,
+        tension: 0.45,
         pointRadius: 0,
-        pointHoverRadius: 4,
-        pointHoverBackgroundColor: 'rgba(255,255,255,0.9)',
-        pointHoverBorderColor: 'rgba(255,255,255,0.2)',
-        pointHoverBorderWidth: 4,
+        pointHoverRadius: 5,
+        pointHoverBackgroundColor: '#fff',
+        pointHoverBorderColor: 'rgba(255,255,255,0.15)',
+        pointHoverBorderWidth: 6,
       }]
     },
     options: {
@@ -2077,16 +2062,16 @@ function drawRevenueChart(period) {
       plugins: {
         legend: { display: false },
         tooltip: {
-          backgroundColor: '#18181c',
-          borderColor: 'rgba(255,255,255,0.12)',
+          backgroundColor: 'rgba(12,12,14,0.95)',
+          borderColor: 'rgba(255,255,255,0.1)',
           borderWidth: 1,
-          titleColor: '#7a7a82',
+          titleColor: '#4a4a52',
           bodyColor: '#f0f0f0',
           padding: { x: 16, y: 12 },
-          cornerRadius: 10,
+          cornerRadius: 12,
           displayColors: false,
-          titleFont: { size: 11, family: 'Inter' },
-          bodyFont: { size: 14, family: 'Inter', weight: '700' },
+          titleFont: { size: 11, family: 'Geist', weight: '400' },
+          bodyFont: { size: 16, family: 'Geist', weight: '700' },
           callbacks: {
             title: items => items[0].label,
             label: item => item.raw > 0 ? '₽ ' + fmtNum(item.raw) : '—'
@@ -2098,32 +2083,22 @@ function drawRevenueChart(period) {
           grid: { display: false },
           border: { display: false },
           ticks: {
-            color: '#4a4a52',
-            font: { size: 10, family: 'Inter' },
+            color: '#2e2e36',
+            font: { size: 10, family: 'Geist' },
             maxRotation: 0,
             autoSkip: true,
             maxTicksLimit: period === 'month' ? 7 : period === 'week' ? 7 : 12,
             callback: function(val, idx) {
-              if (period === 'month') {
-                // Show ticks every ~5 days: indices 0,5,10,15,20,25,29
-                return (idx % 5 === 0 || idx === labels.length - 1) ? this.getLabelForValue(val) : '';
-              }
+              if (period === 'month') return (idx % 5 === 0 || idx === labels.length - 1) ? this.getLabelForValue(val) : '';
               return this.getLabelForValue(val);
             }
           }
         },
         y: {
-          display: true,
-          position: 'left',
+          display: false,
           min: 0,
           grid: { display: false },
           border: { display: false },
-          ticks: {
-            color: '#4a4a52',
-            font: { size: 10, family: 'Inter' },
-            maxTicksLimit: 5,
-            callback: v => v > 0 ? '₽ '+Math.round(v).toLocaleString('ru-RU') : '0',
-          }
         }
       },
       animation: { duration: 500, easing: 'easeOutQuart' }
