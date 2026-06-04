@@ -3471,9 +3471,15 @@ function openProjectModal(p) {
       <div class="field"><label class="field-label">${t('f_progress')}</label><input class="field-input" id="m-progress" type="number" min="0" max="100" value="${p?.progress||0}"></div>
       <div class="field"><label class="field-label">${t('f_deadline')}</label><input class="field-input" id="m-deadline" type="date" value="${p?.deadline||''}"></div>
     </div>
-    <div class="field"><label class="field-label">${t('f_budget')}</label><input class="field-input" id="m-budget" type="number" value="${p?.budget||0}" placeholder="0"></div>
+    <div class="field-row">
+      <div class="field"><label class="field-label">${t('f_budget')}</label><input class="field-input" id="m-budget" type="number" value="${p?.budget||0}" placeholder="0"></div>
+      <div class="field"><label class="field-label">Assigned to</label><select class="field-input" id="m-assigned">
+        <option value="">— Nobody —</option>
+        ${staff.map(s=>`<option value="${s.user_id||s.id}" ${p?.assigned_to==(s.user_id||s.id)?'selected':''}>${esc(s.name)}</option>`).join('')}
+      </select></div>
+    </div>
   `, async () => {
-    const body = { title:val('m-title'), type:val('m-type'), client_id:val('m-client')||null, status:val('m-status'), progress:+val('m-progress'), deadline:val('m-deadline'), budget:+val('m-budget') };
+    const body = { title:val('m-title'), type:val('m-type'), client_id:val('m-client')||null, status:val('m-status'), progress:+val('m-progress'), deadline:val('m-deadline'), budget:+val('m-budget'), assigned_to:val('m-assigned')||null };
     try {
       if (p) {
         const updated = await api('PUT', `/api/projects/${p.id}`, body);
