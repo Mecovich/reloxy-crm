@@ -796,12 +796,6 @@ app.post('/api/invite/:token', async (req, res) => {
   }
 });
 
-// ─── Static pages ────────────────────────────────────────────────────────────
-app.get('/app',        (req, res) => res.sendFile(path.join(__dirname, 'public', 'app.html')));
-app.get('/admin',      (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
-app.get('/invite/:token', (req, res) => res.sendFile(path.join(__dirname, 'public', 'invite.html')));
-app.get('*',           (req, res) => res.sendFile(path.join(__dirname, 'public', 'login.html')));
-
 // ─── Telegram Bot ────────────────────────────────────────────────────────────
 const TG_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TG_API   = TG_TOKEN ? `https://api.telegram.org/bot${TG_TOKEN}` : null;
@@ -898,6 +892,12 @@ async function tgPoll() {
   } catch (e) { console.error('TG poll error:', e.message); }
   setTimeout(tgPoll, 1000);
 }
+
+// ─── Static pages (MUST be last — catch-all intercepts everything) ───────────
+app.get('/app',           (req, res) => res.sendFile(path.join(__dirname, 'public', 'app.html')));
+app.get('/admin',         (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
+app.get('/invite/:token', (req, res) => res.sendFile(path.join(__dirname, 'public', 'invite.html')));
+app.get('*',              (req, res) => res.sendFile(path.join(__dirname, 'public', 'login.html')));
 
 // ─── Start ───────────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 3000;
