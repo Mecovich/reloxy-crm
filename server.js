@@ -830,13 +830,18 @@ function genCode() { return Math.random().toString(36).slice(2,8).toUpperCase();
 
 // API: get or create link code for current user
 app.get('/api/tg/link-code', authMiddleware, async (req, res) => {
-  let r = await db.execute({ sql: 'SELECT tg_link_code, telegram_chat_id FROM users WHERE id = ?', args: [req.user.id] });
-  let { tg_link_code, telegram_chat_id } = r.rows[0] || {};
-  if (!tg_link_code) {
-    tg_link_code = genCode();
-    await db.execute({ sql: 'UPDATE users SET tg_link_code = ? WHERE id = ?', args: [tg_link_code, req.user.id] });
+  try {
+    let r = await db.execute({ sql: 'SELECT tg_link_code, telegram_chat_id FROM users WHERE id = ?', args: [req.user.id] });
+    let { tg_link_code, telegram_chat_id } = r.rows[0] || {};
+    if (!tg_link_code) {
+      tg_link_code = genCode();
+      await db.execute({ sql: 'UPDATE users SET tg_link_code = ? WHERE id = ?', args: [tg_link_code, req.user.id] });
+    }
+    res.json({ code: tg_link_code, linked: !!telegram_chat_id });
+  } catch(e) {
+    console.error('TG link-code error:', e.message);
+    res.status(500).json({ error: e.message });
   }
-  res.json({ code: tg_link_code, linked: !!telegram_chat_id });
 });
 
 // API: unlink telegram

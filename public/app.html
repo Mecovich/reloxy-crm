@@ -1917,8 +1917,9 @@ async function loadAll() {
 async function api(method, url, body) {
   const opts = { method, headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` } };
   if (body) opts.body = JSON.stringify(body);
-  const res  = await fetch(API + url, opts);
-  const data = await res.json();
+  const res = await fetch(API + url, opts);
+  let data;
+  try { data = await res.json(); } catch { throw new Error('Server error ' + res.status); }
   if (!res.ok) throw new Error(data.error || 'Server error');
   return data;
 }
