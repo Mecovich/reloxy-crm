@@ -423,23 +423,21 @@ tr:hover { background:rgba(255,255,255,0.018); }
 /* ── KANBAN FULL REDESIGN ─────────────────────────────────────────────────── */
 
 #page-projects.active {
-  padding: 20px 24px 0;
-  display: flex; flex-direction: column;
-  height: calc(100vh - 52px); overflow: hidden;
+  padding: 20px 24px 24px;
 }
-#page-projects .k-stats-bar { flex-shrink:0; margin-bottom:14px; padding:0 4px; }
+#page-projects .k-stats-bar { margin-bottom:14px; padding:0 2px; }
 .k-stat-item { font-size:12.5px; color:var(--g2); }
 .k-stat-item b { color:var(--white); font-weight:600; font-variant-numeric:tabular-nums; }
 .k-stat-sep { color:var(--g3); font-size:11px; }
 
 .kanban {
-  flex:1; display:grid; grid-template-columns:repeat(4,1fr);
-  gap:8px; align-items:stretch; height:0; min-height:0;
+  display:grid; grid-template-columns:repeat(4,1fr);
+  gap:8px; align-items:start;
 }
 
 .k-col {
   border-radius:14px; background:var(--s1); border:1px solid var(--line);
-  display:flex; flex-direction:column; overflow:hidden; height:100%;
+  display:flex; flex-direction:column; overflow:hidden;
 }
 .k-col[data-col="queue"]      { border-top:2px solid rgba(255,255,255,0.06); }
 .k-col[data-col="inprogress"] { border-top:2px solid rgba(255,255,255,0.32); }
@@ -457,7 +455,7 @@ tr:hover { background:rgba(255,255,255,0.018); }
   border-radius:6px; padding:2px 9px; color:var(--g1); min-width:26px; text-align:center; flex-shrink:0;
 }
 .k-col-sep { height:1px; background:var(--line); flex-shrink:0; }
-.k-cards { padding:8px 8px 12px; display:flex; flex-direction:column; gap:6px; flex:1; overflow-y:auto; }
+.k-cards { padding:8px 8px 12px; display:flex; flex-direction:column; gap:6px; min-height:60px; }
 
 .k-card {
   padding:14px 14px 13px; border-radius:12px; background:var(--s2);
