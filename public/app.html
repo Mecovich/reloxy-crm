@@ -1246,12 +1246,7 @@ th:not(:first-child), td:not(:first-child) { padding-left:18px !important; }
         <div class="tab" onclick="filterClients('lead',this)" data-i18n="tab_leads">Leads</div>
         <div class="tab" onclick="filterClients('archive',this)" data-i18n="tab_archive">Archive</div>
       </div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th data-i18n="col_company">Company</th><th data-i18n="col_contact">Contact</th><th data-i18n="col_email">Email</th><th data-i18n="col_status">Status</th><th data-i18n="col_projects">Projects</th><th data-i18n="col_revenue">Revenue</th><th></th></tr></thead>
-          <tbody id="clients-tbody"></tbody>
-        </table>
-      </div>
+      <div id="clients-grid"></div>
       <div id="clients-empty" style="display:none"></div>
     </div>
 
@@ -3221,40 +3216,51 @@ function filterClients(f, el) {
 
 function renderClients(list) {
   const data  = (list || clients).filter(c => clientFilter==='all' || c.status===clientFilter);
-  const tbody = document.getElementById('clients-tbody');
+  const grid  = document.getElementById('clients-grid');
   const empty = document.getElementById('clients-empty');
   if (!data.length) {
-    tbody.innerHTML='';
+    if (grid) grid.innerHTML = '';
     empty.innerHTML = emptySkel(t('no_clients'), t('no_clients_sub'));
     empty.style.display='block'; return;
   }
   empty.style.display = 'none';
-  tbody.innerHTML = data.map(c => {
-    const ini = (c.name||'?').split(' ').slice(0,2).map(w=>w[0]||'').join('').toUpperCase();
-    return `
-    <tr>
-      <td>
-        <div class="av-cell">
-          <div class="av-circle">${ini}</div>
-          <div>
-            <div class="av-name">${esc(c.name)}</div>
-            ${c.industry ? `<div class="av-sub">${esc(c.industry)}</div>` : ''}
+  const statusColors = { active:'rgba(255,255,255,0.9)', lead:'rgba(255,255,255,0.5)', archive:'var(--g3)' };
+  if (grid) grid.innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px">
+      ${data.map(c => {
+        const ini = (c.name||'?').split(' ').slice(0,2).map(w=>w[0]||'').join('').toUpperCase();
+        const dotColor = statusColors[c.status] || 'var(--g3)';
+        return `<div style="background:var(--s1);border:1px solid var(--line);border-radius:16px;padding:20px;transition:border-color 0.15s,background 0.15s" onmouseover="this.style.borderColor='var(--line2)';this.style.background='var(--s2)'" onmouseout="this.style.borderColor='var(--line)';this.style.background='var(--s1)'">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px">
+            <div style="display:flex;align-items:center;gap:12px">
+              <div style="width:44px;height:44px;border-radius:50%;background:var(--s3);border:1px solid var(--line2);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:var(--g1);flex-shrink:0;letter-spacing:-0.5px">${ini}</div>
+              <div>
+                <div style="font-size:14px;font-weight:600;color:var(--white);letter-spacing:-0.3px;line-height:1.2">${esc(c.name)}</div>
+                ${c.industry?`<div style="font-size:11.5px;color:var(--g2);margin-top:2px">${esc(c.industry)}</div>`:''}
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--g1);background:var(--s3);border:1px solid var(--line2);padding:3px 9px;border-radius:20px;flex-shrink:0">
+              <div style="width:5px;height:5px;border-radius:50%;background:${dotColor};flex-shrink:0"></div>
+              ${statusClientLabel(c.status)}
+            </div>
           </div>
-        </div>
-      </td>
-      <td>${esc(c.contact_name||'—')}</td>
-      <td style="font-size:12px">${esc(c.email||'—')}</td>
-      <td><div class="status"><div class="dot ${c.status==='active'?'dot-hi':c.status==='archive'?'dot-lo':'dot-mid'}"></div>${statusClientLabel(c.status)}</div></td>
-      <td style="font-variant-numeric:tabular-nums">${c.project_count||0}</td>
-      <td style="font-variant-numeric:tabular-nums">${fmt(c.total_paid||0)}</td>
-      <td>
-        <div class="td-actions">
-          <span class="td-action" onclick="editClient(${c.id})">${t('act_edit')}</span>
-          <span class="td-action danger" onclick="deleteClient(${c.id})">${t('act_delete')}</span>
-        </div>
-      </td>
-    </tr>`;
-  }).join('');
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
+            ${c.contact_name?`<div style="background:var(--s2);border:1px solid var(--line);border-radius:9px;padding:10px 12px"><div style="font-size:9.5px;color:var(--g2);font-weight:600;letter-spacing:0.4px;text-transform:uppercase;margin-bottom:4px">Contact</div><div style="font-size:12.5px;color:var(--white);font-weight:500">${esc(c.contact_name)}</div></div>`:''}
+            ${c.email?`<div style="background:var(--s2);border:1px solid var(--line);border-radius:9px;padding:10px 12px"><div style="font-size:9.5px;color:var(--g2);font-weight:600;letter-spacing:0.4px;text-transform:uppercase;margin-bottom:4px">Email</div><div style="font-size:12px;color:var(--g1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c.email)}</div></div>`:''}
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding-top:12px;border-top:1px solid var(--line)">
+            <div style="display:flex;align-items:center;gap:14px">
+              <div style="font-size:11.5px;color:var(--g2)"><span style="color:var(--white);font-weight:600">${c.project_count||0}</span> projects</div>
+              ${(c.total_paid||0)>0?`<div style="font-size:11.5px;color:var(--g2)"><span style="color:var(--white);font-weight:600;font-variant-numeric:tabular-nums">${fmt(c.total_paid)}</span> revenue</div>`:''}
+            </div>
+            <div style="display:flex;gap:6px">
+              <button style="font-size:12px;font-weight:500;padding:6px 14px;border-radius:8px;background:var(--s3);border:1px solid var(--line2);color:var(--g1);cursor:pointer;font-family:inherit;transition:all 0.12s" onmouseover="this.style.borderColor='var(--line3)';this.style.color='var(--white)'" onmouseout="this.style.borderColor='var(--line2)';this.style.color='var(--g1)'" onclick="editClient(${c.id})">${t('act_edit')}</button>
+              <button style="font-size:12px;font-weight:500;padding:6px 14px;border-radius:8px;background:transparent;border:1px solid transparent;color:var(--g2);cursor:pointer;font-family:inherit;transition:all 0.12s" onmouseover="this.style.color='#f87171';this.style.background='rgba(248,113,113,0.08)';this.style.borderColor='rgba(248,113,113,0.2)'" onmouseout="this.style.color='var(--g2)';this.style.background='transparent';this.style.borderColor='transparent'" onclick="deleteClient(${c.id})">${t('act_delete')}</button>
+            </div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
 }
 
 // ─── PROJECTS ──────────────────────────────────────────────────────────────
@@ -3283,41 +3289,44 @@ function renderProjects() {
     const kbEl = document.getElementById('kb-'+k);
     if (kbEl) kbEl.textContent = colBudget > 0 ? fmt(colBudget) : '';
 
+    const leftColors = { queue:'rgba(255,255,255,0.08)', inprogress:'rgba(255,255,255,0.45)', review:'rgba(255,255,255,0.22)', done:'rgba(255,255,255,0.6)' };
     document.getElementById('kc-'+k).innerHTML = arr.length ? arr.map(p => {
-      // Deadline badge
       let dlBadge = '';
       if (p.deadline && p.status !== 'done') {
         const d = new Date(p.deadline+'T00:00:00');
         const diff = Math.ceil((d - today) / 86400000);
-        if (diff < 0)       dlBadge = `<span class="k-dl-badge overdue">Overdue</span>`;
-        else if (diff === 0)dlBadge = `<span class="k-dl-badge overdue">Today</span>`;
-        else if (diff <= 5) dlBadge = `<span class="k-dl-badge urgent">${diff}d left</span>`;
+        if (diff < 0)       dlBadge = `<span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:5px;background:rgba(248,113,113,0.12);color:#f87171;border:1px solid rgba(248,113,113,0.2);white-space:nowrap">Overdue</span>`;
+        else if (diff === 0)dlBadge = `<span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:5px;background:rgba(248,113,113,0.08);color:#f87171;border:1px solid rgba(248,113,113,0.15);white-space:nowrap">Today</span>`;
+        else if (diff <= 5) dlBadge = `<span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:5px;background:var(--s4);color:var(--g1);border:1px solid var(--line2);white-space:nowrap">${diff}d</span>`;
       }
-      // Client chip
-      const av = p.client_name ? `<span class="k-av">${p.client_name[0].toUpperCase()}</span>` : '';
-      const stClass = 'st-'+(k==='inprogress'?'inprogress':k);
-      const progColor = p.progress >= 100 ? 'var(--white)' : 'rgba(255,255,255,0.7)';
-      return `<div class="k-card ${stClass}" onclick="viewProject(${p.id})">
-        <span class="k-card-del" onclick="deleteProject(${p.id},event)">✕</span>
-        <div class="k-card-meta">
-          <span class="k-card-type">${esc(p.type||'Project')}</span>
+      const clientAv = p.client_name ? `<div style="width:18px;height:18px;border-radius:50%;background:var(--s4);border:1px solid var(--line2);font-size:8px;font-weight:700;color:var(--g1);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0">${p.client_name[0].toUpperCase()}</div>` : '';
+      const lc = leftColors[k] || 'var(--line)';
+      const isDone = k === 'done';
+      return `<div style="padding:14px 14px 12px;border-radius:12px;background:var(--s2);border:1px solid var(--line);border-left:3px solid ${lc};cursor:pointer;position:relative;transition:all 0.14s;${isDone?'opacity:0.8':''}" onclick="viewProject(${p.id})" onmouseover="this.style.borderColor='var(--line2)';this.style.background='var(--s3)';this.style.transform='translateY(-1px)';this.style.boxShadow='0 6px 20px rgba(0,0,0,0.35)'" onmouseout="this.style.borderColor='var(--line)';this.style.background='var(--s2)';this.style.transform='';this.style.boxShadow=''">
+        <button style="position:absolute;top:11px;right:11px;font-size:10px;color:var(--g3);padding:2px 6px;border-radius:4px;opacity:0;transition:opacity 0.1s;cursor:pointer;background:transparent;border:none;font-family:inherit" onclick="deleteProject(${p.id},event)" onmouseover="this.style.color='var(--white)';this.style.background='var(--s4)'" onmouseout="this.style.color='var(--g3)';this.style.background='transparent'">✕</button>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;gap:6px">
+          <span style="font-size:9.5px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:var(--g2)">${esc(p.type||'Project')}</span>
           ${dlBadge}
         </div>
-        <div class="k-card-title">${esc(p.title)}</div>
+        <div style="font-size:13.5px;font-weight:600;color:var(--white);line-height:1.4;letter-spacing:-0.3px;margin-bottom:${p.progress>0?'11':'12'}px">${esc(p.title)}</div>
         ${p.progress > 0 ? `
-        <div class="k-card-prog">
-          <div class="k-card-prog-top">
-            <span style="color:var(--g2)">${t('k_progress')}</span>
-            <span style="font-weight:600;color:var(--white);font-size:10.5px">${p.progress}%</span>
+        <div style="margin-bottom:12px">
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--g2);margin-bottom:5px">
+            <span>${t('k_progress')}</span><span style="font-weight:700;color:var(--white)">${p.progress}%</span>
           </div>
-          <div class="k-prog-bar"><div class="k-prog-fill" style="width:${p.progress}%;background:${progColor}"></div></div>
+          <div style="height:3px;background:var(--s4);border-radius:3px;overflow:hidden">
+            <div style="height:100%;width:${p.progress}%;background:${p.progress>=100?'var(--white)':'linear-gradient(90deg,rgba(255,255,255,0.4),rgba(255,255,255,0.8))'};border-radius:3px"></div>
+          </div>
         </div>` : ''}
-        <div class="k-card-foot">
-          <div class="k-client-chip">${av}<span style="font-size:11px;color:var(--g2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p.client_name||'—')}</span></div>
-          ${p.budget ? `<span class="k-budget-tag">${fmt(p.budget)}</span>` : ''}
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:6px">
+          <div style="display:flex;align-items:center;gap:6px;min-width:0;overflow:hidden">
+            ${clientAv}
+            <span style="font-size:11px;color:var(--g2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p.client_name||'—')}</span>
+          </div>
+          ${p.budget ? `<span style="font-size:11.5px;font-weight:600;color:var(--g1);font-variant-numeric:tabular-nums;flex-shrink:0;background:var(--s3);border:1px solid var(--line);padding:2px 8px;border-radius:6px">${fmt(p.budget)}</span>` : ''}
         </div>
       </div>`;
-    }).join('') : `<div class="k-col-empty"><div class="k-col-empty-label">${t('k_empty')}</div></div>`;
+    }).join('') : `<div style="padding:40px 12px;text-align:center"><div style="font-size:12px;color:var(--g3)">Пусто</div></div>`;
   }
 }
 
