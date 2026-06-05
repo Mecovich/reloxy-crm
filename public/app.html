@@ -806,6 +806,108 @@ tr:hover { background:rgba(255,255,255,0.018); }
 .task-add-input { flex:1; background:none; border:none; outline:none; font-size:13px; color:var(--white); font-family:inherit; }
 .task-add-input::placeholder { color:var(--g3); }
 .task-add-pri { font-size:12px; color:var(--g2); background:var(--s3); border:1px solid var(--line); border-radius:6px; padding:3px 10px; cursor:pointer; font-family:inherit; outline:none; }
+
+/* ═══════════════════════════════════════════════════════
+   FINAL UI OVERRIDE — takes full precedence over above
+   ═══════════════════════════════════════════════════════ */
+
+/* Sidebar */
+.sidebar { width:240px !important; }
+.main { margin-left:240px !important; }
+.brand { padding:20px 16px 16px; }
+.brand-name { font-size:15px; font-weight:800; letter-spacing:-0.4px; }
+.nav-item { padding:10px 14px !important; margin:2px 8px !important; font-size:13.5px !important; font-weight:500 !important; border-radius:10px !important; gap:11px !important; }
+.nav-icon { width:16px !important; height:16px !important; opacity:0.3 !important; }
+.nav-item.active .nav-icon { opacity:0.85 !important; }
+.nav-item:hover .nav-icon { opacity:0.55 !important; }
+
+/* Pages */
+.page.active { padding:28px 36px 36px !important; }
+
+/* Page headers */
+.page-header h1 { font-size:20px !important; font-weight:700 !important; letter-spacing:-0.5px !important; }
+.page-header p { font-size:12px !important; color:var(--g2) !important; margin-top:3px !important; }
+.page-header { margin-bottom:28px !important; }
+
+/* Tables — clean & readable */
+th { font-size:10px !important; letter-spacing:0.5px !important; color:var(--g2) !important; padding-bottom:10px !important; font-weight:700 !important; }
+td { padding:12px 0 !important; font-size:13px !important; }
+th:not(:first-child), td:not(:first-child) { padding-left:18px !important; }
+
+/* Metric cards */
+.metric { padding:18px 20px 16px !important; border-radius:14px !important; }
+.metric-value { font-size:26px !important; letter-spacing:-1px !important; }
+.metric-name { font-size:10px !important; letter-spacing:0.4px !important; }
+
+/* Dashboard panels */
+.dash-panel { border-radius:14px !important; padding:18px 20px !important; }
+.dash-panel-title { font-size:10px !important; letter-spacing:0.5px !important; }
+
+/* ── KANBAN ─────────────────────────────────────── */
+#page-projects.active { padding:20px 24px 28px !important; }
+#page-projects .k-stats-bar { margin-bottom:16px; }
+.k-stat-item { font-size:12.5px; }
+.k-stat-item b { color:var(--white); font-weight:600; }
+
+.kanban { display:grid !important; grid-template-columns:repeat(4,1fr) !important; gap:8px !important; align-items:start !important; }
+
+/* Columns */
+.k-col { border-radius:14px !important; background:var(--s1) !important; border:1px solid var(--line) !important; overflow:hidden !important; display:flex !important; flex-direction:column !important; }
+.k-col[data-col="queue"]      { border-top:2px solid rgba(255,255,255,0.08) !important; }
+.k-col[data-col="inprogress"] { border-top:2px solid rgba(255,255,255,0.35) !important; }
+.k-col[data-col="review"]     { border-top:2px solid rgba(255,255,255,0.18) !important; }
+.k-col[data-col="done"]       { border-top:2px solid rgba(255,255,255,0.55) !important; opacity:0.82; }
+
+.k-col-head { padding:16px 16px 13px !important; }
+.k-col-name { font-size:10px !important; letter-spacing:0.8px !important; font-weight:700 !important; color:var(--g1) !important; }
+.k-col-sub { font-size:11px !important; color:var(--g2) !important; margin-top:4px !important; }
+.k-col-n { font-size:10.5px !important; font-weight:700 !important; border-radius:6px !important; padding:2px 9px !important; background:var(--s3) !important; border:1px solid var(--line2) !important; color:var(--g1) !important; }
+.k-col-sep { height:1px !important; background:var(--line) !important; }
+.k-cards { padding:8px 8px 12px !important; display:flex !important; flex-direction:column !important; gap:6px !important; min-height:80px !important; flex:1 !important; }
+
+/* Cards — THE MAIN FIX */
+.k-card { padding:14px 14px 12px !important; border-radius:12px !important; background:var(--s2) !important; border:1px solid var(--line) !important; border-left:3px solid transparent !important; cursor:pointer !important; position:relative !important; transition:all 0.14s !important; }
+.k-card:hover { border-color:var(--line2) !important; background:var(--s3) !important; transform:translateY(-1px) !important; box-shadow:0 4px 16px rgba(0,0,0,0.35) !important; }
+.k-card.st-queue      { border-left-color:rgba(255,255,255,0.1) !important; }
+.k-card.st-inprogress { border-left-color:rgba(255,255,255,0.38) !important; }
+.k-card.st-review     { border-left-color:rgba(255,255,255,0.2) !important; }
+.k-card.st-done       { border-left-color:rgba(255,255,255,0.55) !important; }
+
+.k-card-meta { display:flex !important; align-items:center !important; justify-content:space-between !important; margin-bottom:8px !important; gap:6px !important; }
+.k-card-type { font-size:9.5px !important; font-weight:700 !important; letter-spacing:0.5px !important; color:var(--g2) !important; text-transform:uppercase !important; }
+.k-card-title { font-size:13.5px !important; font-weight:600 !important; color:var(--white) !important; line-height:1.4 !important; letter-spacing:-0.3px !important; }
+.k-card-foot { display:flex !important; align-items:center !important; justify-content:space-between !important; margin-top:12px !important; gap:6px !important; }
+.k-client-chip { display:flex !important; align-items:center !important; gap:6px !important; min-width:0 !important; overflow:hidden !important; }
+.k-av { width:18px !important; height:18px !important; border-radius:50% !important; background:var(--s4) !important; border:1px solid var(--line2) !important; font-size:8.5px !important; font-weight:700 !important; color:var(--g1) !important; display:flex !important; align-items:center !important; justify-content:center !important; flex-shrink:0 !important; }
+.k-budget-tag { font-size:11.5px !important; font-weight:600 !important; color:var(--g1) !important; font-variant-numeric:tabular-nums !important; flex-shrink:0 !important; background:var(--s3) !important; border:1px solid var(--line) !important; padding:2px 8px !important; border-radius:6px !important; }
+.k-card-del { position:absolute !important; top:12px !important; right:12px !important; font-size:10px !important; color:var(--g3) !important; padding:2px 6px !important; border-radius:4px !important; opacity:0 !important; transition:all 0.1s !important; cursor:pointer !important; background:transparent !important; border:none !important; font-family:inherit !important; }
+.k-card:hover .k-card-del { opacity:1 !important; }
+.k-card-del:hover { color:var(--white) !important; background:var(--s4) !important; }
+.k-prog-bar { height:3px !important; background:var(--s4) !important; border-radius:3px !important; overflow:hidden !important; }
+.k-prog-fill { height:100% !important; border-radius:3px !important; }
+.k-card-prog-top { display:flex !important; justify-content:space-between !important; font-size:10px !important; color:var(--g2) !important; margin-bottom:5px !important; }
+.k-dl-badge { font-size:10px !important; font-weight:600 !important; padding:2px 8px !important; border-radius:5px !important; white-space:nowrap !important; }
+.k-dl-badge.overdue { background:rgba(248,113,113,0.12) !important; color:#f87171 !important; border:1px solid rgba(248,113,113,0.2) !important; }
+.k-dl-badge.urgent  { background:var(--s4) !important; color:var(--g1) !important; border:1px solid var(--line2) !important; }
+.k-dl-badge.ok      { background:var(--s3) !important; color:var(--g2) !important; border:1px solid var(--line) !important; }
+.k-col-empty { padding:36px 12px !important; text-align:center !important; }
+.k-col-empty-label, .k-col-empty div { font-size:12px !important; color:var(--g3) !important; }
+/* ─────────────────────────────────────────────── */
+
+/* Finance */
+.fin-card { border-radius:14px !important; }
+.fin-value { font-size:26px !important; letter-spacing:-1px !important; }
+
+/* Modals */
+.modal { border-radius:14px !important; }
+.field-input { border-radius:9px !important; padding:10px 13px !important; }
+.field-label { font-size:10px !important; letter-spacing:0.4px !important; }
+
+/* Avatar cell */
+.av-cell { display:flex; align-items:center; gap:10px; }
+.av-circle { width:30px; height:30px; border-radius:50%; background:var(--s3); border:1px solid var(--line2); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:var(--g1); flex-shrink:0; }
+.av-name { font-size:13px; font-weight:500; color:var(--white); }
+.av-sub { font-size:11px; color:var(--g2); margin-top:1px; }
 </style>
 </head>
 <body>
@@ -885,15 +987,6 @@ tr:hover { background:rgba(255,255,255,0.018); }
         </svg>
         <span data-i18n="nav_analytics">Analytics</span>
       </div>
-      <div class="nav-item" onclick="go('notes',this)">
-        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-          <rect x="2" y="1" width="12" height="14" rx="2"/>
-          <line x1="5" y1="5" x2="11" y2="5"/>
-          <line x1="5" y1="8" x2="11" y2="8"/>
-          <line x1="5" y1="11" x2="8" y2="11"/>
-        </svg>
-        <span data-i18n="nav_notes">Notes</span>
-      </div>
       <div class="nav-item" onclick="go('tasks',this)">
         <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
           <polyline points="2,4 4,6 7,2"/><line x1="10" y1="4" x2="14" y2="4"/>
@@ -916,6 +1009,15 @@ tr:hover { background:rgba(255,255,255,0.018); }
           <polyline points="10,4 13,4 13,7"/>
         </svg>
         <span>Reports</span>
+      </div>
+      <div class="nav-item" onclick="go('notes',this)">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="2" y="1" width="12" height="14" rx="2"/>
+          <line x1="5" y1="5" x2="11" y2="5"/>
+          <line x1="5" y1="8" x2="11" y2="8"/>
+          <line x1="5" y1="11" x2="8" y2="11"/>
+        </svg>
+        <span data-i18n="nav_notes">Notes</span>
       </div>
     </div>
   </nav>
@@ -1409,7 +1511,6 @@ tr:hover { background:rgba(255,255,255,0.018); }
               <button class="set-save-btn" onclick="saveStudio()" data-i18n="btn_save_studio">Save studio</button>
             </div>
           </div>
-        </div>
 
           <!-- SECURITY SECTION -->
           <div id="set-tab-security" class="set-section" style="display:none">
@@ -1502,6 +1603,10 @@ tr:hover { background:rgba(255,255,255,0.018); }
 
     <!-- FINANCE -->
     <div class="page" id="page-finance">
+      <div class="page-header">
+        <div><h1>Finance</h1><p>Invoices, payments and revenue tracking</p></div>
+        <button class="btn btn-white" onclick="openAddModal()">+ New invoice</button>
+      </div>
       <div class="fin-grid">
         <div class="fin-card">
           <div class="fin-card-top">
@@ -1550,6 +1655,9 @@ tr:hover { background:rgba(255,255,255,0.018); }
 
     <!-- ANALYTICS -->
     <div class="page" id="page-analytics">
+      <div class="page-header">
+        <div><h1>Analytics</h1><p>Performance metrics and business insights</p></div>
+      </div>
       <div class="an-grid" id="an-grid">
         <div class="an-card"><div class="an-label">Total revenue</div><div class="an-value" id="an-revenue">—</div><div class="an-sub">All paid invoices</div></div>
         <div class="an-card"><div class="an-label">Avg project budget</div><div class="an-value" id="an-avg">—</div><div class="an-sub">Across all projects</div></div>
@@ -1604,6 +1712,9 @@ tr:hover { background:rgba(255,255,255,0.018); }
 
     <!-- REPORTS -->
     <div class="page" id="page-reports">
+      <div class="page-header">
+        <div><h1>Reports</h1><p>Revenue, expenses and profit overview</p></div>
+      </div>
       <div class="an-grid" id="rep-kpi"></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:0">
         <div class="an-section">
@@ -2859,32 +2970,40 @@ function renderTasks() {
   const all = getTasks();
   const shown = taskFilter === 'done' ? all.filter(t=>t.done) : taskFilter === 'active' ? all.filter(t=>!t.done) : all;
   const done = all.filter(t=>t.done).length;
+  const high = all.filter(t=>!t.done && t.priority==='high').length;
   const wrap = document.getElementById('tasks-wrap');
   if (!wrap) return;
   wrap.innerHTML = `
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
-      <div style="display:flex;gap:6px">
-        ${['all','active','done'].map(f=>`<button class="tasks-filter${taskFilter===f?' active':''}" onclick="taskFilter='${f}';renderTasks()">${f==='all'?'All tasks':f==='active'?'Active':'Completed'}</button>`).join('')}
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px">
+      <div>
+        <h1 style="font-size:20px;font-weight:700;letter-spacing:-0.5px;color:var(--white);margin-bottom:3px">Tasks</h1>
+        <div style="font-size:12px;color:var(--g2)">${done} of ${all.length} completed${high?` · <span style="color:var(--white)">${high} high priority</span>`:''}</div>
       </div>
-      <div style="font-size:12px;color:var(--g2)">${done}/${all.length} done</div>
+      <div style="display:flex;gap:6px">
+        ${['all','active','done'].map(f=>`<button class="tasks-filter${taskFilter===f?' active':''}" onclick="taskFilter='${f}';renderTasks()">${f==='all'?'All':f==='active'?'Active':'Done'}</button>`).join('')}
+      </div>
     </div>
-    ${shown.length ? shown.map((t,i)=>`
+    ${shown.length ? shown.map(t=>`
       <div class="task-row${t.done?' done':''}">
         <div class="task-check${t.done?' checked':''}" onclick="toggleTask(${t.id})">
-          <svg viewBox="0 0 10 10" fill="none" stroke="#000" stroke-width="2"><polyline points="1.5,5 4,7.5 8.5,2"/></svg>
+          <svg viewBox="0 0 10 10" fill="none" stroke="#000" stroke-width="2.2"><polyline points="1.5,5 4,7.5 8.5,2"/></svg>
         </div>
         <div class="task-body">
           <div class="task-title">${esc(t.title)}</div>
           <div class="task-meta">
             <span class="task-pri ${t.priority}">${t.priority}</span>
-            ${t.due?`<span class="task-due">Due ${t.due}</span>`:''}
+            ${t.due?`<span class="task-due">· ${t.due}</span>`:''}
           </div>
         </div>
-        <button class="task-del" onclick="deleteTask(${t.id})">Delete</button>
-      </div>`).join('') : `<div style="padding:32px;text-align:center;color:var(--g2);font-size:13px">${taskFilter==='done'?'No completed tasks yet':'No tasks — add one below'}</div>`}
+        <button class="task-del" onclick="deleteTask(${t.id})">✕</button>
+      </div>`).join('') : `
+      <div style="padding:48px 24px;text-align:center;background:var(--s1);border:1px solid var(--line);border-radius:14px;margin-bottom:16px">
+        <div style="font-size:13px;font-weight:500;color:var(--white);margin-bottom:4px">${taskFilter==='done'?'No completed tasks yet':'All clear!'}</div>
+        <div style="font-size:12px;color:var(--g2)">${taskFilter==='done'?'Complete a task to see it here':'Add a task below to get started'}</div>
+      </div>`}
     <div class="task-add-row" onclick="document.getElementById('task-inp').focus()">
-      <div style="color:var(--g2);font-size:16px">+</div>
-      <input class="task-add-input" id="task-inp" placeholder="Add a task..." onkeydown="addTaskKey(event)">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" style="color:var(--g2);flex-shrink:0"><line x1="8" y1="2" x2="8" y2="14"/><line x1="2" y1="8" x2="14" y2="8"/></svg>
+      <input class="task-add-input" id="task-inp" placeholder="New task — press Enter to add" onkeydown="addTaskKey(event)">
       <select class="task-add-pri" id="task-pri-sel">
         <option value="medium">Medium</option>
         <option value="high">High</option>
@@ -3182,7 +3301,7 @@ function renderProjects() {
       const av = p.client_name ? `<span class="k-av">${p.client_name[0].toUpperCase()}</span>` : '';
       const stClass = 'st-'+(k==='inprogress'?'inprogress':k);
       const progColor = p.progress >= 100 ? 'var(--white)' : 'rgba(255,255,255,0.7)';
-      return `<div class="k-card ${stClass}" onclick="editProject(${p.id})">
+      return `<div class="k-card ${stClass}" onclick="viewProject(${p.id})">
         <span class="k-card-del" onclick="deleteProject(${p.id},event)">✕</span>
         <div class="k-card-meta">
           <span class="k-card-type">${esc(p.type||'Project')}</span>
@@ -3233,25 +3352,41 @@ function renderFunnel() {
   document.getElementById('f-total').textContent  = active.length;
 
   const maxC = Math.max(...Object.values(counts), 1);
+  const stageDeals = {};
+  STAGES.forEach(s => { stageDeals[s.key] = deals.filter(d => d.stage === s.key); });
+
   document.getElementById('funnel-list').innerHTML = `
-    <div class="funnel-header-row">
-      <div style="width:180px;flex-shrink:0;font-size:11px;color:var(--g1);font-weight:500">${t('funnel_stage')}</div>
-      <div style="flex:1"></div>
-      <div style="width:44px;text-align:right;font-size:11px;color:var(--g1);font-weight:500">${t('funnel_leads')}</div>
-      <div style="width:60px;text-align:right;font-size:11px;color:var(--g1);font-weight:500">${t('funnel_conv')}</div>
-      <div style="width:110px;text-align:right;font-size:11px;color:var(--g1);font-weight:500">${t('funnel_value')}</div>
-    </div>
-    ${STAGES.map(s => {
-      const pct  = total ? Math.round(counts[s.key]/total*100) : 0;
-      const barW = Math.round(counts[s.key]/maxC*100);
-      return `<div class="funnel-row">
-        <div class="f-name">${t(s.i18n)}</div>
-        <div class="f-bar-wrap"><div class="f-bar-outer"><div class="f-bar-inner" style="width:${barW}%"></div></div></div>
-        <div class="f-n">${counts[s.key]}</div>
-        <div class="f-conv">${pct}%</div>
-        <div class="f-amt">${fmt(values[s.key])}</div>
-      </div>`;
-    }).join('')}`;
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px">
+      ${STAGES.map(s => {
+        const stageDls = stageDeals[s.key];
+        const pct  = total ? Math.round(counts[s.key]/total*100) : 0;
+        const barH = counts[s.key] ? Math.max(8, Math.round(counts[s.key]/maxC*60)) : 4;
+        const isClosed = s.key === 'closed';
+        return `<div style="background:var(--s1);border:1px solid var(--line);border-radius:14px;overflow:hidden;${isClosed?'border-top:2px solid rgba(255,255,255,0.4)':''}">
+          <div style="padding:16px 16px 12px">
+            <div style="font-size:9.5px;font-weight:700;letter-spacing:0.6px;text-transform:uppercase;color:var(--g2);margin-bottom:10px">${t(s.i18n)}</div>
+            <div style="font-size:28px;font-weight:700;letter-spacing:-1px;color:var(--white);line-height:1;margin-bottom:4px">${counts[s.key]}</div>
+            <div style="font-size:11px;color:var(--g2);font-variant-numeric:tabular-nums">${values[s.key]>0?fmt(values[s.key]):'No value'}</div>
+            <div style="margin-top:12px;height:4px;background:var(--s4);border-radius:4px;overflow:hidden">
+              <div style="height:100%;width:${pct}%;background:${isClosed?'var(--white)':'rgba(255,255,255,0.4)'};border-radius:4px;transition:width 0.8s"></div>
+            </div>
+            <div style="font-size:10px;color:var(--g2);margin-top:5px">${pct}% of total</div>
+          </div>
+          ${stageDls.length ? `
+          <div style="border-top:1px solid var(--line)">
+            ${stageDls.slice(0,3).map(d=>`
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 14px;border-bottom:1px solid var(--line);cursor:pointer;transition:background 0.1s" onmouseover="this.style.background='rgba(255,255,255,0.03)'" onmouseout="this.style.background=''" onclick="openDealModal(deals.find(x=>x.id===${d.id}))">
+              <div style="min-width:0;flex:1">
+                <div style="font-size:12px;font-weight:500;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(d.title)}</div>
+                ${d.client_name?`<div style="font-size:10.5px;color:var(--g2);margin-top:1px">${esc(d.client_name)}</div>`:''}
+              </div>
+              ${d.value?`<div style="font-size:11px;font-weight:600;color:var(--g1);margin-left:8px;flex-shrink:0;font-variant-numeric:tabular-nums">${fmt(d.value)}</div>`:''}
+            </div>`).join('')}
+            ${stageDls.length > 3 ? `<div style="padding:8px 14px;font-size:11px;color:var(--g2);text-align:center">+${stageDls.length-3} more</div>` : ''}
+          </div>` : `<div style="padding:16px 14px;font-size:11.5px;color:var(--g3);border-top:1px solid var(--line);text-align:center">Empty</div>`}
+        </div>`;
+      }).join('')}
+    </div>`;
 }
 
 // ─── FINANCE ───────────────────────────────────────────────────────────────
@@ -3585,6 +3720,11 @@ function showModal(title, body, action) {
   document.getElementById('modal-title').textContent = title;
   document.getElementById('modal-body').innerHTML    = body;
   modalAction = action;
+  // Reset footer buttons
+  const saveBtn = document.getElementById('modal-save');
+  if (saveBtn) saveBtn.style.display = '';
+  const cancelBtn = document.querySelector('#overlay .modal-foot .btn-ghost');
+  if (cancelBtn) cancelBtn.textContent = translations[currentLang]?.btn_cancel || 'Cancel';
   document.getElementById('overlay').classList.add('open');
 }
 function closeModal()     { document.getElementById('overlay').classList.remove('open'); }
@@ -3683,6 +3823,58 @@ function openProjectModal(p) {
 }
 
 function editProject(id)    { openProjectModal(projects.find(p=>p.id===id)); }
+
+function viewProject(id) {
+  const p = projects.find(x => x.id === id);
+  if (!p) return;
+  const stLabels = { queue:'Backlog', inprogress:'In Progress', 'in-progress':'In Progress', review:'Review', done:'Done' };
+  const stColor  = { queue:'var(--line2)', inprogress:'rgba(255,255,255,0.4)', 'in-progress':'rgba(255,255,255,0.4)', review:'rgba(255,255,255,0.22)', done:'rgba(255,255,255,0.55)' };
+  const today = new Date(); today.setHours(0,0,0,0);
+  let dlHtml = '<span style="color:var(--g2)">No deadline</span>';
+  if (p.deadline) {
+    const d = new Date(p.deadline + 'T00:00:00');
+    const diff = Math.ceil((d - today) / 86400000);
+    const color = diff < 0 ? '#f87171' : diff <= 5 ? 'var(--white)' : 'var(--g1)';
+    const label = diff < 0 ? `Overdue ${Math.abs(diff)}d` : diff === 0 ? 'Due today' : `${diff} days left`;
+    dlHtml = `<span style="color:${color};font-weight:500">${label}</span><span style="color:var(--g2);margin-left:6px">${p.deadline}</span>`;
+  }
+  const body = `
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:20px;flex-wrap:wrap">
+      ${p.type ? `<span style="font-size:9.5px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:var(--g2);background:var(--s3);border:1px solid var(--line2);padding:3px 10px;border-radius:5px">${esc(p.type)}</span>` : ''}
+      <span style="font-size:11px;font-weight:600;color:var(--g1);background:var(--s3);border-left:2px solid ${stColor[p.status]||'var(--line2)'};border-top:1px solid var(--line);border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:3px 10px;border-radius:5px">${stLabels[p.status]||p.status}</span>
+      ${p.budget ? `<span style="margin-left:auto;font-size:14px;font-weight:700;color:var(--white);font-variant-numeric:tabular-nums">${fmt(p.budget)}</span>` : ''}
+    </div>
+    ${p.progress > 0 ? `
+    <div style="margin-bottom:20px">
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--g2);margin-bottom:8px"><span>Progress</span><span style="color:var(--white);font-weight:700">${p.progress}%</span></div>
+      <div style="height:5px;background:var(--s4);border-radius:5px;overflow:hidden">
+        <div style="height:100%;width:${p.progress}%;background:linear-gradient(90deg,rgba(255,255,255,0.3),var(--white));border-radius:5px;transition:width 0.8s cubic-bezier(.16,1,.3,1)"></div>
+      </div>
+    </div>` : ''}
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
+      <div style="background:var(--s3);border:1px solid var(--line);border-radius:10px;padding:13px 15px">
+        <div style="font-size:9.5px;font-weight:700;letter-spacing:0.4px;text-transform:uppercase;color:var(--g2);margin-bottom:6px">Client</div>
+        <div style="font-size:13px;font-weight:500;color:var(--white)">${esc(p.client_name||'—')}</div>
+      </div>
+      <div style="background:var(--s3);border:1px solid var(--line);border-radius:10px;padding:13px 15px">
+        <div style="font-size:9.5px;font-weight:700;letter-spacing:0.4px;text-transform:uppercase;color:var(--g2);margin-bottom:6px">Deadline</div>
+        <div style="font-size:13px">${dlHtml}</div>
+      </div>
+    </div>
+    <div style="padding-top:12px;border-top:1px solid var(--line)">
+      <button class="btn btn-ghost" onclick="closeModal();setTimeout(()=>openProjectModal(projects.find(x=>x.id===${p.id})),50)" style="font-size:12px;width:100%;justify-content:center;gap:7px">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 2l3 3-8 8H3v-3L11 2z"/></svg>
+        Edit project
+      </button>
+    </div>`;
+  showModal(esc(p.title), body, null);
+  setTimeout(() => {
+    const btn = document.getElementById('modal-save');
+    if (btn) btn.style.display = 'none';
+    const cancel = document.querySelector('#overlay .btn-ghost');
+    if (cancel) cancel.textContent = 'Close';
+  }, 0);
+}
 async function deleteProject(id, e) {
   e.stopPropagation();
   if (!confirm(t('confirm_del_project'))) return;
