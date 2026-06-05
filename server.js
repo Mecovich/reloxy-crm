@@ -903,7 +903,7 @@ async function tgPoll() {
   try {
     const r = await fetch(`${TG_API}/getUpdates?timeout=25&offset=${tgOffset}&allowed_updates=["message"]`);
     const data = await r.json();
-    if (!data.ok) { await new Promise(r => setTimeout(r, 5000)); tgPoll(); return; }
+    if (!data.ok) { setTimeout(tgPoll, 5000); return; }
     for (const upd of data.result || []) {
       tgOffset = upd.update_id + 1;
       const msg = upd.message;
