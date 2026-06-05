@@ -136,15 +136,21 @@ tr:hover { background:rgba(255,255,255,0.02); }
 
 <script>
 const token = localStorage.getItem('crm_token');
-const me    = JSON.parse(localStorage.getItem('crm_user') || 'null');
 
 async function init() {
   if (!token) return (window.location.href = '/');
-  if (!me || me.role !== 'admin') {
-    alert('Admin access only');
-    return (window.location.href = '/app');
+  try {
+    const res = await fetch('/api/me', { headers: { 'Authorization': `Bearer ${token}` } });
+    if (!res.ok) return (window.location.href = '/');
+    const me = await res.json();
+    if (me.role !== 'admin') {
+      alert('Admin access only');
+      return (window.location.href = '/app');
+    }
+    document.getElementById('admin-name').textContent = me.name;
+  } catch {
+    return (window.location.href = '/');
   }
-  document.getElementById('admin-name').textContent = me.name;
   await Promise.all([loadStats(), loadUsers()]);
 }
 
