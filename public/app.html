@@ -2048,7 +2048,7 @@ function cmdSearch(q) {
     }
   }
 
-  res.innerHTML = html || `<div style="padding:28px;text-align:center;font-size:13px;color:var(--g2)">No results for "${q}"</div>`;
+  res.innerHTML = html || `<div style="padding:28px;text-align:center;font-size:13px;color:var(--g2)">No results for "${esc(q)}"</div>`;
   cmdSelectedIdx = 0;
   cmdHighlight();
 }

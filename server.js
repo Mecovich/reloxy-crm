@@ -1,7 +1,17 @@
+require('dotenv').config();
+
+if (!process.env.JWT_SECRET) {
+  console.error('FATAL: JWT_SECRET is not set. Add it to your environment variables.');
+  process.exit(1);
+}
+const JWT_SECRET = process.env.JWT_SECRET;
+
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 const path = require('path');
 const { createClient } = require('@libsql/client');
 const { OAuth2Client } = require('google-auth-library');
@@ -12,8 +22,20 @@ const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 // Turso returns BigInt for row IDs — teach JSON how to serialize them
 BigInt.prototype.toJSON = function() { return Number(this); };
 
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 минут
+  max: 20,
+  message: { error: 'Too many attempts, please try again later' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 const app = express();
-app.use(cors());
+app.use(helmet({ contentSecurityPolicy: false })); // CSP отдельно при необходимости
+app.use(cors({
+  origin: process.env.APP_URL || 'https://reloxy.tech',
+  credentials: true,
+}));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -156,6 +178,7 @@ async function initDB() {
     `ALTER TABLE deals ADD COLUMN stage TEXT DEFAULT 'new'`,
     `ALTER TABLE invoices ADD COLUMN issued_at TEXT`,
     `ALTER TABLE invoices ADD COLUMN due_at TEXT`,
+    `ALTER TABLE invoices ADD COLUMN project_id INTEGER DEFAULT NULL`,
     `ALTER TABLE users ADD COLUMN invite_token TEXT DEFAULT ''`,
     `ALTER TABLE users ADD COLUMN owner_id INTEGER DEFAULT NULL`,
     `ALTER TABLE users ADD COLUMN google_id TEXT DEFAULT NULL`,
@@ -175,7 +198,7 @@ function authMiddleware(req, res, next) {
   const token = req.headers.authorization?.split(' ')[1];
   if (!token) return res.status(401).json({ error: 'No token' });
   try {
-    req.user = jwt.verify(token, process.env.JWT_SECRET || 'secret');
+    req.user = jwt.verify(token, JWT_SECRET);
     next();
   } catch {
     res.status(401).json({ error: 'Invalid token' });
@@ -206,7 +229,7 @@ async function handleRegister(req, res) {
 
     const token = jwt.sign(
       { id: result.lastInsertRowid, email, role, name },
-      process.env.JWT_SECRET || 'secret',
+      JWT_SECRET,
       { expiresIn: '30d' }
     );
 
@@ -231,7 +254,7 @@ async function handleLogin(req, res) {
 
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role, name: user.name, owner_id: user.owner_id || null },
-      process.env.JWT_SECRET || 'secret',
+      JWT_SECRET,
       { expiresIn: '30d' }
     );
 
@@ -241,8 +264,8 @@ async function handleLogin(req, res) {
   }
 }
 
-app.post('/api/auth/register', handleRegister);
-app.post('/api/auth/login',    handleLogin);
+app.post('/api/auth/register', authLimiter, handleRegister);
+app.post('/api/auth/login',    authLimiter, handleLogin);
 
 // ─── Google OAuth (redirect flow) ────────────────────────────────────────────
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
@@ -305,7 +328,7 @@ app.get('/api/auth/google/callback', async (req, res) => {
 
     const jwtToken = jwt.sign(
       { id: user.id, email: user.email || email, role: user.role, name: user.name || name },
-      process.env.JWT_SECRET || 'secret',
+      JWT_SECRET,
       { expiresIn: '30d' }
     );
 
@@ -321,8 +344,8 @@ app.get('/api/auth/me', authMiddleware, async (req, res) => {
   res.json(result.rows[0]);
 });
 
-app.post('/api/register', handleRegister);
-app.post('/api/login',    handleLogin);
+app.post('/api/register', authLimiter, handleRegister);
+app.post('/api/login',    authLimiter, handleLogin);
 app.get('/api/me', authMiddleware, async (req, res) => {
   const result = await db.execute({ sql: 'SELECT id, name, email, role, plan, studio_name, owner_id, created_at FROM users WHERE id = ?', args: [req.user.id] });
   res.json(result.rows[0]);
@@ -386,9 +409,19 @@ app.get('/api/projects', authMiddleware, async (req, res) => {
 app.post('/api/projects', authMiddleware, async (req, res) => {
   if (denyStaff(req, res)) return;
   const { title, type, client_id, status, progress, deadline, budget, assigned_to } = req.body;
+  if (!title) return res.status(400).json({ error: 'Title is required' });
+  if (client_id) {
+    const cl = await db.execute({ sql: 'SELECT id FROM clients WHERE id=? AND user_id=?', args: [client_id, req.user.id] });
+    if (!cl.rows.length) return res.status(403).json({ error: 'Invalid client' });
+  }
+  if (assigned_to) {
+    const st = await db.execute({ sql: 'SELECT id FROM users WHERE id=? AND owner_id=?', args: [assigned_to, req.user.id] });
+    if (!st.rows.length) return res.status(403).json({ error: 'Invalid assignee' });
+  }
+  const safeProgress = Math.max(0, Math.min(100, parseInt(progress) || 0));
   const result = await db.execute({
     sql: 'INSERT INTO projects (user_id, client_id, title, type, status, progress, deadline, budget, assigned_to) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-    args: [req.user.id, client_id||null, title, type||'', status||'queue', progress||0, deadline||null, budget||null, assigned_to||null],
+    args: [req.user.id, client_id||null, title, type||'', status||'queue', safeProgress, deadline||null, budget||null, assigned_to||null],
   });
   const row = await db.execute({ sql: 'SELECT * FROM projects WHERE id = ?', args: [result.lastInsertRowid] });
   // Notify assigned staff
@@ -404,12 +437,22 @@ app.post('/api/projects', authMiddleware, async (req, res) => {
 app.put('/api/projects/:id', authMiddleware, async (req, res) => {
   if (denyStaff(req, res)) return;
   const { title, type, client_id, status, progress, deadline, budget, assigned_to } = req.body;
+  if (!title) return res.status(400).json({ error: 'Title is required' });
+  if (client_id) {
+    const cl = await db.execute({ sql: 'SELECT id FROM clients WHERE id=? AND user_id=?', args: [client_id, req.user.id] });
+    if (!cl.rows.length) return res.status(403).json({ error: 'Invalid client' });
+  }
+  if (assigned_to) {
+    const st = await db.execute({ sql: 'SELECT id FROM users WHERE id=? AND owner_id=?', args: [assigned_to, req.user.id] });
+    if (!st.rows.length) return res.status(403).json({ error: 'Invalid assignee' });
+  }
+  const safeProgress = Math.max(0, Math.min(100, parseInt(progress) || 0));
   // Check previous assignee to detect reassignment
   const prev = await db.execute({ sql: 'SELECT assigned_to, title FROM projects WHERE id = ?', args: [req.params.id] });
   const prevAssigned = prev.rows[0]?.assigned_to;
   await db.execute({
     sql: 'UPDATE projects SET title=?, type=?, client_id=?, status=?, progress=?, deadline=?, budget=?, assigned_to=? WHERE id=? AND user_id=?',
-    args: [title, type||'', client_id||null, status||'queue', progress||0, deadline||null, budget||null, assigned_to||null, req.params.id, req.user.id],
+    args: [title, type||'', client_id||null, status||'queue', safeProgress, deadline||null, budget||null, assigned_to||null, req.params.id, req.user.id],
   });
   const row = await db.execute({ sql: 'SELECT * FROM projects WHERE id = ?', args: [req.params.id] });
   // Notify if newly assigned or reassigned
@@ -487,6 +530,11 @@ app.get('/api/deals', authMiddleware, async (req, res) => {
 
 app.post('/api/deals', authMiddleware, async (req, res) => {
   const { title, client_id, value, stage } = req.body;
+  if (!title) return res.status(400).json({ error: 'Title is required' });
+  if (client_id) {
+    const cl = await db.execute({ sql: 'SELECT id FROM clients WHERE id=? AND user_id=?', args: [client_id, req.user.id] });
+    if (!cl.rows.length) return res.status(403).json({ error: 'Invalid client' });
+  }
   const result = await db.execute({
     sql: 'INSERT INTO deals (user_id, client_id, title, value, stage) VALUES (?, ?, ?, ?, ?)',
     args: [req.user.id, client_id||null, title, value||null, stage||'new'],
@@ -525,6 +573,10 @@ app.get('/api/invoices', authMiddleware, async (req, res) => {
 
 app.post('/api/invoices', authMiddleware, async (req, res) => {
   const { number, client_id, amount, issued_at, due_at, status } = req.body;
+  if (client_id) {
+    const cl = await db.execute({ sql: 'SELECT id FROM clients WHERE id=? AND user_id=?', args: [client_id, req.user.id] });
+    if (!cl.rows.length) return res.status(403).json({ error: 'Invalid client' });
+  }
   const result = await db.execute({
     sql: 'INSERT INTO invoices (user_id, client_id, number, amount, issued_at, due_at, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
     args: [req.user.id, client_id||null, number||'', amount||null, issued_at||null, due_at||null, status||'pending'],
@@ -892,6 +944,12 @@ async function tgPoll() {
   } catch (e) { console.error('TG poll error:', e.message); }
   setTimeout(tgPoll, 1000);
 }
+
+// ─── Global error handler ────────────────────────────────────────────────────
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err);
+  res.status(500).json({ error: 'Internal server error' });
+});
 
 // ─── Static pages (MUST be last — catch-all intercepts everything) ───────────
 app.get('/app',           (req, res) => res.sendFile(path.join(__dirname, 'public', 'app.html')));
