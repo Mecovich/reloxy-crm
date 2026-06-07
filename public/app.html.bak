@@ -6,54 +6,43 @@
 <title>Reloxy</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; overflow-anchor: none; }
 :root {
-  --black:#121212; --s1:#161616; --s2:#1a1a1a; --s3:#222222; --s4:#2a2a2a;
-  --line:rgba(217,217,217,0.06); --line2:rgba(217,217,217,0.12); --line3:rgba(217,217,217,0.25);
-  --white:#e8e8e8; --g1:#909090; --g2:#555555; --g3:#383838;
-  --accent:#D9D9D9; --accent-dim:rgba(217,217,217,0.07);
-  --sh-sm:0 1px 3px rgba(0,0,0,0.6),0 1px 8px rgba(0,0,0,0.4);
-  --sh-md:0 4px 20px rgba(0,0,0,0.7),0 1px 4px rgba(0,0,0,0.5);
-  --sh-lg:0 16px 48px rgba(0,0,0,0.9),0 4px 16px rgba(0,0,0,0.6);
-  --r:12px; --r-sm:8px; --r-lg:16px;
-  --glass-bg:rgba(217,217,217,0.03);
-  --glass-bg-hover:rgba(217,217,217,0.055);
-  --glass-border:rgba(217,217,217,0.08);
-  --glass-border-hover:rgba(217,217,217,0.18);
-  --blur:20px;
+  --black:#040404; --s1:#0c0c0e; --s2:#111114; --s3:#18181c; --s4:#222228;
+  --line:rgba(255,255,255,0.06); --line2:rgba(255,255,255,0.12); --line3:rgba(255,255,255,0.2);
+  --white:#f0f0f0; --g1:#7a7a82; --g2:#4a4a52; --g3:#2e2e36;
+  --accent:#fff; --accent-dim:rgba(255,255,255,0.07);
+  --sh-sm:0 1px 3px rgba(0,0,0,0.5),0 1px 8px rgba(0,0,0,0.3);
+  --sh-md:0 4px 16px rgba(0,0,0,0.6),0 1px 4px rgba(0,0,0,0.4);
+  --sh-lg:0 16px 48px rgba(0,0,0,0.8),0 4px 16px rgba(0,0,0,0.5);
+  --r:10px; --r-sm:7px; --r-lg:14px;
 }
-body { font-family:'Plus Jakarta Sans',-apple-system,"Helvetica Neue",sans-serif; background:var(--black); color:var(--white); display:flex; height:100vh; overflow:hidden; font-size:14px; line-height:1.55; -webkit-font-smoothing:antialiased; letter-spacing:-0.1px; }
+body { font-family:'Inter',-apple-system,"Helvetica Neue",sans-serif; background:var(--black); color:var(--white); display:flex; height:100vh; overflow:hidden; font-size:14px; line-height:1.55; -webkit-font-smoothing:antialiased; letter-spacing:-0.1px; }
 
 /* ── SIDEBAR ── */
-.sidebar { width:260px; height:100vh; background:var(--black); border-right:1px solid var(--line); position:fixed; top:0; left:0; bottom:0; display:flex; flex-direction:column; z-index:100; overflow:hidden; transition:width 0.22s cubic-bezier(.16,1,.3,1),border-color 0.22s; }
+.sidebar { width:244px; height:100vh; background:var(--s1); border-right:1px solid var(--line); position:fixed; top:0; left:0; bottom:0; display:flex; flex-direction:column; z-index:100; overflow:hidden; transition:width 0.22s cubic-bezier(.16,1,.3,1),border-color 0.22s; }
 body.sidebar-collapsed .sidebar { width:0; border-color:transparent; }
 body.sidebar-collapsed .main { margin-left:0; }
-.brand { padding:24px 20px 20px; display:flex; align-items:center; gap:12px; }
-.brand-logo { width:36px; height:36px; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
-.brand-logo img { width:28px; height:28px; object-fit:contain; }
-.brand-name { font-size:20px; font-weight:700; letter-spacing:-0.5px; color:var(--accent); }
-.brand-sub { display:none; }
-.nav { flex:1; padding:8px 0 10px; overflow-y:auto; overflow-x:hidden; scrollbar-width:none; }
-.nav::-webkit-scrollbar { display:none; }
-.nav-group { margin-bottom:2px; }
+.brand { padding:20px 18px 16px; border-bottom:1px solid var(--line); display:flex; align-items:center; gap:10px; }
+.brand-logo { width:30px; height:30px; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+.brand-logo img { width:20px; height:20px; object-fit:contain; }
+.brand-name { font-size:14px; font-weight:800; letter-spacing:-0.4px; color:var(--white); }
+.brand-sub { font-size:10px; color:var(--g2); letter-spacing:0.2px; margin-top:1px; text-transform:uppercase; }
+.nav { flex:1; padding:14px 0 10px; overflow-y:auto; }
+.nav-group { margin-bottom:4px; }
 .nav-group-label { display:none; }
-.nav-item { display:flex; align-items:center; padding:12px 20px; margin:1px 8px; font-size:13.5px; font-weight:500; color:rgba(217,217,217,0.5); cursor:pointer; transition:color 0.15s,background 0.15s; position:relative; user-select:none; gap:14px; border-radius:10px; letter-spacing:0; }
-.nav-item:hover { color:var(--accent); background:rgba(217,217,217,0.05); }
-.nav-item.active { color:var(--accent); background:rgba(217,217,217,0.07); }
-.nav-item.active::before { display:none; }
-.nav-icon { width:18px; height:18px; opacity:0.6; flex-shrink:0; transition:opacity 0.15s; }
-.nav-item.active .nav-icon { opacity:1; }
-.nav-item:hover .nav-icon { opacity:0.8; }
-/* Material Symbols in nav */
-.nav-ms { font-size:20px; flex-shrink:0; transition:opacity 0.15s; opacity:0.5; font-variation-settings:'FILL' 0,'wght' 300; }
-.nav-item.active .nav-ms { opacity:1; font-variation-settings:'FILL' 1,'wght' 400; }
-.nav-item:hover .nav-ms { opacity:0.8; }
+.nav-item { display:flex; align-items:center; padding:11px 14px; margin:2px 8px; font-size:14px; color:var(--g1); cursor:pointer; transition:color 0.12s,background 0.12s; position:relative; user-select:none; gap:12px; border-radius:10px; letter-spacing:-0.2px; }
+.nav-item:hover { color:var(--white); background:rgba(255,255,255,0.04); }
+.nav-item.active { color:var(--white); background:rgba(255,255,255,0.07); }
+.nav-item.active::before { content:''; position:absolute; left:-8px; top:50%; transform:translateY(-50%); width:3px; height:18px; border-radius:0 2px 2px 0; background:var(--white); opacity:0.6; }
+.nav-icon { width:18px; height:18px; opacity:0.3; flex-shrink:0; transition:opacity 0.12s; }
+.nav-item.active .nav-icon { opacity:0.85; }
+.nav-item:hover .nav-icon { opacity:0.55; }
 .nav-count { display:none; }
-.sidebar-bottom { padding:16px 16px; border-top:1px solid var(--line); position:relative; }
+.sidebar-bottom { padding:10px 12px; border-top:1px solid var(--line); position:relative; }
 .user-trigger { display:flex; align-items:center; padding:5px 6px; border-radius:9px; cursor:pointer; transition:background 0.12s; width:fit-content; }
 .user-trigger:hover { background:rgba(255,255,255,0.05); }
 .user-trigger.active { background:rgba(255,255,255,0.07); }
@@ -80,8 +69,8 @@ body.sidebar-collapsed .main { margin-left:0; }
 .user-popup-item.danger:hover { background:rgba(248,113,113,0.08); color:#f87171; }
 
 /* ── MAIN ── */
-.main { margin-left:260px; flex:1; display:flex; flex-direction:column; height:100vh; overflow:hidden; transition:margin-left 0.22s cubic-bezier(.16,1,.3,1); }
-.topbar { height:60px; flex-shrink:0; border-bottom:1px solid var(--line); display:flex; align-items:center; padding:0 32px; gap:12px; background:rgba(18,18,18,0.85); backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px); z-index:50; }
+.main { margin-left:244px; flex:1; display:flex; flex-direction:column; height:100vh; overflow:hidden; transition:margin-left 0.22s cubic-bezier(.16,1,.3,1); }
+.topbar { height:56px; flex-shrink:0; border-bottom:1px solid var(--line); display:flex; align-items:center; padding:0 36px; gap:12px; background:rgba(4,4,4,0.96); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); z-index:50; }
 .sidebar-toggle { width:32px; height:32px; display:flex; align-items:center; justify-content:center; border:none; background:transparent; border-radius:8px; cursor:pointer; color:var(--g2); transition:color 0.15s,background 0.15s; flex-shrink:0; margin-right:4px; }
 .sidebar-toggle:hover { color:var(--white); background:var(--s3); }
 .sidebar-toggle svg { width:15px; height:15px; }
@@ -123,14 +112,10 @@ body.sidebar-collapsed .main { margin-left:0; }
 .dash-title { font-size:26px; font-weight:800; letter-spacing:-0.8px; line-height:1.1; color:var(--white); }
 .dash-period-label { font-size:12px; color:var(--g2); margin-top:4px; }
 
-/* ── GLASS CARD UTILITY ── */
-.glass { background:var(--glass-bg); border:1px solid var(--glass-border); backdrop-filter:blur(var(--blur)); -webkit-backdrop-filter:blur(var(--blur)); transition:border-color 0.2s,background 0.2s,box-shadow 0.2s; }
-.glass:hover { border-color:var(--glass-border-hover); background:var(--glass-bg-hover); }
 /* ── DASH HERO CHART ── */
 .dash-hero {
-  background:var(--glass-bg); border:1px solid var(--glass-border); border-radius:20px;
+  background:var(--s1); border:1px solid var(--line); border-radius:20px;
   padding:28px 32px 0; margin-bottom:12px; position:relative; overflow:hidden;
-  backdrop-filter:blur(var(--blur)); -webkit-backdrop-filter:blur(var(--blur));
 }
 .dash-hero-top { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:24px; }
 .dash-hero-label { font-size:11px; color:var(--g2); font-weight:500; margin-bottom:10px; letter-spacing:0.2px; text-transform:uppercase; }
@@ -148,11 +133,11 @@ body.sidebar-collapsed .main { margin-left:0; }
 /* ── METRICS ── */
 .metrics { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:12px; }
 .metric {
-  padding:22px 24px 20px; background:var(--glass-bg); border:1px solid var(--glass-border);
-  border-radius:16px; transition:border-color 0.2s,background 0.2s,box-shadow 0.2s; cursor:default;
-  position:relative; overflow:hidden; backdrop-filter:blur(var(--blur));
+  padding:20px 22px 18px; background:var(--s1); border:1px solid var(--line);
+  border-radius:16px; transition:border-color 0.2s,background 0.2s; cursor:default;
+  position:relative; overflow:hidden;
 }
-.metric:hover { border-color:var(--glass-border-hover); background:var(--glass-bg-hover); box-shadow:var(--sh-sm); }
+.metric:hover { border-color:var(--line2); background:var(--s2); }
 .metric-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
 .metric-name { font-size:11px; font-weight:500; color:var(--g2); letter-spacing:0.1px; text-transform:uppercase; }
 .metric-icon { width:30px; height:30px; border-radius:8px; background:var(--s3); border:1px solid var(--line2); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
@@ -236,20 +221,20 @@ tr:hover td { background:transparent; }
 .two-col { display:grid; grid-template-columns:1fr 1fr; gap:40px; }
 
 /* ── KANBAN ── */
-.kanban { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; align-items:start; }
+.kanban { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; align-items:start; }
 .k-stats-bar { display:flex; align-items:center; gap:6px; margin-bottom:16px; }
 .k-stat-item { font-size:12px; color:var(--g2); }
 .k-stat-item b { color:var(--white); font-weight:600; }
 .k-stat-sep { color:var(--g3); font-size:11px; }
-.k-col { background:var(--glass-bg); border:1px solid var(--glass-border); border-radius:16px; overflow:hidden; display:flex; flex-direction:column; backdrop-filter:blur(var(--blur)); }
+.k-col { background:var(--s1); border:1px solid var(--line); border-radius:16px; overflow:hidden; display:flex; flex-direction:column; }
 .k-col-head { padding:16px 16px 14px; display:flex; align-items:center; justify-content:space-between; }
-.k-col-name { font-size:10px; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; color:var(--g1); }
+.k-col-name { font-size:10.5px; font-weight:600; letter-spacing:0.6px; text-transform:uppercase; color:var(--g2); }
 .k-col-sub { font-size:10.5px; color:var(--g2); margin-top:3px; font-variant-numeric:tabular-nums; }
-.k-col-n { font-size:11px; font-weight:600; color:var(--g1); font-variant-numeric:tabular-nums; background:rgba(217,217,217,0.06); border:1px solid var(--glass-border); border-radius:6px; padding:2px 8px; min-width:22px; text-align:center; flex-shrink:0; }
+.k-col-n { font-size:11px; font-weight:600; color:var(--g1); font-variant-numeric:tabular-nums; background:var(--s3); border:1px solid var(--line2); border-radius:6px; padding:2px 8px; min-width:22px; text-align:center; flex-shrink:0; }
 .k-col-sep { height:1px; background:var(--line); }
 .k-cards { padding:8px 8px 10px; display:flex; flex-direction:column; gap:6px; min-height:60px; flex:1; }
-.k-card { padding:14px 14px 12px; border:1px solid var(--glass-border); border-radius:12px; background:rgba(217,217,217,0.025); cursor:pointer; transition:border-color 0.15s,background 0.15s,transform 0.12s,box-shadow 0.15s; position:relative; }
-.k-card:hover { border-color:var(--glass-border-hover); background:rgba(217,217,217,0.055); transform:translateY(-1px); box-shadow:var(--sh-sm); }
+.k-card { padding:14px 14px 12px; border:1px solid var(--line); border-radius:12px; background:var(--s2); cursor:pointer; transition:border-color 0.15s,background 0.15s,transform 0.12s,box-shadow 0.15s; position:relative; }
+.k-card:hover { border-color:var(--line2); background:var(--s3); transform:translateY(-1px); box-shadow:var(--sh-sm); }
 .k-card-meta { display:flex; align-items:center; justify-content:space-between; margin-bottom:7px; gap:6px; }
 .k-card-type { font-size:9.5px; font-weight:600; letter-spacing:0.4px; color:var(--g2); text-transform:uppercase; }
 .k-card-title { font-size:13.5px; font-weight:600; color:var(--white); line-height:1.4; letter-spacing:-0.3px; }
@@ -277,10 +262,10 @@ tr:hover td { background:transparent; }
 
 /* ── FINANCE ── */
 .fin-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:20px; }
-.fin-card { padding:22px 24px 20px; background:var(--glass-bg); border:1px solid var(--glass-border); border-radius:16px; transition:border-color 0.2s,background 0.2s,box-shadow 0.2s; cursor:default; position:relative; overflow:hidden; min-height:130px; display:flex; flex-direction:column; justify-content:space-between; backdrop-filter:blur(var(--blur)); }
-.fin-card::before { content:''; position:absolute; inset:0; opacity:0; background:radial-gradient(600px circle at var(--mx,50%) var(--my,50%), rgba(217,217,217,0.04), transparent 55%); transition:opacity 0.3s; pointer-events:none; border-radius:inherit; }
+.fin-card { padding:22px 24px 20px; background:var(--s1); border:1px solid var(--line); border-radius:16px; transition:border-color 0.2s; cursor:default; position:relative; overflow:hidden; min-height:130px; display:flex; flex-direction:column; justify-content:space-between; }
+.fin-card::before { content:''; position:absolute; inset:0; opacity:0; background:radial-gradient(600px circle at var(--mx,50%) var(--my,50%), rgba(255,255,255,0.055), transparent 55%); transition:opacity 0.3s; pointer-events:none; border-radius:inherit; }
 .fin-card:hover::before { opacity:1; }
-.fin-card:hover { border-color:var(--glass-border-hover); box-shadow:var(--sh-sm); }
+.fin-card:hover { border-color:var(--line2); }
 .fin-card-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
 .fin-card-icon { width:28px; height:28px; border-radius:7px; background:var(--s3); border:1px solid var(--line); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
 .fin-card-icon svg { width:13px; height:13px; opacity:0.45; }
@@ -923,43 +908,6 @@ th:not(:first-child), td:not(:first-child) { padding-left:18px !important; }
 .av-circle { width:30px; height:30px; border-radius:50%; background:var(--s3); border:1px solid var(--line2); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:var(--g1); flex-shrink:0; }
 .av-name { font-size:13px; font-weight:500; color:var(--white); }
 .av-sub { font-size:11px; color:var(--g2); margin-top:1px; }
-
-/* ── MODAL GLASSMORPHISM ── */
-.modal { background:rgba(20,20,20,0.92) !important; border:1px solid var(--glass-border) !important; backdrop-filter:blur(40px) !important; }
-
-/* ── SEARCH BAR ── */
-.search { background:rgba(217,217,217,0.04) !important; border-color:var(--glass-border) !important; }
-.search:focus-within { border-color:rgba(217,217,217,0.25) !important; }
-
-/* ── PAGE CARDS GLASS ── */
-.dash-chart-wrap { background:var(--glass-bg) !important; border-color:var(--glass-border) !important; }
-.set-card { background:var(--glass-bg) !important; border-color:var(--glass-border) !important; }
-
-/* ── ACCENT UPDATES ── */
-.metric-value { color:var(--accent) !important; }
-.metric-name { color:var(--g1) !important; text-transform:uppercase !important; letter-spacing:0.5px !important; font-size:10px !important; }
-.dash-hero-num { color:var(--accent) !important; }
-.dash-hero-label { color:var(--g1) !important; text-transform:uppercase !important; letter-spacing:0.5px !important; }
-
-/* ── BUTTON ACCENT ── */
-.btn-white { background:var(--accent) !important; color:#0a0a0a !important; }
-.btn-white:hover { background:#c0c0c0 !important; }
-
-/* ── TABLE GLASSMORPHISM ── */
-th { border-bottom-color:var(--line) !important; text-transform:uppercase !important; letter-spacing:0.5px !important; font-size:10px !important; color:var(--g1) !important; }
-td { border-bottom-color:var(--line) !important; }
-
-/* ── USER POPUP GLASS ── */
-.user-popup { background:rgba(18,18,18,0.9) !important; border-color:var(--glass-border) !important; backdrop-filter:blur(40px) !important; }
-
-/* ── CLIENTS CARD GLASS ── */
-.client-card { background:var(--glass-bg) !important; border-color:var(--glass-border) !important; backdrop-filter:blur(var(--blur)) !important; }
-.client-card:hover { border-color:var(--glass-border-hover) !important; background:var(--glass-bg-hover) !important; }
-
-/* ── ATMOSPHERE GLOW (injected via body::before/after) ── */
-body::before { content:''; position:fixed; top:-10%; right:-5%; width:40vw; height:40vw; background:rgba(217,217,217,0.025); border-radius:50%; filter:blur(120px); pointer-events:none; z-index:0; }
-body::after { content:''; position:fixed; bottom:10%; left:-10%; width:50vw; height:50vw; background:rgba(217,217,217,0.015); border-radius:50%; filter:blur(150px); pointer-events:none; z-index:0; }
-.sidebar,.main { position:relative; z-index:1; }
 </style>
 </head>
 <body>
@@ -969,56 +917,106 @@ body::after { content:''; position:fixed; bottom:10%; left:-10%; width:50vw; hei
     <div class="brand-logo">
       <img src="/logo.svg" alt="Reloxy">
     </div>
-    <div class="brand-name">Reloxy</div>
+    <div>
+      <div class="brand-name">Reloxy</div>
+      <div class="brand-sub" id="sb-studio">CRM · Design</div>
+    </div>
   </div>
   <nav class="nav">
     <div class="nav-group">
       <div class="nav-item active" onclick="go('dashboard',this)">
-        <span class="material-symbols-outlined nav-ms">dashboard</span>
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="1" y="1" width="6" height="6" rx="1.5"/><rect x="9" y="1" width="6" height="6" rx="1.5"/>
+          <rect x="1" y="9" width="6" height="6" rx="1.5"/><rect x="9" y="9" width="6" height="6" rx="1.5"/>
+        </svg>
         <span data-i18n="nav_dashboard">Dashboard</span>
       </div>
       <div class="nav-item" onclick="go('calendar',this)">
-        <span class="material-symbols-outlined nav-ms">calendar_today</span>
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="1" y="2.5" width="14" height="12" rx="2"/>
+          <line x1="1" y1="6.5" x2="15" y2="6.5"/>
+          <line x1="5" y1="1" x2="5" y2="4"/>
+          <line x1="11" y1="1" x2="11" y2="4"/>
+        </svg>
         <span data-i18n="nav_calendar">Calendar</span>
       </div>
       <div class="nav-item" onclick="go('clients',this)">
-        <span class="material-symbols-outlined nav-ms">group</span>
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="8" cy="5" r="3"/>
+          <path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/>
+        </svg>
         <span data-i18n="nav_clients">Clients</span> <span class="nav-count" id="nc-clients">0</span>
       </div>
       <div class="nav-item" onclick="go('projects',this)">
-        <span class="material-symbols-outlined nav-ms">account_tree</span>
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="1" y="1" width="14" height="10" rx="2"/>
+          <line x1="4" y1="14" x2="12" y2="14"/>
+          <line x1="8" y1="11" x2="8" y2="14"/>
+        </svg>
         <span data-i18n="nav_projects">Projects</span> <span class="nav-count" id="nc-projects">0</span>
       </div>
       <div class="nav-item" onclick="go('funnel',this)">
-        <span class="material-symbols-outlined nav-ms">filter_list</span>
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M2 2h12l-4.5 6v5l-3-2V8L2 2z"/>
+        </svg>
         <span data-i18n="nav_pipeline">Pipeline</span>
       </div>
       <div class="nav-item" onclick="go('team',this)">
-        <span class="material-symbols-outlined nav-ms">badge</span>
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="5.5" cy="5" r="2.5"/>
+          <circle cx="10.5" cy="5" r="2.5"/>
+          <path d="M1 14c0-2.5 2-4.5 4.5-4.5S10 11.5 10 14"/>
+          <path d="M10 11.5c.8-.6 1.9-1 3-1 2 0 3 1.5 3 3.5" stroke-dasharray="2 1"/>
+        </svg>
         <span data-i18n="nav_team">Team</span> <span class="nav-count" id="nc-team">0</span>
       </div>
       <div class="nav-item" onclick="go('finance',this)">
-        <span class="material-symbols-outlined nav-ms">payments</span>
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="1" y="3" width="14" height="10" rx="2"/>
+          <circle cx="8" cy="8" r="2.5"/>
+          <line x1="1" y1="6" x2="15" y2="6"/>
+          <line x1="1" y1="10" x2="15" y2="10"/>
+        </svg>
         <span data-i18n="nav_finance">Finance</span>
       </div>
       <div class="nav-item" onclick="go('analytics',this)">
-        <span class="material-symbols-outlined nav-ms">insights</span>
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="1" y="9" width="3" height="6" rx="1"/>
+          <rect x="6" y="5" width="3" height="10" rx="1"/>
+          <rect x="11" y="1" width="3" height="14" rx="1"/>
+        </svg>
         <span data-i18n="nav_analytics">Analytics</span>
       </div>
       <div class="nav-item" onclick="go('tasks',this)">
-        <span class="material-symbols-outlined nav-ms">task_alt</span>
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <polyline points="2,4 4,6 7,2"/><line x1="10" y1="4" x2="14" y2="4"/>
+          <polyline points="2,9 4,11 7,7"/><line x1="10" y1="9" x2="14" y2="9"/>
+          <polyline points="2,14 4,14 7,12"/><line x1="10" y1="13" x2="14" y2="13"/>
+        </svg>
         <span>Tasks</span>
       </div>
       <div class="nav-item" onclick="go('expenses',this)">
-        <span class="material-symbols-outlined nav-ms">receipt_long</span>
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="1" y="3" width="14" height="10" rx="2"/>
+          <line x1="1" y1="7" x2="15" y2="7"/>
+          <circle cx="5" cy="11" r="1" fill="currentColor"/>
+        </svg>
         <span>Expenses</span>
       </div>
       <div class="nav-item" onclick="go('reports',this)">
-        <span class="material-symbols-outlined nav-ms">description</span>
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M2 12 L6 7 L9 10 L13 4"/>
+          <polyline points="10,4 13,4 13,7"/>
+        </svg>
         <span>Reports</span>
       </div>
       <div class="nav-item" onclick="go('notes',this)">
-        <span class="material-symbols-outlined nav-ms">edit_note</span>
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="2" y="1" width="12" height="14" rx="2"/>
+          <line x1="5" y1="5" x2="11" y2="5"/>
+          <line x1="5" y1="8" x2="11" y2="8"/>
+          <line x1="5" y1="11" x2="8" y2="11"/>
+        </svg>
         <span data-i18n="nav_notes">Notes</span>
       </div>
     </div>
