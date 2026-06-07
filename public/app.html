@@ -997,13 +997,13 @@ td { border-bottom-color:var(--line) !important; }
 #page-dashboard { padding:28px 28px 60px; }
 
 .bento-welcome { display:flex; flex-wrap:wrap; align-items:flex-end; justify-content:space-between; gap:24px; margin-bottom:32px; }
-.bento-h1 { font-size:40px; font-weight:700; letter-spacing:-0.02em; line-height:1.1; color:var(--accent); margin-bottom:8px; }
-.bento-sub { font-size:13px; color:var(--g1); }
-.bento-welcome-actions { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
-.bento-btn { padding:11px 22px; border-radius:12px; font-size:13px; font-weight:700; white-space:nowrap; cursor:pointer; border:1px solid var(--glass-border); background:var(--glass-bg); color:var(--accent); backdrop-filter:blur(20px); transition:all .2s; display:inline-flex; align-items:center; }
-.bento-btn:hover { background:var(--glass-bg-hover); border-color:var(--glass-border-hover); }
-.bento-btn-primary { background:var(--accent); color:var(--black); border-color:var(--accent); }
-.bento-btn-primary:hover { transform:scale(1.02); background:var(--accent); }
+.bento-h1 { font-size:48px; font-weight:400; letter-spacing:-0.02em; line-height:48px; color:#D9D9D9; margin-bottom:8px; }
+.bento-sub { font-size:16px; font-weight:400; line-height:24px; color:rgba(217,217,217,0.60); }
+.bento-welcome-actions { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.bento-btn { padding:10px 24px; border-radius:16px; font-size:14px; font-weight:700; white-space:nowrap; cursor:pointer; border:none; outline:1px solid rgba(217,217,217,0.10); outline-offset:-1px; background:rgba(217,217,217,0.03); color:#D9D9D9; backdrop-filter:blur(10px); transition:all .2s; display:inline-flex; align-items:center; }
+.bento-btn:hover { background:rgba(217,217,217,0.08); outline-color:rgba(217,217,217,0.20); }
+.bento-btn-primary { background:#D9D9D9; color:#121212; outline:none; }
+.bento-btn-primary:hover { transform:scale(1.02); background:#D9D9D9; }
 
 .bento-grid { display:grid; grid-template-columns:repeat(12,1fr); gap:20px; }
 .bento-col-4 { grid-column:span 4; }
@@ -1014,43 +1014,44 @@ td { border-bottom-color:var(--line) !important; }
 .bento-card { background:var(--glass-bg); backdrop-filter:blur(20px); border:1px solid var(--glass-border); border-radius:16px; padding:24px; transition:all .25s; }
 .bento-card:hover { background:var(--glass-bg-hover); border-color:var(--glass-border-hover); }
 .bento-card-head { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap; }
-.bento-card-title { font-size:22px; font-weight:600; letter-spacing:-0.01em; color:var(--accent); }
-.bento-card-desc { font-size:13px; color:var(--g1); margin-top:4px; }
-.bento-eyebrow { font-size:11px; font-weight:700; letter-spacing:0.2em; text-transform:uppercase; color:var(--g1); }
+.bento-card-title { font-size:24px; font-weight:400; letter-spacing:0; line-height:32px; color:#D9D9D9; }
+.bento-card-desc { font-size:14px; font-weight:400; line-height:20px; color:rgba(217,217,217,0.60); margin-top:4px; }
+.bento-eyebrow { font-size:12px; font-weight:700; letter-spacing:0.15em; text-transform:uppercase; color:rgba(217,217,217,0.60); }
 .bento-amount { display:flex; align-items:center; gap:10px; }
-.bento-amount-num { font-size:28px; font-weight:800; letter-spacing:-0.02em; color:var(--accent); font-variant-numeric:tabular-nums; }
-.bento-link-btn { margin-top:24px; padding-top:16px; border-top:1px solid var(--line); font-size:10px; font-weight:700; letter-spacing:0.18em; text-transform:uppercase; color:var(--accent); background:none; border-left:none; border-right:none; border-bottom:none; text-align:left; cursor:pointer; }
+.bento-amount-num { font-size:28px; font-weight:800; letter-spacing:-0.02em; color:#D9D9D9; font-variant-numeric:tabular-nums; }
+.bento-link-btn { margin-top:24px; padding-top:16px; border-top:1px solid rgba(255,255,255,0.05); font-size:10px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#D9D9D9; background:none; border-left:none; border-right:none; border-bottom:none; text-align:left; cursor:pointer; }
 .bento-link-btn:hover { text-decoration:underline; }
-.bento-link-btn-outline { margin-top:24px; padding:13px; border:1px solid var(--glass-border); border-radius:10px; text-align:center; color:var(--g1); }
-.bento-link-btn-outline:hover { background:var(--glass-bg-hover); border-color:var(--glass-border-hover); color:var(--accent); text-decoration:none; }
-.bento-table-head { display:flex; align-items:center; justify-content:space-between; padding:22px 24px; border-bottom:1px solid var(--line); }
+.bento-link-btn-outline { margin-top:24px; padding:12px; border:1px solid rgba(255,255,255,0.10); border-radius:12px; text-align:center; font-size:10px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:rgba(217,217,217,0.60); }
+.bento-link-btn-outline:hover { background:rgba(255,255,255,0.05); color:#D9D9D9; text-decoration:none; }
+.bento-table-head { display:flex; align-items:center; justify-content:space-between; padding:24px; border-bottom:1px solid rgba(255,255,255,0.05); }
 
 /* Team activity rows */
-.bento-activity-row { display:flex; align-items:center; gap:14px; }
-.bento-activity-avatar { width:34px; height:34px; border-radius:50%; background:var(--s3); border:1px solid var(--line2); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:var(--g1); flex-shrink:0; overflow:hidden; }
-.bento-activity-text { font-size:12px; color:var(--accent); line-height:1.5; }
+.bento-activity-row { display:flex; align-items:center; gap:16px; }
+.bento-activity-avatar { width:32px; height:32px; border-radius:50%; background:rgba(255,255,255,0.10); border:1px solid rgba(255,255,255,0.10); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:rgba(217,217,217,0.60); flex-shrink:0; overflow:hidden; }
+.bento-activity-text { font-size:12px; font-weight:700; color:#D9D9D9; line-height:16px; }
 .bento-activity-text b { font-weight:700; }
-.bento-activity-time { font-size:10px; color:var(--g2); margin-top:2px; }
+.bento-activity-time { font-size:10px; font-weight:400; color:rgba(217,217,217,0.60); line-height:15px; margin-top:2px; }
 
 /* Task cards */
-.bento-task { display:flex; align-items:center; gap:14px; padding:14px; border-radius:12px; background:var(--glass-bg); border:1px solid var(--glass-border); cursor:pointer; transition:all .2s; }
-.bento-task:hover { border-color:var(--glass-border-hover); background:var(--glass-bg-hover); }
-.bento-task-dot { width:8px; height:8px; border-radius:50%; background:var(--g3); flex-shrink:0; }
-.bento-task-dot.urgent { background:var(--accent); box-shadow:0 0 8px rgba(217,217,217,0.5); }
-.bento-task-title { font-size:13px; font-weight:700; color:var(--accent); }
-.bento-task-time { font-size:10px; color:var(--g1); text-transform:uppercase; letter-spacing:0.06em; margin-top:3px; }
+.bento-task { display:flex; align-items:center; gap:16px; padding:16px; border-radius:12px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.05); cursor:pointer; transition:all .2s; }
+.bento-task:hover { border-color:rgba(255,255,255,0.10); background:rgba(255,255,255,0.08); }
+.bento-task-dot { width:8px; height:8px; border-radius:50%; background:rgba(255,255,255,0.20); flex-shrink:0; }
+.bento-task-dot.urgent { background:#D9D9D9; box-shadow:0 0 8px rgba(217,217,217,0.5); }
+.bento-task-title { font-size:14px; font-weight:700; line-height:20px; color:#D9D9D9; }
+.bento-task-time { font-size:10px; font-weight:400; color:rgba(217,217,217,0.60); text-transform:uppercase; letter-spacing:0.05em; line-height:15px; margin-top:4px; }
 
 /* Transactions table */
 .bento-tx-table { width:100%; border-collapse:collapse; }
-.bento-tx-table th { padding:14px 24px; font-size:10px; font-weight:700; letter-spacing:0.16em; text-transform:uppercase; color:var(--g2); text-align:left; border-bottom:1px solid var(--line); }
-.bento-tx-table td { padding:16px 24px; font-size:13px; border-bottom:1px solid var(--line); color:var(--accent); vertical-align:middle; }
+.bento-tx-table th { padding:24px; font-size:10px; font-weight:700; letter-spacing:0.2em; text-transform:uppercase; color:rgba(217,217,217,0.60); text-align:left; border-bottom:1px solid rgba(255,255,255,0.05); }
+.bento-tx-table td { padding:24px; font-size:13px; border-bottom:1px solid rgba(255,255,255,0.05); color:#D9D9D9; vertical-align:middle; }
 .bento-tx-table tr:last-child td { border-bottom:none; }
 .bento-tx-table tr:hover td { background:rgba(217,217,217,0.03); }
-.bento-tx-icon { width:38px; height:38px; border-radius:10px; background:var(--s3); display:flex; align-items:center; justify-content:center; color:var(--g1); }
-.bento-tx-name { font-weight:700; }
-.bento-tx-sub { font-size:11px; color:var(--g2); margin-top:2px; }
-.bento-tx-status { display:inline-block; padding:4px 12px; border-radius:20px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; background:var(--glass-bg); border:1px solid var(--glass-border); color:var(--g1); }
-.bento-tx-status.paid { color:var(--accent); border-color:var(--glass-border-hover); }
+.bento-tx-icon { width:38px; height:40px; border-radius:12px; background:rgba(255,255,255,0.05); display:flex; align-items:center; justify-content:center; color:#D9D9D9; }
+.bento-tx-name { font-weight:700; font-size:14px; }
+.bento-tx-sub { font-size:12px; font-weight:400; color:rgba(217,217,217,0.60); margin-top:2px; }
+.bento-tx-status { display:inline-block; padding:4px 12px; border-radius:9999px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.10); color:#D9D9D9; }
+.bento-tx-status.paid { color:#D9D9D9; background:rgba(255,255,255,0.10); border-color:rgba(255,255,255,0.20); }
+.bento-tx-status.flagged { color:rgba(217,217,217,0.40); background:rgba(255,255,255,0.05); border-color:rgba(255,255,255,0.05); }
 </style>
 </head>
 <body>
@@ -1183,12 +1184,13 @@ td { border-bottom-color:var(--line) !important; }
       <section class="bento-welcome">
         <div>
           <h1 class="bento-h1"><span data-i18n="dash_welcome">Welcome Back</span>, <span id="dash-title-name"></span>!</h1>
-          <p class="bento-sub" id="dash-greeting"></p>
+          <p class="bento-sub"><span id="dash-greeting"></span><span id="dash-perf-note" data-i18n="dash_perf_note">Your business performance is up this month.</span></p>
         </div>
         <div class="bento-welcome-actions">
           <button class="bento-btn bento-btn-primary" onclick="go('finance',document.querySelectorAll('.nav-item')[6])" data-i18n="btn_send_funds">Send Funds</button>
           <button class="bento-btn" onclick="go('finance',document.querySelectorAll('.nav-item')[6])" data-i18n="btn_request">Request</button>
           <button class="bento-btn" onclick="go('finance',document.querySelectorAll('.nav-item')[6])" data-i18n="btn_transfer">Transfer</button>
+          <button class="bento-btn" onclick="go('finance',document.querySelectorAll('.nav-item')[6])" data-i18n="btn_deposit">Deposit</button>
           <button class="bento-btn" onclick="openGoalModal()" id="goal-wrap-mini" style="display:none">
             <span id="goal-mini-current">₽ 0</span>
             <span style="opacity:0.4">/</span>
@@ -2850,13 +2852,30 @@ function getGreeting() {
 
 function renderDashboard() {
   renderGoal();
-  // Greeting line (time of day, no name)
-  const h = new Date().getHours();
-  const greetText = currentLang === 'ru'
-    ? (h < 12 ? 'Доброе утро' : h < 17 ? 'Добрый день' : 'Добрый вечер')
-    : (h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening');
+  // Hide the old time-of-day greeting line — Stitch design uses a performance note instead
   const greetEl = document.getElementById('dash-greeting');
-  if (greetEl) greetEl.textContent = greetText;
+  if (greetEl) { greetEl.textContent = ''; greetEl.style.display = 'none'; }
+  // Performance note: % change in revenue vs previous month
+  const noteEl = document.getElementById('dash-perf-note');
+  if (noteEl) {
+    const now = new Date();
+    const thisMonthKey = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+    const prev = new Date(now.getFullYear(), now.getMonth()-1, 1);
+    const prevMonthKey = `${prev.getFullYear()}-${String(prev.getMonth()+1).padStart(2,'0')}`;
+    const sumFor = (key) => invoices.filter(i => i.status==='paid' && (i.paid_at||i.created_at||'').slice(0,7)===key).reduce((s,i)=>s+(i.amount||0),0);
+    const cur = sumFor(thisMonthKey), prv = sumFor(prevMonthKey);
+    let text;
+    if (prv > 0) {
+      const pct = Math.round(((cur - prv) / prv) * 100);
+      const dir = pct >= 0 ? (currentLang==='ru' ? 'выросла' : 'is up') : (currentLang==='ru' ? 'снизилась' : 'is down');
+      text = currentLang === 'ru'
+        ? `Выручка ${dir} на ${Math.abs(pct)}% по сравнению с прошлым месяцем.`
+        : `Your revenue ${dir} ${Math.abs(pct)}% from last month.`;
+    } else {
+      text = currentLang === 'ru' ? 'Добро пожаловать в обзор вашей студии.' : 'Here’s an overview of your studio performance.';
+    }
+    noteEl.textContent = text;
+  }
   // Welcome title name
   const nameEl = document.getElementById('dash-title-name');
   if (nameEl) {
