@@ -34,7 +34,8 @@ input::placeholder { color:rgba(217,217,217,0.4); }
 .user-popup { opacity:0; transform:translateY(6px) scale(0.97); pointer-events:none; transition:opacity 0.16s,transform 0.16s; }
 .user-popup.open { opacity:1 !important; transform:translateY(0) scale(1) !important; pointer-events:all !important; }
 /* MODALS */
-.overlay { position:fixed;inset:0;background:rgba(0,0,0,0.75);display:flex;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(6px); }
+.overlay { position:fixed;inset:0;background:rgba(0,0,0,0.75);display:none;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(6px); }
+.overlay.open { display:flex; }
 .modal { background:#161616;border:1px solid rgba(217,217,217,0.12);border-radius:16px;box-shadow:0 40px 100px rgba(0,0,0,0.9);max-height:90vh;overflow-y:auto;width:90vw;max-width:580px; }
 .modal-head { display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid rgba(217,217,217,0.07); }
 .modal-title { font-size:16px;font-weight:700;color:#D9D9D9; }
