@@ -1267,7 +1267,30 @@ tr:hover { background: rgba(217,217,217,0.022) !important; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(217,217,217,0.12) !important; }
 
 /* ══════════════════════════════════════════════════════════════════════════ */
+
+/* ── GLASS CARD (Stitch) ── */
+.glass-card { background:rgba(217,217,217,0.03); backdrop-filter:blur(20px); border:1px solid rgba(217,217,217,0.1); transition:all 0.3s cubic-bezier(0.4,0,0.2,1); }
+.glass-card:hover { background:rgba(217,217,217,0.055); border-color:rgba(217,217,217,0.2); }
 </style>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      colors: {
+        "background": "#121212",
+        "surface": "#131313",
+        "on-surface": "#D9D9D9",
+        "primary": "#D9D9D9",
+        "on-primary": "#121212",
+        "on-surface-variant": "rgba(217,217,217,0.6)",
+        "surface-container": "rgba(217,217,217,0.05)",
+      }
+    }
+  }
+}
+</script>
 </head>
 <body>
 <div id="atmosphere"></div>
@@ -1394,43 +1417,32 @@ tr:hover { background: rgba(217,217,217,0.022) !important; }
 
     <!-- DASHBOARD -->
     <div class="page active" id="page-dashboard">
-
-      <!-- HERO: Full-width revenue chart -->
-      <div class="dash-hero" style="margin-bottom:12px">
-        <div class="dash-hero-top">
-          <div>
-            <div class="dash-hero-label"><span data-i18n="metric_revenue">Revenue</span> · <span id="dash-chart-period-label">This month</span></div>
-            <div class="dash-hero-amount">
-              <div class="dash-hero-num" id="chart-total">₽ —</div>
-              <div class="chart-badge" id="chart-badge"></div>
-            </div>
-            <div class="dash-hero-sub" id="chart-sub"></div>
-          </div>
-          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:10px">
-            <div class="chart-periods">
-              <button class="chart-period" onclick="setChartPeriod('week',this)" data-i18n="period_week">Week</button>
-              <button class="chart-period active" onclick="setChartPeriod('month',this)" data-i18n="period_month">Month</button>
-              <button class="chart-period" onclick="setChartPeriod('year',this)" data-i18n="period_year">Year</button>
-            </div>
-            <div id="goal-wrap-mini" style="display:none;align-items:center;gap:10px;background:var(--s3);border:1px solid var(--line2);border-radius:8px;padding:6px 12px;cursor:pointer" onclick="openGoalModal()">
-              <div style="font-size:11px;color:var(--g2)" data-i18n="goal_label">Revenue Goal</div>
-              <div style="display:flex;align-items:center;gap:5px">
-                <div style="font-size:12px;font-weight:700;color:var(--white);font-variant-numeric:tabular-nums" id="goal-mini-current">₽ 0</div>
-                <div style="font-size:10px;color:var(--g2)">/</div>
-                <div style="font-size:11px;color:var(--g1);font-variant-numeric:tabular-nums" id="goal-mini-target">₽ 0</div>
-              </div>
-              <div style="width:50px;height:2px;background:var(--s4);border-radius:2px;overflow:hidden"><div id="goal-mini-fill" style="height:100%;width:0%;background:var(--white);transition:width 0.8s;border-radius:2px"></div></div>
-            </div>
-            <div id="dash-chart-stats" style="display:none"></div>
-          </div>
+      <!-- Header -->
+      <div class="flex items-end justify-between mb-6">
+        <div>
+          <div class="dash-greeting" id="dash-chart-period-label-wrap">Dashboard</div>
+          <div class="dash-title">Welcome back 👋</div>
         </div>
-        <div style="position:relative;height:260px;margin-top:16px">
-          <canvas id="revenue-chart"></canvas>
+        <div class="flex items-center gap-3">
+          <div id="goal-wrap-mini" style="display:none;align-items:center;gap:10px;background:rgba(217,217,217,0.06);border:1px solid rgba(217,217,217,0.1);border-radius:10px;padding:6px 14px;cursor:pointer" onclick="openGoalModal()">
+            <div style="font-size:11px;color:var(--g2)" data-i18n="goal_label">Revenue Goal</div>
+            <div style="display:flex;align-items:center;gap:5px">
+              <div style="font-size:12px;font-weight:700;color:var(--white);font-variant-numeric:tabular-nums" id="goal-mini-current">₽ 0</div>
+              <div style="font-size:10px;color:var(--g2)">/</div>
+              <div style="font-size:11px;color:var(--g1);font-variant-numeric:tabular-nums" id="goal-mini-target">₽ 0</div>
+            </div>
+            <div style="width:50px;height:2px;background:rgba(217,217,217,0.1);border-radius:2px;overflow:hidden"><div id="goal-mini-fill" style="height:100%;width:0%;background:var(--white);transition:width 0.8s;border-radius:2px"></div></div>
+          </div>
+          <div class="chart-periods">
+            <button class="chart-period" onclick="setChartPeriod('week',this)" data-i18n="period_week">Week</button>
+            <button class="chart-period active" onclick="setChartPeriod('month',this)" data-i18n="period_month">Month</button>
+            <button class="chart-period" onclick="setChartPeriod('year',this)" data-i18n="period_year">Year</button>
+          </div>
         </div>
       </div>
 
-      <!-- 4 metric cards -->
-      <div class="metrics">
+      <!-- 4 Metric cards -->
+      <div class="metrics" style="margin-bottom:12px">
         <div class="metric">
           <div class="metric-top">
             <div class="metric-name" data-i18n="metric_revenue">Revenue</div>
@@ -1477,54 +1489,76 @@ tr:hover { background: rgba(217,217,217,0.022) !important; }
         </div>
       </div>
 
-      <!-- Bottom: 3 panels side by side -->
-      <div class="dash-grid-2">
-        <div class="dash-panel">
-          <div class="dash-panel-title">
+      <!-- Bento grid: top row -->
+      <div style="display:grid;grid-template-columns:1fr 380px;gap:12px;margin-bottom:12px">
+        <!-- Revenue chart -->
+        <div class="glass-card rounded-2xl p-6 overflow-hidden relative">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px">
+            <div>
+              <div class="dash-hero-label"><span data-i18n="metric_revenue">Revenue</span> · <span id="dash-chart-period-label">This month</span></div>
+              <div class="dash-hero-amount">
+                <div class="dash-hero-num" id="chart-total">₽ —</div>
+                <div class="chart-badge up" id="chart-badge"></div>
+              </div>
+              <div class="dash-hero-sub" id="chart-sub"></div>
+            </div>
+          </div>
+          <div style="position:relative;height:220px">
+            <canvas id="revenue-chart"></canvas>
+          </div>
+        </div>
+        <!-- In progress -->
+        <div class="glass-card rounded-2xl p-5 flex flex-col">
+          <div class="dash-panel-title" style="margin-bottom:14px">
             <span data-i18n="dash_inprogress">In progress</span>
             <span class="dash-panel-link" onclick="go('projects',document.querySelectorAll('.nav-item')[3])" data-i18n="dash_all">All →</span>
           </div>
-          <div id="dash-inprogress"></div>
+          <div id="dash-inprogress" style="flex:1"></div>
         </div>
-        <div class="dash-panel">
-          <div class="dash-panel-title">
+      </div>
+
+      <!-- Bento grid: bottom row -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 380px;gap:12px">
+        <!-- Deadlines -->
+        <div class="glass-card rounded-2xl p-5">
+          <div class="dash-panel-title" style="margin-bottom:14px">
             <span data-i18n="dash_deadlines_title">Upcoming deadlines</span>
             <span class="dash-panel-link" onclick="go('calendar',document.querySelectorAll('.nav-item')[1])" data-i18n="dash_all">All →</span>
           </div>
           <div id="dash-deadlines-panel"></div>
         </div>
-        <div class="dash-panel">
-          <div class="dash-panel-title">
+        <!-- Unpaid -->
+        <div class="glass-card rounded-2xl p-5">
+          <div class="dash-panel-title" style="margin-bottom:14px">
             <span data-i18n="dash_unpaid">Unpaid invoices</span>
             <span class="dash-panel-link" onclick="go('finance',document.querySelectorAll('.nav-item')[6])" data-i18n="dash_all">All →</span>
           </div>
           <div id="dash-unpaid"></div>
         </div>
-      </div><!-- /dash-grid-2 -->
-
-      <!-- Hidden goal bar (full, shown only if goal set) -->
-      <div class="goal-bar-wrap" id="goal-wrap" style="display:none;margin-top:16px">
-        <div class="goal-bar-header">
-          <div class="goal-bar-label"><span data-i18n="goal_label">Revenue Goal</span> · <span id="goal-period-label">This month</span></div>
-          <div class="goal-bar-right">
-            <span class="goal-amount" id="goal-current">₽ 0</span>
-            <span class="goal-sep" data-i18n="goal_of">of</span>
-            <span class="goal-target" id="goal-target-label">₽ 0</span>
-            <button class="goal-edit-btn" onclick="openGoalModal()" data-i18n="btn_edit_goal">Edit goal</button>
+        <!-- Revenue goal -->
+        <div class="glass-card rounded-2xl p-5" id="goal-wrap" style="display:none">
+          <div class="goal-bar-header">
+            <div class="goal-bar-label"><span data-i18n="goal_label">Revenue Goal</span> · <span id="goal-period-label">This month</span></div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span class="goal-amount" id="goal-current">₽ 0</span>
+              <span class="goal-sep">/</span>
+              <span class="goal-target" id="goal-target-label">₽ 0</span>
+              <button class="goal-edit-btn" onclick="openGoalModal()">Edit</button>
+            </div>
           </div>
+          <div class="goal-track" style="margin-top:12px"><div class="goal-fill" id="goal-fill" style="width:0%"></div></div>
+          <div class="goal-pct" id="goal-pct" style="margin-top:6px"></div>
         </div>
-        <div class="goal-track"><div class="goal-fill" id="goal-fill" style="width:0%"></div></div>
-        <div class="goal-pct" id="goal-pct"></div>
       </div>
-      <!-- Hidden ids for metric compat -->
+
+      <!-- Hidden compat -->
       <div style="display:none">
         <div id="m-avg-budget"></div><div id="m-completion"></div>
+        <div id="dash-deadlines"></div>
+        <textarea id="quick-notes-area" oninput="saveNote(this)"></textarea>
+        <span id="notes-saved"></span>
+        <div id="dash-chart-stats"></div>
       </div>
-      <!-- Hidden compat elements (used by JS) -->
-      <div id="dash-deadlines" style="display:none"></div>
-      <textarea id="quick-notes-area" style="display:none" oninput="saveNote(this)"></textarea>
-      <span id="notes-saved" style="display:none"></span>
-
     </div>
 
     <!-- CALENDAR -->
