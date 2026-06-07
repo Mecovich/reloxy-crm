@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" class="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -111,7 +111,7 @@ body.sidebar-collapsed .main { margin-left:0; }
 
 /* ── PAGES ── */
 .page { display:none; }
-.page.active { display:block; height:calc(100vh - 56px); overflow-y:auto; overflow-x:hidden; padding:32px 40px; animation:fadeup .22s cubic-bezier(.16,1,.3,1); }
+.page.active { display:block; height:calc(100vh - 64px); overflow-y:auto; overflow-x:hidden; padding:32px 40px; animation:fadeup .22s cubic-bezier(.16,1,.3,1); }
 @keyframes fadeup { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
 .page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:32px; }
 .page-header h1 { font-size:22px; font-weight:700; letter-spacing:-0.7px; line-height:1.2; color:var(--white); }
@@ -1271,6 +1271,20 @@ tr:hover { background: rgba(217,217,217,0.022) !important; }
 /* ── GLASS CARD (Stitch) ── */
 .glass-card { background:rgba(217,217,217,0.03); backdrop-filter:blur(20px); border:1px solid rgba(217,217,217,0.1); transition:all 0.3s cubic-bezier(0.4,0,0.2,1); }
 .glass-card:hover { background:rgba(217,217,217,0.055); border-color:rgba(217,217,217,0.2); }
+/* Stitch nav active states */
+.nav-item { transition: all 0.15s; }
+.nav-item.active { color:#D9D9D9 !important; background:rgba(217,217,217,0.07) !important; }
+.nav-item.active span.material-symbols-outlined { font-variation-settings:'FILL' 1 !important; }
+.user-popup.open { opacity:1 !important; transform:translateY(0) scale(1) !important; pointer-events:all !important; }
+/* ── STITCH OVERRIDES ── */
+.glass-popover { background:rgba(18,18,18,0.8); backdrop-filter:blur(40px); border:1px solid rgba(217,217,217,0.15); }
+.primary-glow { box-shadow:0 0 15px rgba(217,217,217,0.2); }
+.path-animate { stroke-dasharray:1000; stroke-dashoffset:1000; animation:dash 3s ease-in-out forwards; }
+@keyframes dash { to { stroke-dashoffset:0; } }
+input::placeholder { color:rgba(217,217,217,0.4); }
+.stitch-atmosphere { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0; overflow:hidden; opacity:0.3; }
+.stitch-orb-1 { position:absolute; top:-10%; right:-5%; width:40vw; height:40vw; background:rgba(217,217,217,0.05); border-radius:50%; filter:blur(120px); }
+.stitch-orb-2 { position:absolute; bottom:10%; left:-10%; width:50vw; height:50vw; background:rgba(255,255,255,0.05); border-radius:50%; filter:blur(150px); }
 </style>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <script>
@@ -1293,125 +1307,131 @@ tailwind.config = {
 </script>
 </head>
 <body>
-<div id="atmosphere"></div>
-<aside class="sidebar">
-  <div class="brand">
-    <div class="brand-logo">
-      <img src="/logo.svg" alt="Reloxy">
+<div class="stitch-atmosphere">
+  <div class="stitch-orb-1"></div>
+  <div class="stitch-orb-2"></div>
+</div>
+<aside class="fixed left-0 top-0 h-full w-72 bg-background border-r border-white/5 flex flex-col py-6 px-2 z-50" style="background:#121212">
+  <div class="px-4 mb-8 flex items-center gap-3">
+    <div class="w-10 h-10 flex items-center justify-center flex-shrink-0">
+      <img src="/logo.svg" alt="Reloxy" style="width:28px;height:28px;object-fit:contain">
     </div>
-    <div class="brand-name">Reloxy</div>
+    <span class="text-2xl font-bold text-primary" style="color:#D9D9D9;letter-spacing:-0.5px">Reloxy</span>
   </div>
-  <nav class="nav">
-    <div class="nav-group">
-      <div class="nav-item active" onclick="go('dashboard',this)">
-        <span class="material-symbols-outlined nav-ms">dashboard</span>
-        <span data-i18n="nav_dashboard">Dashboard</span>
-      </div>
-      <div class="nav-item" onclick="go('calendar',this)">
-        <span class="material-symbols-outlined nav-ms">calendar_today</span>
-        <span data-i18n="nav_calendar">Calendar</span>
-      </div>
-      <div class="nav-item" onclick="go('clients',this)">
-        <span class="material-symbols-outlined nav-ms">group</span>
-        <span data-i18n="nav_clients">Clients</span> <span class="nav-count" id="nc-clients">0</span>
-      </div>
-      <div class="nav-item" onclick="go('projects',this)">
-        <span class="material-symbols-outlined nav-ms">account_tree</span>
-        <span data-i18n="nav_projects">Projects</span> <span class="nav-count" id="nc-projects">0</span>
-      </div>
-      <div class="nav-item" onclick="go('funnel',this)">
-        <span class="material-symbols-outlined nav-ms">filter_list</span>
-        <span data-i18n="nav_pipeline">Pipeline</span>
-      </div>
-      <div class="nav-item" onclick="go('team',this)">
-        <span class="material-symbols-outlined nav-ms">badge</span>
-        <span data-i18n="nav_team">Team</span> <span class="nav-count" id="nc-team">0</span>
-      </div>
-      <div class="nav-item" onclick="go('finance',this)">
-        <span class="material-symbols-outlined nav-ms">payments</span>
-        <span data-i18n="nav_finance">Finance</span>
-      </div>
-      <div class="nav-item" onclick="go('analytics',this)">
-        <span class="material-symbols-outlined nav-ms">insights</span>
-        <span data-i18n="nav_analytics">Analytics</span>
-      </div>
-      <div class="nav-item" onclick="go('tasks',this)">
-        <span class="material-symbols-outlined nav-ms">task_alt</span>
-        <span>Tasks</span>
-      </div>
-      <div class="nav-item" onclick="go('expenses',this)">
-        <span class="material-symbols-outlined nav-ms">receipt_long</span>
-        <span>Expenses</span>
-      </div>
-      <div class="nav-item" onclick="go('reports',this)">
-        <span class="material-symbols-outlined nav-ms">description</span>
-        <span>Reports</span>
-      </div>
-      <div class="nav-item" onclick="go('notes',this)">
-        <span class="material-symbols-outlined nav-ms">edit_note</span>
-        <span data-i18n="nav_notes">Notes</span>
-      </div>
+  <nav class="flex-1 space-y-0.5 overflow-y-auto" style="scrollbar-width:none">
+    <div class="nav-item flex items-center gap-4 py-3 px-4 mx-2 rounded-lg cursor-pointer transition-all text-primary bg-white/5 active" style="color:#D9D9D9;background:rgba(217,217,217,0.07)" onclick="go('dashboard',this)" data-page="dashboard">
+      <span class="material-symbols-outlined" style="font-size:20px;font-variation-settings:'FILL' 1">dashboard</span>
+      <span class="text-sm font-medium" data-i18n="nav_dashboard">Dashboard</span>
+      <span class="nav-count ml-auto text-xs opacity-40" id="nc-dashboard" style="display:none"></span>
+    </div>
+    <div class="nav-item flex items-center gap-4 py-3 px-4 mx-2 rounded-lg cursor-pointer transition-all text-on-surface-variant hover:text-primary hover:bg-white/5" style="color:rgba(217,217,217,0.5)" onclick="go('calendar',this)" data-page="calendar">
+      <span class="material-symbols-outlined" style="font-size:20px">calendar_today</span>
+      <span class="text-sm font-medium" data-i18n="nav_calendar">Calendar</span>
+    </div>
+    <div class="nav-item flex items-center gap-4 py-3 px-4 mx-2 rounded-lg cursor-pointer transition-all text-on-surface-variant hover:text-primary hover:bg-white/5" style="color:rgba(217,217,217,0.5)" onclick="go('clients',this)" data-page="clients">
+      <span class="material-symbols-outlined" style="font-size:20px">group</span>
+      <span class="text-sm font-medium" data-i18n="nav_clients">Clients</span>
+      <span class="nav-count ml-auto text-xs opacity-40" id="nc-clients"></span>
+    </div>
+    <div class="nav-item flex items-center gap-4 py-3 px-4 mx-2 rounded-lg cursor-pointer transition-all text-on-surface-variant hover:text-primary hover:bg-white/5" style="color:rgba(217,217,217,0.5)" onclick="go('projects',this)" data-page="projects">
+      <span class="material-symbols-outlined" style="font-size:20px">account_tree</span>
+      <span class="text-sm font-medium" data-i18n="nav_projects">Projects</span>
+      <span class="nav-count ml-auto text-xs opacity-40" id="nc-projects"></span>
+    </div>
+    <div class="nav-item flex items-center gap-4 py-3 px-4 mx-2 rounded-lg cursor-pointer transition-all text-on-surface-variant hover:text-primary hover:bg-white/5" style="color:rgba(217,217,217,0.5)" onclick="go('funnel',this)" data-page="funnel">
+      <span class="material-symbols-outlined" style="font-size:20px">filter_list</span>
+      <span class="text-sm font-medium" data-i18n="nav_pipeline">Pipeline</span>
+    </div>
+    <div class="nav-item flex items-center gap-4 py-3 px-4 mx-2 rounded-lg cursor-pointer transition-all text-on-surface-variant hover:text-primary hover:bg-white/5" style="color:rgba(217,217,217,0.5)" onclick="go('team',this)" data-page="team">
+      <span class="material-symbols-outlined" style="font-size:20px">badge</span>
+      <span class="text-sm font-medium" data-i18n="nav_team">Team</span>
+      <span class="nav-count ml-auto text-xs opacity-40" id="nc-team"></span>
+    </div>
+    <div class="nav-item flex items-center gap-4 py-3 px-4 mx-2 rounded-lg cursor-pointer transition-all text-on-surface-variant hover:text-primary hover:bg-white/5" style="color:rgba(217,217,217,0.5)" onclick="go('finance',this)" data-page="finance">
+      <span class="material-symbols-outlined" style="font-size:20px">payments</span>
+      <span class="text-sm font-medium" data-i18n="nav_finance">Finance</span>
+    </div>
+    <div class="nav-item flex items-center gap-4 py-3 px-4 mx-2 rounded-lg cursor-pointer transition-all text-on-surface-variant hover:text-primary hover:bg-white/5" style="color:rgba(217,217,217,0.5)" onclick="go('analytics',this)" data-page="analytics">
+      <span class="material-symbols-outlined" style="font-size:20px">insights</span>
+      <span class="text-sm font-medium" data-i18n="nav_analytics">Analytics</span>
+    </div>
+    <div class="nav-item flex items-center gap-4 py-3 px-4 mx-2 rounded-lg cursor-pointer transition-all text-on-surface-variant hover:text-primary hover:bg-white/5" style="color:rgba(217,217,217,0.5)" onclick="go('tasks',this)" data-page="tasks">
+      <span class="material-symbols-outlined" style="font-size:20px">task_alt</span>
+      <span class="text-sm font-medium">Tasks</span>
+    </div>
+    <div class="nav-item flex items-center gap-4 py-3 px-4 mx-2 rounded-lg cursor-pointer transition-all text-on-surface-variant hover:text-primary hover:bg-white/5" style="color:rgba(217,217,217,0.5)" onclick="go('expenses',this)" data-page="expenses">
+      <span class="material-symbols-outlined" style="font-size:20px">receipt_long</span>
+      <span class="text-sm font-medium">Expenses</span>
+    </div>
+    <div class="nav-item flex items-center gap-4 py-3 px-4 mx-2 rounded-lg cursor-pointer transition-all text-on-surface-variant hover:text-primary hover:bg-white/5" style="color:rgba(217,217,217,0.5)" onclick="go('reports',this)" data-page="reports">
+      <span class="material-symbols-outlined" style="font-size:20px">description</span>
+      <span class="text-sm font-medium">Reports</span>
+    </div>
+    <div class="nav-item flex items-center gap-4 py-3 px-4 mx-2 rounded-lg cursor-pointer transition-all text-on-surface-variant hover:text-primary hover:bg-white/5" style="color:rgba(217,217,217,0.5)" onclick="go('notes',this)" data-page="notes">
+      <span class="material-symbols-outlined" style="font-size:20px">edit_note</span>
+      <span class="text-sm font-medium">Notes</span>
     </div>
   </nav>
+  <div class="px-4 py-4 border-t border-white/5" id="sidebar-bottom-area">
+    <div class="flex items-center gap-3 p-2 rounded-xl cursor-pointer hover:bg-white/5 transition-all" onclick="popupGoSettings()" id="user-trigger">
+      <div class="w-9 h-9 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-sm font-bold flex-shrink-0" id="popup-initials-sb" style="color:#D9D9D9">—</div>
+      <div class="min-w-0">
+        <div class="text-sm font-bold truncate" style="color:#D9D9D9" id="sb-user-name">...</div>
+        <div class="text-xs opacity-50 truncate" style="color:#D9D9D9" id="sb-user-role">Administrator</div>
+      </div>
+    </div>
+  </div>
+  <!-- hidden compat divs for JS -->
+  <div style="display:none">
+    <div class="user-row"><div class="user-name" id="topbar-username-compat"></div></div>
+    <div class="user-popup" id="user-popup-compat"></div>
+    <div id="topbar-title"></div>
+  </div>
 </aside>
 
-<main class="main">
-  <div class="topbar">
-    <button class="sidebar-toggle" onclick="toggleSidebar()" title="Toggle sidebar">
-      <svg id="sidebar-toggle-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-        <rect x="1" y="2" width="14" height="12" rx="2"/>
-        <line x1="6" y1="2" x2="6" y2="14"/>
-      </svg>
-    </button>
-    <div class="topbar-title" id="topbar-title">Dashboard</div>
-    <div class="search">
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-        <circle cx="6.5" cy="6.5" r="4.5"/><line x1="10" y1="10" x2="14" y2="14"/>
-      </svg>
-      <input placeholder="Search..." id="search-input" data-i18n-ph="search_ph" oninput="doSearch(this.value)" onclick="cmdOpen()" readonly style="cursor:pointer">
-      <span style="font-size:11px;color:var(--g3);background:var(--s3);border:1px solid var(--line2);border-radius:5px;padding:1px 6px;white-space:nowrap">⌘K</span>
+<main style="margin-left:288px;flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden">
+  <header style="height:64px;flex-shrink:0;background:rgba(18,18,18,0.8);backdrop-filter:blur(40px);border-bottom:1px solid rgba(217,217,217,0.05);display:flex;align-items:center;justify-content:space-between;padding:0 24px;gap:16px;position:sticky;top:0;z-index:40">
+    <div style="display:flex;align-items:center;background:rgba(255,255,255,0.05);border-radius:8px;padding:8px 16px;border:1px solid rgba(255,255,255,0.1);max-width:400px;width:100%;gap:12px;transition:all 0.2s" onfocusin="this.style.borderColor='rgba(217,217,217,0.3)'" onfocusout="this.style.borderColor='rgba(255,255,255,0.1)'">
+      <span class="material-symbols-outlined" style="font-size:20px;color:rgba(217,217,217,0.6)">search</span>
+      <input id="search-input" data-i18n-ph="search_ph" oninput="doSearch(this.value)" onclick="cmdOpen()" readonly style="background:transparent;border:none;outline:none;font-size:14px;color:#D9D9D9;width:100%;font-family:inherit;cursor:pointer" placeholder="Search...">
+      <span style="font-size:11px;color:rgba(217,217,217,0.3);background:rgba(217,217,217,0.07);border:1px solid rgba(217,217,217,0.1);border-radius:5px;padding:1px 6px;white-space:nowrap">⌘K</span>
     </div>
-    <div class="topbar-actions">
-      <!-- Notifications -->
-      <div class="topbar-btn topbar-notif" title="Notifications">
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-          <path d="M8 1a5 5 0 015 5v3l1.5 2.5H1.5L3 9V6a5 5 0 015-5z"/>
-          <path d="M6.5 13a1.5 1.5 0 003 0"/>
-        </svg>
+    <div style="display:flex;align-items:center;gap:8px">
+      <div class="topbar-notif" style="position:relative;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:8px;color:rgba(217,217,217,0.5);transition:all 0.15s" onmouseover="this.style.background='rgba(217,217,217,0.07)';this.style.color='#D9D9D9'" onmouseout="this.style.background='transparent';this.style.color='rgba(217,217,217,0.5)'">
+        <span class="material-symbols-outlined" style="font-size:22px">notifications</span>
+        <span class="topbar-notif-dot" style="position:absolute;top:8px;right:8px;width:6px;height:6px;border-radius:50%;background:#f87171;border:1.5px solid #121212"></span>
       </div>
-      <!-- Topbar user chip + dropdown -->
-      <div class="tb-user-wrap" id="tb-user-wrap">
-        <div class="tb-user-chip" onclick="toggleUserPopup(event)" id="tb-user-chip">
-          <div class="tb-user-name" id="topbar-username">...</div>
-          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.6" style="opacity:0.3;flex-shrink:0"><path d="M2 3.5L5 6.5 8 3.5"/></svg>
+      <div style="width:1px;height:24px;background:rgba(217,217,217,0.08);margin:0 4px"></div>
+      <div class="tb-user-wrap" id="tb-user-wrap" style="position:relative">
+        <div id="tb-user-chip" onclick="toggleUserPopup(event)" style="display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:8px;cursor:pointer;transition:all 0.15s;border:1px solid rgba(217,217,217,0.1)" onmouseover="this.style.background='rgba(217,217,217,0.07)'" onmouseout="this.style.background='transparent'">
+          <div class="tb-user-name" id="topbar-username" style="font-size:13px;font-weight:600;color:#D9D9D9;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">...</div>
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.6" style="opacity:0.3;color:#D9D9D9"><path d="M2 3.5L5 6.5 8 3.5"/></svg>
         </div>
-        <!-- hidden compat -->
         <span id="topbar-avatar" style="display:none"></span>
-        <!-- Dropdown -->
-        <div class="user-popup" id="user-popup">
-          <div class="user-popup-header">
-            <div class="user-popup-avatar" id="popup-initials">—</div>
+        <div class="user-popup" id="user-popup" style="position:absolute;top:calc(100% + 8px);right:0;width:220px;background:#1a1a1a;border:1px solid rgba(217,217,217,0.12);border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.55);z-index:200;overflow:hidden;opacity:0;transform:translateY(-6px) scale(0.97);pointer-events:none;transition:opacity 0.16s,transform 0.16s;transform-origin:top right">
+          <div style="padding:14px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(217,217,217,0.06)">
+            <div class="user-popup-avatar" id="popup-initials" style="width:38px;height:38px;border-radius:50%;background:rgba(217,217,217,0.1);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#D9D9D9;flex-shrink:0">—</div>
             <div style="min-width:0">
-              <div class="user-popup-name" id="popup-name">...</div>
-              <div class="user-popup-email" id="popup-email">...</div>
+              <div class="user-popup-name" id="popup-name" style="font-size:13px;font-weight:700;color:#D9D9D9">...</div>
+              <div class="user-popup-email" id="popup-email" style="font-size:11px;color:rgba(217,217,217,0.5);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">...</div>
             </div>
           </div>
-          <div class="user-popup-list">
-            <div class="user-popup-item" onclick="popupGoSettings()">
+          <div style="padding:6px 0">
+            <div class="user-popup-item" onclick="popupGoSettings()" style="display:flex;align-items:center;gap:11px;padding:9px 16px;font-size:13px;color:rgba(217,217,217,0.5);cursor:pointer;transition:all 0.1s" onmouseover="this.style.background='rgba(255,255,255,0.05)';this.style.color='#D9D9D9'" onmouseout="this.style.background='transparent';this.style.color='rgba(217,217,217,0.5)'">
               <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v1.5M8 13.5V15M1 8h1.5M13.5 8H15M3.05 3.05l1.06 1.06M11.89 11.89l1.06 1.06M3.05 12.95l1.06-1.06M11.89 4.11l1.06-1.06"/></svg>
               <span data-i18n="nav_settings">Settings</span>
             </div>
-            <div class="user-popup-divider"></div>
-            <div class="user-popup-item danger" onclick="logout()">
+            <div style="height:1px;background:rgba(217,217,217,0.06);margin:4px 0"></div>
+            <div class="user-popup-item danger" onclick="logout()" style="display:flex;align-items:center;gap:11px;padding:9px 16px;font-size:13px;color:#f87171;cursor:pointer;transition:all 0.1s" onmouseover="this.style.background='rgba(248,113,113,0.08)'" onmouseout="this.style.background='transparent'">
               <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2H3a1 1 0 00-1 1v10a1 1 0 001 1h3M10 11l3-3-3-3M13 8H6"/></svg>
               <span data-i18n="sign_out">Sign out</span>
             </div>
           </div>
         </div>
       </div>
+      <button class="btn btn-white" id="add-btn" onclick="openAddModal()" data-i18n="btn_add" style="margin-left:8px;padding:8px 18px;border-radius:10px;font-weight:700;font-size:13px;background:#D9D9D9;color:#0a0a0a;border:none;cursor:pointer;transition:all 0.15s">+ Add new</button>
     </div>
-    <button class="btn btn-white" id="add-btn" onclick="openAddModal()" data-i18n="btn_add">+ Add new</button>
-  </div>
+  </header>
 
   <div class="content">
 
