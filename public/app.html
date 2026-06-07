@@ -992,6 +992,281 @@ td { border-bottom-color:var(--line) !important; }
 
 /* ── CLIENTS CARD OVERRIDES ── */
 #clients-grid .client-card { backdrop-filter:blur(20px) !important; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   STITCH REDESIGN — Midnight Glass v2
+   Based on Google Stitch screens: Dashboard · Finance · Projects · Tasks
+   · Calendar · Team · Notes
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Sidebar: frosted glass panel ── */
+.sidebar {
+  background: rgba(14,14,14,0.75) !important;
+  backdrop-filter: blur(28px) !important;
+  -webkit-backdrop-filter: blur(28px) !important;
+  border-right: 1px solid rgba(217,217,217,0.055) !important;
+}
+
+/* ── Active nav: left-border indicator (Stitch Finance pattern) ── */
+.nav-item {
+  border-left: 2px solid transparent !important;
+  border-radius: 0 10px 10px 0 !important;
+  margin: 2px 8px 2px 0 !important;
+  padding-left: 14px !important;
+}
+.nav-item.active {
+  border-left-color: rgba(217,217,217,0.6) !important;
+  background: rgba(217,217,217,0.08) !important;
+  color: var(--accent) !important;
+}
+.nav-item:hover {
+  border-left-color: rgba(217,217,217,0.2) !important;
+  background: rgba(217,217,217,0.04) !important;
+}
+
+/* ── Topbar: stronger glass ── */
+.topbar {
+  height: 62px !important;
+  background: rgba(10,10,10,0.88) !important;
+  backdrop-filter: blur(40px) !important;
+  -webkit-backdrop-filter: blur(40px) !important;
+  border-bottom: 1px solid rgba(217,217,217,0.055) !important;
+  padding: 0 32px !important;
+}
+.page.active { height: calc(100vh - 62px) !important; }
+
+/* ── Search: pill-shaped (Stitch Finance) ── */
+.search {
+  border-radius: 24px !important;
+  width: 280px !important;
+  padding: 8px 16px !important;
+  background: rgba(217,217,217,0.04) !important;
+  border-color: rgba(217,217,217,0.08) !important;
+}
+.search:focus-within {
+  border-color: rgba(217,217,217,0.22) !important;
+  background: rgba(217,217,217,0.06) !important;
+}
+
+/* ── Metric cards: hover lift (Stitch Finance glass-panel) ── */
+.metric {
+  transition: all 0.28s cubic-bezier(.16,1,.3,1) !important;
+}
+.metric:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.65), 0 4px 16px rgba(0,0,0,0.4) !important;
+  border-color: rgba(217,217,217,0.18) !important;
+}
+
+/* ── Finance cards: hover lift ── */
+.fin-card {
+  transition: all 0.28s cubic-bezier(.16,1,.3,1) !important;
+}
+.fin-card:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.65) !important;
+}
+
+/* ── Dashboard panels: true glass ── */
+.dash-panel {
+  background: rgba(217,217,217,0.025) !important;
+  border: 1px solid rgba(217,217,217,0.07) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-radius: 16px !important;
+}
+.dash-panel-title {
+  color: var(--g1) !important;
+  font-size: 10px !important;
+  letter-spacing: 0.7px !important;
+  text-transform: uppercase !important;
+}
+
+/* ── Hero revenue card: enhanced ── */
+.dash-hero {
+  background: rgba(217,217,217,0.032) !important;
+  border: 1px solid rgba(217,217,217,0.09) !important;
+  border-radius: 22px !important;
+}
+
+/* ── All badges: pill-shaped (Stitch pattern) ── */
+.badge,
+.inv-status,
+.metric-badge,
+.chart-badge,
+.plan-badge,
+.staff-status,
+.k-dl-badge,
+.k-budget-tag { border-radius: 999px !important; }
+
+/* ── Status badges: slightly larger padding ── */
+.inv-status { padding: 3px 12px !important; font-size: 10.5px !important; }
+.staff-status { padding: 3px 12px !important; font-size: 10.5px !important; }
+
+/* ── Topbar user chip: pill ── */
+.tb-user-chip { border-radius: 20px !important; }
+.user-avatar  { border-radius: 8px !important; }
+
+/* ── Kanban: glass columns ── */
+.k-col {
+  background: rgba(217,217,217,0.018) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-color: rgba(217,217,217,0.06) !important;
+  border-radius: 16px !important;
+}
+.k-card {
+  background: rgba(217,217,217,0.03) !important;
+  border-color: rgba(217,217,217,0.07) !important;
+  border-radius: 14px !important;
+}
+.k-card:hover {
+  background: rgba(217,217,217,0.065) !important;
+  border-color: rgba(217,217,217,0.18) !important;
+}
+
+/* ── Calendar: glass cells ── */
+.cal-grid {
+  border-color: rgba(217,217,217,0.05) !important;
+  background: rgba(217,217,217,0.03) !important;
+}
+.cal-day      { background: rgba(217,217,217,0.01) !important; }
+.cal-day:hover { background: rgba(217,217,217,0.04) !important; }
+.cal-day.today { background: rgba(217,217,217,0.06) !important; }
+.cal-day-head  { background: rgba(217,217,217,0.025) !important; }
+
+/* ── Analytics: glass cards ── */
+.an-card {
+  background: rgba(217,217,217,0.025) !important;
+  border: 1px solid rgba(217,217,217,0.07) !important;
+  backdrop-filter: blur(20px) !important;
+  transition: all 0.25s !important;
+}
+.an-card:hover {
+  transform: translateY(-3px) !important;
+  border-color: rgba(217,217,217,0.16) !important;
+}
+.an-section {
+  background: rgba(217,217,217,0.02) !important;
+  border: 1px solid rgba(217,217,217,0.07) !important;
+  backdrop-filter: blur(20px) !important;
+}
+
+/* ── Notes: glass wrap ── */
+.notes-page-wrap {
+  background: rgba(217,217,217,0.02) !important;
+  border: 1px solid rgba(217,217,217,0.07) !important;
+  backdrop-filter: blur(20px) !important;
+}
+
+/* ── Settings card: glass ── */
+.set-card {
+  background: rgba(217,217,217,0.025) !important;
+  border: 1px solid rgba(217,217,217,0.07) !important;
+  backdrop-filter: blur(20px) !important;
+}
+.set-input:focus {
+  border-color: rgba(217,217,217,0.25) !important;
+  box-shadow: 0 0 0 3px rgba(217,217,217,0.06) !important;
+}
+
+/* ── Task rows: glass + slide transition ── */
+.task-row {
+  background: rgba(217,217,217,0.025) !important;
+  border-color: rgba(217,217,217,0.07) !important;
+  backdrop-filter: blur(20px) !important;
+  transition: all 0.2s cubic-bezier(.16,1,.3,1) !important;
+}
+.task-row:hover {
+  border-color: rgba(217,217,217,0.18) !important;
+  background: rgba(217,217,217,0.055) !important;
+  transform: translateX(3px) !important;
+}
+
+/* ── Funnel rows: subtle hover ── */
+.funnel-row:hover {
+  background: rgba(217,217,217,0.02) !important;
+  border-radius: 10px !important;
+  padding-left: 4px !important;
+  margin-left: -4px !important;
+  transition: all 0.15s !important;
+}
+
+/* ── Table: cleaner ── */
+th {
+  color: rgba(217,217,217,0.45) !important;
+  border-bottom: 1px solid rgba(217,217,217,0.06) !important;
+}
+td { border-bottom-color: rgba(217,217,217,0.045) !important; }
+tr:hover { background: rgba(217,217,217,0.022) !important; }
+
+/* ── Modal: elevated glass ── */
+.modal {
+  background: rgba(16,16,16,0.92) !important;
+  border: 1px solid rgba(217,217,217,0.12) !important;
+  backdrop-filter: blur(48px) !important;
+  box-shadow: 0 40px 100px rgba(0,0,0,0.9), 0 0 0 1px rgba(217,217,217,0.06) !important;
+}
+
+/* ── Buttons ── */
+.btn-white {
+  background: var(--accent) !important;
+  color: #0a0a0a !important;
+  border-radius: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.1px !important;
+}
+.btn-white:hover { background: #c8c8c8 !important; transform: scale(1.01); }
+.btn-ghost { border-radius: 10px !important; }
+
+/* ── Atmosphere: bigger orbs ── */
+#atmosphere::before {
+  background: rgba(217,217,217,0.04) !important;
+  width: 45vw !important;
+  height: 45vw !important;
+  top: -15% !important;
+  right: -8% !important;
+}
+#atmosphere::after {
+  background: rgba(217,217,217,0.02) !important;
+  width: 55vw !important;
+  height: 55vw !important;
+  bottom: 5% !important;
+  left: -12% !important;
+}
+
+/* ── Brand name: crisper ── */
+.brand { padding: 22px 16px 18px !important; }
+.brand-name {
+  font-size: 16px !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.7px !important;
+  color: var(--accent) !important;
+}
+
+/* ── Section headers: uppercase ── */
+.section-title {
+  font-size: 11px !important;
+  letter-spacing: 0.7px !important;
+  text-transform: uppercase !important;
+  color: rgba(217,217,217,0.5) !important;
+  font-weight: 700 !important;
+}
+.page-header h1 {
+  font-size: 24px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.04em !important;
+}
+
+/* ── Chart periods: pill-shaped ── */
+.chart-periods { border-radius: 12px !important; }
+.chart-period { border-radius: 8px !important; }
+
+/* ── Scrollbar: subtler ── */
+::-webkit-scrollbar-thumb { background: rgba(217,217,217,0.06) !important; }
+::-webkit-scrollbar-thumb:hover { background: rgba(217,217,217,0.12) !important; }
+
+/* ══════════════════════════════════════════════════════════════════════════ */
 </style>
 </head>
 <body>
