@@ -326,10 +326,7 @@ tailwind.config = {
       <button class="px-6 py-2.5 rounded-xl glass-card text-primary font-bold text-sm hover:bg-white/10 transition-all whitespace-nowrap" onclick="go('finance',document.querySelector('[data-page=finance]'))" data-i18n="btn_request">Request</button>
       <button class="px-6 py-2.5 rounded-xl glass-card text-primary font-bold text-sm hover:bg-white/10 transition-all whitespace-nowrap" onclick="go('finance',document.querySelector('[data-page=finance]'))" data-i18n="btn_transfer">Transfer</button>
       <button class="px-6 py-2.5 rounded-xl glass-card text-primary font-bold text-sm hover:bg-white/10 transition-all whitespace-nowrap" onclick="go('finance',document.querySelector('[data-page=finance]'))" data-i18n="btn_deposit">Deposit</button>
-      <button id="goal-wrap-mini" onclick="openGoalModal()" style="display:none" class="px-4 py-2 rounded-xl glass-card text-primary font-bold text-sm transition-all flex items-center gap-2">
-        <span id="goal-mini-current">₽ 0</span><span style="opacity:0.4">/</span><span id="goal-mini-target" style="opacity:0.6">₽ 0</span>
-        <div style="width:36px;height:2px;background:rgba(217,217,217,0.15);border-radius:2px;overflow:hidden"><div id="goal-mini-fill" style="height:100%;width:0%;background:#D9D9D9;transition:width 0.8s;border-radius:2px"></div></div>
-      </button>
+      <div id="goal-wrap-mini" style="display:none !important"><span id="goal-mini-current"></span><span id="goal-mini-target"></span><div id="goal-mini-fill"></div></div>
     </div>
   </section>
 
@@ -402,20 +399,7 @@ tailwind.config = {
       </div>
       <div id="dash-deadlines-panel" class="flex-1 space-y-3"></div>
       <!-- Goal section -->
-      <div id="goal-wrap" style="display:none;margin-top:16px;padding-top:16px;border-top:1px solid rgba(217,217,217,0.06)">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-          <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:rgba(217,217,217,0.5)" data-i18n="goal_label">Revenue Goal</span>
-          <div style="display:flex;align-items:center;gap:6px">
-            <span style="font-size:14px;font-weight:700;color:#D9D9D9;font-variant-numeric:tabular-nums" id="goal-current">₽ 0</span>
-            <span style="color:rgba(217,217,217,0.3)">/</span>
-            <span style="font-size:12px;color:rgba(217,217,217,0.5);font-variant-numeric:tabular-nums" id="goal-target-label">₽ 0</span>
-            <button onclick="openGoalModal()" style="font-size:11px;color:rgba(217,217,217,0.4);background:none;border:none;cursor:pointer;padding:2px 6px;border-radius:4px" class="hover:text-primary">Edit</button>
-          </div>
-        </div>
-        <div class="goal-track"><div class="goal-fill" id="goal-fill" style="width:0%"></div></div>
-        <div style="font-size:11px;color:rgba(217,217,217,0.4);margin-top:4px" id="goal-pct"></div>
-        <div style="display:none" id="goal-period-label"></div>
-      </div>
+      <div id="goal-wrap" style="display:none !important"><div id="goal-current"></div><div id="goal-target-label"></div><div id="goal-fill"></div><div id="goal-pct"></div><div id="goal-period-label"></div></div>
     </div>
 
   </div>
