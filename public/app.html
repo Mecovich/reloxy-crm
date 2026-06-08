@@ -1009,8 +1009,15 @@ td { border-bottom-color:var(--line) !important; }
 /* ── DASHBOARD BENTO REDESIGN (Stitch) ── */
 #page-dashboard { padding:28px 28px 60px; }
 
-.bento-welcome { display:flex; flex-wrap:wrap; align-items:flex-end; justify-content:space-between; gap:24px; margin-bottom:32px; }
-.bento-h1 { font-size:48px; font-weight:400; letter-spacing:-0.02em; line-height:48px; color:#D9D9D9; margin-bottom:8px; }
+.bento-welcome { position:relative; display:flex; flex-wrap:wrap; align-items:flex-end; justify-content:space-between; gap:24px; margin-bottom:32px; padding-bottom:8px; }
+.bento-welcome::before {
+  content:''; position:absolute; top:-60px; left:-40px; width:420px; height:260px; pointer-events:none; z-index:-1;
+  background:radial-gradient(closest-side, rgba(217,217,217,0.10), rgba(217,217,217,0.03) 55%, transparent 75%);
+  filter:blur(40px); animation:auroraDrift 16s ease-in-out infinite alternate;
+}
+@keyframes auroraDrift { 0% { transform:translate(0,0) scale(1); opacity:.7; } 50% { transform:translate(60px,30px) scale(1.15); opacity:1; } 100% { transform:translate(-30px,10px) scale(0.95); opacity:.8; } }
+.bento-h1 { font-size:48px; font-weight:400; letter-spacing:-0.02em; line-height:48px; color:#D9D9D9; margin-bottom:8px; background:linear-gradient(100deg,#fff 0%,#D9D9D9 35%,#9a9a9a 60%,#D9D9D9 100%); background-size:220% auto; -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; animation:textShine 7s ease-in-out infinite; }
+@keyframes textShine { 0%,100% { background-position:0% center; } 50% { background-position:100% center; } }
 .bento-sub { font-size:16px; font-weight:400; line-height:24px; color:rgba(217,217,217,0.60); }
 .bento-welcome-actions { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
 .bento-btn { padding:10px 24px; border-radius:16px; font-size:14px; font-weight:700; white-space:nowrap; cursor:pointer; border:none; outline:1px solid rgba(217,217,217,0.10); outline-offset:-1px; background:rgba(217,217,217,0.03); color:#D9D9D9; backdrop-filter:blur(10px); transition:all .2s; display:inline-flex; align-items:center; }
@@ -1024,8 +1031,8 @@ td { border-bottom-color:var(--line) !important; }
 .bento-col-12 { grid-column:span 12; }
 @media (max-width:1100px){ .bento-col-4,.bento-col-8,.bento-col-12{ grid-column:span 12; } }
 
-.bento-card { background:var(--glass-bg); backdrop-filter:blur(20px); border:1px solid var(--glass-border); border-radius:16px; padding:24px; transition:all .25s; }
-.bento-card:hover { background:var(--glass-bg-hover); border-color:var(--glass-border-hover); }
+.bento-card { background:var(--glass-bg); backdrop-filter:blur(20px); border:1px solid var(--glass-border); border-radius:16px; padding:24px; transition:all .28s cubic-bezier(.16,1,.3,1); box-shadow:0 1px 0 rgba(255,255,255,0.03) inset, 0 12px 32px -16px rgba(0,0,0,0.5); }
+.bento-card:hover { background:var(--glass-bg-hover); border-color:var(--glass-border-hover); transform:translateY(-2px); box-shadow:0 1px 0 rgba(255,255,255,0.05) inset, 0 20px 48px -16px rgba(0,0,0,0.6); }
 .bento-card-head { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap; }
 .bento-card-title { font-size:24px; font-weight:400; letter-spacing:0; line-height:32px; color:#D9D9D9; }
 .bento-card-desc { font-size:14px; font-weight:400; line-height:20px; color:rgba(217,217,217,0.60); margin-top:4px; }
@@ -1070,9 +1077,12 @@ td { border-bottom-color:var(--line) !important; }
 .bento-toggle { display:flex; gap:0; background:rgba(255,255,255,0.05); border-radius:16px; padding:4px; }
 .bento-toggle-opt { padding:8px 16px; border-radius:16px; font-size:12px; font-weight:700; color:rgba(217,217,217,0.40); cursor:pointer; transition:all .15s; user-select:none; }
 .bento-toggle-opt.active { background:rgba(217,217,217,0.10); color:#D9D9D9; }
-.bento-peak-card { position:absolute; min-width:160px; padding:16px; background:rgba(217,217,217,0.05); border:1px solid rgba(255,255,255,0.10); border-radius:16px; backdrop-filter:blur(12px); box-shadow:0 25px 50px -12px rgba(0,0,0,0.4); }
-.bento-peak-label { font-size:9px; font-weight:700; letter-spacing:0.18em; text-transform:uppercase; color:rgba(217,217,217,0.40); }
-.bento-peak-val { font-size:20px; font-weight:700; color:#D9D9D9; margin-top:4px; }
+.bento-peak-card { position:absolute; min-width:160px; padding:16px; background:rgba(217,217,217,0.06); border:1px solid rgba(255,255,255,0.12); border-radius:16px; backdrop-filter:blur(16px); box-shadow:0 25px 50px -12px rgba(0,0,0,0.45),0 0 0 1px rgba(255,255,255,0.02) inset; animation:peakFloat 4.5s ease-in-out infinite; }
+@keyframes peakFloat { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-5px); } }
+.bento-peak-label { font-size:9px; font-weight:700; letter-spacing:0.18em; text-transform:uppercase; color:rgba(217,217,217,0.40); display:flex; align-items:center; gap:6px; }
+.bento-peak-label::before { content:''; width:6px; height:6px; border-radius:50%; background:#D9D9D9; box-shadow:0 0 0 0 rgba(217,217,217,0.5); animation:peakPulse 2s ease-out infinite; flex-shrink:0; }
+@keyframes peakPulse { 0% { box-shadow:0 0 0 0 rgba(217,217,217,0.45); } 70% { box-shadow:0 0 0 7px rgba(217,217,217,0); } 100% { box-shadow:0 0 0 0 rgba(217,217,217,0); } }
+.bento-peak-val { font-size:20px; font-weight:700; color:#D9D9D9; margin-top:4px; text-shadow:0 0 16px rgba(217,217,217,0.25); }
 
 .bento-portfolio-row { display:grid; grid-template-columns:1fr 1fr; gap:24px; }
 @media (max-width:1100px){ .bento-portfolio-row{ grid-template-columns:1fr; } }
@@ -1143,8 +1153,10 @@ td { border-bottom-color:var(--line) !important; }
 .bento-spark-trend.up { background:rgba(217,217,217,0.12); color:#D9D9D9; }
 .bento-spark-trend.down { background:rgba(255,255,255,0.04); color:rgba(217,217,217,0.40); }
 .bento-spark-bars { display:flex; align-items:flex-end; gap:4px; height:36px; }
-.bento-spark-bar { flex:1; background:rgba(217,217,217,0.12); border-radius:3px 3px 0 0; transition:background .15s; }
+.bento-spark-bar { flex:1; background:rgba(217,217,217,0.12); border-radius:3px 3px 0 0; transition:background .15s,transform .2s cubic-bezier(.16,1,.3,1),box-shadow .2s; transform-origin:bottom; }
+.bento-spark-bar:hover { background:rgba(217,217,217,0.28); transform:scaleY(1.08); }
 .bento-spark-bar.peak { background:#D9D9D9; box-shadow:0 0 8px rgba(217,217,217,0.4); }
+.bento-spark-bar.peak:hover { box-shadow:0 0 14px rgba(217,217,217,0.6); transform:scaleY(1.08); }
 
 /* ── Donut distribution card ── */
 .bento-donut-row { display:flex; align-items:center; gap:28px; }
@@ -1406,7 +1418,7 @@ td { border-bottom-color:var(--line) !important; }
                         stroke-dasharray="528" stroke-dashoffset="528" transform="rotate(-90 100 100)"/>
               </svg>
               <div class="bento-gauge-center">
-                <div class="bento-gauge-num" id="dash-gauge-num">—<span>%</span></div>
+                <div class="bento-gauge-num" id="dash-gauge-num"><span id="dash-gauge-num-val">—</span><span>%</span></div>
                 <div class="bento-gauge-lbl" data-i18n="dash_efficiency">Efficiency</div>
               </div>
             </div>
@@ -2940,7 +2952,7 @@ function drawRevenueChart(period) {
     badge.className = 'chart-badge';
   }
 
-  document.getElementById('chart-total').textContent = '₽ ' + fmtNum(total);
+  animateCount(document.getElementById('chart-total'), total, { prefix: '₽ ' });
   const subPeriodLabel = period === 'week' ? t('period_week') : period === 'month' ? t('period_month') : t('period_year');
   document.getElementById('chart-sub').textContent = total
     ? subPeriodLabel
@@ -2953,9 +2965,50 @@ function drawRevenueChart(period) {
   const ctx = canvas.getContext('2d');
   const canvasH = canvas.parentElement?.clientHeight || 260;
   const grad = ctx.createLinearGradient(0, 0, 0, canvasH);
-  grad.addColorStop(0,   'rgba(255,255,255,0.18)');
-  grad.addColorStop(0.5, 'rgba(255,255,255,0.06)');
-  grad.addColorStop(1,   'rgba(255,255,255,0)');
+  grad.addColorStop(0,    'rgba(217,217,217,0.22)');
+  grad.addColorStop(0.35, 'rgba(217,217,217,0.09)');
+  grad.addColorStop(0.75, 'rgba(217,217,217,0.02)');
+  grad.addColorStop(1,    'rgba(217,217,217,0)');
+
+  const lineGrad = ctx.createLinearGradient(0, 0, canvas.parentElement?.clientWidth || 600, 0);
+  lineGrad.addColorStop(0,   'rgba(217,217,217,0.55)');
+  lineGrad.addColorStop(0.5, 'rgba(255,255,255,0.95)');
+  lineGrad.addColorStop(1,   'rgba(217,217,217,0.55)');
+
+  // Soft glow under the line for a premium "lit curve" look
+  const glowPlugin = {
+    id: 'lineGlow',
+    beforeDatasetsDraw(chart) {
+      const { ctx } = chart;
+      ctx.save();
+      ctx.shadowColor = 'rgba(217,217,217,0.35)';
+      ctx.shadowBlur = 14;
+      ctx.shadowOffsetY = 4;
+    },
+    afterDatasetsDraw(chart) { chart.ctx.restore(); }
+  };
+
+  // Faint horizontal guide lines for depth (drawn behind the chart)
+  const gridPlugin = {
+    id: 'softGrid',
+    beforeDraw(chart) {
+      const { ctx, chartArea: a } = chart;
+      if (!a) return;
+      ctx.save();
+      ctx.strokeStyle = 'rgba(255,255,255,0.045)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4, 6]);
+      const rows = 4;
+      for (let i = 1; i < rows; i++) {
+        const y = a.top + (a.height / rows) * i;
+        ctx.beginPath();
+        ctx.moveTo(a.left, y);
+        ctx.lineTo(a.right, y);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+  };
 
   revenueChartInstance = new Chart(ctx, {
     type: 'line',
@@ -2963,16 +3016,18 @@ function drawRevenueChart(period) {
       labels,
       datasets: [{
         data,
-        borderColor: 'rgba(255,255,255,0.9)',
-        borderWidth: 1.5,
+        borderColor: lineGrad,
+        borderWidth: 2,
+        borderCapStyle: 'round',
+        borderJoinStyle: 'round',
         backgroundColor: grad,
         fill: true,
-        tension: 0.45,
+        tension: 0.5,
         pointRadius: 0,
-        pointHoverRadius: 5,
+        pointHoverRadius: 6,
         pointHoverBackgroundColor: '#fff',
-        pointHoverBorderColor: 'rgba(255,255,255,0.15)',
-        pointHoverBorderWidth: 6,
+        pointHoverBorderColor: 'rgba(217,217,217,0.25)',
+        pointHoverBorderWidth: 7,
       }]
     },
     options: {
@@ -3021,9 +3076,9 @@ function drawRevenueChart(period) {
           border: { display: false },
         }
       },
-      animation: { duration: 500, easing: 'easeOutQuart' }
+      animation: { duration: 650, easing: 'easeOutQuart' }
     },
-    plugins: []
+    plugins: [gridPlugin, glowPlugin]
   });
 }
 
@@ -3305,7 +3360,7 @@ function renderDashboard() {
   // ── Total Portfolio (paid + pending invoice value) ──
   const portfolioTotal = paidTotal + pendingTotal;
   const ptEl = document.getElementById('dash-portfolio-total');
-  if (ptEl) ptEl.textContent = portfolioTotal ? fmt(portfolioTotal) : '—';
+  if (ptEl) { if (portfolioTotal) animateCount(ptEl, portfolioTotal, { prefix: '₽ ', duration: 1100 }); else ptEl.textContent = '—'; }
   const pbEl = document.getElementById('dash-portfolio-badge');
   if (pbEl) {
     let pct = 0;
@@ -3336,7 +3391,7 @@ function renderDashboard() {
   const gaugeTrend = document.getElementById('dash-gauge-trend');
   if (gaugeNum && gaugeFill) {
     const eff = projects.length ? completion : 0;
-    gaugeNum.innerHTML = `${eff}<span>%</span>`;
+    animateCount(document.getElementById('dash-gauge-num-val'), eff, { format: n => Math.round(n), duration: 1000 });
     const circumference = 2 * Math.PI * 84;
     const offset = circumference - (eff/100) * circumference;
     gaugeFill.setAttribute('stroke-dasharray', String(circumference));
@@ -4794,6 +4849,34 @@ function esc(s)   { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt
 function fmt(n)   { return n ? '₽ ' + fmtNum(n) : '₽ —'; }
 function fmtNum(n) {
   return Math.round(n).toLocaleString('ru-RU');
+}
+// Smooth count-up animation for headline numbers — small touch that makes the
+// dashboard feel alive whenever it (re)renders.
+const _countAnim = new WeakMap();
+function animateCount(el, target, opts) {
+  if (!el) return;
+  opts = opts || {};
+  const prefix = opts.prefix || '';
+  const suffix = opts.suffix || '';
+  const fmtFn  = opts.format || (n => Math.round(n).toLocaleString('ru-RU'));
+  const dur    = opts.duration || 900;
+  if (!isFinite(target)) { el.textContent = prefix + target + suffix; return; }
+  if (_countAnim.has(el)) cancelAnimationFrame(_countAnim.get(el));
+  const start = 0;
+  const t0 = performance.now();
+  const ease = x => 1 - Math.pow(1 - x, 3); // easeOutCubic
+  function step(now) {
+    const p = Math.min(1, (now - t0) / dur);
+    const val = start + (target - start) * ease(p);
+    el.textContent = prefix + fmtFn(val) + suffix;
+    if (p < 1) {
+      _countAnim.set(el, requestAnimationFrame(step));
+    } else {
+      _countAnim.delete(el);
+      el.textContent = prefix + fmtFn(target) + suffix;
+    }
+  }
+  _countAnim.set(el, requestAnimationFrame(step));
 }
 function statusLabel(s) {
   const map = { queue:'st_queue', 'in-progress':'st_inprogress', review:'st_review', done:'st_done' };
