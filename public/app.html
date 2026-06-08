@@ -5206,8 +5206,8 @@ function viewProject(id) {
   setTimeout(() => {
     const btn = document.getElementById('modal-save');
     if (btn) btn.style.display = 'none';
-    const cancel = document.querySelector('#overlay .btn-ghost');
-    if (cancel) cancel.textContent = 'Close';
+    const cancel = document.querySelector('#overlay .modal-foot .btn-ghost');
+    if (cancel) cancel.textContent = currentLang==='ru' ? 'Закрыть' : 'Close';
   }, 0);
 }
 async function deleteProject(id, e) {
