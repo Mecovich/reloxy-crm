@@ -412,7 +412,8 @@ tr:hover td { background:transparent; }
 .modal-foot { display:flex; justify-content:flex-end; gap:8px; padding:16px 24px; border-top:1px solid var(--line); flex-shrink:0; margin-top:0; }
 .field { margin-bottom:14px; }
 .field-label { font-size:11px; color:var(--g1); margin-bottom:6px; display:block; letter-spacing:0.2px; font-weight:600; text-transform:uppercase; }
-.field-input { width:100%; background:var(--s2); border:1px solid var(--line2); border-radius:9px; padding:10px 13px; color:var(--white); font-size:13px; outline:none; transition:border-color 0.15s,background 0.15s,box-shadow 0.15s; font-family:inherit; -webkit-appearance:none; appearance:none; line-height:1.4; }
+.field-input { width:100%; background:var(--s2); border:1px solid var(--line2); border-radius:9px; padding:10px 13px; color:var(--white); font-size:13px; outline:none; transition:border-color 0.15s,background 0.15s,box-shadow 0.15s; font-family:inherit; -webkit-appearance:none; appearance:none; line-height:1.4; color-scheme:dark; }
+input.field-input[type="date"], input.field-input[type="number"] { color-scheme:dark; }
 .field-input:focus { border-color:rgba(255,255,255,0.28); box-shadow:0 0 0 3px rgba(255,255,255,0.05); background:var(--s3); }
 .field-input:hover:not(:focus) { border-color:var(--line3); }
 .field-input::placeholder { color:var(--g3); font-size:13px; }
@@ -1019,6 +1020,14 @@ th:not(:first-child), td:not(:first-child) { padding-left:18px !important; }
 .field-input:focus { border-color:rgba(217,217,217,0.38) !important; box-shadow:0 0 0 4px rgba(217,217,217,0.07) !important; background:rgba(255,255,255,0.04) !important; }
 .field-input::placeholder { color:rgba(217,217,217,0.28); }
 textarea.field-input { line-height:1.65; }
+
+/* ── INVOICE MODAL: AMOUNT FIELD & STATUS SEGMENT ── */
+.amount-input-wrap { position:relative; }
+.amount-input-prefix { position:absolute; left:13px; top:50%; transform:translateY(-50%); font-size:13px; color:rgba(217,217,217,0.4); pointer-events:none; }
+.seg-control { display:flex; gap:6px; }
+.seg-opt { flex:1; background:rgba(255,255,255,0.025); border:1px solid var(--glass-border); border-radius:8px; padding:9px 10px; font-size:12px; font-weight:600; color:rgba(217,217,217,0.45); cursor:pointer; transition:background .15s ease,border-color .15s ease,color .15s ease; font-family:inherit; }
+.seg-opt:hover { background:rgba(255,255,255,0.045); color:rgba(217,217,217,0.7); }
+.seg-opt.is-active { background:rgba(217,217,217,0.1); border-color:rgba(217,217,217,0.22); color:#EDEDED; }
 
 /* ── PROJECT MODAL: PROGRESS SLIDER ── */
 .proj-progress-readout { font-size:12px; font-weight:600; color:rgba(217,217,217,0.65); letter-spacing:0.02em; }
@@ -4928,21 +4937,37 @@ function openDealModal(d) {
 
 function openInvoiceModal(inv) {
   const clientOpts = clients.map(c=>`<option value="${c.id}" ${inv?.client_id==c.id?'selected':''}>${esc(c.name)}</option>`).join('');
+  const yr = new Date().getFullYear();
+  const todayISO = new Date().toISOString().slice(0,10);
+  const statuses = [
+    { v:'pending', lbl:t('st_pending') },
+    { v:'paid',    lbl:t('st_paid') },
+    { v:'overdue', lbl:t('st_overdue') },
+  ];
+  const curStatus = inv?.status || 'pending';
   showModal(inv ? t('modal_edit_invoice') : t('modal_new_invoice'), `
     <div class="field-row">
-      <div class="field"><label class="field-label">${t('f_number')}</label><input class="field-input" id="m-number" placeholder="#2026-001" value="${esc(inv?.number||'')}"></div>
+      <div class="field"><label class="field-label">${t('f_number')}</label><input class="field-input" id="m-number" placeholder="#${yr}-001" value="${esc(inv?.number||'')}"></div>
       <div class="field"><label class="field-label">${t('f_client')}</label><select class="field-input" id="m-client"><option value="">${t('opt_none')}</option>${clientOpts}</select></div>
     </div>
-    <div class="field"><label class="field-label">${t('f_amount')}</label><input class="field-input" id="m-amount" type="number" placeholder="0" value="${inv?.amount||''}"></div>
+    <div class="field">
+      <label class="field-label">${t('f_amount')}</label>
+      <div class="amount-input-wrap">
+        <span class="amount-input-prefix">₽</span>
+        <input class="field-input" id="m-amount" type="number" min="0" placeholder="0" value="${inv?.amount||''}" style="padding-left:30px">
+      </div>
+    </div>
     <div class="field-row">
-      <div class="field"><label class="field-label">${t('f_issued')}</label><input class="field-input" id="m-issued" type="date" value="${inv?.issued_at||''}"></div>
+      <div class="field"><label class="field-label">${t('f_issued')}</label><input class="field-input" id="m-issued" type="date" value="${inv?.issued_at||todayISO}"></div>
       <div class="field"><label class="field-label">${t('f_due')}</label><input class="field-input" id="m-due" type="date" value="${inv?.due_at||''}"></div>
     </div>
-    <div class="field"><label class="field-label">${t('f_status')}</label><select class="field-input" id="m-status">
-      <option value="pending" ${inv?.status==='pending'?'selected':''}>${t('st_pending')}</option>
-      <option value="paid"    ${inv?.status==='paid'   ?'selected':''}>${t('st_paid')}</option>
-      <option value="overdue" ${inv?.status==='overdue'?'selected':''}>${t('st_overdue')}</option>
-    </select></div>
+    <div class="field">
+      <label class="field-label">${t('f_status')}</label>
+      <div class="seg-control" id="m-status-seg">
+        ${statuses.map(s=>`<button type="button" class="seg-opt ${s.v===curStatus?'is-active':''}" data-val="${s.v}" onclick="document.querySelectorAll('#m-status-seg .seg-opt').forEach(b=>b.classList.remove('is-active'));this.classList.add('is-active');document.getElementById('m-status').value=this.dataset.val;">${esc(s.lbl)}</button>`).join('')}
+      </div>
+      <input type="hidden" id="m-status" value="${curStatus}">
+    </div>
   `, async () => {
     const body = { number:val('m-number'), client_id:val('m-client')||null, amount:+val('m-amount'), issued_at:val('m-issued'), due_at:val('m-due'), status:val('m-status') };
     try {
