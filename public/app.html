@@ -259,17 +259,17 @@ tr:hover td { background:transparent; }
 @media (max-width:760px){ .cl-stats-bar{ flex-wrap:wrap; gap:18px; } .cl-stat{ min-width:45%; } .cl-stat-sep{ display:none; } }
 
 .cl-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(330px,1fr)); gap:14px; }
-.cl-card { position:relative; background:var(--glass-bg); backdrop-filter:blur(20px); border:1px solid var(--glass-border); border-radius:16px; padding:22px; transition:all .25s cubic-bezier(.16,1,.3,1); overflow:hidden; box-shadow:0 1px 0 rgba(255,255,255,0.03) inset, 0 12px 32px -16px rgba(0,0,0,0.5); }
-.cl-card:hover { background:var(--glass-bg-hover); border-color:var(--glass-border-hover); transform:translateY(-2px); box-shadow:0 1px 0 rgba(255,255,255,0.05) inset, 0 20px 48px -16px rgba(0,0,0,0.6); }
+.cl-card { position:relative; background:var(--glass-bg); border:1px solid var(--glass-border); border-radius:16px; padding:22px; transition:background .2s ease, border-color .2s ease; overflow:hidden; }
+.cl-card:hover { background:var(--glass-bg-hover); border-color:var(--glass-border-hover); }
 .cl-card-top { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:18px; }
 .cl-card-id { display:flex; align-items:center; gap:12px; min-width:0; }
 .cl-avatar { position:relative; width:46px; height:46px; border-radius:14px; background:linear-gradient(135deg, rgba(217,217,217,0.16), rgba(217,217,217,0.04)); border:1px solid rgba(255,255,255,0.10); display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:700; color:#D9D9D9; flex-shrink:0; letter-spacing:-0.5px; }
 .cl-card-name { font-size:15px; font-weight:700; color:#D9D9D9; letter-spacing:-0.2px; line-height:1.25; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .cl-card-industry { font-size:11.5px; color:rgba(217,217,217,0.45); margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.cl-status-pill { display:inline-flex; align-items:center; gap:7px; font-size:10.5px; font-weight:700; letter-spacing:0.05em; text-transform:uppercase; padding:6px 13px; border-radius:20px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.09); color:rgba(217,217,217,0.55); flex-shrink:0; white-space:nowrap; transition:all .25s ease; }
-.cl-status-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; transition:all .25s ease; }
-.cl-status-pill.is-active { background:linear-gradient(135deg, rgba(217,217,217,0.16), rgba(217,217,217,0.05)); border-color:rgba(217,217,217,0.28); color:#EDEDED; box-shadow:0 0 0 1px rgba(217,217,217,0.05) inset, 0 4px 16px -4px rgba(217,217,217,0.25); }
-.cl-status-pill.is-active .cl-status-dot { background:#D9D9D9; box-shadow:0 0 8px 1px rgba(217,217,217,0.65); animation:peakPulse 2.4s ease-out infinite; }
+.cl-status-pill { display:inline-flex; align-items:center; gap:7px; font-size:10.5px; font-weight:700; letter-spacing:0.05em; text-transform:uppercase; padding:6px 13px; border-radius:20px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.09); color:rgba(217,217,217,0.55); flex-shrink:0; white-space:nowrap; transition:all .2s ease; }
+.cl-status-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+.cl-status-pill.is-active { background:rgba(255,255,255,0.06); border-color:rgba(255,255,255,0.14); color:#EDEDED; }
+.cl-status-pill.is-active .cl-status-dot { background:#D9D9D9; }
 .cl-status-pill.is-lead { color:rgba(217,217,217,0.65); border-color:rgba(217,217,217,0.14); }
 .cl-status-pill.is-lead .cl-status-dot { background:rgba(217,217,217,0.55); }
 .cl-status-pill.is-archive { color:rgba(217,217,217,0.35); }
@@ -282,10 +282,9 @@ tr:hover td { background:transparent; }
 .cl-mini-stat { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:11px 12px; transition:background .2s,border-color .2s; }
 .cl-mini-stat:hover { background:rgba(255,255,255,0.06); border-color:rgba(255,255,255,0.12); }
 .cl-mini-stat-val { font-size:16px; font-weight:700; color:#D9D9D9; letter-spacing:-0.02em; font-variant-numeric:tabular-nums; line-height:1.15; }
-.cl-mini-stat-val.glow { text-shadow:0 0 14px rgba(217,217,217,0.30); }
 .cl-mini-stat-lbl { font-size:9px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:rgba(217,217,217,0.35); margin-top:3px; }
-.cl-revenue-bar { height:5px; border-radius:9999px; background:rgba(255,255,255,0.06); overflow:hidden; margin-bottom:16px; }
-.cl-revenue-bar-fill { height:100%; border-radius:9999px; background:linear-gradient(90deg, rgba(217,217,217,0.35), #D9D9D9); box-shadow:0 0 10px rgba(217,217,217,0.35); transition:width 1s cubic-bezier(.16,1,.3,1); }
+.cl-revenue-bar { height:3px; border-radius:9999px; background:rgba(255,255,255,0.06); overflow:hidden; margin-bottom:16px; }
+.cl-revenue-bar-fill { height:100%; border-radius:9999px; background:rgba(217,217,217,0.45); transition:width 1s cubic-bezier(.16,1,.3,1); }
 .cl-card-foot { display:flex; align-items:center; justify-content:space-between; gap:12px; padding-top:14px; border-top:1px solid rgba(255,255,255,0.05); }
 .cl-since { font-size:11px; color:rgba(217,217,217,0.40); }
 .cl-since b { color:rgba(217,217,217,0.65); font-weight:600; }
@@ -4128,7 +4127,7 @@ function renderClients(list) {
 
           <div class="cl-stat-grid">
             <div class="cl-mini-stat">
-              <div class="cl-mini-stat-val glow">${fmt(m.revenue)}</div>
+              <div class="cl-mini-stat-val">${fmt(m.revenue)}</div>
               <div class="cl-mini-stat-lbl">${t('cl_revenue')}</div>
             </div>
             <div class="cl-mini-stat">
