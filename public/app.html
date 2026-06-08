@@ -1007,6 +1007,16 @@ th:not(:first-child), td:not(:first-child) { padding-left:18px !important; }
 .field-input::placeholder { color:rgba(217,217,217,0.28); }
 textarea.field-input { line-height:1.65; }
 
+/* ── PROJECT MODAL: PROGRESS SLIDER ── */
+.proj-progress-readout { font-size:12px; font-weight:600; color:rgba(217,217,217,0.65); letter-spacing:0.02em; }
+.proj-progress-slider { -webkit-appearance:none; appearance:none; width:100%; height:34px; margin:0; background:transparent; cursor:pointer; }
+.proj-progress-slider::-webkit-slider-runnable-track { height:4px; border-radius:3px; background:rgba(255,255,255,0.08); }
+.proj-progress-slider::-moz-range-track { height:4px; border-radius:3px; background:rgba(255,255,255,0.08); }
+.proj-progress-slider::-webkit-slider-thumb { -webkit-appearance:none; appearance:none; width:16px; height:16px; border-radius:50%; background:#D9D9D9; border:2px solid #161616; margin-top:-6px; transition:background .15s ease; }
+.proj-progress-slider::-moz-range-thumb { width:16px; height:16px; border-radius:50%; background:#D9D9D9; border:2px solid #161616; transition:background .15s ease; }
+.proj-progress-slider:hover::-webkit-slider-thumb { background:#F5F5F5; }
+.proj-progress-slider:hover::-moz-range-thumb { background:#F5F5F5; }
+
 /* ── SEARCH BAR ── */
 .search { background:rgba(217,217,217,0.04) !important; border-color:var(--glass-border) !important; }
 .search:focus-within { border-color:rgba(217,217,217,0.25) !important; }
@@ -2392,7 +2402,7 @@ const TRANS = {
     f_stage:'Stage', f_value:'Value ₽', f_desc:'Description',
     f_amount:'Amount ₽', f_issued:'Issue date', f_due:'Due date',
     f_name:'Name *', f_position:'Position', f_goal_period:'Period',
-    f_phone:'Telegram Username', f_username:'Telegram Username', f_email:'Email', f_number:'Number', opt_none:'— none —', f_notes:'Notes',
+    f_phone:'Telegram Username', f_username:'Telegram Username', f_email:'Email', f_number:'Number', opt_none:'— none —', f_notes:'Notes', f_assigned:'Assigned to', opt_nobody:'— Unassigned —',
     toast_mark_paid:'Invoice marked as paid',
     confirm_del_client:'Delete this client?', confirm_del_project:'Delete this project?',
     confirm_del_deal:'Delete this deal?', confirm_del_invoice:'Delete this invoice?',
@@ -2522,7 +2532,7 @@ const TRANS = {
     f_stage:'Этап', f_value:'Сумма ₽', f_desc:'Описание',
     f_amount:'Сумма ₽', f_issued:'Дата выставления', f_due:'Дата оплаты',
     f_name:'Имя *', f_position:'Должность', f_goal_period:'Период',
-    f_phone:'Telegram Username', f_username:'Telegram Username', f_email:'Email', f_number:'Номер счёта', opt_none:'— нет —', f_notes:'Заметки',
+    f_phone:'Telegram Username', f_username:'Telegram Username', f_email:'Email', f_number:'Номер счёта', opt_none:'— нет —', f_notes:'Заметки', f_assigned:'Ответственный', opt_nobody:'— не назначен —',
     toast_mark_paid:'Счёт отмечен как оплаченный',
     confirm_del_client:'Удалить клиента?', confirm_del_project:'Удалить проект?',
     confirm_del_deal:'Удалить сделку?', confirm_del_invoice:'Удалить счёт?',
@@ -4713,30 +4723,36 @@ async function deleteClient(id) {
 
 function openProjectModal(p) {
   const clientOpts = clients.map(c=>`<option value="${c.id}" ${p?.client_id==c.id?'selected':''}>${esc(c.name)}</option>`).join('');
+  const progressVal = p?.progress||0;
   showModal(p?t('modal_edit_project'):t('modal_new_project'), `
     <div class="field-row">
-      <div class="field"><label class="field-label">${t('f_title')}</label><input class="field-input" id="m-title" value="${esc(p?.title||'')}" placeholder="Rebrand..."></div>
-      <div class="field"><label class="field-label">${t('f_type')}</label><input class="field-input" id="m-type" value="${esc(p?.type||'')}" placeholder="BRAND / WEB..."></div>
+      <div class="field" style="flex:1.4"><label class="field-label">${t('f_title')}</label><input class="field-input" id="m-title" value="${esc(p?.title||'')}" placeholder="${currentLang==='ru'?'Например: Редизайн сайта':'e.g. Website redesign'}"></div>
+      <div class="field"><label class="field-label">${t('f_type')}</label><input class="field-input" id="m-type" value="${esc(p?.type||'')}" placeholder="${currentLang==='ru'?'Бренд / Веб / Видео…':'Brand / Web / Video…'}"></div>
     </div>
     <div class="field-row">
       <div class="field"><label class="field-label">${t('f_client')}</label><select class="field-input" id="m-client"><option value="">${t('opt_none')}</option>${clientOpts}</select></div>
+      <div class="field"><label class="field-label">${t('f_assigned')}</label><select class="field-input" id="m-assigned">
+        <option value="">${t('opt_nobody')}</option>
+        ${staff.map(s=>`<option value="${s.user_id||s.id}" ${p?.assigned_to==(s.user_id||s.id)?'selected':''}>${esc(s.name)}</option>`).join('')}
+      </select></div>
+    </div>
+    <div class="field-row">
       <div class="field"><label class="field-label">${t('f_status')}</label><select class="field-input" id="m-status">
         <option value="queue" ${p?.status==='queue'?'selected':''}>${t('st_queue')}</option>
         <option value="in-progress" ${p?.status==='in-progress'?'selected':''}>${t('st_inprogress')}</option>
         <option value="review" ${p?.status==='review'?'selected':''}>${t('st_review')}</option>
         <option value="done" ${p?.status==='done'?'selected':''}>${t('st_done')}</option>
       </select></div>
-    </div>
-    <div class="field-row">
-      <div class="field"><label class="field-label">${t('f_progress')}</label><input class="field-input" id="m-progress" type="number" min="0" max="100" value="${p?.progress||0}"></div>
       <div class="field"><label class="field-label">${t('f_deadline')}</label><input class="field-input" id="m-deadline" type="date" value="${p?.deadline||''}"></div>
     </div>
     <div class="field-row">
-      <div class="field"><label class="field-label">${t('f_budget')}</label><input class="field-input" id="m-budget" type="number" value="${p?.budget||0}" placeholder="0"></div>
-      <div class="field"><label class="field-label">Assigned to</label><select class="field-input" id="m-assigned">
-        <option value="">— Nobody —</option>
-        ${staff.map(s=>`<option value="${s.user_id||s.id}" ${p?.assigned_to==(s.user_id||s.id)?'selected':''}>${esc(s.name)}</option>`).join('')}
-      </select></div>
+      <div class="field"><label class="field-label">${t('f_budget')}</label><input class="field-input" id="m-budget" type="number" value="${p?.budget||0}" placeholder="0" style="text-align:left"></div>
+      <div class="field">
+        <label class="field-label" style="display:flex;justify-content:space-between;align-items:center">
+          <span>${t('f_progress')}</span><span class="proj-progress-readout" id="m-progress-readout">${progressVal}%</span>
+        </label>
+        <input class="proj-progress-slider" id="m-progress" type="range" min="0" max="100" step="5" value="${progressVal}" oninput="document.getElementById('m-progress-readout').textContent=this.value+'%'">
+      </div>
     </div>
   `, async () => {
     const body = { title:val('m-title'), type:val('m-type'), client_id:val('m-client')||null, status:val('m-status'), progress:+val('m-progress'), deadline:val('m-deadline'), budget:+val('m-budget'), assigned_to:val('m-assigned')||null };
