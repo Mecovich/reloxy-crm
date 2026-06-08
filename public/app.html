@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
@@ -26,7 +27,7 @@
   --glass-border-hover:rgba(217,217,217,0.18);
   --blur:20px;
 }
-body { font-family:'Plus Jakarta Sans',-apple-system,"Helvetica Neue",sans-serif; background:var(--black); color:var(--white); display:flex; height:100vh; overflow:hidden; font-size:14px; line-height:1.55; -webkit-font-smoothing:antialiased; letter-spacing:-0.1px; }
+body { font-family:'Archivo','Plus Jakarta Sans',-apple-system,"Helvetica Neue",sans-serif; background:var(--black); color:var(--white); display:flex; height:100vh; overflow:hidden; font-size:14px; line-height:1.55; -webkit-font-smoothing:antialiased; letter-spacing:-0.1px; }
 
 /* ── SIDEBAR ── */
 .sidebar { width:244px; height:100vh; background:var(--black); border-right:1px solid var(--line); position:fixed; top:0; left:0; bottom:0; display:flex; flex-direction:column; z-index:100; overflow:hidden; transition:width 0.22s cubic-bezier(.16,1,.3,1),border-color 0.22s; }
@@ -1118,6 +1119,48 @@ td { border-bottom-color:var(--line) !important; }
 .bento-resource-card { padding:16px; border-radius:16px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.05); }
 .bento-resource-label { font-size:10px; font-weight:700; letter-spacing:0.05em; text-transform:uppercase; color:rgba(217,217,217,0.40); }
 .bento-resource-val { font-size:20px; font-weight:700; color:#D9D9D9; margin-top:4px; }
+
+/* ── Sparkline metric row (Nexora-style mini stat cards) ── */
+.bento-spark-row { display:grid; grid-template-columns:repeat(3,1fr); gap:24px; }
+@media (max-width:900px){ .bento-spark-row{ grid-template-columns:1fr; } }
+.bento-spark-card { display:flex; flex-direction:column; gap:14px; }
+.bento-spark-top { display:flex; align-items:center; justify-content:space-between; }
+.bento-spark-label { font-size:11px; font-weight:700; letter-spacing:0.05em; text-transform:uppercase; color:rgba(217,217,217,0.40); }
+.bento-spark-val { font-size:26px; font-weight:700; color:#D9D9D9; letter-spacing:-0.02em; }
+.bento-spark-trend { font-size:10px; font-weight:700; padding:3px 8px; border-radius:6px; display:inline-flex; align-items:center; gap:3px; }
+.bento-spark-trend.up { background:rgba(217,217,217,0.12); color:#D9D9D9; }
+.bento-spark-trend.down { background:rgba(255,255,255,0.04); color:rgba(217,217,217,0.40); }
+.bento-spark-bars { display:flex; align-items:flex-end; gap:4px; height:36px; }
+.bento-spark-bar { flex:1; background:rgba(217,217,217,0.12); border-radius:3px 3px 0 0; transition:background .15s; }
+.bento-spark-bar.peak { background:#D9D9D9; box-shadow:0 0 8px rgba(217,217,217,0.4); }
+
+/* ── Donut distribution card ── */
+.bento-donut-row { display:flex; align-items:center; gap:28px; }
+.bento-donut-center-lbl { font-size:20px; font-weight:700; color:#D9D9D9; }
+.bento-donut-center-sub { font-size:9px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:rgba(217,217,217,0.40); margin-top:2px; }
+.bento-donut-legend { display:flex; flex-direction:column; gap:12px; flex:1; }
+.bento-donut-legend-item { display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:12px; }
+.bento-donut-legend-left { display:flex; align-items:center; gap:10px; color:rgba(217,217,217,0.70); }
+.bento-donut-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.bento-donut-legend-val { font-weight:700; color:#D9D9D9; }
+
+/* ── AI Insight card ── */
+.bento-ai-card { display:flex; flex-direction:column; gap:16px; }
+.bento-ai-head { display:flex; align-items:center; gap:12px; }
+.bento-ai-icon { width:36px; height:36px; border-radius:10px; background:rgba(217,217,217,0.10); display:flex; align-items:center; justify-content:center; color:#D9D9D9; font-size:18px; flex-shrink:0; }
+.bento-ai-text { font-size:12.5px; line-height:1.7; color:rgba(217,217,217,0.70); }
+.bento-ai-text b { color:#D9D9D9; }
+.bento-ai-actions { display:flex; flex-wrap:wrap; gap:8px; }
+.bento-ai-action-btn { font-size:11px; font-weight:600; padding:7px 14px; border-radius:9999px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.10); color:#D9D9D9; cursor:pointer; transition:all .15s; font-family:inherit; }
+.bento-ai-action-btn:hover { background:rgba(217,217,217,0.12); }
+
+/* ── Weekly activity bars ── */
+.bento-week-row { display:flex; align-items:flex-end; justify-content:space-between; gap:8px; height:120px; margin-top:8px; }
+.bento-week-col { display:flex; flex-direction:column; align-items:center; gap:8px; flex:1; height:100%; justify-content:flex-end; }
+.bento-week-bar { width:100%; max-width:28px; border-radius:6px 6px 3px 3px; background:rgba(217,217,217,0.10); transition:background .15s,height .3s; position:relative; }
+.bento-week-bar.peak { background:#D9D9D9; box-shadow:0 0 10px rgba(217,217,217,0.35); }
+.bento-week-bar.peak::after { content:attr(data-val); position:absolute; top:-22px; left:50%; transform:translateX(-50%); font-size:9px; font-weight:700; color:#D9D9D9; background:rgba(255,255,255,0.08); padding:2px 6px; border-radius:5px; white-space:nowrap; }
+.bento-week-lbl { font-size:10px; font-weight:700; color:rgba(217,217,217,0.40); text-transform:uppercase; }
 </style>
 </head>
 <body>
@@ -1311,6 +1354,11 @@ td { border-bottom-color:var(--line) !important; }
           <div id="dash-chart-stats" style="display:none"></div>
         </div>
 
+        <!-- Sparkline metric row — col-span-12, three mini stat cards -->
+        <div class="bento-card bento-col-12">
+          <div class="bento-spark-row" id="dash-sparks"></div>
+        </div>
+
         <!-- Total Portfolio — col-span-4 -->
         <div class="bento-card bento-col-4 bento-portfolio-card">
           <div>
@@ -1375,6 +1423,43 @@ td { border-bottom-color:var(--line) !important; }
             <div class="bento-promo-text" data-i18n="dash_enterprise_text">Unlock advanced analytics, unlimited team seats and priority support.</div>
             <button class="bento-promo-btn" onclick="go('settings',document.querySelectorAll('.nav-item')[7])" data-i18n="dash_upgrade_now">Upgrade Now</button>
           </div>
+        </div>
+
+        <!-- AI Insight — col-span-4 -->
+        <div class="bento-card bento-col-4 bento-ai-card">
+          <div class="bento-ai-head">
+            <div class="bento-ai-icon"><span class="material-symbols-outlined" style="font-size:18px">auto_awesome</span></div>
+            <h3 class="bento-eyebrow" data-i18n="dash_ai_insight">AI Insight</h3>
+          </div>
+          <div class="bento-ai-text" id="dash-ai-text">—</div>
+          <div class="bento-ai-actions" id="dash-ai-actions"></div>
+        </div>
+
+        <!-- Distribution donut — col-span-4 -->
+        <div class="bento-card bento-col-4">
+          <div class="bento-card-head" style="margin-bottom:18px">
+            <h3 class="bento-eyebrow" data-i18n="dash_project_status">Project Status</h3>
+            <span class="material-symbols-outlined" style="font-size:18px;color:var(--g1)">donut_large</span>
+          </div>
+          <div class="bento-donut-row">
+            <svg width="104" height="104" viewBox="0 0 104 104" style="flex-shrink:0">
+              <circle cx="52" cy="52" r="44" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="14"/>
+              <g id="dash-donut-segments" transform="rotate(-90 52 52)"></g>
+              <text x="52" y="49" text-anchor="middle" fill="#D9D9D9" font-size="20" font-weight="700" id="dash-donut-total">0</text>
+              <text x="52" y="64" text-anchor="middle" fill="rgba(217,217,217,0.40)" font-size="8" font-weight="700" letter-spacing="1" id="dash-donut-sub">TOTAL</text>
+            </svg>
+            <div class="bento-donut-legend" id="dash-donut-legend"></div>
+          </div>
+        </div>
+
+        <!-- Weekly activity — col-span-4 -->
+        <div class="bento-card bento-col-4" style="display:flex;flex-direction:column">
+          <div class="bento-card-head" style="margin-bottom:8px">
+            <h3 class="bento-eyebrow" data-i18n="dash_weekly_activity">Weekly Activity</h3>
+            <span class="material-symbols-outlined" style="font-size:18px;color:var(--g1)">bar_chart</span>
+          </div>
+          <p class="bento-card-desc" id="dash-week-sub" style="margin-top:-6px"></p>
+          <div class="bento-week-row" id="dash-week-row"></div>
         </div>
 
         <!-- Project Milestones — col-span-8 -->
@@ -2101,6 +2186,11 @@ const TRANS = {
     dash_resource_allocation:'Resource Allocation',
     dash_res_clients:'Clients', dash_res_projects:'Projects', dash_res_team:'Team', dash_res_completion:'Completion',
     dash_no_team:'No team members yet',
+    dash_ai_insight:'AI Insight', dash_ai_review_invoices:'Review invoices', dash_ai_view_projects:'View projects',
+    dash_project_status:'Project Status', dash_total:'TOTAL',
+    dash_status_done:'Done', dash_status_active:'Active', dash_status_review:'Review', dash_status_other:'Other',
+    dash_weekly_activity:'Weekly Activity',
+    dash_spark_revenue:'Revenue', dash_spark_clients:'New Clients', dash_spark_projects:'Active Projects',
     grp_overview:'Overview', grp_work:'Work', grp_finance_g:'Finance',
     nav_dashboard:'Dashboard', nav_calendar:'Calendar', nav_clients:'Clients',
     nav_projects:'Projects', nav_pipeline:'Pipeline', nav_team:'Team',
@@ -2221,6 +2311,11 @@ const TRANS = {
     dash_resource_allocation:'Распределение ресурсов',
     dash_res_clients:'Клиенты', dash_res_projects:'Проекты', dash_res_team:'Команда', dash_res_completion:'Завершено',
     dash_no_team:'Пока нет участников команды',
+    dash_ai_insight:'AI-инсайт', dash_ai_review_invoices:'Проверить счета', dash_ai_view_projects:'К проектам',
+    dash_project_status:'Статус проектов', dash_total:'ВСЕГО',
+    dash_status_done:'Готово', dash_status_active:'В работе', dash_status_review:'На проверке', dash_status_other:'Другое',
+    dash_weekly_activity:'Активность по дням',
+    dash_spark_revenue:'Выручка', dash_spark_clients:'Новые клиенты', dash_spark_projects:'Активные проекты',
     grp_overview:'Обзор', grp_work:'Работа', grp_finance_g:'Финансы',
     nav_dashboard:'Дашборд', nav_calendar:'Календарь', nav_clients:'Клиенты',
     nav_projects:'Проекты', nav_pipeline:'Воронка', nav_team:'Команда',
@@ -3292,6 +3387,130 @@ function renderDashboard() {
       <div class="bento-resource-label">${esc(r.label)}</div>
       <div class="bento-resource-val">${esc(String(r.val))}</div>
     </div>`).join('');
+  }
+
+  // ── Sparkline metric row (Revenue / Clients / Projects, last 6 months) ──
+  const sparkEl = document.getElementById('dash-sparks');
+  if (sparkEl) {
+    const monthsBack = 6;
+    const monthKeys = [];
+    for (let i = monthsBack-1; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
+      monthKeys.push(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`);
+    }
+    const bucketCount = (arr, field) => monthKeys.map(k => arr.filter(x => (x[field]||'').slice(0,7) === k).length);
+    const bucketSum = (arr, field, dateField) => monthKeys.map(k => arr.filter(x => x.status==='paid' && (x[dateField]||'').slice(0,7) === k).reduce((s,x)=>s+(x[field]||0),0));
+
+    const revSeries = bucketSum(invoices, 'amount', 'paid_at');
+    const clientSeries = bucketCount((typeof clients !== 'undefined' && clients) ? clients : [], 'created_at');
+    const projectSeries = bucketCount(projects, 'created_at');
+
+    const pctChange = (series) => {
+      const last = series[series.length-1] || 0, prev = series[series.length-2] || 0;
+      if (prev === 0) return last > 0 ? 100 : 0;
+      return Math.round(((last-prev)/prev)*100);
+    };
+    const sparkCard = (label, val, series) => {
+      const max = Math.max(1, ...series);
+      const pct = pctChange(series);
+      const bars = series.map((v,i) => `<div class="bento-spark-bar ${i===series.length-1 ? 'peak':''}" style="height:${Math.max(6, Math.round((v/max)*36))}px"></div>`).join('');
+      return `<div class="bento-spark-card">
+        <div class="bento-spark-top">
+          <span class="bento-spark-label">${esc(label)}</span>
+          <span class="bento-spark-trend ${pct>=0?'up':'down'}">${pct>=0?'▲':'▼'} ${Math.abs(pct)}%</span>
+        </div>
+        <div class="bento-spark-val">${val}</div>
+        <div class="bento-spark-bars">${bars}</div>
+      </div>`;
+    };
+    sparkEl.innerHTML =
+      sparkCard(t('dash_spark_revenue')||'Revenue', fmt(paidTotal), revSeries) +
+      sparkCard(t('dash_spark_clients')||'New Clients', String(((typeof clients !== 'undefined' && clients) ? clients.length : 0)), clientSeries) +
+      sparkCard(t('dash_spark_projects')||'Active Projects', String(inprog.length), projectSeries);
+  }
+
+  // ── Project status distribution donut ──
+  const donutSeg = document.getElementById('dash-donut-segments');
+  const donutLegend = document.getElementById('dash-donut-legend');
+  const donutTotal = document.getElementById('dash-donut-total');
+  if (donutSeg && donutLegend) {
+    const statusGroups = [
+      { key:'done', label: t('dash_status_done')||'Done', op: 1.0 },
+      { key:'inprogress', label: t('dash_status_active')||'Active', op: 0.6, alts:['active','in-progress'] },
+      { key:'review', label: t('dash_status_review')||'Review', op: 0.35 },
+      { key:'other', label: t('dash_status_other')||'Other', op: 0.15 },
+    ];
+    const counts = statusGroups.map(g => projects.filter(p => p.status === g.key || (g.alts||[]).includes(p.status)).length);
+    // "other" = anything not matched by previous groups
+    const matched = projects.filter(p => ['done','inprogress','active','in-progress','review'].includes(p.status)).length;
+    counts[3] = Math.max(0, projects.length - matched);
+    const total = projects.length;
+    donutTotal.textContent = total;
+    const donutSub = document.getElementById('dash-donut-sub');
+    if (donutSub) donutSub.textContent = t('dash_total') || 'TOTAL';
+    const r = 44, circumference = 2*Math.PI*r;
+    let offsetAcc = 0;
+    donutSeg.innerHTML = counts.map((c, i) => {
+      if (!c || !total) return '';
+      const frac = c/total;
+      const dash = frac*circumference;
+      const seg = `<circle cx="52" cy="52" r="${r}" fill="none" stroke="rgba(217,217,217,${statusGroups[i].op})" stroke-width="14" stroke-dasharray="${dash} ${circumference-dash}" stroke-dashoffset="${-offsetAcc}" stroke-linecap="butt"/>`;
+      offsetAcc += dash;
+      return seg;
+    }).join('');
+    donutLegend.innerHTML = total ? statusGroups.map((g,i) => counts[i] > 0 ? `<div class="bento-donut-legend-item">
+      <div class="bento-donut-legend-left"><span class="bento-donut-dot" style="background:rgba(217,217,217,${g.op})"></span>${esc(g.label)}</div>
+      <span class="bento-donut-legend-val">${counts[i]}</span>
+    </div>` : '').join('') : empty(t('dash_no_projects'));
+  }
+
+  // ── AI Insight card ──
+  const aiText = document.getElementById('dash-ai-text');
+  const aiActions = document.getElementById('dash-ai-actions');
+  if (aiText && aiActions) {
+    let pctRev = 0;
+    if (prv > 0) pctRev = Math.round(((cur-prv)/prv)*100);
+    const dirWord = pctRev >= 0 ? (currentLang==='ru' ? 'выросла' : 'increased') : (currentLang==='ru' ? 'снизилась' : 'decreased');
+    const topClient = (() => {
+      const byClient = {};
+      invoices.filter(i=>i.status==='paid').forEach(i => { byClient[i.client_name||'—'] = (byClient[i.client_name||'—']||0) + (i.amount||0); });
+      const sorted = Object.entries(byClient).sort((a,b)=>b[1]-a[1]);
+      return sorted.length ? sorted[0][0] : null;
+    })();
+    aiText.innerHTML = currentLang === 'ru'
+      ? `Выручка <b>${dirWord} на ${Math.abs(pctRev)}%</b> по сравнению с прошлым месяцем.${topClient ? ` Лучший клиент по оплатам — <b>${esc(topClient)}</b>.` : ''} ${unpaid.length ? `Сейчас <b>${unpaid.length}</b> неоплаченных счетов ожидают внимания.` : 'Все счета оплачены — отличная динамика.'}`
+      : `Your revenue has <b>${dirWord} ${Math.abs(pctRev)}%</b> vs last month.${topClient ? ` Your top client by payments is <b>${esc(topClient)}</b>.` : ''} ${unpaid.length ? `There ${unpaid.length===1?'is':'are'} <b>${unpaid.length}</b> unpaid invoice${unpaid.length===1?'':'s'} needing attention.` : 'All invoices are settled — great momentum.'}`;
+    aiActions.innerHTML = `
+      <button class="bento-ai-action-btn" onclick="go('finance',document.querySelectorAll('.nav-item')[6])">${esc(t('dash_ai_review_invoices')||'Review invoices')}</button>
+      <button class="bento-ai-action-btn" onclick="go('projects',document.querySelectorAll('.nav-item')[2])">${esc(t('dash_ai_view_projects')||'View projects')}</button>`;
+  }
+
+  // ── Weekly activity (paid invoices grouped by weekday) ──
+  const weekRow = document.getElementById('dash-week-row');
+  const weekSub = document.getElementById('dash-week-sub');
+  if (weekRow) {
+    const dayLabels = currentLang === 'ru'
+      ? ['ПН','ВТ','СР','ЧТ','ПТ','СБ','ВС']
+      : ['MON','TUE','WED','THU','FRI','SAT','SUN'];
+    const counts = [0,0,0,0,0,0,0];
+    invoices.filter(i=>i.status==='paid' && i.paid_at).forEach(i => {
+      const d = new Date(i.paid_at);
+      if (!isNaN(d)) { const idx = (d.getDay()+6)%7; counts[idx]++; }
+    });
+    const maxC = Math.max(1, ...counts);
+    const peakIdx = counts.indexOf(maxC);
+    const totalActivity = counts.reduce((a,b)=>a+b,0);
+    if (weekSub) weekSub.textContent = totalActivity
+      ? (currentLang==='ru' ? `${totalActivity} оплат за последнее время` : `${totalActivity} payments recorded`)
+      : (currentLang==='ru' ? 'Пока недостаточно данных' : 'Not enough data yet');
+    weekRow.innerHTML = counts.map((c,i) => {
+      const h = Math.max(6, Math.round((c/maxC)*84));
+      const isPeak = c > 0 && i === peakIdx;
+      return `<div class="bento-week-col">
+        <div class="bento-week-bar ${isPeak?'peak':''}" style="height:${h}px" data-val="${c}"></div>
+        <span class="bento-week-lbl">${dayLabels[i]}</span>
+      </div>`;
+    }).join('');
   }
 
   // Auto-select best period: prefer one that has data
