@@ -149,6 +149,15 @@ async function initDB() {
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (user_id) REFERENCES users(id)
     )`,
+    `CREATE TABLE IF NOT EXISTS project_stages (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      project_id INTEGER NOT NULL,
+      title TEXT NOT NULL,
+      status TEXT DEFAULT 'planned',
+      position INTEGER DEFAULT 0,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (project_id) REFERENCES projects(id)
+    )`,
     `CREATE TABLE IF NOT EXISTS staff (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id INTEGER NOT NULL,
@@ -185,6 +194,7 @@ async function initDB() {
     `ALTER TABLE projects ADD COLUMN assigned_to INTEGER DEFAULT NULL`,
     `ALTER TABLE users ADD COLUMN telegram_chat_id TEXT DEFAULT NULL`,
     `ALTER TABLE users ADD COLUMN tg_link_code TEXT DEFAULT NULL`,
+    `ALTER TABLE projects ADD COLUMN share_token TEXT DEFAULT NULL`,
   ];
   for (const sql of migrations) {
     try { await db.execute({ sql, args: [] }); } catch (_) { /* column already exists */ }
@@ -469,6 +479,125 @@ app.delete('/api/projects/:id', authMiddleware, async (req, res) => {
   if (denyStaff(req, res)) return;
   await db.execute({ sql: 'DELETE FROM projects WHERE id=? AND user_id=?', args: [req.params.id, req.user.id] });
   res.json({ ok: true });
+});
+
+// ─── PROJECT STAGES ──────────────────────────────────────────────────────────
+async function assertOwnsProject(req, projectId) {
+  const uid = ownerId(req);
+  const row = await db.execute({ sql: 'SELECT id FROM projects WHERE id=? AND user_id=?', args: [projectId, uid] });
+  return row.rows.length > 0;
+}
+
+app.get('/api/projects/:id/stages', authMiddleware, async (req, res) => {
+  if (!(await assertOwnsProject(req, req.params.id))) return res.status(404).json({ error: 'Project not found' });
+  const result = await db.execute({
+    sql: 'SELECT * FROM project_stages WHERE project_id=? ORDER BY position ASC, id ASC',
+    args: [req.params.id],
+  });
+  res.json(result.rows);
+});
+
+app.post('/api/projects/:id/stages', authMiddleware, async (req, res) => {
+  if (denyStaff(req, res)) return;
+  if (!(await assertOwnsProject(req, req.params.id))) return res.status(404).json({ error: 'Project not found' });
+  const { title, status } = req.body;
+  if (!title) return res.status(400).json({ error: 'Title is required' });
+  const posRow = await db.execute({ sql: 'SELECT COALESCE(MAX(position),-1)+1 as next FROM project_stages WHERE project_id=?', args: [req.params.id] });
+  const position = posRow.rows[0]?.next || 0;
+  const result = await db.execute({
+    sql: 'INSERT INTO project_stages (project_id, title, status, position) VALUES (?, ?, ?, ?)',
+    args: [req.params.id, title, status || 'planned', position],
+  });
+  const row = await db.execute({ sql: 'SELECT * FROM project_stages WHERE id=?', args: [result.lastInsertRowid] });
+  res.json(row.rows[0]);
+});
+
+app.put('/api/projects/:id/stages/:stageId', authMiddleware, async (req, res) => {
+  if (denyStaff(req, res)) return;
+  if (!(await assertOwnsProject(req, req.params.id))) return res.status(404).json({ error: 'Project not found' });
+  const { title, status, position } = req.body;
+  const cur = await db.execute({ sql: 'SELECT * FROM project_stages WHERE id=? AND project_id=?', args: [req.params.stageId, req.params.id] });
+  if (!cur.rows.length) return res.status(404).json({ error: 'Stage not found' });
+  const c = cur.rows[0];
+  await db.execute({
+    sql: 'UPDATE project_stages SET title=?, status=?, position=? WHERE id=?',
+    args: [title ?? c.title, status ?? c.status, position ?? c.position, req.params.stageId],
+  });
+  const row = await db.execute({ sql: 'SELECT * FROM project_stages WHERE id=?', args: [req.params.stageId] });
+  res.json(row.rows[0]);
+});
+
+app.delete('/api/projects/:id/stages/:stageId', authMiddleware, async (req, res) => {
+  if (denyStaff(req, res)) return;
+  if (!(await assertOwnsProject(req, req.params.id))) return res.status(404).json({ error: 'Project not found' });
+  await db.execute({ sql: 'DELETE FROM project_stages WHERE id=? AND project_id=?', args: [req.params.stageId, req.params.id] });
+  res.json({ ok: true });
+});
+
+// Reorder stages — body: { order: [stageId1, stageId2, ...] }
+app.put('/api/projects/:id/stages-reorder', authMiddleware, async (req, res) => {
+  if (denyStaff(req, res)) return;
+  if (!(await assertOwnsProject(req, req.params.id))) return res.status(404).json({ error: 'Project not found' });
+  const { order } = req.body;
+  if (!Array.isArray(order)) return res.status(400).json({ error: 'order must be an array' });
+  for (let i = 0; i < order.length; i++) {
+    await db.execute({ sql: 'UPDATE project_stages SET position=? WHERE id=? AND project_id=?', args: [i, order[i], req.params.id] });
+  }
+  const result = await db.execute({ sql: 'SELECT * FROM project_stages WHERE project_id=? ORDER BY position ASC, id ASC', args: [req.params.id] });
+  res.json(result.rows);
+});
+
+// ─── PROJECT SHARE LINK (client-facing, read-only) ───────────────────────────
+// POST /api/projects/:id/share — owner gets (or creates) a share token for the project
+app.post('/api/projects/:id/share', authMiddleware, async (req, res) => {
+  if (denyStaff(req, res)) return;
+  if (!(await assertOwnsProject(req, req.params.id))) return res.status(404).json({ error: 'Project not found' });
+  const row = await db.execute({ sql: 'SELECT share_token FROM projects WHERE id=?', args: [req.params.id] });
+  let token = row.rows[0]?.share_token;
+  if (!token) {
+    token = crypto.randomBytes(20).toString('hex');
+    await db.execute({ sql: 'UPDATE projects SET share_token=? WHERE id=?', args: [token, req.params.id] });
+  }
+  const base = process.env.APP_URL || `https://${req.hostname}`;
+  res.json({ url: `${base}/share/${token}` });
+});
+
+// DELETE /api/projects/:id/share — owner revokes the share link
+app.delete('/api/projects/:id/share', authMiddleware, async (req, res) => {
+  if (denyStaff(req, res)) return;
+  if (!(await assertOwnsProject(req, req.params.id))) return res.status(404).json({ error: 'Project not found' });
+  await db.execute({ sql: 'UPDATE projects SET share_token=NULL WHERE id=?', args: [req.params.id] });
+  res.json({ ok: true });
+});
+
+// GET /api/share/:token — public: read-only project info + stages for the client
+app.get('/api/share/:token', async (req, res) => {
+  const row = await db.execute({
+    sql: `SELECT p.id, p.title, p.type, p.status, p.progress, p.deadline, p.created_at,
+                 c.name as client_name, u.name as owner_name, u.studio_name as studio_name
+          FROM projects p
+          LEFT JOIN clients c ON p.client_id = c.id
+          LEFT JOIN users u ON p.user_id = u.id
+          WHERE p.share_token = ?`,
+    args: [req.params.token],
+  });
+  if (!row.rows.length) return res.status(404).json({ error: 'Invalid or expired link' });
+  const p = row.rows[0];
+  const stages = await db.execute({
+    sql: 'SELECT id, title, status, position FROM project_stages WHERE project_id=? ORDER BY position ASC, id ASC',
+    args: [p.id],
+  });
+  res.json({
+    title: p.title,
+    type: p.type,
+    status: p.status,
+    progress: p.progress,
+    deadline: p.deadline,
+    created_at: p.created_at,
+    client_name: p.client_name,
+    studio_name: p.studio_name || p.owner_name,
+    stages: stages.rows,
+  });
 });
 
 // GET staff list with their user_ids (for assignment dropdown)
@@ -955,6 +1084,7 @@ app.use((err, req, res, next) => {
 app.get('/app',           (req, res) => res.sendFile(path.join(__dirname, 'public', 'app.html')));
 app.get('/admin',         (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
 app.get('/invite/:token', (req, res) => res.sendFile(path.join(__dirname, 'public', 'invite.html')));
+app.get('/share/:token',  (req, res) => res.sendFile(path.join(__dirname, 'public', 'share.html')));
 app.get('*',              (req, res) => res.sendFile(path.join(__dirname, 'public', 'login.html')));
 
 // ─── Start ───────────────────────────────────────────────────────────────────

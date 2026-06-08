@@ -1039,6 +1039,36 @@ textarea.field-input { line-height:1.65; }
 .proj-progress-slider:hover::-webkit-slider-thumb { background:#F5F5F5; }
 .proj-progress-slider:hover::-moz-range-thumb { background:#F5F5F5; }
 
+/* ── PROJECT STAGES EDITOR ── */
+.proj-stages-list { display:flex; flex-direction:column; gap:6px; margin-top:6px; }
+.proj-stage-row { display:flex; align-items:center; gap:8px; padding:9px 10px; border-radius:9px; background:rgba(217,217,217,0.04); border:1px solid rgba(255,255,255,0.06); }
+.proj-stage-row .proj-stage-pos { display:flex; flex-direction:column; gap:2px; }
+.proj-stage-row .proj-stage-pos span { width:18px; height:14px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:rgba(217,217,217,0.35); border-radius:4px; transition:color .15s,background .15s; }
+.proj-stage-row .proj-stage-pos span:hover { color:#D9D9D9; background:rgba(217,217,217,0.08); }
+.proj-stage-row .proj-stage-pos .material-symbols-outlined { font-size:13px; }
+.proj-stage-title { flex:1; font-size:13px; font-weight:500; color:#D9D9D9; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.proj-stage-status-select { font-size:11px; font-weight:600; letter-spacing:0.2px; color:rgba(217,217,217,0.65); background:rgba(217,217,217,0.06); border:1px solid rgba(255,255,255,0.08); border-radius:7px; padding:5px 8px; font-family:inherit; cursor:pointer; outline:none; }
+.proj-stage-status-select:hover { border-color:rgba(255,255,255,0.16); }
+.proj-stage-del { display:flex; align-items:center; justify-content:center; width:26px; height:26px; border-radius:7px; color:rgba(217,217,217,0.32); cursor:pointer; transition:color .15s,background .15s; flex-shrink:0; }
+.proj-stage-del:hover { color:#f87171; background:rgba(248,113,113,0.1); }
+.proj-stage-del .material-symbols-outlined { font-size:16px; }
+.proj-stages-empty, .proj-stages-loading { font-size:12px; color:rgba(217,217,217,0.35); padding:10px 2px; }
+.proj-stage-add-row { display:flex; gap:8px; margin-top:8px; }
+.proj-stage-add-row input { flex:1; background:rgba(217,217,217,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:8px 11px; font-size:12.5px; color:#D9D9D9; font-family:inherit; outline:none; transition:border-color .15s; }
+.proj-stage-add-row input:focus { border-color:rgba(255,255,255,0.22); }
+.proj-stage-add-row input::placeholder { color:rgba(217,217,217,0.3); }
+.proj-stage-add-btn { font-size:12px; font-weight:600; color:#121212; background:#D9D9D9; border:none; border-radius:8px; padding:0 16px; cursor:pointer; transition:opacity .15s; }
+.proj-stage-add-btn:hover { opacity:0.85; }
+
+.proj-share-row { display:flex; align-items:center; gap:8px; margin-top:6px; }
+.proj-share-link-box { flex:1; display:flex; align-items:center; gap:8px; background:rgba(217,217,217,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:8px 12px; font-size:12px; color:rgba(217,217,217,0.6); overflow:hidden; }
+.proj-share-link-box span { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-variant-numeric:tabular-nums; }
+.proj-share-link-box .material-symbols-outlined { font-size:15px; color:#D9D9D9; flex-shrink:0; }
+.proj-share-action { display:flex; align-items:center; gap:6px; font-size:11.5px; font-weight:600; color:rgba(217,217,217,0.65); background:rgba(217,217,217,0.06); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:8px 13px; cursor:pointer; transition:color .15s,border-color .15s; white-space:nowrap; }
+.proj-share-action:hover { color:#D9D9D9; border-color:rgba(255,255,255,0.18); }
+.proj-share-action.is-danger:hover { color:#f87171; border-color:rgba(248,113,113,0.3); }
+.proj-share-action .material-symbols-outlined { font-size:15px; }
+
 /* ── SEARCH BAR ── */
 .search { background:rgba(217,217,217,0.04) !important; border-color:var(--glass-border) !important; }
 .search:focus-within { border-color:rgba(217,217,217,0.25) !important; }
@@ -2462,6 +2492,11 @@ const TRANS = {
     f_company:'Company *', f_industry:'Industry', f_contact:'Contact',
     f_title:'Title *', f_type:'Type', f_client:'Client', f_status:'Status',
     f_deadline:'Deadline', f_budget:'Budget ₽', f_progress:'Progress %',
+    f_stages:'Work stages', hint_stages:'Build a step-by-step plan — your client will see this on their project page.',
+    btn_add_stage:'Add stage', btn_stage_confirm:'Add', loading_ellipsis:'Loading…', stages_empty:'No stages yet — add the first one.',
+    f_share_link:'Client link', hint_share_link:'A read-only page where the client can track their project status — no login required.',
+    btn_generate_link:'Generate client link', btn_copy_link:'Copy', confirm_revoke_link:'Revoke this link? The client will lose access to the project page.',
+    toast_link_created:'Client link created', toast_link_copied:'Link copied', toast_link_revoked:'Link revoked',
     f_stage:'Stage', f_value:'Value ₽', f_desc:'Description',
     f_amount:'Amount ₽', f_issued:'Issue date', f_due:'Due date',
     f_name:'Name *', f_position:'Position', f_goal_period:'Period',
@@ -2598,6 +2633,11 @@ const TRANS = {
     f_company:'Компания *', f_industry:'Отрасль', f_contact:'Контакт',
     f_title:'Название *', f_type:'Вид услуги', f_client:'Клиент', f_status:'Статус',
     f_deadline:'Дедлайн', f_budget:'Бюджет ₽', f_progress:'Прогресс %',
+    f_stages:'Этапы работы', hint_stages:'Соберите пошаговый план — клиент увидит его на своей странице проекта.',
+    btn_add_stage:'Добавить этап', btn_stage_confirm:'Добавить', loading_ellipsis:'Загрузка…', stages_empty:'Пока нет этапов — добавьте первый.',
+    f_share_link:'Ссылка для клиента', hint_share_link:'Страница только для просмотра, где клиент может следить за статусом проекта — без входа в систему.',
+    btn_generate_link:'Создать ссылку для клиента', btn_copy_link:'Копировать', confirm_revoke_link:'Отозвать эту ссылку? Клиент потеряет доступ к странице проекта.',
+    toast_link_created:'Ссылка для клиента создана', toast_link_copied:'Ссылка скопирована', toast_link_revoked:'Ссылка отозвана',
     f_stage:'Этап', f_value:'Сумма ₽', f_desc:'Описание',
     f_amount:'Сумма ₽', f_issued:'Дата выставления', f_due:'Дата оплаты',
     f_name:'Имя *', f_position:'Должность', f_goal_period:'Период',
@@ -4938,6 +4978,24 @@ function openProjectModal(p) {
         <input class="proj-progress-slider" id="m-progress" type="range" min="0" max="100" step="5" value="${progressVal}" oninput="document.getElementById('m-progress-readout').textContent=this.value+'%'">
       </div>
     </div>
+    ${p ? `
+    <div class="field" style="margin-top:6px;border-top:1px solid var(--line);padding-top:16px">
+      <label class="field-label" style="display:flex;align-items:center;justify-content:space-between">
+        <span>${t('f_stages')}</span>
+        <span style="font-size:11px;font-weight:600;color:rgba(217,217,217,0.5);cursor:pointer" onclick="toggleStageAddRow(${p.id})">+ ${t('btn_add_stage')}</span>
+      </label>
+      <p class="field-hint" style="font-size:11px;color:rgba(217,217,217,0.35);margin:2px 0 2px">${t('hint_stages')}</p>
+      <div id="m-stages-list" class="proj-stages-list"><div class="proj-stages-loading">${t('loading_ellipsis')}</div></div>
+      <div class="proj-stage-add-row" id="m-stage-add-row" style="display:none">
+        <input id="m-stage-new-title" placeholder="${currentLang==='ru'?'Например: Концепция':'e.g. Concept'}" onkeydown="if(event.key==='Enter')submitNewStage(${p.id})">
+        <button class="proj-stage-add-btn" onclick="submitNewStage(${p.id})">${t('btn_stage_confirm')}</button>
+      </div>
+    </div>
+    <div class="field" style="margin-top:6px">
+      <label class="field-label">${t('f_share_link')}</label>
+      <p class="field-hint" style="font-size:11px;color:rgba(217,217,217,0.35);margin:2px 0 8px">${t('hint_share_link')}</p>
+      <div id="m-share-link"><button class="proj-share-action" onclick="generateShareLink(${p.id})"><span class="material-symbols-outlined">link</span>${t('btn_generate_link')}</button></div>
+    </div>` : ''}
   `, async () => {
     const body = { title:val('m-title'), type:val('m-type'), client_id:val('m-client')||null, status:val('m-status'), progress:+val('m-progress'), deadline:val('m-deadline'), budget:+val('m-budget'), assigned_to:val('m-assigned')||null };
     try {
@@ -4954,9 +5012,152 @@ function openProjectModal(p) {
       loadAll();
     } catch(e) { showErr(e.message); }
   });
+  if (p) { loadProjectStages(p.id); loadShareLinkState(p.id); }
 }
 
 function editProject(id)    { openProjectModal(projects.find(p=>p.id===id)); }
+
+// ── Project stages editor (inside project modal) ──────────────────────────
+const STAGE_STATUS_LABELS = {
+  planned:     { en:'Planned',    ru:'Запланирован' },
+  in_progress: { en:'In progress',ru:'В работе' },
+  done:        { en:'Done',       ru:'Готово' },
+};
+let projectStagesCache = {};
+
+async function loadProjectStages(projectId) {
+  try {
+    const stages = await api('GET', `/api/projects/${projectId}/stages`);
+    projectStagesCache[projectId] = stages;
+    renderStagesEditor(projectId);
+  } catch(e) {
+    const wrap = document.getElementById('m-stages-list');
+    if (wrap) wrap.innerHTML = `<div class="proj-stages-empty">${esc(e.message)}</div>`;
+  }
+}
+
+function renderStagesEditor(projectId) {
+  const wrap = document.getElementById('m-stages-list');
+  if (!wrap) return;
+  const stages = projectStagesCache[projectId] || [];
+  if (!stages.length) {
+    wrap.innerHTML = `<div class="proj-stages-empty">${t('stages_empty')}</div>`;
+    return;
+  }
+  wrap.innerHTML = stages.map((s, i) => `
+    <div class="proj-stage-row">
+      <div class="proj-stage-pos">
+        <span onclick="moveProjectStage(${projectId},${s.id},-1)" style="${i===0?'visibility:hidden':''}"><span class="material-symbols-outlined">keyboard_arrow_up</span></span>
+        <span onclick="moveProjectStage(${projectId},${s.id},1)" style="${i===stages.length-1?'visibility:hidden':''}"><span class="material-symbols-outlined">keyboard_arrow_down</span></span>
+      </div>
+      <div class="proj-stage-title">${esc(s.title)}</div>
+      <select class="proj-stage-status-select" onchange="updateProjectStageStatus(${projectId},${s.id},this.value)">
+        <option value="planned" ${s.status==='planned'?'selected':''}>${STAGE_STATUS_LABELS.planned[currentLang]}</option>
+        <option value="in_progress" ${s.status==='in_progress'?'selected':''}>${STAGE_STATUS_LABELS.in_progress[currentLang]}</option>
+        <option value="done" ${s.status==='done'?'selected':''}>${STAGE_STATUS_LABELS.done[currentLang]}</option>
+      </select>
+      <div class="proj-stage-del" onclick="deleteProjectStage(${projectId},${s.id})"><span class="material-symbols-outlined">close</span></div>
+    </div>
+  `).join('');
+}
+
+function toggleStageAddRow(projectId) {
+  const row = document.getElementById('m-stage-add-row');
+  if (!row) return;
+  const showing = row.style.display !== 'none';
+  row.style.display = showing ? 'none' : 'flex';
+  if (!showing) setTimeout(() => document.getElementById('m-stage-new-title')?.focus(), 30);
+}
+
+async function submitNewStage(projectId) {
+  const input = document.getElementById('m-stage-new-title');
+  const title = input?.value.trim();
+  if (!title) return;
+  try {
+    const created = await api('POST', `/api/projects/${projectId}/stages`, { title, status:'planned' });
+    projectStagesCache[projectId] = [...(projectStagesCache[projectId]||[]), created];
+    renderStagesEditor(projectId);
+    input.value = '';
+    input.focus();
+  } catch(e) { toast(e.message); }
+}
+
+async function updateProjectStageStatus(projectId, stageId, status) {
+  try {
+    const updated = await api('PUT', `/api/projects/${projectId}/stages/${stageId}`, { status });
+    projectStagesCache[projectId] = (projectStagesCache[projectId]||[]).map(s => s.id===stageId ? updated : s);
+  } catch(e) { toast(e.message); }
+}
+
+async function deleteProjectStage(projectId, stageId) {
+  try {
+    await api('DELETE', `/api/projects/${projectId}/stages/${stageId}`);
+    projectStagesCache[projectId] = (projectStagesCache[projectId]||[]).filter(s => s.id!==stageId);
+    renderStagesEditor(projectId);
+  } catch(e) { toast(e.message); }
+}
+
+async function moveProjectStage(projectId, stageId, dir) {
+  const list = [...(projectStagesCache[projectId]||[])];
+  const idx = list.findIndex(s => s.id===stageId);
+  const swapIdx = idx + dir;
+  if (idx < 0 || swapIdx < 0 || swapIdx >= list.length) return;
+  [list[idx], list[swapIdx]] = [list[swapIdx], list[idx]];
+  projectStagesCache[projectId] = list;
+  renderStagesEditor(projectId);
+  try {
+    const updated = await api('PUT', `/api/projects/${projectId}/stages-reorder`, { order: list.map(s=>s.id) });
+    projectStagesCache[projectId] = updated;
+    renderStagesEditor(projectId);
+  } catch(e) { toast(e.message); }
+}
+
+// ── Client share link ──────────────────────────────────────────────────────
+async function loadShareLinkState(projectId) {
+  const p = projects.find(x => x.id === projectId);
+  const wrap = document.getElementById('m-share-link');
+  if (!wrap) return;
+  if (p && p.share_token) {
+    renderShareLinkBox(projectId, `${location.origin}/share/${p.share_token}`);
+  }
+}
+
+function renderShareLinkBox(projectId, url) {
+  const wrap = document.getElementById('m-share-link');
+  if (!wrap) return;
+  wrap.innerHTML = `
+    <div class="proj-share-row">
+      <div class="proj-share-link-box"><span class="material-symbols-outlined">link</span><span>${esc(url)}</span></div>
+      <button class="proj-share-action" onclick="copyShareLink('${url.replace(/'/g,"\\'")}')"><span class="material-symbols-outlined">content_copy</span>${t('btn_copy_link')}</button>
+      <button class="proj-share-action is-danger" onclick="revokeShareLink(${projectId})"><span class="material-symbols-outlined">link_off</span></button>
+    </div>`;
+}
+
+async function generateShareLink(projectId) {
+  try {
+    const { url } = await api('POST', `/api/projects/${projectId}/share`, {});
+    const p = projects.find(x => x.id === projectId);
+    if (p) p.share_token = url.split('/share/')[1];
+    renderShareLinkBox(projectId, url);
+    toast(t('toast_link_created'));
+  } catch(e) { toast(e.message); }
+}
+
+async function revokeShareLink(projectId) {
+  if (!await confirmDialog(t('confirm_revoke_link'), { danger:true })) return;
+  try {
+    await api('DELETE', `/api/projects/${projectId}/share`);
+    const p = projects.find(x => x.id === projectId);
+    if (p) p.share_token = null;
+    const wrap = document.getElementById('m-share-link');
+    if (wrap) wrap.innerHTML = `<button class="proj-share-action" onclick="generateShareLink(${projectId})"><span class="material-symbols-outlined">link</span>${t('btn_generate_link')}</button>`;
+    toast(t('toast_link_revoked'));
+  } catch(e) { toast(e.message); }
+}
+
+function copyShareLink(url) {
+  navigator.clipboard?.writeText(url).then(() => toast(t('toast_link_copied'))).catch(() => toast(url));
+}
 
 function viewProject(id) {
   const p = projects.find(x => x.id === id);

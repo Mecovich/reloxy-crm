@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Статус проекта — Reloxy</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#121212;
+    --accent:#D9D9D9;
+    --card-bg:rgba(255,255,255,0.03);
+    --card-border:rgba(255,255,255,0.08);
+    --line:rgba(255,255,255,0.07);
+    --g1:rgba(217,217,217,0.62);
+    --g2:rgba(217,217,217,0.38);
+    --r:14px;
+  }
+  html,body{height:100%;background:var(--bg);color:var(--accent);font-family:'Plus Jakarta Sans',-apple-system,sans-serif;-webkit-font-smoothing:antialiased;}
+  body{display:flex;justify-content:center;padding:48px 20px;min-height:100vh;}
+  .wrap{width:100%;max-width:640px;display:flex;flex-direction:column;gap:18px;}
+
+  .brand{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--g1);letter-spacing:0.2px;}
+  .brand .material-symbols-outlined{font-size:18px;}
+
+  .card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:var(--r);padding:26px;}
+
+  .head-eyebrow{font-size:11px;font-weight:600;letter-spacing:0.6px;text-transform:uppercase;color:var(--g2);margin-bottom:8px;}
+  .head-title{font-size:24px;font-weight:800;letter-spacing:-0.4px;line-height:1.2;}
+  .head-sub{font-size:13px;color:var(--g1);margin-top:6px;}
+
+  .meta-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px;}
+  .meta-pill{display:flex;align-items:center;gap:7px;padding:8px 13px;border-radius:10px;background:rgba(217,217,217,0.05);border:1px solid var(--card-border);font-size:12.5px;color:var(--g1);}
+  .meta-pill .material-symbols-outlined{font-size:16px;color:var(--accent);}
+  .meta-pill b{color:var(--accent);font-weight:700;}
+
+  .progress-wrap{margin-top:22px;}
+  .progress-label{display:flex;justify-content:space-between;align-items:baseline;font-size:12px;color:var(--g1);margin-bottom:8px;}
+  .progress-label b{font-size:20px;font-weight:800;color:var(--accent);letter-spacing:-0.02em;}
+  .progress-track{height:8px;border-radius:6px;background:rgba(255,255,255,0.06);overflow:hidden;}
+  .progress-fill{height:100%;border-radius:6px;background:var(--accent);transition:width 0.5s ease;}
+
+  .stages-card .card-title{font-size:15px;font-weight:700;letter-spacing:-0.1px;margin-bottom:4px;}
+  .stages-card .card-desc{font-size:12.5px;color:var(--g2);margin-bottom:22px;}
+
+  .stage{display:flex;gap:16px;position:relative;}
+  .stage:not(:last-child){padding-bottom:26px;}
+  .stage-rail{display:flex;flex-direction:column;align-items:center;}
+  .stage-dot{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid var(--card-border);background:rgba(255,255,255,0.04);transition:background 0.2s,border-color 0.2s;}
+  .stage-dot .material-symbols-outlined{font-size:16px;color:var(--g2);}
+  .stage-line{width:1px;flex:1;background:var(--line);margin-top:4px;}
+  .stage.is-done .stage-dot{background:var(--accent);border-color:var(--accent);}
+  .stage.is-done .stage-dot .material-symbols-outlined{color:#121212;}
+  .stage.is-done .stage-line{background:var(--accent);opacity:0.35;}
+  .stage.is-current .stage-dot{border-color:var(--accent);background:rgba(217,217,217,0.12);}
+  .stage.is-current .stage-dot .material-symbols-outlined{color:var(--accent);}
+  .stage-body{padding-top:4px;}
+  .stage-title{font-size:14.5px;font-weight:700;letter-spacing:-0.1px;color:var(--accent);}
+  .stage-status{font-size:11.5px;color:var(--g2);margin-top:3px;letter-spacing:0.1px;}
+  .stage.is-current .stage-status{color:var(--g1);}
+  .stage-badge{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:700;letter-spacing:0.4px;text-transform:uppercase;color:var(--accent);background:rgba(217,217,217,0.12);border:1px solid rgba(217,217,217,0.22);border-radius:7px;padding:3px 8px;margin-top:8px;}
+
+  .footer-note{text-align:center;font-size:11.5px;color:var(--g2);margin-top:6px;line-height:1.6;}
+  .footer-note a{color:var(--g1);text-decoration:none;border-bottom:1px solid var(--line);}
+
+  .state{text-align:center;padding:60px 24px;display:flex;flex-direction:column;align-items:center;gap:12px;}
+  .state .material-symbols-outlined{font-size:32px;color:var(--g2);}
+  .state-title{font-size:16px;font-weight:700;}
+  .state-sub{font-size:13px;color:var(--g1);}
+
+  @media (max-width:520px){
+    .head-title{font-size:20px;}
+    .card{padding:20px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand"><span class="material-symbols-outlined">workspaces</span> Reloxy CRM</div>
+
+  <div id="content"></div>
+
+  <p class="footer-note" id="footer-note" style="display:none">
+    Эта страница обновляется автоматически по мере продвижения проекта.<br>
+    Работает на <a href="https://reloxy.tech" target="_blank" rel="noopener">Reloxy</a>
+  </p>
+</div>
+
+<script>
+const token = location.pathname.split('/share/')[1];
+const STATUS_LABELS = { planned: 'Запланирован', in_progress: 'В работе', done: 'Готово' };
+const STATUS_ICONS  = { planned: 'schedule', in_progress: 'autorenew', done: 'check' };
+
+function esc(s){
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function fmtDate(d){
+  if(!d) return null;
+  try{
+    return new Date(d).toLocaleDateString('ru-RU', { day:'numeric', month:'long', year:'numeric' });
+  }catch(_){ return d; }
+}
+
+async function load(){
+  const content = document.getElementById('content');
+  try{
+    const r = await fetch(`/api/share/${token}`);
+    if(!r.ok) throw new Error('notfound');
+    const d = await r.json();
+    render(d);
+    document.getElementById('footer-note').style.display = 'block';
+    document.title = `${d.title} — Reloxy`;
+  }catch(e){
+    content.innerHTML = `
+      <div class="card state">
+        <span class="material-symbols-outlined">link_off</span>
+        <div class="state-title">Ссылка недействительна</div>
+        <div class="state-sub">Возможно, она была отозвана или больше не активна.<br>Уточните актуальную ссылку у студии.</div>
+      </div>`;
+  }
+}
+
+function render(d){
+  const content = document.getElementById('content');
+  const progress = Math.max(0, Math.min(100, parseInt(d.progress)||0));
+  const deadline = fmtDate(d.deadline);
+
+  const metaPills = [];
+  if(d.client_name) metaPills.push(`<div class="meta-pill"><span class="material-symbols-outlined">person</span> <b>${esc(d.client_name)}</b></div>`);
+  if(d.type) metaPills.push(`<div class="meta-pill"><span class="material-symbols-outlined">design_services</span> ${esc(d.type)}</div>`);
+  if(deadline) metaPills.push(`<div class="meta-pill"><span class="material-symbols-outlined">event</span> Срок: <b>${esc(deadline)}</b></div>`);
+
+  let head = `
+    <div class="card">
+      <div class="head-eyebrow">${esc(d.studio_name || 'Студия')} · статус проекта</div>
+      <div class="head-title">${esc(d.title)}</div>
+      <div class="head-sub">Здесь вы можете следить за ходом работы над вашим проектом в реальном времени.</div>
+      ${metaPills.length ? `<div class="meta-row">${metaPills.join('')}</div>` : ''}
+      <div class="progress-wrap">
+        <div class="progress-label"><span>Общий прогресс</span> <b>${progress}%</b></div>
+        <div class="progress-track"><div class="progress-fill" style="width:${progress}%"></div></div>
+      </div>
+    </div>`;
+
+  let stagesBlock = '';
+  if(d.stages && d.stages.length){
+    // find index of current stage: first non-done, otherwise none (all done)
+    let currentIdx = d.stages.findIndex(s => s.status !== 'done');
+    const items = d.stages.map((s, i) => {
+      const status = s.status || 'planned';
+      const isDone = status === 'done';
+      const isCurrent = i === currentIdx && !isDone;
+      const cls = isDone ? 'is-done' : (isCurrent ? 'is-current' : '');
+      const icon = isDone ? 'check' : (STATUS_ICONS[status] || 'radio_button_unchecked');
+      const isLast = i === d.stages.length - 1;
+      return `
+        <div class="stage ${cls}">
+          <div class="stage-rail">
+            <div class="stage-dot"><span class="material-symbols-outlined">${icon}</span></div>
+            ${isLast ? '' : '<div class="stage-line"></div>'}
+          </div>
+          <div class="stage-body">
+            <div class="stage-title">${esc(s.title)}</div>
+            <div class="stage-status">${STATUS_LABELS[status] || status}</div>
+            ${isCurrent ? '<div class="stage-badge"><span class="material-symbols-outlined" style="font-size:12px">bolt</span>Сейчас здесь</div>' : ''}
+          </div>
+        </div>`;
+    }).join('');
+
+    stagesBlock = `
+      <div class="card stages-card">
+        <div class="card-title">Этапы работы</div>
+        <div class="card-desc">Прогресс по шагам — от брифа до сдачи проекта.</div>
+        ${items}
+      </div>`;
+  } else {
+    stagesBlock = `
+      <div class="card state">
+        <span class="material-symbols-outlined">hourglass_empty</span>
+        <div class="state-title">Этапы пока не добавлены</div>
+        <div class="state-sub">Студия скоро опубликует план работы по проекту.</div>
+      </div>`;
+  }
+
+  content.innerHTML = head + stagesBlock;
+}
+
+load();
+</script>
+</body>
+</html>
