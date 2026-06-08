@@ -27,7 +27,7 @@
   --glass-border-hover:rgba(217,217,217,0.18);
   --blur:20px;
 }
-body { font-family:'Archivo','Plus Jakarta Sans',-apple-system,"Helvetica Neue",sans-serif; background:var(--black); color:var(--white); display:flex; height:100vh; overflow:hidden; font-size:14px; line-height:1.55; -webkit-font-smoothing:antialiased; letter-spacing:-0.1px; }
+body { font-family:"Helvetica Neue",'Archivo','Plus Jakarta Sans',-apple-system,sans-serif; background:var(--black); color:var(--white); display:flex; height:100vh; overflow:hidden; font-size:14px; line-height:1.55; -webkit-font-smoothing:antialiased; letter-spacing:-0.1px; }
 
 /* ── SIDEBAR ── */
 .sidebar { width:244px; height:100vh; background:var(--black); border-right:1px solid var(--line); position:fixed; top:0; left:0; bottom:0; display:flex; flex-direction:column; z-index:100; overflow:hidden; transition:width 0.22s cubic-bezier(.16,1,.3,1),border-color 0.22s; }
@@ -1325,7 +1325,8 @@ td { border-bottom-color:var(--line) !important; }
           <div class="bento-card-head">
             <div>
               <h2 class="bento-card-title">Revenue Overview</h2>
-              <p class="bento-card-desc" id="dash-chart-period-label">Real-time revenue tracking vs target</p>
+              <p class="bento-card-desc" data-i18n="dash_subtitle" style="margin-bottom:2px">Real-time engagement and growth metrics.</p>
+              <p class="bento-card-desc" id="dash-chart-period-label" style="opacity:0.5;font-size:12px"></p>
             </div>
             <div style="display:flex;align-items:center;gap:16px">
               <div class="bento-toggle">
@@ -1369,6 +1370,7 @@ td { border-bottom-color:var(--line) !important; }
             <span class="bento-portfolio-badge" id="dash-portfolio-badge">+0%</span>
             <span data-i18n="dash_portfolio_sub">vs last period</span>
           </div>
+          <div class="bento-portfolio-sub" style="opacity:0.3;margin-top:8px;font-size:11px" id="dash-portfolio-yield"></div>
         </div>
 
         <!-- New Transaction CTA — col-span-4 -->
@@ -1381,7 +1383,10 @@ td { border-bottom-color:var(--line) !important; }
         <!-- Efficiency Index — col-span-4 -->
         <div class="bento-card bento-col-4" style="display:flex;flex-direction:column;align-items:center">
           <div class="bento-card-head" style="width:100%;margin-bottom:0">
-            <h3 class="bento-eyebrow" data-i18n="dash_efficiency_index">Efficiency Index</h3>
+            <div>
+              <h3 class="bento-eyebrow" style="margin-bottom:2px" data-i18n="dash_efficiency_index">Efficiency Index</h3>
+              <p class="bento-card-desc" style="opacity:0.5;font-size:12px" data-i18n="dash_efficiency_sub">Global resource allocation score</p>
+            </div>
             <span class="material-symbols-outlined" style="font-size:18px;color:var(--g1)">speed</span>
           </div>
           <div class="bento-gauge-wrap">
@@ -2176,10 +2181,12 @@ const TRANS = {
     dash_view_all_tasks:'View All Tasks',
     dash_toggle_analytics:'Analytics', dash_toggle_forecast:'Forecasting',
     dash_active_peak:'Active Peak',
-    dash_total_portfolio:'Total Portfolio', dash_portfolio_sub:'vs last period',
+    dash_total_portfolio:'Total Portfolio', dash_portfolio_sub:'vs last period', dash_yield_prefix:'Average daily yield',
     dash_new_transaction:'New Transaction', dash_new_transaction_sub:'Create an invoice or record a payment in a couple of clicks',
-    dash_efficiency_index:'Efficiency Index', dash_efficiency:'Efficiency',
+    dash_efficiency_index:'Efficiency Index', dash_efficiency:'Efficiency', dash_efficiency_sub:'Global resource allocation score',
     dash_active_events:'Active Events',
+    dash_tx_asset:'Asset', dash_tx_volume:'Volume', dash_tx_timestamp:'Timestamp',
+    dash_subtitle:'Real-time engagement and growth metrics.',
     dash_enterprise_plan:'Enterprise Plan', dash_enterprise_text:'Unlock advanced analytics, unlimited team seats and priority support.', dash_upgrade_now:'Upgrade Now',
     dash_project_milestones:'Project Milestones',
     dash_activity_timeline:'Activity Timeline',
@@ -2195,7 +2202,7 @@ const TRANS = {
     nav_dashboard:'Dashboard', nav_calendar:'Calendar', nav_clients:'Clients',
     nav_projects:'Projects', nav_pipeline:'Pipeline', nav_team:'Team',
     nav_finance:'Finance', nav_settings:'Settings', sign_out:'Sign out',
-    search_ph:'Search...', btn_add:'+ Add new',
+    search_ph:'Search analytics, projects, users...', btn_add:'+ Add new',
     page_dashboard:'Dashboard', page_calendar:'Calendar', page_clients:'Clients',
     page_projects:'Projects', page_pipeline:'Pipeline', page_team:'Team',
     page_finance:'Finance', page_settings:'Settings',
@@ -2301,10 +2308,12 @@ const TRANS = {
     dash_view_all_tasks:'Все задачи',
     dash_toggle_analytics:'Аналитика', dash_toggle_forecast:'Прогноз',
     dash_active_peak:'Активный пик',
-    dash_total_portfolio:'Общий портфель', dash_portfolio_sub:'к прошлому периоду',
+    dash_total_portfolio:'Общий портфель', dash_portfolio_sub:'к прошлому периоду', dash_yield_prefix:'Средняя дневная доходность',
     dash_new_transaction:'Новая транзакция', dash_new_transaction_sub:'Создайте счёт или зафиксируйте платёж в пару кликов',
-    dash_efficiency_index:'Индекс эффективности', dash_efficiency:'Эффективность',
+    dash_efficiency_index:'Индекс эффективности', dash_efficiency:'Эффективность', dash_efficiency_sub:'Оценка распределения ресурсов компании',
     dash_active_events:'Активные события',
+    dash_tx_asset:'Актив', dash_tx_volume:'Объём', dash_tx_timestamp:'Время',
+    dash_subtitle:'Метрики вовлечённости и роста в реальном времени.',
     dash_enterprise_plan:'Корпоративный план', dash_enterprise_text:'Откройте расширенную аналитику, неограниченные места в команде и приоритетную поддержку.', dash_upgrade_now:'Перейти на план',
     dash_project_milestones:'Этапы проектов',
     dash_activity_timeline:'Лента активности',
@@ -2320,7 +2329,7 @@ const TRANS = {
     nav_dashboard:'Дашборд', nav_calendar:'Календарь', nav_clients:'Клиенты',
     nav_projects:'Проекты', nav_pipeline:'Воронка', nav_team:'Команда',
     nav_finance:'Финансы', nav_settings:'Настройки', sign_out:'Выйти',
-    search_ph:'Поиск...', btn_add:'+ Добавить',
+    search_ph:'Поиск по аналитике, проектам, пользователям...', btn_add:'+ Добавить',
     page_dashboard:'Дашборд', page_calendar:'Календарь', page_clients:'Клиенты',
     page_projects:'Проекты', page_pipeline:'Воронка', page_team:'Команда',
     page_finance:'Финансы', page_settings:'Настройки',
@@ -3251,10 +3260,10 @@ function renderDashboard() {
   elUP.innerHTML = unpaid.length ? `
     <table class="bento-tx-table">
       <thead><tr>
-        <th>${t('dash_tx_details')||'Transaction details'}</th>
-        <th>${t('dash_tx_date')||'Date'}</th>
-        <th>${t('dash_tx_amount')||'Amount'}</th>
+        <th>${t('dash_tx_asset')||'Asset'}</th>
         <th>${t('dash_tx_status')||'Status'}</th>
+        <th>${t('dash_tx_volume')||'Volume'}</th>
+        <th>${t('dash_tx_timestamp')||'Timestamp'}</th>
       </tr></thead>
       <tbody>
         ${unpaid.map(i => `<tr>
@@ -3267,12 +3276,12 @@ function renderDashboard() {
               </div>
             </div>
           </td>
-          <td>${i.due_date||i.created_at||'—'}</td>
-          <td><b>${i.amount ? '₽ '+Number(i.amount).toLocaleString('en') : '—'}</b></td>
           <td>
             <span class="bento-tx-status">${esc(i.status||'pending')}</span>
             <button class="dash-pay-btn" style="margin-left:8px" onclick="markPaid(${i.id})">${t('dash_mark_paid')}</button>
           </td>
+          <td><b>${i.amount ? '₽ '+Number(i.amount).toLocaleString('en') : '—'}</b></td>
+          <td>${i.due_date||i.created_at||'—'}</td>
         </tr>`).join('')}
       </tbody>
     </table>` : `<div class="empty" style="padding:32px"><div class="empty-title">${t('dash_all_paid')}</div></div>`;
@@ -3286,6 +3295,11 @@ function renderDashboard() {
     let pct = 0;
     if (prv > 0) pct = Math.round(((cur - prv) / prv) * 100);
     pbEl.textContent = (pct >= 0 ? '+' : '') + pct + '%';
+  }
+  const pyEl = document.getElementById('dash-portfolio-yield');
+  if (pyEl) {
+    const dailyYield = portfolioTotal > 0 ? +((paidTotal / portfolioTotal) * (100 / 30)).toFixed(2) : 0;
+    pyEl.textContent = `${t('dash_yield_prefix')||'Average daily yield'} ${dailyYield}%`;
   }
 
   // ── Active Peak floating card on chart ──
