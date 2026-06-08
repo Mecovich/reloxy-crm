@@ -1141,6 +1141,8 @@ td { border-bottom-color:var(--line) !important; }
 .bento-eyebrow { font-size:12px; font-weight:700; letter-spacing:0.15em; text-transform:uppercase; color:rgba(217,217,217,0.60); }
 .bento-amount { display:flex; align-items:center; gap:10px; }
 .bento-amount-num { font-size:28px; font-weight:800; letter-spacing:-0.02em; color:#D9D9D9; font-variant-numeric:tabular-nums; }
+.bento-earned-row { display:flex; align-items:baseline; gap:14px; margin-top:14px; }
+.bento-earned-num { font-size:40px; font-weight:800; letter-spacing:-0.03em; color:#D9D9D9; font-variant-numeric:tabular-nums; line-height:1; }
 .bento-link-btn { margin-top:24px; padding-top:16px; border-top:1px solid rgba(255,255,255,0.05); font-size:10px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#D9D9D9; background:none; border-left:none; border-right:none; border-bottom:none; text-align:left; cursor:pointer; }
 .bento-link-btn:hover { text-decoration:underline; }
 .bento-link-btn-outline { margin-top:24px; padding:12px; border:1px solid rgba(255,255,255,0.10); border-radius:12px; text-align:center; font-size:10px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:rgba(217,217,217,0.60); }
@@ -1469,15 +1471,16 @@ td { border-bottom-color:var(--line) !important; }
               <h2 class="bento-card-title" data-i18n="dash_earned_title">Earned</h2>
               <p class="bento-card-desc" data-i18n="dash_subtitle" style="margin-bottom:2px">How much you've earned, over time.</p>
               <p class="bento-card-desc" id="dash-chart-period-label" style="opacity:0.5;font-size:12px"></p>
+              <div class="bento-earned-row">
+                <div class="bento-earned-num" id="chart-total">₽ —</div>
+                <div class="chart-badge" id="chart-badge"></div>
+              </div>
+              <div class="bento-card-desc" id="chart-sub" style="margin-top:6px"></div>
             </div>
             <div style="display:flex;align-items:center;gap:16px">
               <div class="bento-toggle">
                 <span class="bento-toggle-opt active" onclick="setChartMode('analytics',this)" data-i18n="dash_toggle_analytics">Analytics</span>
                 <span class="bento-toggle-opt" onclick="setChartMode('forecast',this)" data-i18n="dash_toggle_forecast">Forecasting</span>
-              </div>
-              <div class="bento-amount">
-                <div class="bento-amount-num" id="chart-total">₽ —</div>
-                <div class="chart-badge" id="chart-badge"></div>
               </div>
               <div class="chart-periods">
                 <button class="chart-period" onclick="setChartPeriod('week',this)" data-i18n="period_week">Week</button>
@@ -1486,7 +1489,6 @@ td { border-bottom-color:var(--line) !important; }
               </div>
             </div>
           </div>
-          <div class="bento-card-desc" id="chart-sub" style="margin-top:-8px"></div>
           <div class="bento-forecast-note" id="dash-forecast-note" style="display:none"></div>
           <div style="position:relative;height:280px;margin-top:18px">
             <canvas id="revenue-chart"></canvas>
