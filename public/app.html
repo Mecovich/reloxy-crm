@@ -1119,7 +1119,10 @@ td { border-bottom-color:var(--line) !important; }
 @keyframes textShine { 0%,100% { background-position:0% center; } 50% { background-position:100% center; } }
 .bento-sub { font-size:16px; font-weight:400; line-height:24px; color:rgba(217,217,217,0.60); }
 .bento-welcome-actions { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
-.bento-btn { padding:10px 24px; border-radius:16px; font-size:14px; font-weight:700; white-space:nowrap; cursor:pointer; border:none; outline:1px solid rgba(217,217,217,0.10); outline-offset:-1px; background:rgba(217,217,217,0.03); color:#D9D9D9; backdrop-filter:blur(10px); transition:all .2s; display:inline-flex; align-items:center; }
+.bento-btn { padding:10px 24px; border-radius:16px; font-size:14px; font-weight:700; white-space:nowrap; cursor:pointer; border:none; outline:1px solid rgba(217,217,217,0.10); outline-offset:-1px; background:rgba(217,217,217,0.05); color:#D9D9D9; transition:all .2s; display:inline-flex; align-items:center; }
+.bento-icon-action { width:44px; height:44px; padding:0; border-radius:14px; justify-content:center; gap:0; }
+.bento-icon-action .material-symbols-outlined { font-size:20px; }
+.bento-icon-action:hover { background:rgba(217,217,217,0.10); }
 .bento-btn:hover { background:rgba(217,217,217,0.08); outline-color:rgba(217,217,217,0.20); }
 .bento-btn-primary { background:#D9D9D9; color:#121212; outline:none; }
 .bento-btn-primary:hover { transform:scale(1.02); background:#D9D9D9; }
@@ -1176,6 +1179,8 @@ td { border-bottom-color:var(--line) !important; }
 .bento-toggle { display:flex; gap:0; background:rgba(255,255,255,0.05); border-radius:16px; padding:4px; }
 .bento-toggle-opt { padding:8px 16px; border-radius:16px; font-size:12px; font-weight:700; color:rgba(217,217,217,0.40); cursor:pointer; transition:all .15s; user-select:none; }
 .bento-toggle-opt.active { background:rgba(217,217,217,0.10); color:#D9D9D9; }
+.bento-forecast-note { display:flex; align-items:center; gap:8px; margin-top:10px; padding:10px 16px; border-radius:12px; background:rgba(217,217,217,0.05); border:1px solid rgba(217,217,217,0.10); font-size:12.5px; color:rgba(217,217,217,0.55); }
+.bento-forecast-note b { color:#D9D9D9; font-weight:700; }
 .bento-peak-card { position:absolute; min-width:160px; padding:16px; background:rgba(217,217,217,0.06); border:1px solid rgba(255,255,255,0.12); border-radius:16px; backdrop-filter:blur(16px); box-shadow:0 25px 50px -12px rgba(0,0,0,0.45),0 0 0 1px rgba(255,255,255,0.02) inset; animation:peakFloat 4.5s ease-in-out infinite; }
 @keyframes peakFloat { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-5px); } }
 .bento-peak-label { font-size:9px; font-weight:700; letter-spacing:0.18em; text-transform:uppercase; color:rgba(217,217,217,0.40); display:flex; align-items:center; gap:6px; }
@@ -1187,9 +1192,19 @@ td { border-bottom-color:var(--line) !important; }
 @media (max-width:1100px){ .bento-portfolio-row{ grid-template-columns:1fr; } }
 .bento-portfolio-card { display:flex; flex-direction:column; justify-content:space-between; }
 .bento-portfolio-label { font-size:13px; font-weight:700; letter-spacing:0.05em; text-transform:uppercase; color:rgba(217,217,217,0.40); }
-.bento-portfolio-num { font-size:36px; font-weight:700; color:#D9D9D9; letter-spacing:-0.02em; text-shadow:0 0 12px rgba(217,217,217,0.30); margin-top:8px; }
+.bento-portfolio-num { font-size:36px; font-weight:700; color:#D9D9D9; letter-spacing:-0.02em; margin-top:8px; }
 .bento-portfolio-badge { display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:6px; background:rgba(217,217,217,0.10); font-size:10px; font-weight:700; color:#D9D9D9; }
 .bento-portfolio-sub { display:flex; align-items:center; gap:8px; font-size:11px; color:rgba(217,217,217,0.40); margin-top:16px; }
+.bento-portfolio-head { display:flex; align-items:flex-start; justify-content:space-between; }
+.bento-portfolio-bar { display:flex; height:6px; border-radius:4px; overflow:hidden; background:rgba(217,217,217,0.07); margin-top:14px; }
+.bento-portfolio-bar-seg { height:100%; }
+.bento-portfolio-bar-seg.is-paid { background:rgba(217,217,217,0.55); }
+.bento-portfolio-bar-seg.is-pending { background:rgba(217,217,217,0.20); }
+.bento-portfolio-legend { display:flex; align-items:center; gap:16px; margin-top:10px; font-size:10.5px; color:rgba(217,217,217,0.40); }
+.bento-portfolio-legend span { display:inline-flex; align-items:center; gap:6px; }
+.bento-portfolio-legend i { display:inline-block; width:7px; height:7px; border-radius:2px; }
+.bento-portfolio-legend i.is-paid { background:rgba(217,217,217,0.55); }
+.bento-portfolio-legend i.is-pending { background:rgba(217,217,217,0.20); }
 .bento-cta-card { display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; gap:4px; cursor:pointer; }
 .bento-cta-card:hover { background:var(--glass-bg-hover); }
 .bento-cta-icon { width:48px; height:48px; border-radius:50%; border:1px solid rgba(255,255,255,0.10); display:flex; align-items:center; justify-content:center; margin-bottom:12px; font-size:20px; color:#D9D9D9; }
@@ -1205,18 +1220,18 @@ td { border-bottom-color:var(--line) !important; }
 .bento-milestone-check { width:14px; height:14px; flex-shrink:0; }
 
 /* Efficiency gauge */
+.bento-unpaid-icon { display:inline-flex !important; align-items:center; justify-content:center; width:38px; height:38px; font-size:19px !important; color:#D9D9D9 !important; background:rgba(217,217,217,0.14); border:1px solid rgba(217,217,217,0.22); border-radius:11px; flex-shrink:0; }
 .bento-icon-badge { display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; font-size:17px !important; color:rgba(217,217,217,0.65) !important; background:linear-gradient(150deg, rgba(217,217,217,0.10), rgba(217,217,217,0.02)); border:1px solid rgba(255,255,255,0.08); border-radius:11px; box-shadow:0 1px 0 rgba(255,255,255,0.04) inset; transition:all .2s ease; flex-shrink:0; }
 .bento-card:hover .bento-icon-badge { color:#D9D9D9 !important; border-color:rgba(255,255,255,0.14); background:linear-gradient(150deg, rgba(217,217,217,0.16), rgba(217,217,217,0.04)); }
 
 .bento-gauge-wrap { display:flex; flex-direction:column; align-items:center; gap:4px; padding:20px 0 8px; position:relative; }
 .bento-gauge { position:relative; width:208px; height:208px; }
-.bento-gauge::before { content:''; position:absolute; inset:18px; border-radius:50%; background:radial-gradient(circle, rgba(217,217,217,0.10), transparent 70%); filter:blur(10px); animation:auroraDrift 8s ease-in-out infinite alternate; }
 .bento-gauge-track, .bento-gauge-fill { fill:none; stroke-linecap:round; }
 .bento-gauge-track { stroke:rgba(217,217,217,0.07); }
 .bento-gauge-tick { stroke:rgba(217,217,217,0.16); stroke-width:1.5; }
-.bento-gauge-fill { stroke:url(#gaugeGrad); filter:drop-shadow(0 0 10px rgba(217,217,217,0.5)); transition:stroke-dashoffset 1.1s cubic-bezier(.16,1,.3,1); }
+.bento-gauge-fill { stroke:#D9D9D9; transition:stroke-dashoffset 1.1s cubic-bezier(.16,1,.3,1); }
 .bento-gauge-center { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
-.bento-gauge-num { font-size:44px; font-weight:800; color:#D9D9D9; line-height:1; letter-spacing:-0.03em; text-shadow:0 0 24px rgba(217,217,217,0.30); font-variant-numeric:tabular-nums; }
+.bento-gauge-num { font-size:44px; font-weight:800; color:#D9D9D9; line-height:1; letter-spacing:-0.03em; font-variant-numeric:tabular-nums; }
 .bento-gauge-num span { font-size:17px; font-weight:700; color:rgba(217,217,217,0.40); }
 .bento-gauge-lbl { font-size:10px; font-weight:700; letter-spacing:0.24em; text-transform:uppercase; color:rgba(217,217,217,0.38); margin-top:7px; }
 .bento-gauge-trend { font-size:10.5px; font-weight:700; color:rgba(217,217,217,0.65); margin-top:16px; display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:20px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); }
@@ -1271,6 +1286,8 @@ td { border-bottom-color:var(--line) !important; }
 .bento-donut-legend-left { display:flex; align-items:center; gap:10px; color:rgba(217,217,217,0.70); }
 .bento-donut-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
 .bento-donut-legend-val { font-weight:700; color:#D9D9D9; }
+.bento-donut-rate { display:flex; align-items:center; gap:8px; margin-top:16px; padding-top:14px; border-top:1px solid rgba(255,255,255,0.06); font-size:11.5px; color:rgba(217,217,217,0.40); }
+.bento-donut-rate b { color:#D9D9D9; font-size:14px; font-weight:700; }
 
 /* ── AI Insight card ── */
 .bento-ai-card { display:flex; flex-direction:column; gap:16px; }
@@ -1421,10 +1438,10 @@ td { border-bottom-color:var(--line) !important; }
           <p class="bento-sub"><span id="dash-greeting"></span><span id="dash-perf-note" data-i18n="dash_perf_note">Your business performance is up this month.</span></p>
         </div>
         <div class="bento-welcome-actions">
-          <button class="bento-btn bento-btn-primary" onclick="go('finance',document.querySelectorAll('.nav-item')[6])" data-i18n="btn_send_funds">Send Funds</button>
-          <button class="bento-btn" onclick="go('finance',document.querySelectorAll('.nav-item')[6])" data-i18n="btn_request">Request</button>
-          <button class="bento-btn" onclick="go('finance',document.querySelectorAll('.nav-item')[6])" data-i18n="btn_transfer">Transfer</button>
-          <button class="bento-btn" onclick="go('finance',document.querySelectorAll('.nav-item')[6])" data-i18n="btn_deposit">Deposit</button>
+          <button class="bento-btn bento-btn-primary bento-icon-action" onclick="go('finance',document.querySelectorAll('.nav-item')[6])" data-i18n-title="btn_send_funds"><span class="material-symbols-outlined">north_east</span></button>
+          <button class="bento-btn bento-icon-action" onclick="go('finance',document.querySelectorAll('.nav-item')[6])" data-i18n-title="btn_request"><span class="material-symbols-outlined">south_west</span></button>
+          <button class="bento-btn bento-icon-action" onclick="go('finance',document.querySelectorAll('.nav-item')[6])" data-i18n-title="btn_transfer"><span class="material-symbols-outlined">swap_horiz</span></button>
+          <button class="bento-btn bento-icon-action" onclick="go('finance',document.querySelectorAll('.nav-item')[6])" data-i18n-title="btn_deposit"><span class="material-symbols-outlined">savings</span></button>
           <button class="bento-btn" onclick="openGoalModal()" id="goal-wrap-mini" style="display:none">
             <span id="goal-mini-current">₽ 0</span>
             <span style="opacity:0.4">/</span>
@@ -1449,14 +1466,14 @@ td { border-bottom-color:var(--line) !important; }
         <div class="bento-card bento-col-12">
           <div class="bento-card-head">
             <div>
-              <h2 class="bento-card-title">Revenue Overview</h2>
-              <p class="bento-card-desc" data-i18n="dash_subtitle" style="margin-bottom:2px">Real-time engagement and growth metrics.</p>
+              <h2 class="bento-card-title" data-i18n="dash_earned_title">Earned</h2>
+              <p class="bento-card-desc" data-i18n="dash_subtitle" style="margin-bottom:2px">How much you've earned, over time.</p>
               <p class="bento-card-desc" id="dash-chart-period-label" style="opacity:0.5;font-size:12px"></p>
             </div>
             <div style="display:flex;align-items:center;gap:16px">
               <div class="bento-toggle">
-                <span class="bento-toggle-opt active" data-i18n="dash_toggle_analytics">Analytics</span>
-                <span class="bento-toggle-opt" data-i18n="dash_toggle_forecast">Forecasting</span>
+                <span class="bento-toggle-opt active" onclick="setChartMode('analytics',this)" data-i18n="dash_toggle_analytics">Analytics</span>
+                <span class="bento-toggle-opt" onclick="setChartMode('forecast',this)" data-i18n="dash_toggle_forecast">Forecasting</span>
               </div>
               <div class="bento-amount">
                 <div class="bento-amount-num" id="chart-total">₽ —</div>
@@ -1470,6 +1487,7 @@ td { border-bottom-color:var(--line) !important; }
             </div>
           </div>
           <div class="bento-card-desc" id="chart-sub" style="margin-top:-8px"></div>
+          <div class="bento-forecast-note" id="dash-forecast-note" style="display:none"></div>
           <div style="position:relative;height:280px;margin-top:18px">
             <canvas id="revenue-chart"></canvas>
             <div class="bento-peak-card" id="dash-peak-card" style="top:24px;left:38%;display:none">
@@ -1488,8 +1506,19 @@ td { border-bottom-color:var(--line) !important; }
         <!-- Total Portfolio — col-span-4 -->
         <div class="bento-card bento-col-4 bento-portfolio-card">
           <div>
-            <div class="bento-portfolio-label" data-i18n="dash_total_portfolio">Total Portfolio</div>
+            <div class="bento-portfolio-head">
+              <div class="bento-portfolio-label" data-i18n="dash_total_portfolio">Total Portfolio</div>
+              <span class="material-symbols-outlined bento-icon-badge">account_balance_wallet</span>
+            </div>
             <div class="bento-portfolio-num" id="dash-portfolio-total">₽ —</div>
+          </div>
+          <div class="bento-portfolio-bar" id="dash-portfolio-bar">
+            <div class="bento-portfolio-bar-seg is-paid" id="dash-portfolio-bar-paid" style="width:0%"></div>
+            <div class="bento-portfolio-bar-seg is-pending" id="dash-portfolio-bar-pending" style="width:0%"></div>
+          </div>
+          <div class="bento-portfolio-legend">
+            <span><i class="is-paid"></i><span data-i18n="dash_portfolio_paid">Paid</span> · <b id="dash-portfolio-paid-val" style="color:rgba(217,217,217,0.65)">—</b></span>
+            <span><i class="is-pending"></i><span data-i18n="dash_portfolio_pending">Pending</span> · <b id="dash-portfolio-pending-val" style="color:rgba(217,217,217,0.65)">—</b></span>
           </div>
           <div class="bento-portfolio-sub">
             <span class="bento-portfolio-badge" id="dash-portfolio-badge">+0%</span>
@@ -1517,13 +1546,6 @@ td { border-bottom-color:var(--line) !important; }
           <div class="bento-gauge-wrap">
             <div class="bento-gauge">
               <svg width="208" height="208" viewBox="0 0 200 200">
-                <defs>
-                  <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="rgba(217,217,217,0.55)"/>
-                    <stop offset="55%" stop-color="#D9D9D9"/>
-                    <stop offset="100%" stop-color="#F5F5F5"/>
-                  </linearGradient>
-                </defs>
                 <circle class="bento-gauge-track" cx="100" cy="100" r="84" stroke-width="14"/>
                 <g id="dash-gauge-ticks" transform="rotate(-90 100 100)"></g>
                 <circle class="bento-gauge-fill" id="dash-gauge-fill" cx="100" cy="100" r="84" stroke-width="14"
@@ -1541,7 +1563,13 @@ td { border-bottom-color:var(--line) !important; }
         <!-- Recent Transactions / Unpaid invoices — col-span-8 -->
         <div class="bento-card bento-col-8" style="padding:0;overflow:hidden">
           <div class="bento-table-head">
-            <h3 class="bento-card-title" style="font-size:18px" data-i18n="dash_unpaid">Recent Transactions</h3>
+            <div style="display:flex;align-items:center;gap:14px">
+              <span class="material-symbols-outlined bento-unpaid-icon">receipt_long</span>
+              <div>
+                <h3 class="bento-card-title" style="font-size:18px" data-i18n="dash_unpaid">Recent Transactions</h3>
+                <p class="bento-card-desc" style="opacity:0.45;font-size:11.5px;margin-top:2px" id="dash-unpaid-sub" data-i18n="dash_unpaid_sub">Awaiting payment</p>
+              </div>
+            </div>
             <span class="dash-panel-link" onclick="go('finance',document.querySelectorAll('.nav-item')[6])" data-i18n="dash_all">All →</span>
           </div>
           <div id="dash-unpaid"></div>
@@ -1588,6 +1616,7 @@ td { border-bottom-color:var(--line) !important; }
             </svg>
             <div class="bento-donut-legend" id="dash-donut-legend"></div>
           </div>
+          <div class="bento-donut-rate" id="dash-donut-rate"></div>
         </div>
 
         <!-- Weekly activity — col-span-4 -->
@@ -2326,13 +2355,18 @@ const TRANS = {
     dash_team_default_action:'updated their status',
     dash_view_all_tasks:'View All Tasks',
     dash_toggle_analytics:'Analytics', dash_toggle_forecast:'Forecasting',
+    dash_forecast_label:'Projected for', dash_forecast_trend:'avg. trend',
+    dash_forecast_period_week:'next week', dash_forecast_period_month:'next month', dash_forecast_period_year:'next year',
+    dash_forecast_no_data:'Not enough data yet for a forecast',
     dash_active_peak:'Active Peak',
     dash_total_portfolio:'Total Portfolio', dash_portfolio_sub:'vs last period', dash_yield_prefix:'Average daily yield',
+    dash_portfolio_paid:'Paid', dash_portfolio_pending:'Pending', dash_unpaid_sub:'Awaiting payment',
     dash_new_transaction:'New Transaction', dash_new_transaction_sub:'Create an invoice or record a payment in a couple of clicks',
     dash_efficiency_index:'Efficiency Index', dash_efficiency:'Efficiency', dash_efficiency_sub:'Global resource allocation score',
     dash_active_events:'Active Events',
     dash_tx_asset:'Asset', dash_tx_volume:'Volume', dash_tx_timestamp:'Timestamp',
-    dash_subtitle:'Real-time engagement and growth metrics.',
+    dash_earned_title:'Earned',
+    dash_subtitle:'How much you\'ve earned, over time.',
     dash_enterprise_plan:'Enterprise Plan', dash_enterprise_text:'Unlock advanced analytics, unlimited team seats and priority support.', dash_upgrade_now:'Upgrade Now',
     dash_project_milestones:'Project Milestones',
     dash_activity_timeline:'Activity Timeline',
@@ -2341,7 +2375,7 @@ const TRANS = {
     dash_no_team:'No team members yet',
     dash_ai_insight:'AI Insight', dash_ai_review_invoices:'Review invoices', dash_ai_view_projects:'View projects',
     dash_project_status:'Project Status', dash_total:'TOTAL',
-    dash_status_done:'Done', dash_status_active:'Active', dash_status_review:'Review', dash_status_other:'Other',
+    dash_status_done:'Done', dash_status_active:'Active', dash_status_review:'Review', dash_status_other:'Other', dash_completion_rate:'completed',
     dash_weekly_activity:'Weekly Activity',
     dash_spark_revenue:'Revenue', dash_spark_clients:'New Clients', dash_spark_projects:'Active Projects',
     grp_overview:'Overview', grp_work:'Work', grp_finance_g:'Finance',
@@ -2457,13 +2491,18 @@ const TRANS = {
     dash_team_default_action:'обновил(а) статус',
     dash_view_all_tasks:'Все задачи',
     dash_toggle_analytics:'Аналитика', dash_toggle_forecast:'Прогноз',
+    dash_forecast_label:'Прогноз на', dash_forecast_trend:'ср. динамика',
+    dash_forecast_period_week:'следующую неделю', dash_forecast_period_month:'следующий месяц', dash_forecast_period_year:'следующий год',
+    dash_forecast_no_data:'Пока недостаточно данных для прогноза',
     dash_active_peak:'Активный пик',
     dash_total_portfolio:'Общий портфель', dash_portfolio_sub:'к прошлому периоду', dash_yield_prefix:'Средняя дневная доходность',
+    dash_portfolio_paid:'Оплачено', dash_portfolio_pending:'В ожидании', dash_unpaid_sub:'Ожидают оплаты',
     dash_new_transaction:'Новая транзакция', dash_new_transaction_sub:'Создайте счёт или зафиксируйте платёж в пару кликов',
     dash_efficiency_index:'Индекс эффективности', dash_efficiency:'Эффективность', dash_efficiency_sub:'Оценка распределения ресурсов компании',
     dash_active_events:'Активные события',
     dash_tx_asset:'Актив', dash_tx_volume:'Объём', dash_tx_timestamp:'Время',
-    dash_subtitle:'Метрики вовлечённости и роста в реальном времени.',
+    dash_earned_title:'Заработано',
+    dash_subtitle:'Сколько вы заработали за выбранный период.',
     dash_enterprise_plan:'Корпоративный план', dash_enterprise_text:'Откройте расширенную аналитику, неограниченные места в команде и приоритетную поддержку.', dash_upgrade_now:'Перейти на план',
     dash_project_milestones:'Этапы проектов',
     dash_activity_timeline:'Лента активности',
@@ -2472,7 +2511,7 @@ const TRANS = {
     dash_no_team:'Пока нет участников команды',
     dash_ai_insight:'AI-инсайт', dash_ai_review_invoices:'Проверить счета', dash_ai_view_projects:'К проектам',
     dash_project_status:'Статус проектов', dash_total:'ВСЕГО',
-    dash_status_done:'Готово', dash_status_active:'В работе', dash_status_review:'На проверке', dash_status_other:'Другое',
+    dash_status_done:'Готово', dash_status_active:'В работе', dash_status_review:'На проверке', dash_status_other:'Другое', dash_completion_rate:'завершено',
     dash_weekly_activity:'Активность по дням',
     dash_spark_revenue:'Выручка', dash_spark_clients:'Новые клиенты', dash_spark_projects:'Активные проекты',
     grp_overview:'Обзор', grp_work:'Работа', grp_finance_g:'Финансы',
@@ -2555,7 +2594,7 @@ const TRANS = {
     modal_new_member:'Добавить сотрудника', modal_edit_member:'Редактировать сотрудника',
     modal_goal:'Цель по выручке',
     f_company:'Компания *', f_industry:'Отрасль', f_contact:'Контакт',
-    f_title:'Название *', f_type:'Тип', f_client:'Клиент', f_status:'Статус',
+    f_title:'Название *', f_type:'Вид услуги', f_client:'Клиент', f_status:'Статус',
     f_deadline:'Дедлайн', f_budget:'Бюджет ₽', f_progress:'Прогресс %',
     f_stage:'Этап', f_value:'Сумма ₽', f_desc:'Описание',
     f_amount:'Сумма ₽', f_issued:'Дата выставления', f_due:'Дата оплаты',
@@ -2600,6 +2639,11 @@ function applyLang(lang) {
   document.querySelectorAll('[data-i18n-ph]').forEach(el => {
     const val = t(el.getAttribute('data-i18n-ph'));
     if (typeof val === 'string') el.placeholder = val;
+  });
+  // Title (tooltip) attributes
+  document.querySelectorAll('[data-i18n-title]').forEach(el => {
+    const val = t(el.getAttribute('data-i18n-title'));
+    if (typeof val === 'string') el.title = val;
   });
   // Update TITLES map
   TITLES.dashboard  = t('page_dashboard'); TITLES.calendar   = t('page_calendar');
@@ -3067,6 +3111,47 @@ function setChartPeriod(period, el) {
   document.querySelectorAll('#dash-period-label,#dash-chart-period-label').forEach(e => e.textContent = labels[period]);
   document.getElementById('goal-period-label').textContent = labels[period];
   drawRevenueChart(period);
+  renderForecastPanel();
+}
+
+// ── Analytics / Forecasting toggle ──
+let dashChartMode = 'analytics';
+function setChartMode(mode, el) {
+  dashChartMode = mode;
+  document.querySelectorAll('.bento-toggle-opt').forEach(o => o.classList.remove('active'));
+  el.classList.add('active');
+  renderForecastPanel();
+}
+function computeForecast(period) {
+  const { data } = getChartData(period);
+  const rates = [];
+  for (let i = 1; i < data.length; i++) {
+    if (data[i-1] > 0) rates.push((data[i] - data[i-1]) / data[i-1]);
+  }
+  const nonZero = data.filter(v => v > 0);
+  if (nonZero.length < 2) return null;
+  const avgRate = rates.length ? rates.reduce((a,b) => a+b, 0) / rates.length : 0;
+  const last = data[data.length-1] || nonZero[nonZero.length-1];
+  const projected = Math.max(0, Math.round(last * (1 + avgRate)));
+  return { projected, avgRate };
+}
+function renderForecastPanel() {
+  const note = document.getElementById('dash-forecast-note');
+  if (!note) return;
+  if (dashChartMode !== 'forecast') { note.style.display = 'none'; return; }
+  note.style.display = 'flex';
+  const f = computeForecast(currentChartPeriod);
+  if (!f) {
+    note.innerHTML = `<span class="material-symbols-outlined" style="font-size:16px;opacity:.5">query_stats</span><span>${esc(t('dash_forecast_no_data')||'Not enough data yet for a forecast')}</span>`;
+    return;
+  }
+  const pct = Math.round(f.avgRate * 100);
+  const periodWord = currentChartPeriod === 'week' ? (t('dash_forecast_period_week')||'next week')
+    : currentChartPeriod === 'year' ? (t('dash_forecast_period_year')||'next year')
+    : (t('dash_forecast_period_month')||'next month');
+  note.innerHTML = `<span class="material-symbols-outlined" style="font-size:16px">trending_up</span>` +
+    `<span>${esc(t('dash_forecast_label')||'Projected for')} ${esc(periodWord)}: <b>₽ ${Number(f.projected).toLocaleString('en')}</b> ` +
+    `<span style="opacity:.55">(${pct >= 0 ? '+' : ''}${pct}% ${esc(t('dash_forecast_trend')||'avg. trend')})</span></span>`;
 }
 
 function drawRevenueChart(period) {
@@ -3460,6 +3545,13 @@ function renderDashboard() {
 
   // Unpaid invoices — Stitch "Recent Transactions" table
   const unpaid = invoices.filter(i => i.status !== 'paid').slice(0, 6);
+  const unpaidSubEl = document.getElementById('dash-unpaid-sub');
+  if (unpaidSubEl) {
+    const unpaidSum = unpaid.reduce((s,i)=>s+(i.amount||0),0);
+    unpaidSubEl.textContent = unpaid.length
+      ? `${unpaid.length} · ₽ ${Number(unpaidSum).toLocaleString('en')}`
+      : (t('dash_unpaid_sub')||'Awaiting payment');
+  }
   const elUP = document.getElementById('dash-unpaid');
   elUP.innerHTML = unpaid.length ? `
     <table class="bento-tx-table">
@@ -3494,6 +3586,18 @@ function renderDashboard() {
   const portfolioTotal = paidTotal + pendingTotal;
   const ptEl = document.getElementById('dash-portfolio-total');
   if (ptEl) { if (portfolioTotal) animateCount(ptEl, portfolioTotal, { prefix: '₽ ', duration: 1100 }); else ptEl.textContent = '—'; }
+  const barPaidEl = document.getElementById('dash-portfolio-bar-paid');
+  const barPendEl = document.getElementById('dash-portfolio-bar-pending');
+  const legPaidEl = document.getElementById('dash-portfolio-paid-val');
+  const legPendEl = document.getElementById('dash-portfolio-pending-val');
+  if (barPaidEl && barPendEl) {
+    const paidPct = portfolioTotal > 0 ? (paidTotal / portfolioTotal) * 100 : 0;
+    const pendPct = portfolioTotal > 0 ? (pendingTotal / portfolioTotal) * 100 : 0;
+    barPaidEl.style.width = paidPct + '%';
+    barPendEl.style.width = pendPct + '%';
+  }
+  if (legPaidEl) legPaidEl.textContent = '₽ ' + Number(paidTotal).toLocaleString('en');
+  if (legPendEl) legPendEl.textContent = '₽ ' + Number(pendingTotal).toLocaleString('en');
   const pbEl = document.getElementById('dash-portfolio-badge');
   if (pbEl) {
     let pct = 0;
@@ -3692,6 +3796,13 @@ function renderDashboard() {
       <div class="bento-donut-legend-left"><span class="bento-donut-dot" style="background:rgba(217,217,217,${g.op})"></span>${esc(g.label)}</div>
       <span class="bento-donut-legend-val">${counts[i]}</span>
     </div>` : '').join('') : empty(t('dash_no_projects'));
+    const rateEl = document.getElementById('dash-donut-rate');
+    if (rateEl) {
+      const donePct = total ? Math.round((counts[0] / total) * 100) : 0;
+      rateEl.innerHTML = total
+        ? `<span class="material-symbols-outlined" style="font-size:16px">task_alt</span> <b>${donePct}%</b> ${esc(t('dash_completion_rate')||'completed')}`
+        : '';
+    }
   }
 
   // ── AI Insight card ──
