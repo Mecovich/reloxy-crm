@@ -6,7 +6,7 @@
 <title>Reloxy</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
@@ -1119,332 +1119,597 @@ td { border-bottom-color:var(--line) !important; }
 .bento-resource-label { font-size:10px; font-weight:700; letter-spacing:0.05em; text-transform:uppercase; color:rgba(217,217,217,0.40); }
 .bento-resource-val { font-size:20px; font-weight:700; color:#D9D9D9; margin-top:4px; }
 </style>
+
+/* ═══════════════════════════════════════════════════════
+   NEW LAYOUT — Full redesign overrides
+   ═══════════════════════════════════════════════════════ */
+
+/* Body font update */
+body { font-family:'Inter',-apple-system,sans-serif !important; }
+
+/* ─── SIDEBAR redesign ─── */
+.sidebar {
+  position:relative !important;
+  width:168px !important;
+  flex-shrink:0 !important;
+  height:100vh !important;
+  top:auto !important; left:auto !important; bottom:auto !important;
+  overflow:visible !important;
+  z-index:10 !important;
+  display:flex !important;
+  flex-direction:column !important;
+}
+.main { margin-left:0 !important; }
+
+/* Brand / Logo */
+.brand { display:none !important; }
+
+/* Nav items — compact */
+.nav > * { padding:0 8px; }
+.nav-item {
+  padding:9px 10px !important;
+  margin:1px 0 !important;
+  font-size:13px !important;
+  gap:10px !important;
+  border-radius:8px !important;
+  letter-spacing:0 !important;
+  color:rgba(217,217,217,0.35) !important;
+}
+.nav-item:hover { color:var(--accent) !important; background:rgba(255,255,255,0.05) !important; }
+.nav-item.active { color:var(--accent) !important; background:rgba(255,255,255,0.08) !important; }
+.nav-ms { font-size:16px !important; opacity:1 !important; font-variation-settings:'FILL' 0,'wght' 300,'opsz' 20 !important; }
+.nav-item.active .nav-ms { font-variation-settings:'FILL' 1,'wght' 400,'opsz' 20 !important; }
+.nav-count { display:inline !important; font-size:10px !important; color:rgba(217,217,217,0.3) !important; background:rgba(255,255,255,0.05) !important; border-radius:20px !important; padding:1px 6px !important; margin-left:auto !important; }
+
+/* Sidebar bottom */
+.sidebar-bottom { padding:10px !important; }
+.user-trigger { display:none !important; }
+
+/* New sidebar logo + user */
+.sb-logo-bar {
+  display:flex; align-items:center; gap:10px;
+  padding:18px 16px 14px;
+}
+.sb-logo-icon {
+  width:28px; height:28px; background:rgba(255,255,255,0.12);
+  border-radius:8px; display:flex; align-items:center; justify-content:center;
+  font-size:12px; font-weight:700; color:#fff; flex-shrink:0;
+}
+.sb-logo-name {
+  font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:14px; font-weight:700; letter-spacing:-0.3px; color:var(--accent);
+}
+.sb-user-card {
+  display:flex; align-items:center; gap:9px; padding:8px 10px;
+  border-radius:8px; cursor:pointer; transition:background 0.15s;
+}
+.sb-user-card:hover { background:rgba(255,255,255,0.05); }
+.sb-user-avatar {
+  width:30px; height:30px; border-radius:50%;
+  background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.12);
+  display:flex; align-items:center; justify-content:center;
+  font-size:11px; font-weight:700; color:#fff; flex-shrink:0;
+}
+.sb-user-name { font-size:12px; font-weight:600; color:var(--accent); }
+.sb-user-role { font-size:10px; color:rgba(217,217,217,0.35); margin-top:1px; }
+.sb-user-dots { margin-left:auto; color:rgba(217,217,217,0.3); display:flex; align-items:center; }
+
+/* User popup repositioned */
+.user-popup {
+  bottom:calc(100% + 4px) !important;
+  top:auto !important;
+  left:0 !important;
+  right:0 !important;
+  transform-origin:bottom left !important;
+  transform:translateY(6px) scale(0.97) !important;
+}
+.user-popup.open {
+  transform:translateY(0) scale(1) !important;
+}
+
+/* ─── TOPBAR redesign ─── */
+.topbar {
+  height:52px !important;
+  padding:0 20px !important;
+  gap:10px !important;
+}
+.sidebar-toggle { display:none !important; }
+.topbar-title {
+  font-size:11px !important;
+  font-weight:700 !important;
+  letter-spacing:0.07em !important;
+  text-transform:uppercase !important;
+  color:rgba(217,217,217,0.35) !important;
+  flex:0 0 auto !important;
+}
+/* Search pill */
+.search {
+  flex:1 !important;
+  max-width:380px !important;
+  border-radius:100px !important;
+  padding:6px 14px !important;
+}
+/* Topbar actions */
+.topbar-actions { margin-left:auto !important; }
+.topbar-btn { width:30px !important; height:30px !important; border-radius:8px !important; }
+/* User chip hidden — sidebar has user card */
+.tb-user-wrap { display:none !important; }
+/* Add button */
+#add-btn { font-size:12px !important; padding:6px 14px !important; font-weight:700 !important; border-radius:8px !important; letter-spacing:0.02em !important; }
+
+/* ─── PAGES ─── */
+.page.active {
+  height:calc(100vh - 52px) !important;
+  padding:24px 28px 40px !important;
+  overflow-y:auto !important;
+}
+
+/* Dashboard — no padding, flex layout */
+#page-dashboard.active {
+  padding:0 !important;
+  display:flex !important;
+  flex-direction:column !important;
+  overflow-y:auto !important;
+}
+
+/* Dashboard inner wrap */
+.dash-wrap-new {
+  padding:24px 28px 40px;
+  flex:1;
+}
+
+/* Dash header */
+.dash-head-new {
+  display:flex; align-items:flex-start; justify-content:space-between;
+  margin-bottom:24px;
+}
+.dash-title-new {
+  font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:28px; font-weight:700; letter-spacing:-0.5px; color:var(--accent);
+}
+.dash-sub-new { font-size:13px; color:rgba(217,217,217,0.4); margin-top:4px; }
+
+/* Chart card */
+.dash-chart-card {
+  background:var(--glass-bg); border:1px solid var(--glass-border);
+  border-radius:16px; overflow:hidden; margin-bottom:14px;
+  position:relative;
+}
+.dash-chart-inner { height:280px; position:relative; padding:20px 20px 0; }
+.dash-chart-annotation {
+  position:absolute; top:20px; right:20px;
+  background:rgba(20,20,20,0.9); border:1px solid rgba(255,255,255,0.1);
+  border-radius:10px; padding:10px 14px; min-width:140px;
+  backdrop-filter:blur(10px); z-index:10;
+}
+.dash-chart-ann-label {
+  font-size:10px; font-weight:600; text-transform:uppercase;
+  letter-spacing:0.08em; color:rgba(217,217,217,0.4); margin-bottom:4px;
+}
+.dash-chart-period-bar {
+  display:flex; align-items:center; gap:8px;
+  padding:10px 20px; border-top:1px solid var(--line);
+}
+
+/* 3-card row */
+.dash-3col { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:14px; }
+.dash-3-card {
+  background:var(--glass-bg); border:1px solid var(--glass-border);
+  border-radius:14px; padding:18px 20px;
+}
+.dash-3-label {
+  font-size:10px; font-weight:700; text-transform:uppercase;
+  letter-spacing:0.08em; color:rgba(217,217,217,0.4);
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:12px;
+}
+.dash-3-value {
+  font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:26px; font-weight:700; letter-spacing:-0.5px;
+  color:var(--accent); font-variant-numeric:tabular-nums;
+}
+.dash-3-sub { font-size:11px; color:rgba(217,217,217,0.4); margin-top:8px; }
+
+/* Gauge */
+.dash-gauge-wrap { display:flex; flex-direction:column; align-items:center; gap:6px; margin-top:8px; }
+.dash-gauge-ring { position:relative; width:100px; height:100px; }
+.dash-gauge-ring svg { width:100%; height:100%; transform:rotate(-90deg); }
+.dash-gauge-track { fill:none; stroke:rgba(255,255,255,0.07); stroke-width:8; }
+.dash-gauge-fill { fill:none; stroke:var(--accent); stroke-width:8; stroke-linecap:round; stroke-dasharray:283; stroke-dashoffset:283; transition:stroke-dashoffset 1s ease; }
+.dash-gauge-num {
+  position:absolute; inset:0; display:flex;
+  flex-direction:column; align-items:center; justify-content:center;
+}
+.dash-gauge-val { font-size:20px; font-weight:700; color:var(--accent); line-height:1; }
+.dash-gauge-pct { font-size:10px; color:rgba(217,217,217,0.4); margin-top:1px; }
+
+/* 2-col section grid */
+.dash-2col { display:grid; grid-template-columns:1fr 320px; gap:12px; margin-bottom:14px; }
+.dash-2col-wide { display:grid; grid-template-columns:1fr 320px; gap:12px; }
+.dash-section-card {
+  background:var(--glass-bg); border:1px solid var(--glass-border);
+  border-radius:14px; overflow:hidden;
+}
+.dash-section-head {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 18px; border-bottom:1px solid var(--line);
+}
+.dash-section-title { font-size:13px; font-weight:600; color:var(--accent); }
+.dash-section-link {
+  font-size:10px; font-weight:700; color:rgba(217,217,217,0.4);
+  text-transform:uppercase; letter-spacing:0.05em; cursor:pointer;
+  transition:color 0.15s;
+}
+.dash-section-link:hover { color:var(--accent); }
+
+/* Activity */
+.dash-act-item { display:flex; align-items:flex-start; gap:10px; padding:12px 18px; border-top:1px solid var(--line); }
+.dash-act-icon {
+  width:28px; height:28px; border-radius:50%;
+  background:rgba(255,255,255,0.06); border:1px solid var(--line);
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+.dash-act-text { font-size:12px; font-weight:500; color:var(--accent); line-height:1.4; }
+.dash-act-time { font-size:10px; color:rgba(217,217,217,0.35); margin-top:2px; }
+
+/* Resource grid */
+.dash-res-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; padding:14px; }
+.dash-res-item {
+  background:rgba(255,255,255,0.03); border:1px solid var(--line);
+  border-radius:10px; padding:12px;
+}
+.dash-res-label {
+  font-size:10px; font-weight:700; text-transform:uppercase;
+  letter-spacing:0.06em; color:rgba(217,217,217,0.4); margin-bottom:5px;
+}
+.dash-res-val { font-size:18px; font-weight:700; color:var(--accent); }
+
+/* Dash tabs */
+.dash-tabs-new { display:flex; gap:3px; }
+.dash-tab-new {
+  padding:6px 16px; border-radius:8px; font-size:12px; font-weight:600;
+  cursor:pointer; transition:all 0.15s; border:1px solid transparent;
+  color:rgba(217,217,217,0.4);
+}
+.dash-tab-new.active { background:rgba(255,255,255,0.08); border-color:rgba(255,255,255,0.1); color:var(--accent); }
+.dash-tab-new:not(.active):hover { color:var(--accent); }
+
+</style>
 </head>
 <body>
-<div id="atmosphere"></div>
+
+<!-- SIDEBAR -->
 <aside class="sidebar">
-  <div class="brand">
-    <div class="brand-logo">
-      <img src="/logo.svg" alt="Reloxy">
-    </div>
-    <div class="brand-name">Reloxy</div>
+  <!-- Logo bar -->
+  <div class="sb-logo-bar">
+    <div class="sb-logo-icon" id="popup-initials">A</div>
+    <div class="sb-logo-name">RELOXY</div>
   </div>
+  <!-- Nav -->
   <nav class="nav">
-    <div class="nav-group">
-      <div class="nav-item active" onclick="go('dashboard',this)">
-        <span class="material-symbols-outlined nav-ms">dashboard</span>
-        <span data-i18n="nav_dashboard">Dashboard</span>
-      </div>
-      <div class="nav-item" onclick="go('calendar',this)">
-        <span class="material-symbols-outlined nav-ms">calendar_today</span>
-        <span data-i18n="nav_calendar">Calendar</span>
-      </div>
-      <div class="nav-item" onclick="go('clients',this)">
-        <span class="material-symbols-outlined nav-ms">group</span>
-        <span data-i18n="nav_clients">Clients</span> <span class="nav-count" id="nc-clients">0</span>
-      </div>
-      <div class="nav-item" onclick="go('projects',this)">
-        <span class="material-symbols-outlined nav-ms">account_tree</span>
-        <span data-i18n="nav_projects">Projects</span> <span class="nav-count" id="nc-projects">0</span>
-      </div>
-      <div class="nav-item" onclick="go('funnel',this)">
-        <span class="material-symbols-outlined nav-ms">filter_list</span>
-        <span data-i18n="nav_pipeline">Pipeline</span>
-      </div>
-      <div class="nav-item" onclick="go('team',this)">
-        <span class="material-symbols-outlined nav-ms">badge</span>
-        <span data-i18n="nav_team">Team</span> <span class="nav-count" id="nc-team">0</span>
-      </div>
-      <div class="nav-item" onclick="go('finance',this)">
-        <span class="material-symbols-outlined nav-ms">payments</span>
-        <span data-i18n="nav_finance">Finance</span>
-      </div>
-      <div class="nav-item" onclick="go('analytics',this)">
-        <span class="material-symbols-outlined nav-ms">insights</span>
-        <span data-i18n="nav_analytics">Analytics</span>
-      </div>
-      <div class="nav-item" onclick="go('tasks',this)">
-        <span class="material-symbols-outlined nav-ms">task_alt</span>
-        <span>Tasks</span>
-      </div>
-      <div class="nav-item" onclick="go('expenses',this)">
-        <span class="material-symbols-outlined nav-ms">receipt_long</span>
-        <span>Expenses</span>
-      </div>
-      <div class="nav-item" onclick="go('reports',this)">
-        <span class="material-symbols-outlined nav-ms">description</span>
-        <span>Reports</span>
-      </div>
-      <div class="nav-item" onclick="go('notes',this)">
-        <span class="material-symbols-outlined nav-ms">edit_note</span>
-        <span data-i18n="nav_notes">Notes</span>
-      </div>
+    <div class="nav-item active" onclick="go('dashboard',this)" data-page="dashboard">
+      <span class="material-symbols-outlined nav-ms">dashboard</span>
+      <span data-i18n="nav_dashboard">Dashboard</span>
+    </div>
+    <div class="nav-item" onclick="go('calendar',this)" data-page="calendar">
+      <span class="material-symbols-outlined nav-ms">calendar_today</span>
+      <span data-i18n="nav_calendar">Calendar</span>
+    </div>
+    <div class="nav-item" onclick="go('clients',this)" data-page="clients">
+      <span class="material-symbols-outlined nav-ms">group</span>
+      <span data-i18n="nav_clients">Clients</span>
+      <span class="nav-count" id="nc-clients"></span>
+    </div>
+    <div class="nav-item" onclick="go('projects',this)" data-page="projects">
+      <span class="material-symbols-outlined nav-ms">account_tree</span>
+      <span data-i18n="nav_projects">Projects</span>
+      <span class="nav-count" id="nc-projects"></span>
+    </div>
+    <div class="nav-item" onclick="go('funnel',this)" data-page="funnel">
+      <span class="material-symbols-outlined nav-ms">filter_list</span>
+      <span data-i18n="nav_pipeline">Pipeline</span>
+    </div>
+    <div class="nav-item" onclick="go('team',this)" data-page="team">
+      <span class="material-symbols-outlined nav-ms">badge</span>
+      <span data-i18n="nav_team">Team</span>
+      <span class="nav-count" id="nc-team"></span>
+    </div>
+    <div class="nav-item" onclick="go('finance',this)" data-page="finance">
+      <span class="material-symbols-outlined nav-ms">payments</span>
+      <span data-i18n="nav_finance">Finance</span>
+    </div>
+    <div class="nav-item" onclick="go('analytics',this)" data-page="analytics">
+      <span class="material-symbols-outlined nav-ms">insights</span>
+      <span data-i18n="nav_analytics">Analytics</span>
+    </div>
+    <div class="nav-item" onclick="go('tasks',this)" data-page="tasks">
+      <span class="material-symbols-outlined nav-ms">task_alt</span>
+      <span>Tasks</span>
+    </div>
+    <div class="nav-item" onclick="go('expenses',this)" data-page="expenses">
+      <span class="material-symbols-outlined nav-ms">receipt_long</span>
+      <span>Expenses</span>
+    </div>
+    <div class="nav-item" onclick="go('reports',this)" data-page="reports">
+      <span class="material-symbols-outlined nav-ms">description</span>
+      <span>Reports</span>
+    </div>
+    <div class="nav-item" onclick="go('notes',this)" data-page="notes">
+      <span class="material-symbols-outlined nav-ms">edit_note</span>
+      <span data-i18n="nav_notes">Notes</span>
     </div>
   </nav>
+  <!-- User card at bottom -->
+  <div class="sidebar-bottom">
+    <div class="sb-user-card" onclick="toggleUserPopup(event)" id="tb-user-wrap">
+      <div class="sb-user-avatar" id="popup-initials-sb">M</div>
+      <div>
+        <div class="sb-user-name" id="topbar-username">Mecc</div>
+        <div class="sb-user-role">CEO</div>
+      </div>
+      <div class="sb-user-dots">
+        <svg width="3" height="14" viewBox="0 0 3 14" fill="currentColor"><circle cx="1.5" cy="2" r="1.5"/><circle cx="1.5" cy="7" r="1.5"/><circle cx="1.5" cy="12" r="1.5"/></svg>
+      </div>
+    </div>
+    <!-- hidden compat elements for JS -->
+    <span id="topbar-avatar" style="display:none"></span>
+    <!-- User popup -->
+    <div class="user-popup" id="user-popup">
+      <div class="user-popup-header">
+        <div class="user-popup-avatar" id="popup-initials-modal">—</div>
+        <div style="min-width:0">
+          <div class="user-popup-name" id="popup-name">...</div>
+          <div class="user-popup-email" id="popup-email">...</div>
+        </div>
+      </div>
+      <div class="user-popup-list">
+        <div class="user-popup-item" onclick="popupGoSettings()">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v1.5M8 13.5V15M1 8h1.5M13.5 8H15M3.05 3.05l1.06 1.06M11.89 11.89l1.06 1.06M3.05 12.95l1.06-1.06M11.89 4.11l1.06-1.06"/></svg>
+          <span data-i18n="nav_settings">Settings</span>
+        </div>
+        <div class="user-popup-divider"></div>
+        <div class="user-popup-item danger" onclick="logout()">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2H3a1 1 0 00-1 1v10a1 1 0 001 1h3M10 11l3-3-3-3M13 8H6"/></svg>
+          <span data-i18n="sign_out">Sign out</span>
+        </div>
+      </div>
+    </div>
+    <!-- hidden popup-initials used by JS init -->
+    <span id="popup-initials-unused" style="display:none"></span>
+  </div>
 </aside>
 
+<!-- MAIN AREA -->
 <main class="main">
+  <!-- TOPBAR -->
   <div class="topbar">
-    <button class="sidebar-toggle" onclick="toggleSidebar()" title="Toggle sidebar">
-      <svg id="sidebar-toggle-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-        <rect x="1" y="2" width="14" height="12" rx="2"/>
-        <line x1="6" y1="2" x2="6" y2="14"/>
-      </svg>
-    </button>
-    <div class="topbar-title" id="topbar-title">Dashboard</div>
     <div class="search">
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6">
         <circle cx="6.5" cy="6.5" r="4.5"/><line x1="10" y1="10" x2="14" y2="14"/>
       </svg>
-      <input placeholder="Search..." id="search-input" data-i18n-ph="search_ph" oninput="doSearch(this.value)" onclick="cmdOpen()" readonly style="cursor:pointer">
-      <span style="font-size:11px;color:var(--g3);background:var(--s3);border:1px solid var(--line2);border-radius:5px;padding:1px 6px;white-space:nowrap">⌘K</span>
+      <input id="search-input" placeholder="Search analytics, projects, users..." data-i18n-ph="search_ph"
+        oninput="doSearch(this.value)" onclick="cmdOpen()" readonly style="cursor:pointer">
     </div>
     <div class="topbar-actions">
-      <!-- Notifications -->
-      <div class="topbar-btn topbar-notif" title="Notifications">
+      <!-- Bell -->
+      <div class="topbar-btn topbar-notif">
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
           <path d="M8 1a5 5 0 015 5v3l1.5 2.5H1.5L3 9V6a5 5 0 015-5z"/>
           <path d="M6.5 13a1.5 1.5 0 003 0"/>
         </svg>
+        <span class="topbar-notif-dot"></span>
       </div>
-      <!-- Topbar user chip + dropdown -->
-      <div class="tb-user-wrap" id="tb-user-wrap">
+      <!-- Mail -->
+      <div class="topbar-btn">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="1" y="3" width="14" height="10" rx="2"/>
+          <path d="M1 5l7 5 7-5"/>
+        </svg>
+      </div>
+      <!-- Date label (JS fills this) -->
+      <div class="topbar-title" id="topbar-title" style="margin:0 8px"></div>
+      <!-- hidden compat user chip -->
+      <div class="tb-user-wrap" id="tb-user-wrap-hidden" style="display:none">
         <div class="tb-user-chip" onclick="toggleUserPopup(event)" id="tb-user-chip">
-          <div class="tb-user-name" id="topbar-username">...</div>
-          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.6" style="opacity:0.3;flex-shrink:0"><path d="M2 3.5L5 6.5 8 3.5"/></svg>
-        </div>
-        <!-- hidden compat -->
-        <span id="topbar-avatar" style="display:none"></span>
-        <!-- Dropdown -->
-        <div class="user-popup" id="user-popup">
-          <div class="user-popup-header">
-            <div class="user-popup-avatar" id="popup-initials">—</div>
-            <div style="min-width:0">
-              <div class="user-popup-name" id="popup-name">...</div>
-              <div class="user-popup-email" id="popup-email">...</div>
-            </div>
-          </div>
-          <div class="user-popup-list">
-            <div class="user-popup-item" onclick="popupGoSettings()">
-              <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v1.5M8 13.5V15M1 8h1.5M13.5 8H15M3.05 3.05l1.06 1.06M11.89 11.89l1.06 1.06M3.05 12.95l1.06-1.06M11.89 4.11l1.06-1.06"/></svg>
-              <span data-i18n="nav_settings">Settings</span>
-            </div>
-            <div class="user-popup-divider"></div>
-            <div class="user-popup-item danger" onclick="logout()">
-              <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2H3a1 1 0 00-1 1v10a1 1 0 001 1h3M10 11l3-3-3-3M13 8H6"/></svg>
-              <span data-i18n="sign_out">Sign out</span>
-            </div>
-          </div>
+          <div class="tb-user-name">...</div>
         </div>
       </div>
+      <!-- Add button -->
+      <button class="btn btn-white" id="add-btn" onclick="openAddModal()" data-i18n="btn_add">+ Add new</button>
     </div>
-    <button class="btn btn-white" id="add-btn" onclick="openAddModal()" data-i18n="btn_add">+ Add new</button>
   </div>
 
   <div class="content">
 
-    <!-- DASHBOARD -->
+    <!-- DASHBOARD PAGE -->
     <div class="page active" id="page-dashboard">
+      <div class="dash-wrap-new">
 
-      <!-- Welcome header (Stitch bento style) -->
-      <section class="bento-welcome">
-        <div>
-          <h1 class="bento-h1"><span data-i18n="dash_welcome">Welcome Back</span>, <span id="dash-title-name"></span>!</h1>
-          <p class="bento-sub"><span id="dash-greeting"></span><span id="dash-perf-note" data-i18n="dash_perf_note">Your business performance is up this month.</span></p>
-        </div>
-        <div class="bento-welcome-actions">
-          <button class="bento-btn bento-btn-primary" onclick="go('finance',document.querySelectorAll('.nav-item')[6])" data-i18n="btn_send_funds">Send Funds</button>
-          <button class="bento-btn" onclick="go('finance',document.querySelectorAll('.nav-item')[6])" data-i18n="btn_request">Request</button>
-          <button class="bento-btn" onclick="go('finance',document.querySelectorAll('.nav-item')[6])" data-i18n="btn_transfer">Transfer</button>
-          <button class="bento-btn" onclick="go('finance',document.querySelectorAll('.nav-item')[6])" data-i18n="btn_deposit">Deposit</button>
-          <button class="bento-btn" onclick="openGoalModal()" id="goal-wrap-mini" style="display:none">
-            <span id="goal-mini-current">₽ 0</span>
-            <span style="opacity:0.4">/</span>
-            <span id="goal-mini-target" style="opacity:0.6">₽ 0</span>
-            <div style="width:40px;height:2px;background:rgba(217,217,217,0.15);border-radius:2px;overflow:hidden;margin-left:6px"><div id="goal-mini-fill" style="height:100%;width:0%;background:var(--accent);transition:width 0.8s;border-radius:2px"></div></div>
-          </button>
-        </div>
-      </section>
-
-      <!-- Hidden compat: metric values still computed by JS for other views -->
-      <div style="display:none">
-        <div class="metric-value" id="m-revenue">—</div><div class="metric-badge" id="mb-revenue"></div>
-        <div class="metric-value" id="m-projects">0</div><div class="metric-badge" id="mb-projects"></div>
-        <div class="metric-value" id="m-clients">0</div><div class="metric-badge" id="mb-clients"></div>
-        <div class="metric-value" id="m-leads">0</div><div class="metric-badge" id="mb-leads"></div>
-      </div>
-
-      <!-- BENTO GRID (12-col, Stitch layout v2) -->
-      <div class="bento-grid">
-
-        <!-- Hero Analytics chart — col-span-12 -->
-        <div class="bento-card bento-col-12">
-          <div class="bento-card-head">
-            <div>
-              <h2 class="bento-card-title">Revenue Overview</h2>
-              <p class="bento-card-desc" id="dash-chart-period-label">Real-time revenue tracking vs target</p>
-            </div>
-            <div style="display:flex;align-items:center;gap:16px">
-              <div class="bento-toggle">
-                <span class="bento-toggle-opt active" data-i18n="dash_toggle_analytics">Analytics</span>
-                <span class="bento-toggle-opt" data-i18n="dash_toggle_forecast">Forecasting</span>
-              </div>
-              <div class="bento-amount">
-                <div class="bento-amount-num" id="chart-total">₽ —</div>
-                <div class="chart-badge" id="chart-badge"></div>
-              </div>
-              <div class="chart-periods">
-                <button class="chart-period" onclick="setChartPeriod('week',this)" data-i18n="period_week">Week</button>
-                <button class="chart-period active" onclick="setChartPeriod('month',this)" data-i18n="period_month">Month</button>
-                <button class="chart-period" onclick="setChartPeriod('year',this)" data-i18n="period_year">Year</button>
-              </div>
-            </div>
-          </div>
-          <div class="bento-card-desc" id="chart-sub" style="margin-top:-8px"></div>
-          <div style="position:relative;height:280px;margin-top:18px">
-            <canvas id="revenue-chart"></canvas>
-            <div class="bento-peak-card" id="dash-peak-card" style="top:24px;left:38%;display:none">
-              <div class="bento-peak-label" data-i18n="dash_active_peak">Active Peak</div>
-              <div class="bento-peak-val" id="dash-peak-val">—</div>
-            </div>
-          </div>
-          <div id="dash-chart-stats" style="display:none"></div>
-        </div>
-
-        <!-- Total Portfolio — col-span-4 -->
-        <div class="bento-card bento-col-4 bento-portfolio-card">
+        <!-- Header -->
+        <div class="dash-head-new">
           <div>
-            <div class="bento-portfolio-label" data-i18n="dash_total_portfolio">Total Portfolio</div>
-            <div class="bento-portfolio-num" id="dash-portfolio-total">₽ —</div>
+            <div class="dash-title-new">Dashboard</div>
+            <div class="dash-sub-new">Real-time engagement and growth metrics.</div>
           </div>
-          <div class="bento-portfolio-sub">
-            <span class="bento-portfolio-badge" id="dash-portfolio-badge">+0%</span>
-            <span data-i18n="dash_portfolio_sub">vs last period</span>
+          <div class="dash-tabs-new">
+            <div class="dash-tab-new active" data-i18n="dash_toggle_analytics">Analytics</div>
+            <div class="dash-tab-new" data-i18n="dash_toggle_forecast">Forecasting</div>
           </div>
         </div>
 
-        <!-- New Transaction CTA — col-span-4 -->
-        <div class="bento-card bento-col-4 bento-cta-card" onclick="go('finance',document.querySelectorAll('.nav-item')[6])">
-          <div class="bento-cta-icon"><span class="material-symbols-outlined">add</span></div>
-          <div class="bento-cta-title" data-i18n="dash_new_transaction">New Transaction</div>
-          <div class="bento-cta-sub" data-i18n="dash_new_transaction_sub">Create an invoice or record a payment in a couple of clicks</div>
+        <!-- Revenue chart -->
+        <div class="dash-chart-card">
+          <div class="dash-chart-inner">
+            <div class="dash-chart-annotation">
+              <div class="dash-chart-ann-label">Active Peak · <span id="dash-chart-period-label">This month</span></div>
+              <div class="dash-hero-num" id="chart-total" style="font-size:18px;margin:4px 0 2px">₽ —</div>
+              <div id="chart-badge" style="font-size:11px;font-weight:600;color:rgba(217,217,217,0.7)"></div>
+            </div>
+            <canvas id="revenue-chart" style="width:100%;height:240px"></canvas>
+          </div>
+          <div class="dash-chart-period-bar">
+            <div class="chart-periods">
+              <button class="chart-period" onclick="setChartPeriod('week',this)" data-i18n="period_week">Week</button>
+              <button class="chart-period active" onclick="setChartPeriod('month',this)" data-i18n="period_month">Month</button>
+              <button class="chart-period" onclick="setChartPeriod('year',this)" data-i18n="period_year">Year</button>
+            </div>
+            <span style="font-size:11px;color:rgba(217,217,217,0.4);margin-left:12px" id="chart-sub"></span>
+          </div>
         </div>
 
-        <!-- Efficiency Index — col-span-4 -->
-        <div class="bento-card bento-col-4" style="display:flex;flex-direction:column;align-items:center">
-          <div class="bento-card-head" style="width:100%;margin-bottom:0">
-            <h3 class="bento-eyebrow" data-i18n="dash_efficiency_index">Efficiency Index</h3>
-            <span class="material-symbols-outlined" style="font-size:18px;color:var(--g1)">speed</span>
+        <!-- 3-card row -->
+        <div class="dash-3col">
+          <!-- Total Portfolio -->
+          <div class="dash-3-card">
+            <div class="dash-3-label">
+              Total Portfolio
+              <span class="chart-badge up" id="mb-revenue">+0%</span>
+            </div>
+            <div class="dash-3-value" id="m-revenue">₽ —</div>
+            <div class="dash-3-sub">vs last period</div>
           </div>
-          <div class="bento-gauge-wrap">
-            <div class="bento-gauge">
-              <svg width="200" height="200" viewBox="0 0 200 200">
-                <circle class="bento-gauge-track" cx="100" cy="100" r="84" stroke-width="14"/>
-                <circle class="bento-gauge-fill" id="dash-gauge-fill" cx="100" cy="100" r="84" stroke-width="14"
-                        stroke-dasharray="528" stroke-dashoffset="528" transform="rotate(-90 100 100)"/>
-              </svg>
-              <div class="bento-gauge-center">
-                <div class="bento-gauge-num" id="dash-gauge-num">—<span>%</span></div>
-                <div class="bento-gauge-lbl" data-i18n="dash_efficiency">Efficiency</div>
+          <!-- New Transaction -->
+          <div class="dash-3-card bento-cta-card" onclick="openAddModal()">
+            <div class="bento-cta-icon">+</div>
+            <div class="bento-cta-title" data-i18n="dash_new_transaction">New Transaction</div>
+            <div class="bento-cta-sub" data-i18n="dash_new_transaction_sub">Create an invoice or record a payment</div>
+          </div>
+          <!-- Efficiency Index -->
+          <div class="dash-3-card">
+            <div class="dash-3-label" style="margin-bottom:8px">
+              <span>Efficiency Index</span>
+            </div>
+            <div class="dash-gauge-wrap">
+              <div class="dash-gauge-ring">
+                <svg viewBox="0 0 200 200" style="transform:rotate(-90deg)">
+                  <circle class="bento-gauge-track" cx="100" cy="100" r="84" stroke-width="14"/>
+                  <circle class="bento-gauge-fill" id="dash-gauge-fill" cx="100" cy="100" r="84" stroke-width="14"
+                    style="stroke-dasharray:528;stroke-dashoffset:528;transition:stroke-dashoffset 1s cubic-bezier(.16,1,.3,1)"/>
+                </svg>
+                <div class="bento-gauge-center">
+                  <div class="bento-gauge-num" id="dash-gauge-num">—<span>%</span></div>
+                  <div class="bento-gauge-lbl" data-i18n="dash_efficiency">EFFICIENCY</div>
+                </div>
+              </div>
+              <div class="bento-gauge-trend" id="dash-gauge-trend"></div>
+              <!-- hidden compat -->
+              <span id="m-projects" style="display:none"></span>
+              <span id="mb-projects" style="display:none"></span>
+              <span id="mb-clients" style="display:none"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2-col: Transactions + Events -->
+        <div class="dash-2col">
+          <!-- Recent Transactions -->
+          <div class="dash-section-card">
+            <div class="dash-section-head">
+              <div class="dash-section-title">Recent Transactions</div>
+              <span class="dash-section-link" onclick="go('finance',document.querySelector('[data-page=finance]'))">VIEW ARCHIVE</span>
+            </div>
+            <div id="dash-unpaid"></div>
+          </div>
+          <!-- Active Events -->
+          <div class="dash-section-card">
+            <div class="dash-section-head">
+              <div class="dash-section-title" style="font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:rgba(217,217,217,0.4)" data-i18n="dash_active_events">Active Events</div>
+              <span class="dash-section-link">Full Logs</span>
+            </div>
+            <div id="dash-deadlines-panel"></div>
+          </div>
+        </div>
+
+        <!-- 2-col: Milestones + right column -->
+        <div class="dash-2col-wide" style="margin-top:14px">
+          <!-- Project Milestones -->
+          <div class="dash-section-card">
+            <div class="dash-section-head">
+              <div class="dash-section-title" data-i18n="dash_project_milestones">Project Milestones</div>
+              <span class="material-symbols-outlined" style="font-size:16px;color:rgba(217,217,217,0.35)">flag</span>
+            </div>
+            <div id="dash-inprogress"></div>
+          </div>
+          <!-- Right: Activity + Resource -->
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <!-- Activity Timeline -->
+            <div class="dash-section-card" style="flex:1">
+              <div class="dash-section-head">
+                <div class="dash-section-title" data-i18n="dash_activity_timeline">Activity Timeline</div>
+                <span class="material-symbols-outlined" style="font-size:16px;color:rgba(217,217,217,0.35)">history</span>
+              </div>
+              <div id="dash-activity-panel">
+                <div class="dash-act-item">
+                  <div class="dash-act-icon"><span class="material-symbols-outlined" style="font-size:13px;color:rgba(217,217,217,0.6)">trending_up</span></div>
+                  <div>
+                    <div class="dash-act-text">Project status updated to Active</div>
+                    <div class="dash-act-time">5 MINUTES AGO</div>
+                  </div>
+                </div>
+                <div class="dash-act-item">
+                  <div class="dash-act-icon"><span class="material-symbols-outlined" style="font-size:13px;color:rgba(217,217,217,0.6)">person_add</span></div>
+                  <div>
+                    <div class="dash-act-text">New client added</div>
+                    <div class="dash-act-time">1 HOUR AGO</div>
+                  </div>
+                </div>
+                <div class="dash-act-item">
+                  <div class="dash-act-icon"><span class="material-symbols-outlined" style="font-size:13px;color:rgba(217,217,217,0.6)">receipt</span></div>
+                  <div>
+                    <div class="dash-act-text">Invoice sent</div>
+                    <div class="dash-act-time">3 HOURS AGO</div>
+                  </div>
+                </div>
               </div>
             </div>
-            <div class="bento-gauge-trend" id="dash-gauge-trend"></div>
-          </div>
-        </div>
-
-        <!-- Recent Transactions / Unpaid invoices — col-span-8 -->
-        <div class="bento-card bento-col-8" style="padding:0;overflow:hidden">
-          <div class="bento-table-head">
-            <h3 class="bento-card-title" style="font-size:18px" data-i18n="dash_unpaid">Recent Transactions</h3>
-            <span class="dash-panel-link" onclick="go('finance',document.querySelectorAll('.nav-item')[6])" data-i18n="dash_all">All →</span>
-          </div>
-          <div id="dash-unpaid"></div>
-        </div>
-
-        <!-- Active Events + Enterprise Plan promo — col-span-4 -->
-        <div class="bento-card bento-col-4" style="display:flex;flex-direction:column;gap:24px">
-          <div>
-            <div class="bento-card-head" style="margin-bottom:18px">
-              <h3 class="bento-eyebrow" data-i18n="dash_active_events">Active Events</h3>
-              <span class="material-symbols-outlined" style="font-size:18px;color:var(--g1)">event</span>
+            <!-- Resource Allocation -->
+            <div class="dash-section-card">
+              <div class="dash-section-head">
+                <div class="dash-section-title" data-i18n="dash_resource_allocation">Resource Allocation</div>
+                <span style="font-size:10px;color:rgba(217,217,217,0.35)">Real-time</span>
+              </div>
+              <div class="dash-res-grid">
+                <div class="dash-res-item">
+                  <div class="dash-res-label" data-i18n="dash_res_projects">Projects</div>
+                  <div class="dash-res-val" id="m-leads">—</div>
+                </div>
+                <div class="dash-res-item">
+                  <div class="dash-res-label" data-i18n="dash_res_clients">Clients</div>
+                  <div class="dash-res-val" id="m-clients">—</div>
+                </div>
+                <div class="dash-res-item">
+                  <div class="dash-res-label" data-i18n="dash_res_team">Team active</div>
+                  <div class="dash-res-val" id="mb-leads">—</div>
+                </div>
+                <div class="dash-res-item">
+                  <div class="dash-res-label" data-i18n="dash_res_completion">Status</div>
+                  <div class="dash-res-val" style="font-size:13px;color:rgba(74,222,128,0.9)">Optimal</div>
+                </div>
+              </div>
             </div>
-            <div id="dash-events" style="display:flex;flex-direction:column;gap:16px"></div>
-          </div>
-          <div class="bento-promo">
-            <div class="bento-promo-eyebrow" data-i18n="dash_enterprise_plan">Enterprise Plan</div>
-            <div class="bento-promo-text" data-i18n="dash_enterprise_text">Unlock advanced analytics, unlimited team seats and priority support.</div>
-            <button class="bento-promo-btn" onclick="go('settings',document.querySelectorAll('.nav-item')[7])" data-i18n="dash_upgrade_now">Upgrade Now</button>
           </div>
         </div>
 
-        <!-- Project Milestones — col-span-8 -->
-        <div class="bento-card bento-col-8" style="display:flex;flex-direction:column">
-          <div class="bento-card-head" style="margin-bottom:20px">
-            <h3 class="bento-eyebrow" data-i18n="dash_project_milestones">Project Milestones</h3>
-            <span class="dash-panel-link" onclick="go('projects',document.querySelectorAll('.nav-item')[2])" data-i18n="dash_all">All →</span>
-          </div>
-          <div id="dash-milestones" style="display:flex;flex-direction:column;gap:16px"></div>
+        <!-- Hidden compat IDs for JS -->
+        <div style="display:none">
+          <div id="goal-wrap-mini" style="display:none !important"><span id="goal-mini-current"></span><span id="goal-mini-target"></span><div id="goal-mini-fill"></div></div>
+          <div id="goal-wrap" style="display:none !important"><div id="goal-current"></div><div id="goal-target-label"></div><div id="goal-fill"></div><div id="goal-pct"></div><div id="goal-period-label"></div></div>
+          <div id="dash-deadlines"></div>
+          <div id="dash-events"></div>
+          <div id="dash-chart-period-label-wrap"></div>
+          <div id="dash-title-name"></div>
+          <div id="dash-greeting"></div>
+          <div id="dash-perf-note"></div>
+          <textarea id="quick-notes-area" oninput="saveNote(this)"></textarea>
+          <span id="notes-saved"></span>
+          <div id="dash-chart-stats"></div>
+          <div id="dash-team-activity"></div>
+          <span id="m-avg-budget"></span>
+          <span id="m-completion"></span>
         </div>
 
-        <!-- Activity Timeline — col-span-4 -->
-        <div class="bento-card bento-col-4" style="display:flex;flex-direction:column">
-          <div class="bento-card-head" style="margin-bottom:24px">
-            <h3 class="bento-eyebrow" data-i18n="dash_activity_timeline">Activity Timeline</h3>
-            <span class="material-symbols-outlined" style="font-size:18px;color:var(--g1)">history</span>
-          </div>
-          <div id="dash-timeline" class="bento-timeline" style="flex:1"></div>
-        </div>
-
-        <!-- Resource Allocation — col-span-8 -->
-        <div class="bento-card bento-col-8">
-          <div class="bento-card-head" style="margin-bottom:20px">
-            <h3 class="bento-eyebrow" data-i18n="dash_resource_allocation">Resource Allocation</h3>
-            <span class="material-symbols-outlined" style="font-size:18px;color:var(--g1)">pie_chart</span>
-          </div>
-          <div class="bento-resource-grid" id="dash-resources"></div>
-        </div>
-
-        <!-- Upcoming Tasks / Deadlines — col-span-4 -->
-        <div class="bento-card bento-col-4" style="display:flex;flex-direction:column">
-          <div class="bento-card-head" style="margin-bottom:24px">
-            <h3 class="bento-eyebrow" data-i18n="dash_deadlines_title">Upcoming Tasks</h3>
-            <span class="dash-panel-link" onclick="go('calendar',document.querySelectorAll('.nav-item')[1])" data-i18n="dash_all">All →</span>
-          </div>
-          <div id="dash-deadlines-panel" style="display:flex;flex-direction:column;gap:10px;flex:1"></div>
-          <button class="bento-link-btn bento-link-btn-outline" onclick="go('calendar',document.querySelectorAll('.nav-item')[1])" data-i18n="dash_view_all_tasks">View All Tasks</button>
-        </div>
-
-      </div><!-- /bento-grid -->
-
-      <!-- Hidden compat: Team Activity still rendered for JS, just not shown on dashboard -->
-      <div id="dash-team-activity" style="display:none"></div>
-
-      <!-- Hidden compat: in-progress list still rendered for JS, just not shown -->
-      <div id="dash-inprogress" style="display:none"></div>
-
-      <!-- Hidden goal bar -->
-      <div class="goal-bar-wrap" id="goal-wrap" style="display:none;margin-top:16px">
-        <div class="goal-bar-header">
-          <div class="goal-bar-label"><span data-i18n="goal_label">Revenue Goal</span> · <span id="goal-period-label">This month</span></div>
-          <div class="goal-bar-right">
-            <span class="goal-amount" id="goal-current">₽ 0</span>
-            <span class="goal-sep" data-i18n="goal_of">of</span>
-            <span class="goal-target" id="goal-target-label">₽ 0</span>
-            <button class="goal-edit-btn" onclick="openGoalModal()" data-i18n="btn_edit_goal">Edit goal</button>
-          </div>
-        </div>
-        <div class="goal-track"><div class="goal-fill" id="goal-fill" style="width:0%"></div></div>
-        <div class="goal-pct" id="goal-pct"></div>
       </div>
-      <!-- Hidden compat -->
-      <div style="display:none"><div id="m-avg-budget"></div><div id="m-completion"></div></div>
-      <div id="dash-deadlines" style="display:none"></div>
-      <textarea id="quick-notes-area" style="display:none" oninput="saveNote(this)"></textarea>
-      <span id="notes-saved" style="display:none"></span>
-
     </div>
-
-    <!-- CALENDAR -->
     <div class="page" id="page-calendar">
       <div class="page-header">
         <div><h1 data-i18n="page_calendar">Calendar</h1><p data-i18n="cal_sub">Project deadlines and important dates</p></div>
@@ -1952,6 +2217,8 @@ td { border-bottom-color:var(--line) !important; }
     </div>
 
   </div>
+</main>
+  </div><!-- /.content -->
 </main>
 
 <!-- COMMAND PALETTE -->
