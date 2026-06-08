@@ -250,6 +250,50 @@ tr:hover td { background:transparent; }
 
 /* ── KANBAN ── */
 .kanban { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; align-items:start; }
+/* ── CLIENTS — stats bar & redesigned cards ── */
+.cl-stats-bar { display:flex; align-items:stretch; gap:0; margin:20px 0 24px; background:var(--glass-bg); backdrop-filter:blur(20px); border:1px solid var(--glass-border); border-radius:16px; padding:18px 28px; box-shadow:0 1px 0 rgba(255,255,255,0.03) inset, 0 12px 32px -16px rgba(0,0,0,0.5); }
+.cl-stat { flex:1; display:flex; flex-direction:column; gap:4px; }
+.cl-stat-num { font-size:22px; font-weight:700; letter-spacing:-0.02em; color:#D9D9D9; font-variant-numeric:tabular-nums; }
+.cl-stat-lbl { font-size:11px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color:rgba(217,217,217,0.40); }
+.cl-stat-sep { width:1px; background:rgba(255,255,255,0.07); margin:2px 28px; }
+@media (max-width:760px){ .cl-stats-bar{ flex-wrap:wrap; gap:18px; } .cl-stat{ min-width:45%; } .cl-stat-sep{ display:none; } }
+
+.cl-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(330px,1fr)); gap:14px; }
+.cl-card { position:relative; background:var(--glass-bg); backdrop-filter:blur(20px); border:1px solid var(--glass-border); border-radius:16px; padding:22px; transition:all .25s cubic-bezier(.16,1,.3,1); overflow:hidden; box-shadow:0 1px 0 rgba(255,255,255,0.03) inset, 0 12px 32px -16px rgba(0,0,0,0.5); }
+.cl-card:hover { background:var(--glass-bg-hover); border-color:var(--glass-border-hover); transform:translateY(-2px); box-shadow:0 1px 0 rgba(255,255,255,0.05) inset, 0 20px 48px -16px rgba(0,0,0,0.6); }
+.cl-card-top { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:18px; }
+.cl-card-id { display:flex; align-items:center; gap:12px; min-width:0; }
+.cl-avatar { position:relative; width:46px; height:46px; border-radius:14px; background:linear-gradient(135deg, rgba(217,217,217,0.16), rgba(217,217,217,0.04)); border:1px solid rgba(255,255,255,0.10); display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:700; color:#D9D9D9; flex-shrink:0; letter-spacing:-0.5px; }
+.cl-card-name { font-size:15px; font-weight:700; color:#D9D9D9; letter-spacing:-0.2px; line-height:1.25; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.cl-card-industry { font-size:11.5px; color:rgba(217,217,217,0.45); margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.cl-status-pill { display:inline-flex; align-items:center; gap:7px; font-size:10.5px; font-weight:700; letter-spacing:0.05em; text-transform:uppercase; padding:6px 13px; border-radius:20px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.09); color:rgba(217,217,217,0.55); flex-shrink:0; white-space:nowrap; transition:all .25s ease; }
+.cl-status-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; transition:all .25s ease; }
+.cl-status-pill.is-active { background:linear-gradient(135deg, rgba(217,217,217,0.16), rgba(217,217,217,0.05)); border-color:rgba(217,217,217,0.28); color:#EDEDED; box-shadow:0 0 0 1px rgba(217,217,217,0.05) inset, 0 4px 16px -4px rgba(217,217,217,0.25); }
+.cl-status-pill.is-active .cl-status-dot { background:#D9D9D9; box-shadow:0 0 8px 1px rgba(217,217,217,0.65); animation:peakPulse 2.4s ease-out infinite; }
+.cl-status-pill.is-lead { color:rgba(217,217,217,0.65); border-color:rgba(217,217,217,0.14); }
+.cl-status-pill.is-lead .cl-status-dot { background:rgba(217,217,217,0.55); }
+.cl-status-pill.is-archive { color:rgba(217,217,217,0.35); }
+.cl-status-pill.is-archive .cl-status-dot { background:rgba(217,217,217,0.22); }
+.cl-meta-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px; }
+.cl-meta-chip { flex:1; min-width:120px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:10px; padding:9px 12px; }
+.cl-meta-chip-lbl { font-size:9px; font-weight:700; letter-spacing:0.16em; text-transform:uppercase; color:rgba(217,217,217,0.35); margin-bottom:3px; }
+.cl-meta-chip-val { font-size:12.5px; font-weight:600; color:#D9D9D9; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.cl-stat-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:16px; }
+.cl-mini-stat { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:11px 12px; transition:background .2s,border-color .2s; }
+.cl-mini-stat:hover { background:rgba(255,255,255,0.06); border-color:rgba(255,255,255,0.12); }
+.cl-mini-stat-val { font-size:16px; font-weight:700; color:#D9D9D9; letter-spacing:-0.02em; font-variant-numeric:tabular-nums; line-height:1.15; }
+.cl-mini-stat-val.glow { text-shadow:0 0 14px rgba(217,217,217,0.30); }
+.cl-mini-stat-lbl { font-size:9px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:rgba(217,217,217,0.35); margin-top:3px; }
+.cl-revenue-bar { height:5px; border-radius:9999px; background:rgba(255,255,255,0.06); overflow:hidden; margin-bottom:16px; }
+.cl-revenue-bar-fill { height:100%; border-radius:9999px; background:linear-gradient(90deg, rgba(217,217,217,0.35), #D9D9D9); box-shadow:0 0 10px rgba(217,217,217,0.35); transition:width 1s cubic-bezier(.16,1,.3,1); }
+.cl-card-foot { display:flex; align-items:center; justify-content:space-between; gap:12px; padding-top:14px; border-top:1px solid rgba(255,255,255,0.05); }
+.cl-since { font-size:11px; color:rgba(217,217,217,0.40); }
+.cl-since b { color:rgba(217,217,217,0.65); font-weight:600; }
+.cl-actions { display:flex; gap:6px; }
+.cl-action-btn { font-size:11.5px; font-weight:600; padding:6px 13px; border-radius:8px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); color:rgba(217,217,217,0.65); cursor:pointer; font-family:inherit; transition:all .15s; }
+.cl-action-btn:hover { color:#D9D9D9; border-color:rgba(255,255,255,0.18); background:rgba(255,255,255,0.07); }
+.cl-action-btn.danger:hover { color:#f87171; border-color:rgba(248,113,113,0.3); background:rgba(248,113,113,0.08); }
+
 .k-stats-bar { display:flex; align-items:center; gap:6px; margin-bottom:16px; }
 .k-stat-item { font-size:12px; color:var(--g2); }
 .k-stat-item b { color:var(--white); font-weight:600; }
@@ -937,8 +981,32 @@ th:not(:first-child), td:not(:first-child) { padding-left:18px !important; }
 .av-name { font-size:13px; font-weight:500; color:var(--white); }
 .av-sub { font-size:11px; color:var(--g2); margin-top:1px; }
 
+/* ── CUSTOM CONFIRM DIALOG ── */
+.confirm-overlay { position:fixed; inset:0; z-index:9999; display:flex; align-items:center; justify-content:center; background:rgba(8,8,8,0.55); backdrop-filter:blur(6px); opacity:0; transition:opacity .18s ease; pointer-events:none; }
+.confirm-overlay.open { opacity:1; pointer-events:auto; }
+.confirm-card { width:340px; max-width:90vw; background:rgba(20,20,20,0.94); border:1px solid var(--glass-border); border-radius:18px; backdrop-filter:blur(40px); padding:26px 26px 22px; text-align:center; box-shadow:0 1px 0 rgba(255,255,255,0.05) inset, 0 40px 100px -20px rgba(0,0,0,0.85); transform:translateY(14px) scale(0.97); transition:transform .22s cubic-bezier(.16,1,.3,1); }
+.confirm-overlay.open .confirm-card { transform:translateY(0) scale(1); }
+.confirm-icon { width:48px; height:48px; margin:0 auto 16px; border-radius:14px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.10); color:rgba(217,217,217,0.7); }
+.confirm-icon.is-danger { background:rgba(248,113,113,0.10); border-color:rgba(248,113,113,0.25); color:#f87171; }
+.confirm-title { font-size:15px; font-weight:700; color:#EDEDED; letter-spacing:-0.2px; margin-bottom:6px; }
+.confirm-msg { font-size:12.5px; color:rgba(217,217,217,0.50); line-height:1.6; margin-bottom:22px; }
+.confirm-actions { display:flex; gap:8px; }
+.confirm-btn { flex:1; font-size:13px; font-weight:600; padding:10px 16px; border-radius:10px; cursor:pointer; font-family:inherit; transition:all .15s ease; border:1px solid transparent; }
+.confirm-btn-ghost { background:rgba(255,255,255,0.04); border-color:rgba(255,255,255,0.09); color:rgba(217,217,217,0.65); }
+.confirm-btn-ghost:hover { color:#EDEDED; border-color:rgba(255,255,255,0.18); background:rgba(255,255,255,0.07); }
+.confirm-btn-danger { background:linear-gradient(135deg, #f87171, #ef4444); color:#1a0a0a; box-shadow:0 8px 24px -8px rgba(248,113,113,0.5); }
+.confirm-btn-danger:hover { filter:brightness(1.08); transform:translateY(-1px); }
+.confirm-btn-primary { background:#D9D9D9; color:#0a0a0a; box-shadow:0 8px 24px -8px rgba(217,217,217,0.4); }
+.confirm-btn-primary:hover { background:#EDEDED; transform:translateY(-1px); }
+
 /* ── MODAL GLASSMORPHISM ── */
-.modal { background:rgba(20,20,20,0.92) !important; border:1px solid var(--glass-border) !important; backdrop-filter:blur(40px) !important; }
+.modal { background:rgba(20,20,20,0.92) !important; border:1px solid var(--glass-border) !important; backdrop-filter:blur(40px) !important; box-shadow:0 1px 0 rgba(255,255,255,0.05) inset, 0 40px 100px -20px rgba(0,0,0,0.85) !important; }
+.modal-head { position:relative; }
+.modal-head::after { content:''; position:absolute; left:24px; right:24px; bottom:-1px; height:1px; background:linear-gradient(90deg, rgba(217,217,217,0.18), transparent 70%); }
+.field-input { transition:border-color .2s ease, background .2s ease, box-shadow .2s ease; }
+.field-input:focus { border-color:rgba(217,217,217,0.38) !important; box-shadow:0 0 0 4px rgba(217,217,217,0.07) !important; background:rgba(255,255,255,0.04) !important; }
+.field-input::placeholder { color:rgba(217,217,217,0.28); }
+textarea.field-input { line-height:1.65; }
 
 /* ── SEARCH BAR ── */
 .search { background:rgba(217,217,217,0.04) !important; border-color:var(--glass-border) !important; }
@@ -1106,16 +1174,21 @@ td { border-bottom-color:var(--line) !important; }
 .bento-milestone-check { width:14px; height:14px; flex-shrink:0; }
 
 /* Efficiency gauge */
-.bento-gauge-wrap { display:flex; flex-direction:column; align-items:center; gap:4px; padding:16px 0; }
-.bento-gauge { position:relative; width:200px; height:200px; }
+.bento-icon-badge { display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; font-size:17px !important; color:rgba(217,217,217,0.65) !important; background:linear-gradient(150deg, rgba(217,217,217,0.10), rgba(217,217,217,0.02)); border:1px solid rgba(255,255,255,0.08); border-radius:11px; box-shadow:0 1px 0 rgba(255,255,255,0.04) inset; transition:all .2s ease; flex-shrink:0; }
+.bento-card:hover .bento-icon-badge { color:#D9D9D9 !important; border-color:rgba(255,255,255,0.14); background:linear-gradient(150deg, rgba(217,217,217,0.16), rgba(217,217,217,0.04)); }
+
+.bento-gauge-wrap { display:flex; flex-direction:column; align-items:center; gap:4px; padding:20px 0 8px; position:relative; }
+.bento-gauge { position:relative; width:208px; height:208px; }
+.bento-gauge::before { content:''; position:absolute; inset:18px; border-radius:50%; background:radial-gradient(circle, rgba(217,217,217,0.10), transparent 70%); filter:blur(10px); animation:auroraDrift 8s ease-in-out infinite alternate; }
 .bento-gauge-track, .bento-gauge-fill { fill:none; stroke-linecap:round; }
-.bento-gauge-track { stroke:rgba(217,217,217,0.10); }
-.bento-gauge-fill { stroke:#D9D9D9; filter:drop-shadow(0 0 8px rgba(217,217,217,0.45)); transition:stroke-dashoffset 1s cubic-bezier(.16,1,.3,1); }
+.bento-gauge-track { stroke:rgba(217,217,217,0.07); }
+.bento-gauge-tick { stroke:rgba(217,217,217,0.16); stroke-width:1.5; }
+.bento-gauge-fill { stroke:url(#gaugeGrad); filter:drop-shadow(0 0 10px rgba(217,217,217,0.5)); transition:stroke-dashoffset 1.1s cubic-bezier(.16,1,.3,1); }
 .bento-gauge-center { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
-.bento-gauge-num { font-size:42px; font-weight:700; color:#D9D9D9; line-height:1; letter-spacing:-0.02em; }
-.bento-gauge-num span { font-size:16px; font-weight:700; color:rgba(217,217,217,0.40); }
-.bento-gauge-lbl { font-size:10px; font-weight:700; letter-spacing:0.2em; text-transform:uppercase; color:rgba(217,217,217,0.40); margin-top:6px; }
-.bento-gauge-trend { font-size:10px; font-weight:700; color:rgba(217,217,217,0.60); margin-top:14px; display:flex; align-items:center; gap:5px; }
+.bento-gauge-num { font-size:44px; font-weight:800; color:#D9D9D9; line-height:1; letter-spacing:-0.03em; text-shadow:0 0 24px rgba(217,217,217,0.30); font-variant-numeric:tabular-nums; }
+.bento-gauge-num span { font-size:17px; font-weight:700; color:rgba(217,217,217,0.40); }
+.bento-gauge-lbl { font-size:10px; font-weight:700; letter-spacing:0.24em; text-transform:uppercase; color:rgba(217,217,217,0.38); margin-top:7px; }
+.bento-gauge-trend { font-size:10.5px; font-weight:700; color:rgba(217,217,217,0.65); margin-top:16px; display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:20px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); }
 
 .bento-event-row { display:flex; align-items:center; justify-content:space-between; gap:12px; }
 .bento-event-icon { width:40px; height:40px; border-radius:50%; background:rgba(255,255,255,0.05); display:flex; align-items:center; justify-content:center; color:#D9D9D9; font-size:16px; flex-shrink:0; }
@@ -1408,12 +1481,20 @@ td { border-bottom-color:var(--line) !important; }
               <h3 class="bento-eyebrow" style="margin-bottom:2px" data-i18n="dash_efficiency_index">Efficiency Index</h3>
               <p class="bento-card-desc" style="opacity:0.5;font-size:12px" data-i18n="dash_efficiency_sub">Global resource allocation score</p>
             </div>
-            <span class="material-symbols-outlined" style="font-size:18px;color:var(--g1)">speed</span>
+            <span class="material-symbols-outlined bento-icon-badge">speed</span>
           </div>
           <div class="bento-gauge-wrap">
             <div class="bento-gauge">
-              <svg width="200" height="200" viewBox="0 0 200 200">
+              <svg width="208" height="208" viewBox="0 0 200 200">
+                <defs>
+                  <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="rgba(217,217,217,0.55)"/>
+                    <stop offset="55%" stop-color="#D9D9D9"/>
+                    <stop offset="100%" stop-color="#F5F5F5"/>
+                  </linearGradient>
+                </defs>
                 <circle class="bento-gauge-track" cx="100" cy="100" r="84" stroke-width="14"/>
+                <g id="dash-gauge-ticks" transform="rotate(-90 100 100)"></g>
                 <circle class="bento-gauge-fill" id="dash-gauge-fill" cx="100" cy="100" r="84" stroke-width="14"
                         stroke-dasharray="528" stroke-dashoffset="528" transform="rotate(-90 100 100)"/>
               </svg>
@@ -1440,7 +1521,7 @@ td { border-bottom-color:var(--line) !important; }
           <div>
             <div class="bento-card-head" style="margin-bottom:18px">
               <h3 class="bento-eyebrow" data-i18n="dash_active_events">Active Events</h3>
-              <span class="material-symbols-outlined" style="font-size:18px;color:var(--g1)">event</span>
+              <span class="material-symbols-outlined bento-icon-badge">event</span>
             </div>
             <div id="dash-events" style="display:flex;flex-direction:column;gap:16px"></div>
           </div>
@@ -1465,7 +1546,7 @@ td { border-bottom-color:var(--line) !important; }
         <div class="bento-card bento-col-4">
           <div class="bento-card-head" style="margin-bottom:18px">
             <h3 class="bento-eyebrow" data-i18n="dash_project_status">Project Status</h3>
-            <span class="material-symbols-outlined" style="font-size:18px;color:var(--g1)">donut_large</span>
+            <span class="material-symbols-outlined bento-icon-badge">donut_large</span>
           </div>
           <div class="bento-donut-row">
             <svg width="104" height="104" viewBox="0 0 104 104" style="flex-shrink:0">
@@ -1482,7 +1563,7 @@ td { border-bottom-color:var(--line) !important; }
         <div class="bento-card bento-col-4" style="display:flex;flex-direction:column">
           <div class="bento-card-head" style="margin-bottom:8px">
             <h3 class="bento-eyebrow" data-i18n="dash_weekly_activity">Weekly Activity</h3>
-            <span class="material-symbols-outlined" style="font-size:18px;color:var(--g1)">bar_chart</span>
+            <span class="material-symbols-outlined bento-icon-badge">bar_chart</span>
           </div>
           <p class="bento-card-desc" id="dash-week-sub" style="margin-top:-6px"></p>
           <div class="bento-week-row" id="dash-week-row"></div>
@@ -1501,7 +1582,7 @@ td { border-bottom-color:var(--line) !important; }
         <div class="bento-card bento-col-4" style="display:flex;flex-direction:column">
           <div class="bento-card-head" style="margin-bottom:24px">
             <h3 class="bento-eyebrow" data-i18n="dash_activity_timeline">Activity Timeline</h3>
-            <span class="material-symbols-outlined" style="font-size:18px;color:var(--g1)">history</span>
+            <span class="material-symbols-outlined bento-icon-badge">history</span>
           </div>
           <div id="dash-timeline" class="bento-timeline" style="flex:1"></div>
         </div>
@@ -1510,7 +1591,7 @@ td { border-bottom-color:var(--line) !important; }
         <div class="bento-card bento-col-8">
           <div class="bento-card-head" style="margin-bottom:20px">
             <h3 class="bento-eyebrow" data-i18n="dash_resource_allocation">Resource Allocation</h3>
-            <span class="material-symbols-outlined" style="font-size:18px;color:var(--g1)">pie_chart</span>
+            <span class="material-symbols-outlined bento-icon-badge">pie_chart</span>
           </div>
           <div class="bento-resource-grid" id="dash-resources"></div>
         </div>
@@ -1576,6 +1657,15 @@ td { border-bottom-color:var(--line) !important; }
       <div class="page-header">
         <div><h1 data-i18n="page_clients">Clients</h1><p data-i18n="clients_sub">All companies and contacts</p></div>
         <button class="btn btn-white" onclick="openAddModal()" data-i18n="btn_new_client">+ New client</button>
+      </div>
+      <div class="cl-stats-bar" id="cl-stats-bar">
+        <div class="cl-stat"><div class="cl-stat-num" id="cl-stat-total">0</div><div class="cl-stat-lbl" data-i18n="cl_stat_total">Total clients</div></div>
+        <div class="cl-stat-sep"></div>
+        <div class="cl-stat"><div class="cl-stat-num" id="cl-stat-active">0</div><div class="cl-stat-lbl" data-i18n="cl_stat_active">Active</div></div>
+        <div class="cl-stat-sep"></div>
+        <div class="cl-stat"><div class="cl-stat-num" id="cl-stat-revenue">₽ 0</div><div class="cl-stat-lbl" data-i18n="cl_stat_revenue">Total revenue</div></div>
+        <div class="cl-stat-sep"></div>
+        <div class="cl-stat"><div class="cl-stat-num" id="cl-stat-avg">₽ 0</div><div class="cl-stat-lbl" data-i18n="cl_stat_avg">Avg. per client</div></div>
       </div>
       <div class="tabs">
         <div class="tab active" onclick="filterClients('all',this)" data-i18n="tab_all">All</div>
@@ -2247,6 +2337,9 @@ const TRANS = {
     col_name:'Name', col_position:'Position', col_num:'#',
     col_client:'Client', col_amount:'Amount', col_issued:'Issued', col_due:'Due',
     no_clients:'No clients yet', no_clients_sub:'Click "+ New client" to add your first one',
+    cl_revenue:'Revenue brought in', cl_projects:'Projects', cl_interactions:'Interactions',
+    cl_last_active:'Last activity', cl_client_since:'Client since', cl_never:'No activity yet',
+    cl_stat_total:'Total clients', cl_stat_active:'Active', cl_stat_revenue:'Total revenue', cl_stat_avg:'Avg. per client',
     projects_sub:'Studio projects and tasks', btn_new_project:'+ New project',
     k_backlog:'Backlog', k_inprogress:'In Progress', k_review:'Review', k_done:'Done',
     k_empty:'Empty', k_progress:'Progress',
@@ -2300,7 +2393,7 @@ const TRANS = {
     f_stage:'Stage', f_value:'Value ₽', f_desc:'Description',
     f_amount:'Amount ₽', f_issued:'Issue date', f_due:'Due date',
     f_name:'Name *', f_position:'Position', f_goal_period:'Period',
-    f_phone:'Telegram Username', f_username:'Telegram Username', f_email:'Email', f_number:'Number', opt_none:'— none —',
+    f_phone:'Telegram Username', f_username:'Telegram Username', f_email:'Email', f_number:'Number', opt_none:'— none —', f_notes:'Notes',
     toast_mark_paid:'Invoice marked as paid',
     confirm_del_client:'Delete this client?', confirm_del_project:'Delete this project?',
     confirm_del_deal:'Delete this deal?', confirm_del_invoice:'Delete this invoice?',
@@ -2374,6 +2467,9 @@ const TRANS = {
     col_name:'Имя', col_position:'Должность', col_num:'№',
     col_client:'Клиент', col_amount:'Сумма', col_issued:'Выставлен', col_due:'До',
     no_clients:'Клиентов пока нет', no_clients_sub:'Нажмите "+ Новый клиент" чтобы добавить первого',
+    cl_revenue:'Принёс дохода', cl_projects:'Проекты', cl_interactions:'Обращений',
+    cl_last_active:'Последняя активность', cl_client_since:'Клиент с', cl_never:'Активности пока нет',
+    cl_stat_total:'Всего клиентов', cl_stat_active:'Активные', cl_stat_revenue:'Общий доход', cl_stat_avg:'В среднем на клиента',
     projects_sub:'Проекты и задачи студии', btn_new_project:'+ Новый проект',
     k_backlog:'Очередь', k_inprogress:'В работе', k_review:'Ревью', k_done:'Готово',
     k_empty:'Пусто', k_progress:'Прогресс',
@@ -2427,7 +2523,7 @@ const TRANS = {
     f_stage:'Этап', f_value:'Сумма ₽', f_desc:'Описание',
     f_amount:'Сумма ₽', f_issued:'Дата выставления', f_due:'Дата оплаты',
     f_name:'Имя *', f_position:'Должность', f_goal_period:'Период',
-    f_phone:'Telegram Username', f_username:'Telegram Username', f_email:'Email', f_number:'Номер счёта', opt_none:'— нет —',
+    f_phone:'Telegram Username', f_username:'Telegram Username', f_email:'Email', f_number:'Номер счёта', opt_none:'— нет —', f_notes:'Заметки',
     toast_mark_paid:'Счёт отмечен как оплаченный',
     confirm_del_client:'Удалить клиента?', confirm_del_project:'Удалить проект?',
     confirm_del_deal:'Удалить сделку?', confirm_del_invoice:'Удалить счёт?',
@@ -3396,6 +3492,18 @@ function renderDashboard() {
     const offset = circumference - (eff/100) * circumference;
     gaugeFill.setAttribute('stroke-dasharray', String(circumference));
     requestAnimationFrame(() => { gaugeFill.style.strokeDashoffset = String(offset); });
+    const ticksEl = document.getElementById('dash-gauge-ticks');
+    if (ticksEl && !ticksEl.childElementCount) {
+      const cx = 100, cy = 100, rOuter = 96, rInner = 90, n = 40;
+      let ticks = '';
+      for (let i = 0; i < n; i++) {
+        const a = (i / n) * Math.PI * 2;
+        const x1 = cx + rInner * Math.cos(a), y1 = cy + rInner * Math.sin(a);
+        const x2 = cx + rOuter * Math.cos(a), y2 = cy + rOuter * Math.sin(a);
+        ticks += `<line class="bento-gauge-tick" x1="${x1.toFixed(2)}" y1="${y1.toFixed(2)}" x2="${x2.toFixed(2)}" y2="${y2.toFixed(2)}"/>`;
+      }
+      ticksEl.innerHTML = ticks;
+    }
     if (gaugeTrend) {
       const arrow = eff >= 50 ? '▲' : '▼';
       gaugeTrend.innerHTML = `<span>${arrow}</span><span>${currentLang==='ru' ? 'на этой неделе' : 'this week'}</span>`;
@@ -3684,8 +3792,8 @@ function saveMainNote(el) {
   if (saved) { saved.textContent = 'Saved'; setTimeout(()=>{ saved.textContent=''; },1500); }
 }
 
-function clearNotes() {
-  if (!confirm('Clear all notes?')) return;
+async function clearNotes() {
+  if (!await confirmDialog(currentLang==='ru' ? 'Удалить все заметки?' : 'Clear all notes?', { danger:true })) return;
   localStorage.removeItem('reloxy_notes_main');
   const area = document.getElementById('notes-main-area');
   if (area) area.value = '';
@@ -3953,48 +4061,99 @@ function filterClients(f, el) {
   renderClients();
 }
 
+function clientMetrics(c) {
+  const cInvoices = invoices.filter(i => i.client_id === c.id);
+  const cProjects = projects.filter(p => p.client_id === c.id);
+  const revenue   = cInvoices.filter(i => i.status === 'paid').reduce((s,i) => s + (i.amount||0), 0);
+  const interactions = cInvoices.length + cProjects.length;
+  const dates = []
+    .concat(cInvoices.map(i => i.paid_at || i.issued_at || i.created_at))
+    .concat(cProjects.map(p => p.created_at || p.updated_at))
+    .filter(Boolean)
+    .map(d => new Date(d))
+    .filter(d => !isNaN(d));
+  const lastActive = dates.length ? new Date(Math.max(...dates.map(d=>d.getTime()))) : null;
+  return { revenue, projectCount: cProjects.length, interactions, lastActive };
+}
+
 function renderClients(list) {
   const data  = (list || clients).filter(c => clientFilter==='all' || c.status===clientFilter);
   const grid  = document.getElementById('clients-grid');
   const empty = document.getElementById('clients-empty');
+
+  // ── aggregate stats bar ──
+  const allMetrics = clients.map(clientMetrics);
+  const totalRevenue = allMetrics.reduce((s,m) => s + m.revenue, 0);
+  const activeCount  = clients.filter(c => c.status === 'active').length;
+  const avgRevenue   = clients.length ? totalRevenue / clients.length : 0;
+  const elTotal  = document.getElementById('cl-stat-total');
+  const elActive = document.getElementById('cl-stat-active');
+  const elRev    = document.getElementById('cl-stat-revenue');
+  const elAvg    = document.getElementById('cl-stat-avg');
+  if (elTotal)  animateCount(elTotal, clients.length);
+  if (elActive) animateCount(elActive, activeCount);
+  if (elRev)    animateCount(elRev, totalRevenue, { prefix: '₽ ' });
+  if (elAvg)    animateCount(elAvg, avgRevenue, { prefix: '₽ ' });
+
   if (!data.length) {
     if (grid) grid.innerHTML = '';
     empty.innerHTML = emptySkel(t('no_clients'), t('no_clients_sub'));
     empty.style.display='block'; return;
   }
   empty.style.display = 'none';
-  const statusColors = { active:'rgba(255,255,255,0.9)', lead:'rgba(255,255,255,0.5)', archive:'var(--g3)' };
+  const statusClass = { active:'is-active', lead:'is-lead', archive:'is-archive' };
+  const maxRevenue = Math.max(1, ...allMetrics.map(m => m.revenue));
+  const dateLocale = (currentLang === 'ru') ? 'ru-RU' : 'en-US';
+
   if (grid) grid.innerHTML = `
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px">
+    <div class="cl-grid">
       ${data.map(c => {
+        const m   = clientMetrics(c);
         const ini = (c.name||'?').split(' ').slice(0,2).map(w=>w[0]||'').join('').toUpperCase();
-        const dotColor = statusColors[c.status] || 'var(--g3)';
-        return `<div style="background:var(--s1);border:1px solid var(--line);border-radius:16px;padding:20px;transition:border-color 0.15s,background 0.15s" onmouseover="this.style.borderColor='var(--line2)';this.style.background='var(--s2)'" onmouseout="this.style.borderColor='var(--line)';this.style.background='var(--s1)'">
-          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px">
-            <div style="display:flex;align-items:center;gap:12px">
-              <div style="width:44px;height:44px;border-radius:50%;background:var(--s3);border:1px solid var(--line2);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:var(--g1);flex-shrink:0;letter-spacing:-0.5px">${ini}</div>
-              <div>
-                <div style="font-size:14px;font-weight:600;color:var(--white);letter-spacing:-0.3px;line-height:1.2">${esc(c.name)}</div>
-                ${c.industry?`<div style="font-size:11.5px;color:var(--g2);margin-top:2px">${esc(c.industry)}</div>`:''}
+        const sCls = statusClass[c.status] || 'is-archive';
+        const since = c.created_at ? new Date(c.created_at).toLocaleDateString(dateLocale, { month:'short', year:'numeric' }) : '—';
+        const lastActiveTxt = m.lastActive ? m.lastActive.toLocaleDateString(dateLocale, { day:'numeric', month:'short' }) : t('cl_never');
+        const revPct = Math.round((m.revenue / maxRevenue) * 100);
+        return `<div class="cl-card">
+          <div class="cl-card-top">
+            <div class="cl-card-id">
+              <div class="cl-avatar">${ini}</div>
+              <div style="min-width:0">
+                <div class="cl-card-name">${esc(c.name)}</div>
+                <div class="cl-card-industry">${c.industry ? esc(c.industry) : (c.contact_name ? esc(c.contact_name) : '')}</div>
               </div>
             </div>
-            <div style="display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--g1);background:var(--s3);border:1px solid var(--line2);padding:3px 9px;border-radius:20px;flex-shrink:0">
-              <div style="width:5px;height:5px;border-radius:50%;background:${dotColor};flex-shrink:0"></div>
-              ${statusClientLabel(c.status)}
+            <div class="cl-status-pill ${sCls}"><span class="cl-status-dot"></span>${statusClientLabel(c.status)}</div>
+          </div>
+
+          <div class="cl-stat-grid">
+            <div class="cl-mini-stat">
+              <div class="cl-mini-stat-val glow">${fmt(m.revenue)}</div>
+              <div class="cl-mini-stat-lbl">${t('cl_revenue')}</div>
+            </div>
+            <div class="cl-mini-stat">
+              <div class="cl-mini-stat-val">${m.projectCount}</div>
+              <div class="cl-mini-stat-lbl">${t('cl_projects')}</div>
+            </div>
+            <div class="cl-mini-stat">
+              <div class="cl-mini-stat-val">${m.interactions}</div>
+              <div class="cl-mini-stat-lbl">${t('cl_interactions')}</div>
             </div>
           </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
-            ${c.contact_name?`<div style="background:var(--s2);border:1px solid var(--line);border-radius:9px;padding:10px 12px"><div style="font-size:9.5px;color:var(--g2);font-weight:600;letter-spacing:0.4px;text-transform:uppercase;margin-bottom:4px">Contact</div><div style="font-size:12.5px;color:var(--white);font-weight:500">${esc(c.contact_name)}</div></div>`:''}
-            ${c.email?`<div style="background:var(--s2);border:1px solid var(--line);border-radius:9px;padding:10px 12px"><div style="font-size:9.5px;color:var(--g2);font-weight:600;letter-spacing:0.4px;text-transform:uppercase;margin-bottom:4px">Email</div><div style="font-size:12px;color:var(--g1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c.email)}</div></div>`:''}
+
+          <div class="cl-revenue-bar"><div class="cl-revenue-bar-fill" style="width:${revPct}%"></div></div>
+
+          <div class="cl-meta-row">
+            ${c.contact_name ? `<div class="cl-meta-chip"><div class="cl-meta-chip-lbl">Contact</div><div class="cl-meta-chip-val">${esc(c.contact_name)}</div></div>` : ''}
+            ${c.email ? `<div class="cl-meta-chip"><div class="cl-meta-chip-lbl">Email</div><div class="cl-meta-chip-val">${esc(c.email)}</div></div>` : ''}
+            <div class="cl-meta-chip"><div class="cl-meta-chip-lbl">${t('cl_last_active')}</div><div class="cl-meta-chip-val">${lastActiveTxt}</div></div>
           </div>
-          <div style="display:flex;align-items:center;justify-content:space-between;padding-top:12px;border-top:1px solid var(--line)">
-            <div style="display:flex;align-items:center;gap:14px">
-              <div style="font-size:11.5px;color:var(--g2)"><span style="color:var(--white);font-weight:600">${c.project_count||0}</span> projects</div>
-              ${(c.total_paid||0)>0?`<div style="font-size:11.5px;color:var(--g2)"><span style="color:var(--white);font-weight:600;font-variant-numeric:tabular-nums">${fmt(c.total_paid)}</span> revenue</div>`:''}
-            </div>
-            <div style="display:flex;gap:6px">
-              <button style="font-size:12px;font-weight:500;padding:6px 14px;border-radius:8px;background:var(--s3);border:1px solid var(--line2);color:var(--g1);cursor:pointer;font-family:inherit;transition:all 0.12s" onmouseover="this.style.borderColor='var(--line3)';this.style.color='var(--white)'" onmouseout="this.style.borderColor='var(--line2)';this.style.color='var(--g1)'" onclick="editClient(${c.id})">${t('act_edit')}</button>
-              <button style="font-size:12px;font-weight:500;padding:6px 14px;border-radius:8px;background:transparent;border:1px solid transparent;color:var(--g2);cursor:pointer;font-family:inherit;transition:all 0.12s" onmouseover="this.style.color='#f87171';this.style.background='rgba(248,113,113,0.08)';this.style.borderColor='rgba(248,113,113,0.2)'" onmouseout="this.style.color='var(--g2)';this.style.background='transparent';this.style.borderColor='transparent'" onclick="deleteClient(${c.id})">${t('act_delete')}</button>
+
+          <div class="cl-card-foot">
+            <div class="cl-since">${t('cl_client_since')} <b>${since}</b></div>
+            <div class="cl-actions">
+              <button class="cl-action-btn" onclick="editClient(${c.id})">${t('act_edit')}</button>
+              <button class="cl-action-btn danger" onclick="deleteClient(${c.id})">${t('act_delete')}</button>
             </div>
           </div>
         </div>`;
@@ -4352,7 +4511,7 @@ async function loadTgCode() {
 }
 
 async function unlinkTelegram() {
-  if (!confirm('Disconnect Telegram?')) return;
+  if (!await confirmDialog(currentLang==='ru' ? 'Отключить Telegram?' : 'Disconnect Telegram?', { danger:true, okLabel: currentLang==='ru' ? 'Отключить' : 'Disconnect' })) return;
   await api('POST', '/api/tg/unlink');
   loadTgCode();
   toast('Telegram disconnected');
@@ -4445,7 +4604,7 @@ function openStaffModal(m) {
 }
 function editStaff(id)   { openStaffModal(staff.find(s=>s.id===id)); }
 async function deleteStaff(id) {
-  if (!confirm(t('confirm_del_member'))) return;
+  if (!await confirmDialog(t('confirm_del_member'), { danger:true })) return;
   try { await api('DELETE', `/api/staff/${id}`); staff = staff.filter(s=>s.id!==id); renderTeam(); renderCounts(); toast(t('toast_member_removed')); } catch(e) { toast(e.message); }
 }
 
@@ -4458,6 +4617,41 @@ function _openAddModal() {
   else if (currentPage==='finance')  openInvoiceModal();
   else if (currentPage==='team')     openStaffModal();
   else openClientModal();
+}
+
+function confirmDialog(message, opts) {
+  opts = opts || {};
+  return new Promise(resolve => {
+    const wrap = document.createElement('div');
+    wrap.className = 'confirm-overlay';
+    const danger = opts.danger !== false;
+    wrap.innerHTML = `
+      <div class="confirm-card">
+        <div class="confirm-icon ${danger?'is-danger':''}">
+          <span class="material-symbols-outlined" style="font-size:22px">${danger ? 'delete' : 'help'}</span>
+        </div>
+        <div class="confirm-title">${esc(opts.title || (currentLang==='ru' ? 'Подтвердите действие' : 'Please confirm'))}</div>
+        <div class="confirm-msg">${esc(message)}</div>
+        <div class="confirm-actions">
+          <button class="confirm-btn confirm-btn-ghost" data-act="cancel">${esc(opts.cancelLabel || t('btn_cancel'))}</button>
+          <button class="confirm-btn ${danger?'confirm-btn-danger':'confirm-btn-primary'}" data-act="ok">${esc(opts.okLabel || (currentLang==='ru' ? (danger ? 'Удалить' : 'ОК') : (danger ? 'Delete' : 'OK')))}</button>
+        </div>
+      </div>`;
+    document.body.appendChild(wrap);
+    requestAnimationFrame(() => wrap.classList.add('open'));
+    function done(val) {
+      wrap.classList.remove('open');
+      setTimeout(() => wrap.remove(), 180);
+      resolve(val);
+    }
+    wrap.addEventListener('click', e => {
+      const act = e.target.closest('[data-act]');
+      if (act) return done(act.dataset.act === 'ok');
+      if (e.target === wrap) return done(false);
+    });
+    const escHandler = e => { if (e.key === 'Escape') { document.removeEventListener('keydown', escHandler); done(false); } };
+    document.addEventListener('keydown', escHandler);
+  });
 }
 
 function showModal(title, body, action) {
@@ -4485,18 +4679,15 @@ function openClientModal(c) {
       <div class="field"><label class="field-label">${t('f_industry')}</label><input class="field-input" id="m-industry" value="${esc(c?.industry||'')}" placeholder="IT / SaaS"></div>
     </div>
     <div class="field-row">
-      <div class="field"><label class="field-label">${t('f_contact')}</label><input class="field-input" id="m-contact" value="${esc(c?.contact_name||'')}" placeholder="Full name"></div>
-      <div class="field"><label class="field-label">${t('f_email')}</label><input class="field-input" id="m-email" value="${esc(c?.email||'')}" placeholder="email@company.com"></div>
-    </div>
-    <div class="field-row">
       <div class="field"><label class="field-label">${t('f_username')}</label><input class="field-input" id="m-phone" value="${esc(c?.phone||'')}" placeholder="@username"></div>
       <div class="field"><label class="field-label">${t('f_status')}</label><select class="field-input" id="m-status">
         <option value="active" ${c?.status==='active'?'selected':''}>${t('st_active')}</option>
         <option value="lead" ${c?.status==='lead'?'selected':''}>${t('st_lead')}</option>
         <option value="archive" ${c?.status==='archive'?'selected':''}>${t('st_archive')}</option>
       </select></div>
-    </div>`, async () => {
-    const body = { name:val('m-name'), industry:val('m-industry'), contact_name:val('m-contact'), email:val('m-email'), phone:val('m-phone'), status:val('m-status') };
+    </div>
+    <div class="field"><label class="field-label">${t('f_notes')}</label><textarea class="field-input" id="m-notes" rows="3" placeholder="${currentLang==='ru'?'Договорённости, особенности работы, контакты…':'Agreements, working notes, contacts…'}">${esc(c?.notes||'')}</textarea></div>`, async () => {
+    const body = { name:val('m-name'), industry:val('m-industry'), contact_name:c?.contact_name||'', email:c?.email||'', phone:val('m-phone'), status:val('m-status'), notes:val('m-notes') };
     try {
       if (c) {
         const updated = await api('PUT', `/api/clients/${c.id}`, body);
@@ -4513,7 +4704,7 @@ function openClientModal(c) {
 
 function editClient(id)    { openClientModal(clients.find(c=>c.id===id)); }
 async function deleteClient(id) {
-  if (!confirm(t('confirm_del_client'))) return;
+  if (!await confirmDialog(t('confirm_del_client'), { danger:true })) return;
   try {
     await api('DELETE', `/api/clients/${id}`);
     clients = clients.filter(c=>c.id!==id);
@@ -4621,7 +4812,7 @@ function viewProject(id) {
 }
 async function deleteProject(id, e) {
   e.stopPropagation();
-  if (!confirm(t('confirm_del_project'))) return;
+  if (!await confirmDialog(t('confirm_del_project'), { danger:true })) return;
   try {
     await api('DELETE', `/api/projects/${id}`);
     projects = projects.filter(p=>p.id!==id);
@@ -4703,7 +4894,7 @@ async function markPaid(id) {
 }
 
 async function deleteInvoice(id) {
-  if (!confirm(t('confirm_del_invoice'))) return;
+  if (!await confirmDialog(t('confirm_del_invoice'), { danger:true })) return;
   try { await api('DELETE', `/api/invoices/${id}`); await loadAll(); renderFinance(); toast(t('toast_invoice_deleted')); } catch(e) { toast(e.message); }
 }
 
