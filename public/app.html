@@ -93,6 +93,18 @@ body.sidebar-collapsed .main { margin-left:0; }
 .tb-user-chip { display:flex; align-items:center; gap:6px; padding:5px 10px; border-radius:8px; background:var(--s3); border:1px solid var(--line); cursor:pointer; transition:background 0.12s,border-color 0.12s; }
 .tb-user-chip:hover { background:var(--s4); border-color:var(--line2); }
 .tb-user-name { font-size:12px; font-weight:500; color:var(--white); max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+/* ── SIDEBAR PROFILE CARD (Figma) ── */
+.sidebar-profile { position:relative; margin-top:auto; padding:14px 16px 16px; }
+.sidebar-profile-card { display:flex; align-items:center; gap:10px; padding:12px; border-radius:16px; background:rgba(217,217,217,0.05); border:1px solid var(--line); cursor:pointer; transition:background 0.12s,border-color 0.12s; }
+.sidebar-profile-card:hover, .sidebar-profile-card.active { background:rgba(217,217,217,0.09); border-color:var(--line2); }
+.sidebar-profile-avatar { width:32px; height:32px; border-radius:50%; background:linear-gradient(135deg,#3b3b45,#222228); border:1px solid var(--line2); display:flex; align-items:center; justify-content:center; font-size:11.5px; font-weight:700; color:var(--white); flex-shrink:0; }
+.sidebar-profile-text { min-width:0; flex:1; }
+.sidebar-profile-name { font-size:12px; font-weight:700; color:var(--white); letter-spacing:-0.2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.sidebar-profile-role { font-size:10px; font-weight:500; color:var(--g2); text-transform:uppercase; letter-spacing:0.4px; opacity:0.6; margin-top:1px; }
+.user-popup--sidebar { top:auto; right:auto; bottom:calc(100% + 8px); left:0; width:calc(100% - 32px); transform-origin:bottom left; transform:translateY(6px) scale(0.97); }
+.user-popup--sidebar.open { transform:translateY(0) scale(1); }
+/* ── TOPBAR DATE (Figma) ── */
+.topbar-date { font-size:12px; font-weight:700; color:var(--g2); opacity:0.6; letter-spacing:0.3px; text-transform:uppercase; flex:1; }
 .topbar-btn { width:34px; height:34px; display:flex; align-items:center; justify-content:center; border-radius:8px; cursor:pointer; color:var(--g2); transition:all 0.15s; }
 .topbar-btn:hover { background:var(--s3); color:var(--white); }
 .topbar-btn svg { width:16px; height:16px; }
@@ -1224,6 +1236,30 @@ td { border-bottom-color:var(--line) !important; }
       </div>
     </div>
   </nav>
+  <div class="sidebar-profile" id="tb-user-wrap">
+    <div class="sidebar-profile-card" onclick="toggleUserPopup(event)" id="tb-user-chip">
+      <div class="sidebar-profile-avatar" id="popup-initials">—</div>
+      <div class="sidebar-profile-text">
+        <div class="sidebar-profile-name" id="popup-name">...</div>
+        <div class="sidebar-profile-role" id="popup-email">CEO</div>
+      </div>
+      <svg width="14" height="14" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.6" style="opacity:0.3;flex-shrink:0"><path d="M2 6L5 3 8 6"/></svg>
+    </div>
+    <!-- Dropdown -->
+    <div class="user-popup user-popup--sidebar" id="user-popup">
+      <div class="user-popup-list">
+        <div class="user-popup-item" onclick="popupGoSettings()">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v1.5M8 13.5V15M1 8h1.5M13.5 8H15M3.05 3.05l1.06 1.06M11.89 11.89l1.06 1.06M3.05 12.95l1.06-1.06M11.89 4.11l1.06-1.06"/></svg>
+          <span data-i18n="nav_settings">Settings</span>
+        </div>
+        <div class="user-popup-divider"></div>
+        <div class="user-popup-item danger" onclick="logout()">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2H3a1 1 0 00-1 1v10a1 1 0 001 1h3M10 11l3-3-3-3M13 8H6"/></svg>
+          <span data-i18n="sign_out">Sign out</span>
+        </div>
+      </div>
+    </div>
+  </div>
 </aside>
 
 <main class="main">
@@ -1234,7 +1270,7 @@ td { border-bottom-color:var(--line) !important; }
         <line x1="6" y1="2" x2="6" y2="14"/>
       </svg>
     </button>
-    <div class="topbar-title" id="topbar-title">Dashboard</div>
+    <div class="topbar-date" id="topbar-date"></div>
     <div class="search">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
         <circle cx="6.5" cy="6.5" r="4.5"/><line x1="10" y1="10" x2="14" y2="14"/>
@@ -1250,36 +1286,9 @@ td { border-bottom-color:var(--line) !important; }
           <path d="M6.5 13a1.5 1.5 0 003 0"/>
         </svg>
       </div>
-      <!-- Topbar user chip + dropdown -->
-      <div class="tb-user-wrap" id="tb-user-wrap">
-        <div class="tb-user-chip" onclick="toggleUserPopup(event)" id="tb-user-chip">
-          <div class="tb-user-name" id="topbar-username">...</div>
-          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.6" style="opacity:0.3;flex-shrink:0"><path d="M2 3.5L5 6.5 8 3.5"/></svg>
-        </div>
-        <!-- hidden compat -->
-        <span id="topbar-avatar" style="display:none"></span>
-        <!-- Dropdown -->
-        <div class="user-popup" id="user-popup">
-          <div class="user-popup-header">
-            <div class="user-popup-avatar" id="popup-initials">—</div>
-            <div style="min-width:0">
-              <div class="user-popup-name" id="popup-name">...</div>
-              <div class="user-popup-email" id="popup-email">...</div>
-            </div>
-          </div>
-          <div class="user-popup-list">
-            <div class="user-popup-item" onclick="popupGoSettings()">
-              <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v1.5M8 13.5V15M1 8h1.5M13.5 8H15M3.05 3.05l1.06 1.06M11.89 11.89l1.06 1.06M3.05 12.95l1.06-1.06M11.89 4.11l1.06-1.06"/></svg>
-              <span data-i18n="nav_settings">Settings</span>
-            </div>
-            <div class="user-popup-divider"></div>
-            <div class="user-popup-item danger" onclick="logout()">
-              <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2H3a1 1 0 00-1 1v10a1 1 0 001 1h3M10 11l3-3-3-3M13 8H6"/></svg>
-              <span data-i18n="sign_out">Sign out</span>
-            </div>
-          </div>
-        </div>
-      </div>
+      <!-- hidden compat -->
+      <span id="topbar-avatar" style="display:none"></span>
+      <span id="topbar-username" style="display:none"></span>
     </div>
     <button class="btn btn-white" id="add-btn" onclick="openAddModal()" data-i18n="btn_add">+ Add new</button>
   </div>
@@ -2453,9 +2462,14 @@ function applyLang(lang) {
   TITLES.funnel     = t('page_pipeline');  TITLES.team       = t('page_team');
   TITLES.finance    = t('page_finance');   TITLES.settings   = t('page_settings');
   TITLES.analytics  = t('nav_analytics');  TITLES.notes      = t('nav_notes');
-  // Update topbar title for current page
-  const titleEl = document.getElementById('topbar-title');
-  if (titleEl && currentPage && TITLES[currentPage]) titleEl.textContent = TITLES[currentPage];
+  // Topbar date (Figma-style: "OCT 24, 2026")
+  const dateEl = document.getElementById('topbar-date');
+  if (dateEl) {
+    const now = new Date();
+    const dateLocale = (currentLang === 'ru') ? 'ru-RU' : 'en-US';
+    let txt = now.toLocaleDateString(dateLocale, { month:'short', day:'numeric', year:'numeric' });
+    dateEl.textContent = (currentLang === 'ru') ? txt : txt.toUpperCase();
+  }
   // Re-render current page for dynamic content
   if (currentPage) renderPage(currentPage);
 }
@@ -2472,7 +2486,7 @@ async function init() {
   const initials = user.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
   document.getElementById('popup-initials').textContent = initials;
   document.getElementById('popup-name').textContent   = user.name;
-  document.getElementById('popup-email').textContent  = user.email || '';
+  document.getElementById('popup-email').textContent  = (user.role === 'staff') ? 'Staff' : 'CEO';
 
   // Topbar user chip — just name, no avatar circle
   const tbName = document.getElementById('topbar-username');
@@ -2572,7 +2586,8 @@ function go(id, el) {
   activePage.style.display = 'block';
   activePage.scrollTop = 0;
   if (el) el.classList.add('active');
-  document.getElementById('topbar-title').textContent = TITLES[id] || id;
+  const tbTitleEl = document.getElementById('topbar-title');
+  if (tbTitleEl) tbTitleEl.textContent = TITLES[id] || id;
   currentPage = id;
   // Update add button label per page
   const addBtn = document.getElementById('add-btn');
@@ -2771,7 +2786,8 @@ function popupGoSettings() {
   const sp = document.getElementById('page-settings');
   sp.classList.add('active'); sp.style.display = 'block';
   window.scrollTo(0, 0);
-  document.getElementById('topbar-title').textContent = t('page_settings');
+  const tbTitleEl2 = document.getElementById('topbar-title');
+  if (tbTitleEl2) tbTitleEl2.textContent = t('page_settings');
   currentPage = 'settings';
   renderSettings();
 }
