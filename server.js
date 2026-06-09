@@ -424,10 +424,7 @@ app.post('/api/projects', authMiddleware, async (req, res) => {
     const cl = await db.execute({ sql: 'SELECT id FROM clients WHERE id=? AND user_id=?', args: [client_id, req.user.id] });
     if (!cl.rows.length) return res.status(403).json({ error: 'Invalid client' });
   }
-  if (assigned_to) {
-    const st = await db.execute({ sql: 'SELECT id FROM users WHERE id=? AND owner_id=?', args: [assigned_to, req.user.id] });
-    if (!st.rows.length) return res.status(403).json({ error: 'Invalid assignee' });
-  }
+  // assigned_to может быть сотрудником из таблицы staff (без аккаунта) — проверка убрана
   const safeProgress = Math.max(0, Math.min(100, parseInt(progress) || 0));
   const result = await db.execute({
     sql: 'INSERT INTO projects (user_id, client_id, title, type, status, progress, deadline, budget, assigned_to) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
@@ -452,10 +449,7 @@ app.put('/api/projects/:id', authMiddleware, async (req, res) => {
     const cl = await db.execute({ sql: 'SELECT id FROM clients WHERE id=? AND user_id=?', args: [client_id, req.user.id] });
     if (!cl.rows.length) return res.status(403).json({ error: 'Invalid client' });
   }
-  if (assigned_to) {
-    const st = await db.execute({ sql: 'SELECT id FROM users WHERE id=? AND owner_id=?', args: [assigned_to, req.user.id] });
-    if (!st.rows.length) return res.status(403).json({ error: 'Invalid assignee' });
-  }
+  // assigned_to может быть сотрудником из таблицы staff (без аккаунта) — проверка убрана
   const safeProgress = Math.max(0, Math.min(100, parseInt(progress) || 0));
   // Check previous assignee to detect reassignment
   const prev = await db.execute({ sql: 'SELECT assigned_to, title FROM projects WHERE id = ?', args: [req.params.id] });
