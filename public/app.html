@@ -2341,21 +2341,28 @@ td { border-bottom-color:var(--line) !important; }
 <div class="toast" id="toast"></div>
 
 <script>
-// ─── Handle Google OAuth redirect ──────────────────────────────────────────
+// ─── Handle Google OAuth redirect (one-time code exchange) ──────────────────
+// The server now returns ?code=… instead of the JWT, so the token never sits
+// in the URL/history/logs. We POST it to /api/auth/exchange, store the result,
+// then reload to a clean /app. init() is skipped on this load (see bottom).
 (function() {
-  const p = new URLSearchParams(location.search);
-  const gtoken = p.get('gtoken');
-  if (gtoken) {
-    localStorage.setItem('crm_token', gtoken);
-    localStorage.setItem('crm_user', JSON.stringify({
-      name: decodeURIComponent(p.get('gname') || ''),
-      email: decodeURIComponent(p.get('gemail') || ''),
-      role: p.get('grole') || 'user',
-      plan: p.get('gplan') || 'free',
-    }));
-    localStorage.setItem('reloxy_email', decodeURIComponent(p.get('gemail') || ''));
-    history.replaceState({}, '', '/app');
-  }
+  const code = new URLSearchParams(location.search).get('code');
+  if (!code) return;
+  window.__OAUTH_EXCHANGING = true;
+  fetch('/api/auth/exchange', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ code }),
+  })
+    .then(r => r.ok ? r.json() : Promise.reject())
+    .then(data => {
+      if (!data || !data.token) return Promise.reject();
+      localStorage.setItem('crm_token', data.token);
+      localStorage.setItem('crm_user', JSON.stringify(data.user || {}));
+      if (data.user && data.user.email) localStorage.setItem('reloxy_email', data.user.email);
+      window.location.replace('/app');
+    })
+    .catch(() => window.location.replace('/login?error=google_failed'));
 })();
 
 // ─── STATE ─────────────────────────────────────────────────────────────────
@@ -5531,7 +5538,8 @@ document.addEventListener('click', e => {
   }
 });
 
-init();
+// Skip init on the OAuth-exchange load — it reloads to a clean /app once done.
+if (!window.__OAUTH_EXCHANGING) init();
 
 // ── SPOTLIGHT CARDS ─────────────────────────────────────────────
 function bindSpotlightCards() {
