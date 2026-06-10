@@ -993,6 +993,8 @@ th:not(:first-child), td:not(:first-child) { padding-left:18px !important; }
 .kanban { gap:24px !important; }
 
 /* Columns: frameless */
+.k-col[data-col="queue"], .k-col[data-col="inprogress"], .k-col[data-col="review"], .k-col[data-col="done"] { border:none !important; border-top:none !important; opacity:1 !important; }
+.k-card.st-done .k-prog-bar { display:none !important; }
 .k-col { background:transparent !important; border:none !important; border-radius:0 !important; overflow:visible !important; box-shadow:none !important; opacity:1 !important; position:relative !important; transition:none !important; }
 .k-col::before { display:none !important; }
 .k-col-head { padding:0 2px 12px !important; }
