@@ -1075,14 +1075,20 @@ th:not(:first-child), td:not(:first-child) { padding-left:18px !important; }
 .pj-group-bud { margin-left:auto; font-size:11px; color:rgba(217,217,217,0.3); font-variant-numeric:tabular-nums; }
 
 .pj-rows { border-top:1px solid rgba(255,255,255,0.06); }
-.pj-row { display:grid; grid-template-columns:24px minmax(180px,2.2fr) minmax(110px,1fr) 78px 120px 100px 30px; gap:12px; align-items:center; padding:10px 4px; border-bottom:1px solid rgba(255,255,255,0.05); cursor:pointer; transition:background .12s ease; }
+.pj-row { display:flex; align-items:center; gap:12px; padding:10px 4px; border-bottom:1px solid rgba(255,255,255,0.05); cursor:pointer; transition:background .12s ease; }
 .pj-row:hover { background:rgba(255,255,255,0.022); }
 .pj-row.is-done { opacity:0.45; }
 .pj-row.is-done:hover { opacity:0.8; }
 
 .pj-status-btn { width:24px; height:24px; display:flex; align-items:center; justify-content:center; background:transparent; border:none; border-radius:6px; cursor:pointer; transition:background .12s ease; }
 .pj-status-btn:hover { background:rgba(255,255,255,0.07); }
-.pj-cell-main { display:flex; align-items:baseline; gap:10px; min-width:0; }
+.pj-title { flex:1; }
+.pj-right { display:flex; align-items:center; gap:16px; flex-shrink:0; }
+.pj-prog { width:72px; }
+.pj-av { width:20px; height:20px; border-radius:50%; background:#2a2a2a; display:inline-flex; align-items:center; justify-content:center; font-size:9px; font-weight:700; color:rgba(237,237,237,0.8); flex-shrink:0; overflow:hidden; }
+.pj-budget { min-width:78px; }
+.k-card-top { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px; }
+.k-card-top .k-card-title { margin-bottom:0 !important; }
 .pj-title { font-size:13px; font-weight:600; color:#EDEDED; letter-spacing:-0.15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .pj-type { font-size:9px; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; color:rgba(217,217,217,0.32); flex-shrink:0; }
 .pj-client { font-size:11.5px; color:rgba(217,217,217,0.42); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
@@ -1108,8 +1114,7 @@ th:not(:first-child), td:not(:first-child) { padding-left:18px !important; }
 .pj-empty-sub { font-size:12px; color:rgba(217,217,217,0.38); margin-top:5px; margin-bottom:4px; }
 
 @media (max-width:900px) {
-  .pj-row { grid-template-columns:24px 1fr 90px 30px; }
-  .pj-client, .pj-cell-dl, .pj-prog { display:none; }
+  .pj-prog, .pj-dl { display:none; }
 }
 /* ══════════ /PROJECTS LIST VIEW ══════════ */
 
@@ -2114,7 +2119,7 @@ td { border-bottom-color:var(--line) !important; }
         <span class="k-stat-sep">·</span>
         <span class="k-stat-item"><b id="ks-active">0</b> <span data-i18n="k_stat_active">in progress</span></span>
         <span class="k-stat-sep">·</span>
-        <span class="k-stat-item"><b id="ks-budget">₽ 0</b> <span data-i18n="k_stat_budget">total budget</span></span>
+        <span class="k-stat-item"><b id="ks-budget">₽ 0</b></span>
       </div>
       <div class="pj-toolbar" id="pj-toolbar"></div>
       <div id="pj-list" style="display:none"></div>
@@ -4891,21 +4896,19 @@ function renderPjList() {
         <span class="pj-dot st-${key}"></span>
         <span class="pj-group-name">${t(i18n)}</span>
         <span class="pj-group-cnt">${arr.length}</span>
-        ${budget ? `<span class="pj-group-bud">${fmt(budget)}</span>` : ''}
       </div>
       <div class="pj-rows">
         ${arr.map(p => `
         <div class="pj-row ${key==='done'?'is-done':''}" onclick="viewProject(${p.id})">
           <button class="pj-status-btn" title="${ru?'Сменить статус':'Change status'}" onclick="event.stopPropagation();pjOpenStatusMenu(event, ${p.id})"><span class="pj-dot st-${key}"></span></button>
-          <div class="pj-cell-main">
-            <span class="pj-title">${esc(p.title)}</span>
-            ${p.type ? `<span class="pj-type">${esc(p.type)}</span>` : ''}
+          <span class="pj-title">${esc(p.title)}</span>
+          <div class="pj-right">
+            ${pjDl(p, today)}
+            ${p.progress > 0 ? `<div class="pj-prog"><div class="pj-prog-bar"><div class="pj-prog-fill" style="width:${p.progress}%"></div></div><span>${p.progress}%</span></div>` : ''}
+            ${p.budget ? `<span class="pj-budget">${fmt(p.budget)}</span>` : ''}
+            <span class="pj-av" title="${esc(p.client_name||'')}">${p.client_name ? esc(p.client_name[0].toUpperCase()) : defAv()}</span>
+            <button class="pj-del" onclick="deleteProject(${p.id}, event)">✕</button>
           </div>
-          <span class="pj-client">${esc(p.client_name || '—')}</span>
-          <span class="pj-cell-dl">${pjDl(p, today)}</span>
-          <div class="pj-prog">${p.progress > 0 ? `<div class="pj-prog-bar"><div class="pj-prog-fill" style="width:${p.progress}%"></div></div><span>${p.progress}%</span>` : '<span style="opacity:0.3">—</span>'}</div>
-          <span class="pj-budget">${p.budget ? fmt(p.budget) : ''}</span>
-          <button class="pj-del" onclick="deleteProject(${p.id}, event)">✕</button>
         </div>`).join('')}
       </div>
     </div>`;
@@ -4985,23 +4988,15 @@ function renderProjects() {
       }
       const clientAv = `<div class="k-av">${defAv()}</div>`;
       const isComplete = p.progress >= 100;
-      return `<div class="k-card ${stCls[k]||''} ${k==='done'?'is-done':''}" ${canDrag?'draggable="true"':''} data-pid="${p.id}" style="animation-delay:${Math.min(idx*45,270)}ms" onclick="viewProject(${p.id})">
+      return `<div class="k-card ${stCls[k]||''} ${k==='done'?'is-done':''}" ${canDrag?'draggable="true"':''} data-pid="${p.id}" onclick="viewProject(${p.id})">
         <button class="k-card-del" onclick="deleteProject(${p.id},event)">✕</button>
-        <div class="k-card-meta">
-          <span class="k-card-type">${esc(p.type || (currentLang==='ru'?'Проект':'Project'))}</span>
+        <div class="k-card-top">
+          <div class="k-card-title">${esc(p.title)}</div>
           ${dlBadge}
         </div>
-        <div class="k-card-title">${esc(p.title)}</div>
-        ${p.progress > 0 ? `
-        <div class="k-card-prog">
-          <div class="k-card-prog-top"><span>${t('k_progress')}</span><b>${p.progress}%</b></div>
-          <div class="k-prog-bar"><div class="k-prog-fill ${isComplete?'is-complete':''}" style="width:${p.progress}%"></div></div>
-        </div>` : ''}
+        ${p.progress > 0 ? `<div class="k-prog-bar" style="margin-bottom:11px"><div class="k-prog-fill ${isComplete?'is-complete':''}" style="width:${p.progress}%"></div></div>` : ''}
         <div class="k-card-foot">
-          <div class="k-client-chip">
-            ${clientAv}
-            <span class="k-card-client">${esc(p.client_name||'—')}</span>
-          </div>
+          <div class="k-client-chip" title="${esc(p.client_name||'')}">${clientAv}</div>
           ${p.budget ? `<span class="k-budget-tag">${fmt(p.budget)}</span>` : ''}
         </div>
       </div>`;
