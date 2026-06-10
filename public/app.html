@@ -1057,6 +1057,10 @@ th:not(:first-child), td:not(:first-child) { padding-left:18px !important; }
 /* ══════════ /KANBAN REDESIGN ══════════ */
 
 /* ══════════ PROJECTS LIST VIEW ══════════ */
+#page-projects .page-header { margin-bottom:18px !important; }
+.pj-head-row { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:20px; }
+.pj-head-row .k-stats-bar { margin:0 !important; }
+.pj-head-row .pj-toolbar { margin:0; }
 .pj-toolbar { display:flex; align-items:center; justify-content:flex-start; margin-bottom:18px; }
 .pj-seg { display:inline-flex; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:9px; padding:3px; gap:2px; }
 .pj-seg-btn { display:inline-flex; align-items:center; gap:7px; font-size:11.5px; font-weight:600; color:rgba(217,217,217,0.45); background:transparent; border:none; border-radius:6px; padding:6px 13px; cursor:pointer; font-family:inherit; transition:color .15s ease, background .15s ease; }
@@ -2116,14 +2120,16 @@ td { border-bottom-color:var(--line) !important; }
         <div><h1 data-i18n="page_projects">Projects</h1><p data-i18n="projects_sub">Studio projects and tasks</p></div>
         <button class="btn btn-white" onclick="openProjectModal()" data-i18n="btn_new_project">+ New project</button>
       </div>
-      <div class="k-stats-bar" id="k-stats-bar">
-        <span class="k-stat-item"><b id="ks-total">0</b> <span data-i18n="k_stat_total">projects</span></span>
-        <span class="k-stat-sep">·</span>
-        <span class="k-stat-item"><b id="ks-active">0</b> <span data-i18n="k_stat_active">in progress</span></span>
-        <span class="k-stat-sep">·</span>
-        <span class="k-stat-item"><b id="ks-budget">₽ 0</b></span>
+      <div class="pj-head-row">
+        <div class="pj-toolbar" id="pj-toolbar"></div>
+        <div class="k-stats-bar" id="k-stats-bar">
+          <span class="k-stat-item"><b id="ks-total">0</b> <span data-i18n="k_stat_total">projects</span></span>
+          <span class="k-stat-sep">·</span>
+          <span class="k-stat-item"><b id="ks-active">0</b> <span data-i18n="k_stat_active">in progress</span></span>
+          <span class="k-stat-sep">·</span>
+          <span class="k-stat-item"><b id="ks-budget">₽ 0</b></span>
+        </div>
       </div>
-      <div class="pj-toolbar" id="pj-toolbar"></div>
       <div id="pj-list" style="display:none"></div>
       <div class="kanban" id="kanban-board">
         <div class="k-col" data-col="queue">
