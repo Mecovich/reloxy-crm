@@ -1224,6 +1224,24 @@ th:not(:first-child), td:not(:first-child) { padding-left:18px !important; }
 .bento-empty-mini .bento-empty-title { font-size:12px; color:rgba(217,217,217,0.5); font-weight:500; }
 .bento-empty-mini .bento-empty-btn { margin-top:10px; padding:7px 14px; font-size:11.5px; }
 #dash-unpaid .bento-empty { margin:18px; padding:36px 18px; }
+
+/* Efficiency gauge v2 */
+.bento-gauge-wrap { padding:14px 0 4px !important; gap:2px !important; }
+.bento-gauge { width:216px; height:216px; }
+.bento-gauge-track { stroke:rgba(217,217,217,0.08) !important; }
+.bento-gauge-fill { transition:stroke-dasharray 1.2s cubic-bezier(.16,1,.3,1) !important; }
+.bento-gauge-tick { stroke:rgba(217,217,217,0.12); stroke-width:1.2; }
+.bento-gauge-tick.major { stroke:rgba(217,217,217,0.28); stroke-width:1.6; }
+.bento-gauge-num { font-size:46px !important; }
+.bento-gauge-status { font-size:11px; font-weight:700; color:#EDEDED; margin-top:9px; padding:3px 12px; border-radius:20px;
+  background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.10); letter-spacing:0.3px; min-height:14px; }
+.bento-gauge-status:empty { display:none; }
+.bento-gauge-meta { display:flex; gap:8px; margin-top:2px; }
+.bento-gauge-meta:empty { display:none; }
+.bento-gauge-chip { display:inline-flex; align-items:center; gap:6px; font-size:10.5px; color:rgba(217,217,217,0.45);
+  background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); padding:5px 11px; border-radius:8px; }
+.bento-gauge-chip b { color:#EDEDED; font-weight:700; font-variant-numeric:tabular-nums; }
+.bento-gauge-trend { margin-top:12px !important; }
 /* ══════════ /BENTO POLISH ══════════ */
 
 
@@ -1833,17 +1851,28 @@ td { border-bottom-color:var(--line) !important; }
           </div>
           <div class="bento-gauge-wrap">
             <div class="bento-gauge">
-              <svg width="208" height="208" viewBox="0 0 200 200">
-                <circle class="bento-gauge-track" cx="100" cy="100" r="84" stroke-width="14"/>
-                <g id="dash-gauge-ticks" transform="rotate(-90 100 100)"></g>
-                <circle class="bento-gauge-fill" id="dash-gauge-fill" cx="100" cy="100" r="84" stroke-width="14"
-                        stroke-dasharray="528" stroke-dashoffset="528" transform="rotate(-90 100 100)"/>
+              <svg width="216" height="216" viewBox="0 0 200 200">
+                <defs>
+                  <linearGradient id="gauge-grad" x1="0%" y1="100%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="rgba(217,217,217,0.30)"/>
+                    <stop offset="100%" stop-color="#EDEDED"/>
+                  </linearGradient>
+                </defs>
+                <g transform="rotate(135 100 100)">
+                  <circle class="bento-gauge-track" cx="100" cy="100" r="84" stroke-width="12" stroke-dasharray="395.84 527.79"/>
+                  <g id="dash-gauge-ticks"></g>
+                  <circle class="bento-gauge-fill" id="dash-gauge-fill" cx="100" cy="100" r="84" stroke-width="12"
+                          stroke="url(#gauge-grad)" stroke-dasharray="0 527.79"/>
+                </g>
+                <circle id="dash-gauge-tip" r="4.5" fill="#EDEDED" cx="100" cy="100" style="opacity:0;transition:opacity .4s ease .6s;filter:drop-shadow(0 0 6px rgba(237,237,237,0.8))"/>
               </svg>
               <div class="bento-gauge-center">
                 <div class="bento-gauge-num" id="dash-gauge-num"><span id="dash-gauge-num-val">—</span><span>%</span></div>
                 <div class="bento-gauge-lbl" data-i18n="dash_efficiency">Efficiency</div>
+                <div class="bento-gauge-status" id="dash-gauge-status"></div>
               </div>
             </div>
+            <div class="bento-gauge-meta" id="dash-gauge-meta"></div>
             <div class="bento-gauge-trend" id="dash-gauge-trend"></div>
           </div>
         </div>
@@ -4033,32 +4062,60 @@ function renderDashboard() {
     }
   }
 
-  // ── Efficiency Index gauge (based on project completion rate) ──
-  const gaugeNum = document.getElementById('dash-gauge-num');
+  // ── Efficiency Index gauge (270° arc, completion-based) ──
   const gaugeFill = document.getElementById('dash-gauge-fill');
-  const gaugeTrend = document.getElementById('dash-gauge-trend');
-  if (gaugeNum && gaugeFill) {
+  if (gaugeFill) {
     const eff = projects.length ? completion : 0;
+    const ARC = 0.75, C = 2 * Math.PI * 84, arcLen = C * ARC;
     animateCount(document.getElementById('dash-gauge-num-val'), eff, { format: n => Math.round(n), duration: 1000 });
-    const circumference = 2 * Math.PI * 84;
-    const offset = circumference - (eff/100) * circumference;
-    gaugeFill.setAttribute('stroke-dasharray', String(circumference));
-    requestAnimationFrame(() => { gaugeFill.style.strokeDashoffset = String(offset); });
+    requestAnimationFrame(() => { gaugeFill.setAttribute('stroke-dasharray', `${(eff/100)*arcLen} ${C}`); });
+    // ticks along the 270° arc
     const ticksEl = document.getElementById('dash-gauge-ticks');
     if (ticksEl && !ticksEl.childElementCount) {
-      const cx = 100, cy = 100, rOuter = 96, rInner = 90, n = 40;
+      const cx = 100, cy = 100, n = 31;
       let ticks = '';
       for (let i = 0; i < n; i++) {
-        const a = (i / n) * Math.PI * 2;
-        const x1 = cx + rInner * Math.cos(a), y1 = cy + rInner * Math.sin(a);
-        const x2 = cx + rOuter * Math.cos(a), y2 = cy + rOuter * Math.sin(a);
-        ticks += `<line class="bento-gauge-tick" x1="${x1.toFixed(2)}" y1="${y1.toFixed(2)}" x2="${x2.toFixed(2)}" y2="${y2.toFixed(2)}"/>`;
+        const a = (i / (n - 1)) * 1.5 * Math.PI;
+        const major = i % 5 === 0;
+        const rI = major ? 93 : 95, rO = 99;
+        ticks += `<line class="bento-gauge-tick ${major?'major':''}" x1="${(cx+rI*Math.cos(a)).toFixed(2)}" y1="${(cy+rI*Math.sin(a)).toFixed(2)}" x2="${(cx+rO*Math.cos(a)).toFixed(2)}" y2="${(cy+rO*Math.sin(a)).toFixed(2)}"/>`;
       }
       ticksEl.innerHTML = ticks;
     }
+    // glowing tip at the end of the arc
+    const tip = document.getElementById('dash-gauge-tip');
+    if (tip) {
+      const th = (135 + (eff/100)*270) * Math.PI/180;
+      tip.setAttribute('cx', (100 + 84*Math.cos(th)).toFixed(2));
+      tip.setAttribute('cy', (100 + 84*Math.sin(th)).toFixed(2));
+      tip.style.opacity = eff > 0 ? '1' : '0';
+    }
+    // status word
+    const stEl = document.getElementById('dash-gauge-status');
+    if (stEl) {
+      const ru = currentLang === 'ru';
+      stEl.textContent = !projects.length ? '' :
+        eff >= 75 ? (ru?'Отлично':'Excellent') :
+        eff >= 45 ? (ru?'Хорошо':'Good') :
+        eff > 0   ? (ru?'Набираем ход':'Improving') : (ru?'Старт':'Just started');
+    }
+    // meta chips: done / in progress / total
+    const metaEl = document.getElementById('dash-gauge-meta');
+    if (metaEl) {
+      const ru = currentLang === 'ru';
+      const inWork = projects.filter(p => ['inprogress','in-progress','active','review'].includes(p.status)).length;
+      metaEl.innerHTML = projects.length ? `
+        <div class="bento-gauge-chip"><b>${done}</b>${ru?'готово':'done'}</div>
+        <div class="bento-gauge-chip"><b>${inWork}</b>${ru?'в работе':'active'}</div>
+        <div class="bento-gauge-chip"><b>${projects.length}</b>${ru?'всего':'total'}</div>` : '';
+    }
+    // bottom pill
+    const gaugeTrend = document.getElementById('dash-gauge-trend');
     if (gaugeTrend) {
-      const arrow = eff >= 50 ? '▲' : '▼';
-      gaugeTrend.innerHTML = `<span>${arrow}</span><span>${currentLang==='ru' ? 'на этой неделе' : 'this week'}</span>`;
+      const ru = currentLang === 'ru';
+      gaugeTrend.innerHTML = projects.length
+        ? `<span class="material-symbols-outlined" style="font-size:14px">task_alt</span><span>${done} ${ru?'из':'of'} ${projects.length} ${ru?'проектов завершено':'projects completed'}</span>`
+        : `<span style="opacity:0.6">${ru?'Появится после первых проектов':'Shows up after your first projects'}</span>`;
     }
   }
 
