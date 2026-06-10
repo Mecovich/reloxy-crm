@@ -1202,6 +1202,30 @@ th:not(:first-child), td:not(:first-child) { padding-left:18px !important; }
 }
 /* ══════════ /DASH BANNER CAROUSEL ══════════ */
 
+/* ══════════ BENTO POLISH ══════════ */
+.bento-card { position:relative; background:linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.015)) !important;
+  border:1px solid rgba(255,255,255,0.07) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.045), 0 12px 32px -16px rgba(0,0,0,0.5) !important;
+  transition:transform .25s cubic-bezier(.16,1,.3,1), border-color .25s ease, box-shadow .25s ease !important; }
+.bento-card:hover { transform:translateY(-2px); border-color:rgba(255,255,255,0.13) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.06), 0 18px 44px -16px rgba(0,0,0,0.7) !important; }
+
+/* Rich empty states */
+.bento-empty { display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;
+  padding:30px 18px; margin:4px; border:1px dashed rgba(255,255,255,0.08); border-radius:13px; }
+.bento-empty-icon { width:44px; height:44px; border-radius:13px; display:flex; align-items:center; justify-content:center;
+  background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); color:rgba(217,217,217,0.55); margin-bottom:12px; }
+.bento-empty-title { font-size:13px; font-weight:650; color:rgba(237,237,237,0.85); letter-spacing:-0.2px; }
+.bento-empty-sub { font-size:11.5px; color:rgba(217,217,217,0.38); margin-top:4px; line-height:1.5; max-width:240px; }
+.bento-empty-btn { margin-top:14px; font-size:12px; font-weight:700; color:#121212; background:#D9D9D9; border:none; border-radius:9px;
+  padding:8px 16px; cursor:pointer; font-family:inherit; transition:transform .15s ease, box-shadow .15s ease; }
+.bento-empty-btn:hover { transform:scale(1.04); box-shadow:0 8px 20px -8px rgba(217,217,217,0.35); }
+.bento-empty-mini { padding:14px 10px; margin:0; border:none; }
+.bento-empty-mini .bento-empty-title { font-size:12px; color:rgba(217,217,217,0.5); font-weight:500; }
+.bento-empty-mini .bento-empty-btn { margin-top:10px; padding:7px 14px; font-size:11.5px; }
+#dash-unpaid .bento-empty { margin:18px; padding:36px 18px; }
+/* ══════════ /BENTO POLISH ══════════ */
+
 
 
 
@@ -3881,6 +3905,13 @@ function renderDashboard() {
   ].map(s=>`<div class="chart-stat-item"><div class="chart-stat-val">${s.val}</div><div class="chart-stat-lbl">${s.label}</div></div>`).join('');
 
   const empty = (msg, sub) => `<div class="empty-compact">${msg}${sub ? `<div style="margin-top:4px;font-size:11px;color:var(--g3)">${sub}</div>` : ''}</div>`;
+  const emptyCta = (icon, msg, sub, btn, action) => `
+    <div class="bento-empty">
+      <div class="bento-empty-icon"><span class="material-symbols-outlined" style="font-size:22px">${icon}</span></div>
+      <div class="bento-empty-title">${msg}</div>
+      ${sub ? `<div class="bento-empty-sub">${sub}</div>` : ''}
+      ${btn ? `<button class="bento-empty-btn" onclick="${action}">${btn}</button>` : ''}
+    </div>`;
 
   // In progress
   const inprog = projects.filter(p => p.status === 'inprogress' || p.status === 'in-progress' || p.status === 'active' || p.status === 'review').slice(0, 5);
@@ -3921,7 +3952,7 @@ function renderDashboard() {
       </div>
       <span class="material-symbols-outlined" style="color:var(--g2);font-size:18px">chevron_right</span>
     </div>`;
-  }).join('') : empty(t('dash_no_deadlines'));
+  }).join('') : emptyCta('event_upcoming', t('dash_no_deadlines'), currentLang==='ru' ? 'Задачи с дедлайнами появятся здесь' : 'Tasks with deadlines will appear here', null, null);
 
   // Unpaid invoices — Stitch "Recent Transactions" table
   const unpaid = invoices.filter(i => i.status !== 'paid').slice(0, 6);
@@ -3960,7 +3991,7 @@ function renderDashboard() {
           <td>${i.due_date||i.created_at||'—'}</td>
         </tr>`).join('')}
       </tbody>
-    </table>` : `<div class="empty" style="padding:32px"><div class="empty-title">${t('dash_all_paid')}</div></div>`;
+    </table>` : emptyCta('task_alt', t('dash_all_paid'), currentLang==='ru' ? 'Новые счета появятся здесь' : 'New invoices will appear here', currentLang==='ru' ? '+ Новый счёт' : '+ New invoice', "go('finance',document.querySelectorAll('.nav-item')[6]);setTimeout(()=>openInvoiceModal(),200)");
 
   // ── Total Portfolio (paid + pending invoice value) ──
   const portfolioTotal = paidTotal + pendingTotal;
@@ -4048,7 +4079,7 @@ function renderDashboard() {
         </div>
         <div class="bento-event-val">${label}</div>
       </div>`;
-    }).join('') : empty(t('dash_no_deadlines'));
+    }).join('') : emptyCta('event_available', t('dash_no_deadlines'), currentLang==='ru' ? 'Дедлайны проектов появятся здесь' : 'Project deadlines will show up here', currentLang==='ru' ? 'Открыть календарь' : 'Open calendar', "go('calendar',document.querySelectorAll('.nav-item')[1])");
   }
 
   // ── Project Milestones ──
@@ -4069,7 +4100,7 @@ function renderDashboard() {
           ? `<svg class="bento-milestone-check" viewBox="0 0 24 24" fill="none" stroke="#D9D9D9" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>`
           : `<div style="font-size:10px;font-weight:700;color:rgba(217,217,217,0.40);width:14px;text-align:right">${prog}%</div>`}
       </div>`;
-    }).join('') : empty(t('dash_no_projects'));
+    }).join('') : emptyCta('account_tree', t('dash_no_projects'), currentLang==='ru' ? 'Создайте первый проект — прогресс будет виден здесь' : 'Create your first project to track progress here', currentLang==='ru' ? '+ Новый проект' : '+ New project', "openProjectModal()");
   }
 
   // ── Activity Timeline (recent staff activity) ──
@@ -4085,7 +4116,7 @@ function renderDashboard() {
           <div class="bento-timeline-time">${esc(m.name||'')}</div>
         </div>
       </div>`;
-    }).join('') : empty(t('dash_no_team'));
+    }).join('') : emptyCta('group', t('dash_no_team'), currentLang==='ru' ? 'Пригласите сотрудников — активность появится здесь' : 'Invite teammates to see their activity', currentLang==='ru' ? 'Открыть команду' : 'Open team', "go('team',document.querySelectorAll('.nav-item')[5])");
   }
 
   // ── Resource Allocation (team / project metrics grid) ──
@@ -4175,7 +4206,10 @@ function renderDashboard() {
     donutLegend.innerHTML = total ? statusGroups.map((g,i) => counts[i] > 0 ? `<div class="bento-donut-legend-item">
       <div class="bento-donut-legend-left"><span class="bento-donut-dot" style="background:rgba(217,217,217,${g.op})"></span>${esc(g.label)}</div>
       <span class="bento-donut-legend-val">${counts[i]}</span>
-    </div>` : '').join('') : empty(t('dash_no_projects'));
+    </div>` : '').join('') : `<div class="bento-empty bento-empty-mini">
+      <div class="bento-empty-title">${t('dash_no_projects')}</div>
+      <button class="bento-empty-btn" onclick="openProjectModal()">${currentLang==='ru'?'+ Новый проект':'+ New project'}</button>
+    </div>`;
     const rateEl = document.getElementById('dash-donut-rate');
     if (rateEl) {
       const donePct = total ? Math.round((counts[0] / total) * 100) : 0;
