@@ -1260,6 +1260,7 @@ body.plan-paid .nav-pro { display:none; }
 .ai-letter-close:hover { color:#EDEDED; }
 body.is-staff .ai-fab { display:none; }
 /* дашборд: без лишнего места внизу */
+#revenue-chart { max-height:100% !important; }
 #page-dashboard { padding-bottom:28px !important; }
 .bento-grid { margin-bottom:0 !important; }
 /* ══════════ /AI ══════════ */
@@ -2055,7 +2056,7 @@ td { border-bottom-color:var(--line) !important; }
             </div>
           </div>
           <div class="bento-forecast-note" id="dash-forecast-note" style="display:none"></div>
-          <div style="position:relative;height:280px;margin-top:18px">
+          <div id="revenue-chart-wrap" style="position:relative;height:280px;margin-top:18px;overflow:hidden">
             <canvas id="revenue-chart"></canvas>
             <div class="bento-peak-card" id="dash-peak-card" style="top:24px;left:38%;display:none">
               <div class="bento-peak-label" data-i18n="dash_active_peak">Active Peak</div>
@@ -3814,6 +3815,8 @@ function drawRevenueChart(period) {
 
   const canvas = document.getElementById('revenue-chart');
   if (!canvas) return;
+  const chartWrap = document.getElementById('revenue-chart-wrap');
+  if (chartWrap) chartWrap.style.height = total > 0 ? '280px' : '120px';
   if (typeof Chart === 'undefined') return; // chart lib not loaded yet — onload колбэк дорисует
   if (revenueChartInstance) { revenueChartInstance.destroy(); revenueChartInstance = null; }
 
