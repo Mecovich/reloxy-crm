@@ -991,8 +991,8 @@ app.post('/api/staff', authMiddleware, async (req, res) => {
     const _cnt = await db.execute({ sql: 'SELECT COUNT(*) AS c FROM staff WHERE user_id = ?', args: [ownerId(req)] });
     if (Number(_cnt.rows[0].c) >= _limit) {
       return res.status(403).json({ error: _plan === 'free'
-        ? 'Лимит тарифа Старт: до 2 сотрудников. Откройте Тарифы, чтобы расширить команду.'
-        : 'Лимит тарифа Pro: до 7 сотрудников. Перейдите на Studio для команды без лимита.' });
+        ? 'Start plan limit: up to 2 team members. Open Plans to upgrade.'
+        : 'Pro plan limit: up to 7 team members. Switch to Studio for an unlimited team.' });
     }
   }
   const result = await db.execute({
