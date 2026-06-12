@@ -1163,6 +1163,13 @@ th:not(:first-child), td:not(:first-child) { padding-left:18px !important; }
 .price-cur { text-align:center; font-size:12px; font-weight:600; color:rgba(217,217,217,0.5); padding:10px 0; }
 .pricing-note { font-size:11px; color:rgba(217,217,217,0.32); text-align:center; margin-top:18px; }
 @media (max-width:760px) { .pricing-grid { grid-template-columns:1fr; } }
+
+/* Paid nav marking */
+.nav-paid-sep { height:1px; background:rgba(255,255,255,0.05); margin:8px 18px; }
+.nav-pro { margin-left:auto; font-size:8.5px; font-weight:700; letter-spacing:0.7px; text-transform:uppercase;
+  color:rgba(217,217,217,0.55); background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);
+  padding:2px 7px; border-radius:20px; flex-shrink:0; }
+body.plan-paid .nav-pro { display:none; }
 /* ══════════ /PRICING ══════════ */
 
 
@@ -1751,10 +1758,6 @@ td { border-bottom-color:var(--line) !important; }
         <span class="material-symbols-outlined nav-ms">payments</span>
         <span data-i18n="nav_finance">Finance</span>
       </div>
-      <div class="nav-item" onclick="go('analytics',this)">
-        <span class="material-symbols-outlined nav-ms">insights</span>
-        <span data-i18n="nav_analytics">Analytics</span>
-      </div>
       <div class="nav-item" onclick="go('tasks',this)">
         <span class="material-symbols-outlined nav-ms">task_alt</span>
         <span>Tasks</span>
@@ -1763,13 +1766,20 @@ td { border-bottom-color:var(--line) !important; }
         <span class="material-symbols-outlined nav-ms">receipt_long</span>
         <span>Expenses</span>
       </div>
-      <div class="nav-item" onclick="go('reports',this)">
-        <span class="material-symbols-outlined nav-ms">description</span>
-        <span>Reports</span>
-      </div>
       <div class="nav-item" onclick="go('notes',this)">
         <span class="material-symbols-outlined nav-ms">edit_note</span>
         <span data-i18n="nav_notes">Notes</span>
+      </div>
+      <div class="nav-paid-sep"></div>
+      <div class="nav-item" onclick="go('analytics',this)">
+        <span class="material-symbols-outlined nav-ms">insights</span>
+        <span data-i18n="nav_analytics">Analytics</span>
+        <span class="nav-pro">Pro</span>
+      </div>
+      <div class="nav-item" onclick="go('reports',this)">
+        <span class="material-symbols-outlined nav-ms">description</span>
+        <span>Reports</span>
+        <span class="nav-pro">Pro</span>
       </div>
     </div>
   </nav>
@@ -4910,6 +4920,7 @@ function trialDaysLeft() {
   return ms > 0 ? Math.ceil(ms / 86400000) : 0;
 }
 function renderPlanChip() {
+  document.body.classList.toggle('plan-paid', planOf() !== 'free');
   const el = document.getElementById('plan-chip');
   if (!el) return;
   if (user?.role === 'staff') { el.style.display = 'none'; return; }
