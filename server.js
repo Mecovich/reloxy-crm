@@ -211,6 +211,13 @@ async function initDB() {
     `ALTER TABLE users ADD COLUMN plan TEXT DEFAULT 'free'`,
     `ALTER TABLE users ADD COLUMN trial_ends_at TEXT DEFAULT NULL`,
     `ALTER TABLE users ADD COLUMN plan_expires_at TEXT DEFAULT NULL`,
+    `CREATE TABLE IF NOT EXISTS ai_usage (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      kind TEXT NOT NULL,
+      tokens INTEGER DEFAULT 0,
+      created_at TEXT DEFAULT (datetime('now'))
+    )`,
     `CREATE TABLE IF NOT EXISTS payments (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id INTEGER NOT NULL,
@@ -466,6 +473,104 @@ app.post('/api/login',    authLimiter, handleLogin);
 app.get('/api/me', authMiddleware, async (req, res) => {
   const result = await db.execute({ sql: 'SELECT id, name, email, role, plan, trial_ends_at, plan_expires_at, studio_name, owner_id, created_at FROM users WHERE id = ?', args: [req.user.id] });
   res.json(result.rows[0]);
+});
+
+// ─── AI (OpenRouter) ──────────────────────────────────────────────────────────
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || '';
+const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'deepseek/deepseek-chat';
+const PLAN_AI_LIMITS = { free: 0, pro: 100, studio: 1000 };
+
+async function aiCheckLimit(req, res) {
+  if (!OPENROUTER_API_KEY) { res.status(503).json({ error: 'AI is not configured yet' }); return null; }
+  if (isStaff(req)) { res.status(403).json({ error: 'AI is available to workspace owners' }); return null; }
+  const plan = await getEffectivePlan(req.user.id);
+  const limit = PLAN_AI_LIMITS[plan] ?? 0;
+  if (limit === 0) { res.status(403).json({ error: 'ai_requires_pro' }); return null; }
+  const used = await db.execute({
+    sql: "SELECT COUNT(*) AS c FROM ai_usage WHERE user_id = ? AND created_at >= datetime('now','start of month')",
+    args: [req.user.id],
+  });
+  if (Number(used.rows[0].c) >= limit) {
+    res.status(403).json({ error: plan === 'pro'
+      ? 'Monthly AI limit reached (100). Upgrade to Studio for unlimited AI.'
+      : 'Fair-use AI limit reached for this month.' });
+    return null;
+  }
+  return plan;
+}
+
+async function aiCall(messages, maxTokens = 700) {
+  const r = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+      'Content-Type': 'application/json',
+      'HTTP-Referer': 'https://reloxy.tech',
+      'X-Title': 'Reloxy CRM',
+    },
+    body: JSON.stringify({ model: OPENROUTER_MODEL, messages, max_tokens: maxTokens, temperature: 0.4 }),
+  });
+  const data = await r.json();
+  if (!r.ok || !data.choices?.[0]?.message?.content) {
+    console.error('OpenRouter error:', JSON.stringify(data).slice(0, 400));
+    throw new Error('AI provider error');
+  }
+  return { text: data.choices[0].message.content.trim(), tokens: data.usage?.total_tokens || 0 };
+}
+
+async function aiBuildContext(oid) {
+  const [clients, projects, invoices, deals] = await Promise.all([
+    db.execute({ sql: 'SELECT name, status FROM clients WHERE user_id=? LIMIT 50', args: [oid] }),
+    db.execute({ sql: 'SELECT p.title, p.type, p.status, p.progress, p.budget, p.deadline, c.name AS client FROM projects p LEFT JOIN clients c ON c.id=p.client_id WHERE p.user_id=? ORDER BY p.id DESC LIMIT 40', args: [oid] }),
+    db.execute({ sql: 'SELECT i.number, i.amount, i.status, i.due_date, i.created_at, c.name AS client FROM invoices i LEFT JOIN clients c ON c.id=i.client_id WHERE i.user_id=? ORDER BY i.id DESC LIMIT 60', args: [oid] }),
+    db.execute({ sql: 'SELECT d.title, d.stage, d.value, c.name AS client FROM deals d LEFT JOIN clients c ON c.id=d.client_id WHERE d.user_id=? LIMIT 40', args: [oid] }),
+  ]);
+  const today = new Date().toISOString().slice(0, 10);
+  return `Today: ${today}
+CLIENTS (${clients.rows.length}): ${JSON.stringify(clients.rows)}
+PROJECTS (${projects.rows.length}): ${JSON.stringify(projects.rows)}
+INVOICES (${invoices.rows.length}): ${JSON.stringify(invoices.rows)}
+DEALS (${deals.rows.length}): ${JSON.stringify(deals.rows)}`;
+}
+
+app.post('/api/ai/assistant', authMiddleware, async (req, res) => {
+  try {
+    const plan = await aiCheckLimit(req, res);
+    if (!plan) return;
+    const { question, lang } = req.body;
+    if (!question || String(question).length > 600) return res.status(400).json({ error: 'Question required (max 600 chars)' });
+    const ctx = await aiBuildContext(ownerId(req));
+    const { text, tokens } = await aiCall([
+      { role: 'system', content: `You are the built-in business assistant of Reloxy CRM for a design studio. Answer the owner's question using ONLY the data below. Be concise (2-6 sentences), concrete, with numbers in ₽ where relevant. If data is insufficient, say so. Answer in ${lang === 'ru' ? 'Russian' : 'English'}.
+
+${ctx}` },
+      { role: 'user', content: String(question) },
+    ], 600);
+    await db.execute({ sql: 'INSERT INTO ai_usage (user_id, kind, tokens) VALUES (?,?,?)', args: [req.user.id, 'assistant', tokens] });
+    res.json({ answer: text });
+  } catch (e) { console.error('ai assistant:', e.message); res.status(500).json({ error: 'AI error, try again' }); }
+});
+
+app.post('/api/ai/letter', authMiddleware, async (req, res) => {
+  try {
+    const plan = await aiCheckLimit(req, res);
+    if (!plan) return;
+    const { invoice_id, lang } = req.body;
+    const inv = await db.execute({
+      sql: 'SELECT i.*, c.name AS client_name FROM invoices i LEFT JOIN clients c ON c.id=i.client_id WHERE i.id=? AND i.user_id=?',
+      args: [invoice_id, ownerId(req)],
+    });
+    if (!inv.rows.length) return res.status(404).json({ error: 'Invoice not found' });
+    const i = inv.rows[0];
+    const me = await db.execute({ sql: 'SELECT name, studio_name FROM users WHERE id=?', args: [ownerId(req)] });
+    const u = me.rows[0] || {};
+    const { text, tokens } = await aiCall([
+      { role: 'system', content: `You write short, warm, professional payment reminder messages for a design studio. No subject line, no placeholders like [Name] — use real data. 60-120 words. Friendly but clear. Write in ${lang === 'ru' ? 'Russian' : 'English'}.` },
+      { role: 'user', content: `Studio: ${u.studio_name || u.name || 'our studio'}. Client: ${i.client_name || 'client'}. Invoice #${i.number || invoice_id} for ${i.amount} RUB, status: ${i.status}, due date: ${i.due_date || 'not set'}, issued: ${i.created_at || ''}. Write a polite payment reminder message ready to send in a messenger.` },
+    ], 400);
+    await db.execute({ sql: 'INSERT INTO ai_usage (user_id, kind, tokens) VALUES (?,?,?)', args: [req.user.id, 'letter', tokens] });
+    res.json({ letter: text });
+  } catch (e) { console.error('ai letter:', e.message); res.status(500).json({ error: 'AI error, try again' }); }
 });
 
 // ─── RollyPay billing ─────────────────────────────────────────────────────────

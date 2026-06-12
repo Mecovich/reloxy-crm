@@ -1214,6 +1214,58 @@ body.plan-paid .nav-pro { display:none; }
 
 /* Topbar removed — поиск остаётся на Cmd+K */
 .topbar { display:none !important; }
+
+/* ══════════ AI ══════════ */
+.ai-fab { position:fixed; right:26px; bottom:26px; z-index:8000; width:52px; height:52px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center; cursor:pointer; border:1px solid rgba(255,255,255,0.14);
+  background:linear-gradient(180deg, #2a2a2a, #1a1a1a); color:#EDEDED;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.08), 0 14px 40px -10px rgba(0,0,0,0.8);
+  transition:transform .18s cubic-bezier(.16,1,.3,1), box-shadow .18s ease; }
+.ai-fab:hover { transform:translateY(-2px) scale(1.04); box-shadow:inset 0 1px 0 rgba(255,255,255,0.1), 0 18px 50px -10px rgba(0,0,0,0.9), 0 0 24px rgba(237,237,237,0.08); }
+.ai-panel { position:fixed; right:26px; bottom:90px; z-index:8001; width:380px; max-width:calc(100vw - 40px); height:520px; max-height:calc(100vh - 130px);
+  display:flex; flex-direction:column; border-radius:18px; overflow:hidden;
+  background:linear-gradient(180deg, #1B1B1B, #141414); border:1px solid rgba(255,255,255,0.1);
+  box-shadow:0 40px 100px -20px rgba(0,0,0,0.9);
+  opacity:0; transform:translateY(14px) scale(0.98); pointer-events:none;
+  transition:opacity .22s cubic-bezier(.16,1,.3,1), transform .22s cubic-bezier(.16,1,.3,1); }
+.ai-panel.open { opacity:1; transform:none; pointer-events:auto; }
+.ai-head { display:flex; align-items:center; justify-content:space-between; padding:15px 17px; border-bottom:1px solid rgba(255,255,255,0.06); }
+.ai-head-title { font-size:13px; font-weight:700; color:#EDEDED; letter-spacing:-0.2px; }
+.ai-spark { color:rgba(232,200,131,0.9); margin-right:4px; }
+.ai-close { width:26px; height:26px; display:flex; align-items:center; justify-content:center; font-size:11px;
+  color:rgba(217,217,217,0.4); background:transparent; border:none; border-radius:7px; cursor:pointer; font-family:inherit; }
+.ai-close:hover { color:#EDEDED; background:rgba(255,255,255,0.06); }
+.ai-msgs { flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:10px; }
+.ai-msg { max-width:86%; padding:10px 13px; border-radius:13px; font-size:12.5px; line-height:1.55; }
+.ai-msg.user { align-self:flex-end; background:#D9D9D9; color:#121212; border-bottom-right-radius:5px; }
+.ai-msg.ai { align-self:flex-start; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.06);
+  color:rgba(237,237,237,0.85); border-bottom-left-radius:5px; }
+.ai-dots { display:inline-flex; gap:4px; }
+.ai-dots i { width:5px; height:5px; border-radius:50%; background:rgba(217,217,217,0.5); animation:ai-blink 1.2s infinite; }
+.ai-dots i:nth-child(2) { animation-delay:.2s; } .ai-dots i:nth-child(3) { animation-delay:.4s; }
+@keyframes ai-blink { 0%,80%,100% { opacity:0.25; } 40% { opacity:1; } }
+.ai-input-row { display:flex; gap:8px; padding:12px; border-top:1px solid rgba(255,255,255,0.06); }
+.ai-input { flex:1; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.09); border-radius:11px;
+  padding:10px 13px; color:#EDEDED; font-size:13px; outline:none; font-family:inherit; transition:border-color .15s ease; }
+.ai-input:focus { border-color:rgba(255,255,255,0.2); }
+.ai-send { width:40px; border-radius:11px; border:none; background:#D9D9D9; color:#121212; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; transition:transform .15s ease; }
+.ai-send:hover { transform:scale(1.05); }
+.ai-letter-overlay { position:fixed; inset:0; z-index:9100; display:flex; align-items:center; justify-content:center;
+  background:rgba(8,8,8,0.6); backdrop-filter:blur(8px); padding:20px; }
+.ai-letter-modal { width:480px; max-width:94vw; background:#181818; border:1px solid rgba(255,255,255,0.1);
+  border-radius:18px; padding:22px; box-shadow:0 40px 100px -20px rgba(0,0,0,0.9); }
+.ai-letter-title { font-size:14px; font-weight:700; color:#EDEDED; margin-bottom:14px; }
+.ai-letter-ta { width:100%; height:190px; resize:vertical; background:rgba(255,255,255,0.03);
+  border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:13px 15px; color:rgba(237,237,237,0.9);
+  font-size:13px; line-height:1.6; outline:none; font-family:inherit; }
+.ai-letter-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:14px; }
+.ai-letter-actions .bento-empty-btn { margin-top:0; }
+.ai-letter-close { font-size:12px; font-weight:600; color:rgba(217,217,217,0.55); background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.09); border-radius:9px; padding:8px 16px; cursor:pointer; font-family:inherit; }
+.ai-letter-close:hover { color:#EDEDED; }
+body.is-staff .ai-fab { display:none; }
+/* ══════════ /AI ══════════ */
 /* ══════════ /PRICING ══════════ */
 
 /* ══════════ GLOBAL POLISH ══════════ */
@@ -2769,6 +2821,31 @@ td { border-bottom-color:var(--line) !important; }
 </div>
 
 <!-- INVITE MODAL -->
+<button class="ai-fab" id="ai-fab" onclick="toggleAiChat()" title="AI assistant">
+  <svg width="18" height="18" viewBox="0 0 18 18" fill="currentColor"><path d="M9 1l1.8 5.2L16 8l-5.2 1.8L9 15l-1.8-5.2L2 8l5.2-1.8L9 1zm6 10l.9 2.6L18 14.5l-2.1.9L15 18l-.9-2.6-2.1-.9 2.1-.9L15 11z"/></svg>
+</button>
+<div class="ai-panel" id="ai-panel">
+  <div class="ai-head">
+    <div class="ai-head-title"><span class="ai-spark">✦</span> AI Assistant</div>
+    <button class="ai-close" onclick="document.getElementById('ai-panel').classList.remove('open')">✕</button>
+  </div>
+  <div class="ai-msgs" id="ai-msgs"></div>
+  <div class="ai-input-row">
+    <input class="ai-input" id="ai-input" placeholder="Ask about your business…" onkeydown="if(event.key==='Enter')aiSend()">
+    <button class="ai-send" onclick="aiSend()"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M13 1L6.5 7.5M13 1L9 13l-2.5-5.5L1 5l12-4z"/></svg></button>
+  </div>
+</div>
+<div class="ai-letter-overlay" id="ai-letter-overlay" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+  <div class="ai-letter-modal">
+    <div class="ai-letter-title">✦ Payment reminder</div>
+    <textarea id="ai-letter-text" class="ai-letter-ta" spellcheck="false"></textarea>
+    <div class="ai-letter-actions">
+      <button class="bento-empty-btn" onclick="copyAiLetter()">Copy</button>
+      <button class="ai-letter-close" onclick="document.getElementById('ai-letter-overlay').style.display='none'">Close</button>
+    </div>
+  </div>
+</div>
+
 <div class="pricing-overlay" id="pricing-overlay" style="display:none" onclick="closePricingModal(event)">
   <div class="pricing-modal">
     <div class="pricing-head">
@@ -5011,6 +5088,89 @@ function renderClients(list) {
 }
 
 // ─── PROJECTS ──────────────────────────────────────────────────────────────
+// ── AI assistant ──
+let aiBusy = false;
+function aiGate() {
+  if (planOf() === 'free') {
+    openPricingModal('pro');
+    toast(currentLang==='ru' ? 'ИИ доступен на Pro и Studio' : 'AI is available on Pro & Studio');
+    return false;
+  }
+  return true;
+}
+function toggleAiChat() {
+  if (!aiGate()) return;
+  const p = document.getElementById('ai-panel');
+  const open = p.classList.toggle('open');
+  if (open) {
+    const msgs = document.getElementById('ai-msgs');
+    if (!msgs.childElementCount) {
+      aiPush('ai', currentLang==='ru'
+        ? 'Привет! Я знаю всё о ваших клиентах, проектах и деньгах. Спросите, например: «Сколько мне должны по счетам?» или «Какие проекты горят?»'
+        : 'Hi! I know your clients, projects and money. Ask me things like “How much is owed to me?” or “Which projects are at risk?”');
+    }
+    setTimeout(() => document.getElementById('ai-input')?.focus(), 50);
+  }
+}
+function aiPush(role, text) {
+  const msgs = document.getElementById('ai-msgs');
+  const div = document.createElement('div');
+  div.className = 'ai-msg ' + role;
+  div.innerHTML = esc(text).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>');
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+function aiTyping(on) {
+  let el = document.getElementById('ai-typing');
+  if (on && !el) {
+    el = document.createElement('div');
+    el.id = 'ai-typing';
+    el.className = 'ai-msg ai';
+    el.innerHTML = '<span class="ai-dots"><i></i><i></i><i></i></span>';
+    document.getElementById('ai-msgs').appendChild(el);
+    document.getElementById('ai-msgs').scrollTop = 1e9;
+  } else if (!on && el) el.remove();
+}
+async function aiSend() {
+  if (aiBusy) return;
+  const inp = document.getElementById('ai-input');
+  const q = inp.value.trim();
+  if (!q) return;
+  inp.value = '';
+  aiPush('user', q);
+  aiBusy = true; aiTyping(true);
+  try {
+    const d = await api('POST', '/api/ai/assistant', { question: q, lang: currentLang });
+    aiTyping(false);
+    aiPush('ai', d.answer);
+  } catch (e) {
+    aiTyping(false);
+    if (e.message === 'ai_requires_pro') { openPricingModal('pro'); }
+    else aiPush('ai', '⚠ ' + e.message);
+  }
+  aiBusy = false;
+}
+async function aiInvoiceLetter(id) {
+  if (!aiGate()) return;
+  const ov = document.getElementById('ai-letter-overlay');
+  const ta = document.getElementById('ai-letter-text');
+  ov.style.display = 'flex';
+  ta.value = currentLang==='ru' ? 'Пишу письмо…' : 'Writing the letter…';
+  try {
+    const d = await api('POST', '/api/ai/letter', { invoice_id: id, lang: currentLang });
+    ta.value = d.letter;
+  } catch (e) {
+    ta.value = '';
+    ov.style.display = 'none';
+    if (e.message === 'ai_requires_pro') openPricingModal('pro'); else toast(e.message);
+  }
+}
+async function copyAiLetter() {
+  const ta = document.getElementById('ai-letter-text');
+  try { await navigator.clipboard.writeText(ta.value); toast(currentLang==='ru' ? 'Скопировано' : 'Copied'); }
+  catch { ta.select(); document.execCommand('copy'); toast('Copied'); }
+}
+
 // ── Plans / pricing ──
 const PLAN_INFO = {
   free:   { ru:'Старт',  en:'Start'  },
@@ -5463,7 +5623,7 @@ function renderFinance() {
       <td><div class="inv-status ${i.status}">${invLabel(i.status)}</div></td>
       <td>
         <div class="td-actions">
-          ${i.status !== 'paid' ? `<span class="td-action" onclick="markPaid(${i.id})">✓ Paid</span>` : ''}
+          ${i.status !== 'paid' ? `<span class="td-action" onclick="markPaid(${i.id})">✓ Paid</span><span class="td-action" onclick="aiInvoiceLetter(${i.id})">✦ AI</span>` : ''}
           <span class="td-action" onclick="editInvoice(${i.id})">${t('act_edit')}</span>
           <span class="td-action" onclick="printInvoice(${i.id})">PDF</span>
           <span class="td-action danger" onclick="deleteInvoice(${i.id})">${t('act_delete')}</span>
