@@ -53,19 +53,31 @@ body::before {
 
 .left-body { flex:1; display:flex; flex-direction:column; justify-content:center; position:relative; padding:40px 0 30px; }
 
-/* floating brand orb */
-.orb-wrap { position:relative; width:150px; height:150px; margin-bottom:38px; }
-.orb-wrap::before {
-  content:''; position:absolute; inset:-44px; border-radius:50%; pointer-events:none;
-  background:radial-gradient(circle, rgba(237,237,237,0.13), transparent 65%);
+/* floating product glimpse */
+.glimpse-wrap { position:relative; margin-bottom:42px; width:300px; }
+.glimpse-wrap::before {
+  content:''; position:absolute; inset:-50px -70px; pointer-events:none;
+  background:radial-gradient(ellipse, rgba(237,237,237,0.09), transparent 65%);
 }
-.orb {
-  width:150px; height:150px; border-radius:50%; object-fit:cover; display:block;
+.glimpse {
+  position:relative; padding:20px 20px 18px; border-radius:18px;
+  background:linear-gradient(180deg, rgba(255,255,255,0.055), rgba(255,255,255,0.02));
   border:1px solid rgba(255,255,255,0.10);
-  box-shadow:0 30px 70px -20px rgba(0,0,0,0.9), inset 0 1px 0 rgba(255,255,255,0.08);
-  animation:orb-float 7s ease-in-out infinite;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.07), 0 34px 80px -24px rgba(0,0,0,0.95);
+  animation:glimpse-float 7s ease-in-out infinite;
 }
-@keyframes orb-float { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-12px); } }
+@keyframes glimpse-float { 0%,100% { transform:translateY(0) rotate(-1.2deg); } 50% { transform:translateY(-10px) rotate(-1.2deg); } }
+.glimpse-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+.glimpse-label { font-size:10px; font-weight:700; letter-spacing:1.4px; text-transform:uppercase; color:rgba(217,217,217,0.45); }
+.glimpse-badge { font-size:10.5px; font-weight:700; color:#EDEDED; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.12); padding:2px 9px; border-radius:20px; }
+.glimpse-num { font-size:25px; font-weight:800; letter-spacing:-1px; color:#F0F0F0; margin-bottom:12px; font-variant-numeric:tabular-nums; }
+.glimpse-spark { width:100%; height:56px; display:block; margin-bottom:16px; }
+.glimpse-row { display:flex; align-items:center; gap:9px; padding:7px 0; border-top:1px solid rgba(255,255,255,0.05); }
+.glimpse-dot { width:6px; height:6px; border-radius:50%; background:rgba(217,217,217,0.3); flex-shrink:0; }
+.glimpse-dot.on { background:#EDEDED; box-shadow:0 0 7px rgba(237,237,237,0.6); }
+.glimpse-name { font-size:11.5px; color:rgba(217,217,217,0.6); flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.glimpse-bar { width:64px; height:2px; border-radius:2px; background:rgba(255,255,255,0.08); overflow:hidden; flex-shrink:0; }
+.glimpse-bar i { display:block; height:100%; border-radius:2px; background:rgba(237,237,237,0.85); }
 
 .left-eyebrow {
   font-size:10.5px; font-weight:700; letter-spacing:2px; text-transform:uppercase;
@@ -208,7 +220,24 @@ body::before {
   </div>
 
   <div class="left-body">
-    <div class="orb-wrap"><img class="orb" src="/avatar-default.png" alt=""></div>
+    <div class="glimpse-wrap" aria-hidden="true">
+      <div class="glimpse">
+        <div class="glimpse-top">
+          <span class="glimpse-label">Revenue</span>
+          <span class="glimpse-badge">+24%</span>
+        </div>
+        <div class="glimpse-num">₽ 1 240 000</div>
+        <svg class="glimpse-spark" viewBox="0 0 240 56" fill="none" preserveAspectRatio="none">
+          <path d="M0 48 C28 44, 44 40, 62 36 S 96 38, 116 28 S 152 10, 174 16 S 214 8, 240 4" stroke="rgba(237,237,237,0.85)" stroke-width="2" stroke-linecap="round"/>
+          <path d="M0 48 C28 44, 44 40, 62 36 S 96 38, 116 28 S 152 10, 174 16 S 214 8, 240 4 L240 56 L0 56 Z" fill="url(#gl-fade)"/>
+          <defs><linearGradient id="gl-fade" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="rgba(237,237,237,0.14)"/><stop offset="1" stop-color="rgba(237,237,237,0)"/>
+          </linearGradient></defs>
+        </svg>
+        <div class="glimpse-row"><span class="glimpse-dot on"></span><span class="glimpse-name">Branding — KRUIZ</span><span class="glimpse-bar"><i style="width:72%"></i></span></div>
+        <div class="glimpse-row"><span class="glimpse-dot"></span><span class="glimpse-name">Pitch deck — Gatepay</span><span class="glimpse-bar"><i style="width:38%"></i></span></div>
+      </div>
+    </div>
     <div class="left-eyebrow">Business CRM</div>
     <div class="left-title">Your business,<br>under control</div>
     <div class="left-desc">Clients, projects, finances and team — everything in one clean workspace. Built for any business.</div>
