@@ -197,6 +197,9 @@ body::before {
 .btn-google:hover { background:rgba(255,255,255,0.06); border-color:var(--line3); transform:translateY(-1px); }
 .btn-google svg { width:17px; height:17px; flex-shrink:0; }
 
+.otp-link { margin-top:14px; text-align:center; font-size:12.5px; color:var(--g1); cursor:pointer; transition:color .12s; user-select:none; }
+.otp-link:hover { color:var(--white); }
+.otp-code-input { text-align:center; font-size:22px !important; letter-spacing:10px; font-weight:700; }
 .switch-hint { margin-top:22px; text-align:center; font-size:13px; color:var(--g2); }
 .switch-hint a { color:var(--g1); cursor:pointer; text-decoration:none; transition:color 0.12s; }
 .switch-hint a:hover { color:var(--white); }
@@ -299,6 +302,23 @@ body::before {
         <label onclick="document.getElementById('chk-remember').classList.toggle('on')">Remember me</label>
       </div>
       <button class="btn-primary" type="submit" id="btn-login">Sign in</button>
+      <div class="otp-link" onclick="showOtp(true)">Sign in with email code</div>
+    </form>
+
+    <!-- EMAIL CODE -->
+    <form class="form" id="form-otp" onsubmit="otpSubmit(event)">
+      <div class="error-msg" id="err-otp"></div>
+      <div class="field">
+        <label class="field-label">Email</label>
+        <input class="field-input" type="email" id="o-email" placeholder="you@company.com" required autocomplete="email">
+      </div>
+      <div class="field" id="o-code-field" style="display:none">
+        <label class="field-label">Code from email</label>
+        <input class="field-input otp-code-input" type="text" id="o-code" placeholder="••••••" maxlength="6" inputmode="numeric" autocomplete="one-time-code">
+      </div>
+      <button class="btn-primary" type="submit" id="btn-otp">Send code</button>
+      <div class="otp-link" id="otp-resend" style="display:none" onclick="otpResend()">Resend code</div>
+      <div class="otp-link" onclick="showOtp(false)">← Back to password</div>
     </form>
 
     <!-- REGISTER -->
@@ -395,6 +415,64 @@ body::before {
       showErr('err-login', err.message);
       btn.disabled = false; btn.textContent = 'Sign in';
     }
+  }
+
+  let otpStep = 'email', otpTimer = null;
+  function showOtp(on) {
+    document.getElementById('form-login').classList.toggle('active', !on);
+    document.getElementById('form-otp').classList.toggle('active', on);
+    document.getElementById('form-title').textContent = on ? 'Sign in with code' : 'Welcome back';
+    document.getElementById('form-sub').textContent = on ? 'We will email you a 6-digit code' : 'Sign in to your workspace';
+    if (on && document.getElementById('l-email').value) document.getElementById('o-email').value = document.getElementById('l-email').value;
+  }
+  function otpResend() { otpStep = 'email'; otpSubmit(new Event('submit')); }
+  async function otpSubmit(e) {
+    e.preventDefault(); hideErr('err-otp');
+    const btn = document.getElementById('btn-otp');
+    const email = document.getElementById('o-email').value.trim();
+    if (!email) return;
+    btn.disabled = true;
+    try {
+      if (otpStep === 'email') {
+        btn.textContent = 'Sending...';
+        const res = await fetch('/api/auth/otp/send', {
+          method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        otpStep = 'code';
+        document.getElementById('o-code-field').style.display = 'block';
+        document.getElementById('o-email').readOnly = true;
+        document.getElementById('o-code').focus();
+        btn.textContent = 'Verify code';
+        const rs = document.getElementById('otp-resend');
+        rs.style.display = 'block'; rs.style.opacity = '0.35'; rs.style.pointerEvents = 'none';
+        let left = 30;
+        clearInterval(otpTimer);
+        otpTimer = setInterval(() => {
+          left--;
+          rs.textContent = left > 0 ? `Resend code (${left}s)` : 'Resend code';
+          if (left <= 0) { clearInterval(otpTimer); rs.style.opacity = ''; rs.style.pointerEvents = ''; }
+        }, 1000);
+      } else {
+        btn.textContent = 'Verifying...';
+        const res = await fetch('/api/auth/otp/verify', {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ email, code: document.getElementById('o-code').value.trim() })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        localStorage.setItem('crm_token', data.token);
+        localStorage.setItem('crm_user', JSON.stringify(data.user));
+        localStorage.setItem('reloxy_email', data.user.email);
+        window.location.href = '/app';
+        return;
+      }
+    } catch (err) {
+      showErr('err-otp', err.message);
+      btn.textContent = otpStep === 'email' ? 'Send code' : 'Verify code';
+    }
+    btn.disabled = false;
   }
 
   async function register(e) {

@@ -9,6 +9,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const nodemailer = require('nodemailer');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
@@ -211,6 +212,14 @@ async function initDB() {
     `ALTER TABLE users ADD COLUMN plan TEXT DEFAULT 'free'`,
     `ALTER TABLE users ADD COLUMN trial_ends_at TEXT DEFAULT NULL`,
     `ALTER TABLE users ADD COLUMN plan_expires_at TEXT DEFAULT NULL`,
+    `CREATE TABLE IF NOT EXISTS otp_codes (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      email TEXT NOT NULL,
+      code_hash TEXT NOT NULL,
+      attempts INTEGER DEFAULT 0,
+      expires_at TEXT NOT NULL,
+      created_at TEXT DEFAULT (datetime('now'))
+    )`,
     `CREATE TABLE IF NOT EXISTS ai_usage (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id INTEGER NOT NULL,
@@ -358,6 +367,72 @@ async function handleLogin(req, res) {
 
 app.post('/api/auth/register', authLimiter, handleRegister);
 app.post('/api/auth/login',    authLimiter, handleLogin);
+
+// ─── Email OTP login ──────────────────────────────────────────────────────────
+const SMTP_USER = process.env.SMTP_USER || '';
+const SMTP_PASS = process.env.SMTP_PASS || '';
+const mailer = SMTP_USER ? nodemailer.createTransport({ service: 'gmail', auth: { user: SMTP_USER, pass: SMTP_PASS } }) : null;
+const otpHash = (email, code) => crypto.createHmac('sha256', JWT_SECRET).update(email.toLowerCase() + ':' + code).digest('hex');
+
+app.post('/api/auth/otp/send', authLimiter, async (req, res) => {
+  try {
+    if (!mailer) return res.status(503).json({ error: 'Email sign-in is not configured yet' });
+    const email = String(req.body.email || '').trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return res.status(400).json({ error: 'Invalid email' });
+    const code = String(Math.floor(100000 + Math.random() * 900000));
+    const expires = new Date(Date.now() + 10 * 60 * 1000).toISOString();
+    await db.execute({ sql: 'DELETE FROM otp_codes WHERE email = ?', args: [email] });
+    await db.execute({ sql: 'INSERT INTO otp_codes (email, code_hash, expires_at) VALUES (?,?,?)', args: [email, otpHash(email, code), expires] });
+    await mailer.sendMail({
+      from: `"Reloxy" <${SMTP_USER}>`,
+      to: email,
+      subject: `${code} — your Reloxy sign-in code`,
+      text: `Your Reloxy sign-in code: ${code}\n\nIt is valid for 10 minutes. If you didn't request it, just ignore this email.`,
+      html: `<div style="font-family:Helvetica,Arial,sans-serif;max-width:420px;margin:0 auto;padding:32px 24px;color:#1a1a1a">
+        <div style="font-size:18px;font-weight:700;margin-bottom:18px">Reloxy</div>
+        <div style="font-size:14px;color:#555;margin-bottom:22px">Your sign-in code:</div>
+        <div style="font-size:34px;font-weight:800;letter-spacing:8px;margin-bottom:22px">${code}</div>
+        <div style="font-size:12px;color:#999">Valid for 10 minutes. If you didn't request it, ignore this email.</div>
+      </div>`,
+    });
+    res.json({ ok: true });
+  } catch (e) { console.error('otp send:', e.message); res.status(500).json({ error: 'Could not send email, try again' }); }
+});
+
+app.post('/api/auth/otp/verify', authLimiter, async (req, res) => {
+  try {
+    const email = String(req.body.email || '').trim().toLowerCase();
+    const code = String(req.body.code || '').trim();
+    if (!email || !/^\d{6}$/.test(code)) return res.status(400).json({ error: 'Invalid code' });
+    const row = await db.execute({ sql: 'SELECT * FROM otp_codes WHERE email = ? ORDER BY id DESC LIMIT 1', args: [email] });
+    const otp = row.rows[0];
+    if (!otp || new Date(otp.expires_at) < new Date()) return res.status(400).json({ error: 'Code expired — request a new one' });
+    if (otp.attempts >= 5) return res.status(429).json({ error: 'Too many attempts — request a new code' });
+    if (otpHash(email, code) !== otp.code_hash) {
+      await db.execute({ sql: 'UPDATE otp_codes SET attempts = attempts + 1 WHERE id = ?', args: [otp.id] });
+      return res.status(400).json({ error: 'Wrong code' });
+    }
+    await db.execute({ sql: 'DELETE FROM otp_codes WHERE email = ?', args: [email] });
+    let result = await db.execute({ sql: 'SELECT * FROM users WHERE email = ?', args: [email] });
+    let user = result.rows[0];
+    if (!user) {
+      const role = email === process.env.ADMIN_EMAIL ? 'admin' : 'user';
+      const placeholder = await bcrypt.hash('otp_' + crypto.randomUUID(), 10);
+      const name = email.split('@')[0].replace(/[._-]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      const ins = await db.execute({
+        sql: 'INSERT INTO users (name, email, password, role, studio_name, trial_ends_at) VALUES (?,?,?,?,?,?)',
+        args: [name, email, placeholder, role, '', trialEnd()],
+      });
+      user = { id: ins.lastInsertRowid, name, email, role, plan: 'free', trial_ends_at: trialEnd() };
+      await sendTelegram(`🆕 <b>New user (email code)</b>\nName: ${tgEsc(name)}\nEmail: ${tgEsc(email)}`);
+    }
+    const token = jwt.sign(
+      { id: user.id, email: user.email, role: user.role, name: user.name, owner_id: user.owner_id || null },
+      JWT_SECRET, { expiresIn: '30d' }
+    );
+    res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role, plan: user.plan || 'free', trial_ends_at: user.trial_ends_at || null, owner_id: user.owner_id || null } });
+  } catch (e) { console.error('otp verify:', e.message); res.status(500).json({ error: 'Internal server error' }); }
+});
 
 // ─── Google OAuth (redirect flow) ────────────────────────────────────────────
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
