@@ -1123,11 +1123,10 @@ th:not(:first-child), td:not(:first-child) { padding-left:18px !important; }
 /* ══════════ /PROJECTS LIST VIEW ══════════ */
 
 /* ══════════ PRICING ══════════ */
-#plan-chip { display:none; margin:0 0 10px; padding:10px 13px; border-radius:12px;
-  background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07);
+#plan-chip { display:none; margin:0 0 8px; padding:9px 12px; border-radius:10px;
+  background:transparent; border:1px solid rgba(255,255,255,0.06);
   cursor:pointer; transition:border-color .16s ease, background .16s ease; }
-#plan-chip:hover { border-color:rgba(255,255,255,0.14); background:rgba(255,255,255,0.05); }
-#plan-chip:hover .plan-chip-arr { transform:translateX(2px); opacity:0.85; }
+#plan-chip:hover { border-color:rgba(255,255,255,0.12); background:rgba(255,255,255,0.03); }
 .plan-chip-row { display:flex; align-items:center; gap:8px; }
 .plan-ic { width:14px; height:14px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
 .plan-ic svg { width:13px; height:13px; }
@@ -1208,6 +1207,7 @@ body.plan-paid .nav-pro { display:none; }
 
 /* Topbar removed — поиск остаётся на Cmd+K */
 .topbar { display:none !important; }
+.page.active { height:100vh !important; }
 
 /* ══════════ AI ══════════ */
 .ai-fab { position:fixed; right:26px; bottom:26px; z-index:8000; width:52px; height:52px; border-radius:50%;
@@ -5196,7 +5196,7 @@ function renderPlanChip() {
     icon = `<span class="plan-ic gold">${crown}</span>`;
     name = 'Studio';
     sub = ru ? `триал · ${d} дн` : `trial · ${d}d`;
-    bar = `<div class="plan-bar"><i style="width:${Math.round(d/14*100)}%"></i></div>`;
+    bar = '';
   } else {
     const key = user?.plan || 'free';
     name = ru ? PLAN_INFO[key].ru : PLAN_INFO[key].en;
@@ -5218,8 +5218,7 @@ function renderPlanChip() {
       ${icon}
       <b class="plan-chip-name">${name}</b>
       <span class="plan-chip-sub">${sub}</span>
-      <svg class="plan-chip-arr" width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2.5 6h7M7 3.5L9.5 6 7 8.5"/></svg>
-    </div>${bar}`;
+    </div>`;
   el.style.display = 'block';
 }
 function openPricingModal(highlight) {
