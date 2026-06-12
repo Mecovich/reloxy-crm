@@ -476,8 +476,10 @@ app.get('/api/me', authMiddleware, async (req, res) => {
 });
 
 // ─── AI (OpenRouter) ──────────────────────────────────────────────────────────
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || '';
-const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'deepseek/deepseek-chat';
+// Любой OpenAI-совместимый провайдер: OpenRouter, ProxyAPI, Polza, VseGPT, DeepSeek...
+const OPENROUTER_API_KEY = process.env.AI_API_KEY || process.env.OPENROUTER_API_KEY || '';
+const OPENROUTER_MODEL = process.env.AI_MODEL || process.env.OPENROUTER_MODEL || 'deepseek/deepseek-chat';
+const AI_API_URL = process.env.AI_API_URL || 'https://openrouter.ai/api/v1/chat/completions';
 const PLAN_AI_LIMITS = { free: 0, pro: 100, studio: 1000 };
 
 async function aiCheckLimit(req, res) {
@@ -500,7 +502,7 @@ async function aiCheckLimit(req, res) {
 }
 
 async function aiCall(messages, maxTokens = 700) {
-  const r = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+  const r = await fetch(AI_API_URL, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
