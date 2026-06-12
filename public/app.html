@@ -1123,28 +1123,22 @@ th:not(:first-child), td:not(:first-child) { padding-left:18px !important; }
 /* ══════════ /PROJECTS LIST VIEW ══════════ */
 
 /* ══════════ PRICING ══════════ */
-#plan-chip { display:none; margin:0 0 10px; padding:11px 13px 12px; border-radius:14px;
-  background:linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.02));
-  border:1px solid rgba(255,255,255,0.08);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,0.05);
-  cursor:pointer; transition:border-color .18s ease, background .18s ease, transform .18s ease; }
-#plan-chip:hover { border-color:rgba(255,255,255,0.16); transform:translateY(-1px);
-  background:linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03)); }
-#plan-chip:hover .plan-chip-arr { transform:translateX(2px); opacity:0.9; }
-.plan-chip-row { display:flex; align-items:center; gap:10px; }
-.plan-ic { width:26px; height:26px; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0;
-  background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.09); }
+#plan-chip { display:none; margin:0 0 10px; padding:10px 13px; border-radius:12px;
+  background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07);
+  cursor:pointer; transition:border-color .16s ease, background .16s ease; }
+#plan-chip:hover { border-color:rgba(255,255,255,0.14); background:rgba(255,255,255,0.05); }
+#plan-chip:hover .plan-chip-arr { transform:translateX(2px); opacity:0.85; }
+.plan-chip-row { display:flex; align-items:center; gap:8px; }
+.plan-ic { width:14px; height:14px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
 .plan-ic svg { width:13px; height:13px; }
-.plan-ic.gold { color:rgba(232,200,131,0.9); }
-.plan-ic.gold svg { filter:drop-shadow(0 0 6px rgba(232,200,131,0.3)); }
-.plan-ic.dim { color:rgba(217,217,217,0.4); }
-.plan-chip-text { min-width:0; flex:1; }
-.plan-chip-text b { display:block; font-size:12px; font-weight:700; color:#EDEDED; letter-spacing:-0.2px; line-height:1.2; }
-.plan-chip-text span { display:block; font-size:10.5px; color:rgba(217,217,217,0.42); margin-top:1px; }
-.plan-chip-arr { flex-shrink:0; color:rgba(217,217,217,0.45); opacity:0.6; transition:transform .18s ease, opacity .18s ease; }
-.plan-bar { height:3px; border-radius:3px; background:rgba(255,255,255,0.07); margin-top:10px; overflow:hidden; }
-.plan-bar i { display:block; height:100%; border-radius:3px; background:linear-gradient(90deg, rgba(232,200,131,0.55), rgba(232,200,131,0.95));
-  box-shadow:0 0 8px rgba(232,200,131,0.3); transition:width .6s cubic-bezier(.16,1,.3,1); }
+.plan-ic.gold { color:rgba(232,200,131,0.75); }
+.plan-ic.dim { color:rgba(217,217,217,0.35); }
+.plan-chip-name { font-size:12px; font-weight:650; color:#EDEDED; letter-spacing:-0.2px; }
+.plan-chip-sub { margin-left:auto; font-size:10.5px; color:rgba(217,217,217,0.38); white-space:nowrap; }
+.plan-chip-arr { flex-shrink:0; color:rgba(217,217,217,0.4); opacity:0.55; transition:transform .16s ease, opacity .16s ease; }
+.plan-bar { height:2px; border-radius:2px; background:rgba(255,255,255,0.05); margin-top:9px; overflow:hidden; }
+.plan-bar i { display:block; height:100%; border-radius:2px; background:rgba(232,200,131,0.4);
+  transition:width .6s cubic-bezier(.16,1,.3,1); }
 
 /* Профиль внизу сайдбара */
 .sidebar-profile-card { background:linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.02)) !important;
@@ -1265,6 +1259,9 @@ body.plan-paid .nav-pro { display:none; }
   border:1px solid rgba(255,255,255,0.09); border-radius:9px; padding:8px 16px; cursor:pointer; font-family:inherit; }
 .ai-letter-close:hover { color:#EDEDED; }
 body.is-staff .ai-fab { display:none; }
+/* дашборд: без лишнего места внизу */
+#page-dashboard { padding-bottom:28px !important; }
+.bento-grid { margin-bottom:0 !important; }
 /* ══════════ /AI ══════════ */
 /* ══════════ /PRICING ══════════ */
 
@@ -5198,29 +5195,30 @@ function renderPlanChip() {
   if (d > 0) {
     icon = `<span class="plan-ic gold">${crown}</span>`;
     name = 'Studio';
-    sub = ru ? `Триал — ${d} ${d===1?'день':d<5?'дня':'дней'}` : `Trial — ${d} day${d===1?'':'s'} left`;
+    sub = ru ? `триал · ${d} дн` : `trial · ${d}d`;
     bar = `<div class="plan-bar"><i style="width:${Math.round(d/14*100)}%"></i></div>`;
   } else {
     const key = user?.plan || 'free';
     name = ru ? PLAN_INFO[key].ru : PLAN_INFO[key].en;
     if (key === 'free') {
       icon = `<span class="plan-ic dim"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="5.2"/></svg></span>`;
-      sub = ru ? 'Открыть Pro-функции' : 'Unlock Pro features';
+      sub = ru ? 'улучшить' : 'upgrade';
     } else {
       icon = `<span class="plan-ic gold">${crown}</span>`;
       if (user?.plan_expires_at) {
         const dt = new Date(user.plan_expires_at);
         sub = (ru ? 'до ' : 'until ') + dt.toLocaleDateString(ru?'ru-RU':'en-US', { day:'numeric', month:'short' });
       } else {
-        sub = ru ? 'Активен' : 'Active';
+        sub = ru ? 'активен' : 'active';
       }
     }
   }
   el.innerHTML = `
     <div class="plan-chip-row">
       ${icon}
-      <div class="plan-chip-text"><b>${name}</b><span>${sub}</span></div>
-      <svg class="plan-chip-arr" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2.5 6h7M7 3.5L9.5 6 7 8.5"/></svg>
+      <b class="plan-chip-name">${name}</b>
+      <span class="plan-chip-sub">${sub}</span>
+      <svg class="plan-chip-arr" width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2.5 6h7M7 3.5L9.5 6 7 8.5"/></svg>
     </div>${bar}`;
   el.style.display = 'block';
 }
