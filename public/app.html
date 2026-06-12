@@ -1124,6 +1124,47 @@ th:not(:first-child), td:not(:first-child) { padding-left:18px !important; }
 }
 /* ══════════ /PROJECTS LIST VIEW ══════════ */
 
+/* ══════════ PRICING ══════════ */
+#plan-chip { display:none; align-items:center; gap:7px; margin:0 0 10px; padding:9px 13px; border-radius:11px;
+  font-size:11px; color:rgba(217,217,217,0.5); background:rgba(255,255,255,0.035); border:1px solid rgba(255,255,255,0.08);
+  cursor:pointer; transition:border-color .15s ease, background .15s ease; }
+#plan-chip:hover { background:rgba(255,255,255,0.06); border-color:rgba(255,255,255,0.16); }
+#plan-chip b { color:#EDEDED; font-weight:700; }
+.plan-chip-up { margin-left:auto; color:rgba(237,237,237,0.75); font-weight:600; }
+.pricing-overlay { position:fixed; inset:0; z-index:9000; display:flex; align-items:center; justify-content:center;
+  background:rgba(8,8,8,0.62); backdrop-filter:blur(10px); padding:20px; }
+.pricing-modal { width:900px; max-width:96vw; max-height:92vh; overflow:auto; background:#161616;
+  border:1px solid rgba(255,255,255,0.1); border-radius:20px; padding:30px 30px 24px;
+  box-shadow:0 40px 100px -20px rgba(0,0,0,0.9); }
+.pricing-head { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:24px; }
+.pricing-title { font-size:22px; font-weight:700; color:#F0F0F0; letter-spacing:-0.5px; }
+.pricing-sub { font-size:12.5px; color:rgba(217,217,217,0.45); margin-top:4px; }
+.pricing-x { width:30px; height:30px; display:flex; align-items:center; justify-content:center; font-size:13px;
+  color:rgba(217,217,217,0.4); background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08);
+  border-radius:8px; cursor:pointer; font-family:inherit; transition:color .12s ease; }
+.pricing-x:hover { color:#EDEDED; }
+.pricing-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+.price-card { position:relative; display:flex; flex-direction:column; padding:22px 20px 20px;
+  border:1px solid rgba(255,255,255,0.08); border-radius:15px; background:rgba(255,255,255,0.02); }
+.price-card.hl { border-color:rgba(217,217,217,0.45); background:rgba(255,255,255,0.035); }
+.price-pop { position:absolute; top:-9px; left:50%; transform:translateX(-50%); font-size:9px; font-weight:700;
+  letter-spacing:0.8px; text-transform:uppercase; color:#121212; background:#D9D9D9; padding:3px 11px; border-radius:20px; }
+.price-name { font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:rgba(217,217,217,0.55); }
+.price-amount { font-size:26px; font-weight:800; color:#F0F0F0; letter-spacing:-0.8px; margin:8px 0 16px; }
+.price-feats { display:flex; flex-direction:column; gap:8px; flex:1; margin-bottom:18px; }
+.price-feat { font-size:12px; color:rgba(217,217,217,0.6); line-height:1.45; padding-left:18px; position:relative; }
+.price-feat::before { content:'✓'; position:absolute; left:0; color:rgba(237,237,237,0.5); font-size:11px; }
+.price-btn { font-size:12.5px; font-weight:700; padding:10px 16px; border-radius:10px; cursor:pointer; font-family:inherit;
+  background:rgba(255,255,255,0.05); color:#EDEDED; border:1px solid rgba(255,255,255,0.12);
+  transition:background .15s ease, transform .15s ease; }
+.price-btn:hover { background:rgba(255,255,255,0.09); }
+.price-btn.primary { background:#D9D9D9; color:#121212; border:none; }
+.price-btn.primary:hover { transform:scale(1.02); }
+.price-cur { text-align:center; font-size:12px; font-weight:600; color:rgba(217,217,217,0.5); padding:10px 0; }
+.pricing-note { font-size:11px; color:rgba(217,217,217,0.32); text-align:center; margin-top:18px; }
+@media (max-width:760px) { .pricing-grid { grid-template-columns:1fr; } }
+/* ══════════ /PRICING ══════════ */
+
 
 
 /* ══════════ TEAM REDESIGN ══════════ */
@@ -1733,6 +1774,7 @@ td { border-bottom-color:var(--line) !important; }
     </div>
   </nav>
   <div class="sidebar-profile" id="tb-user-wrap">
+    <div id="plan-chip" onclick="openPricingModal()"></div>
     <div class="sidebar-profile-card" onclick="toggleUserPopup(event)" id="tb-user-chip">
       <div class="sidebar-profile-avatar" id="popup-initials">—</div>
       <div class="sidebar-profile-text">
@@ -1964,7 +2006,7 @@ td { border-bottom-color:var(--line) !important; }
           <div class="bento-promo">
             <div class="bento-promo-eyebrow" data-i18n="dash_enterprise_plan">Enterprise Plan</div>
             <div class="bento-promo-text" data-i18n="dash_enterprise_text">Unlock advanced analytics, unlimited team seats and priority support.</div>
-            <button class="bento-promo-btn" onclick="go('settings',document.querySelectorAll('.nav-item')[7])" data-i18n="dash_upgrade_now">Upgrade Now</button>
+            <button class="bento-promo-btn" onclick="openPricingModal('studio')" data-i18n="dash_upgrade_now">Upgrade Now</button>
           </div>
         </div>
 
@@ -2617,6 +2659,20 @@ td { border-bottom-color:var(--line) !important; }
 </div>
 
 <!-- INVITE MODAL -->
+<div class="pricing-overlay" id="pricing-overlay" style="display:none" onclick="closePricingModal(event)">
+  <div class="pricing-modal">
+    <div class="pricing-head">
+      <div>
+        <div class="pricing-title">Тарифы</div>
+        <div class="pricing-sub" id="pricing-sub"></div>
+      </div>
+      <button class="pricing-x" onclick="document.getElementById('pricing-overlay').style.display='none'">✕</button>
+    </div>
+    <div class="pricing-grid" id="pricing-cards"></div>
+    <div class="pricing-note">Оплата активируется после заявки — мы свяжемся и подключим план. Триал не требует карты.</div>
+  </div>
+</div>
+
 <div class="overlay" id="invite-overlay" onclick="closeInviteModal(event)" style="display:none">
   <div class="modal" style="max-width:440px">
     <div class="modal-head">
@@ -3062,6 +3118,7 @@ async function init() {
 
   const initials = user.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
   document.getElementById('popup-initials').innerHTML = defAv();
+  renderPlanChip();
   document.getElementById('popup-name').textContent   = user.name;
   document.getElementById('popup-email').textContent  = (user.role === 'staff') ? 'Staff' : 'CEO';
 
@@ -3155,6 +3212,7 @@ const TITLES = { dashboard:'Dashboard', calendar:'Calendar', clients:'Clients', 
 function go(id, el) {
   const staffBlocked = ['finance','team','funnel'];
   if (user?.role === 'staff' && staffBlocked.includes(id)) return;
+  if (['analytics','reports'].includes(id) && user?.role !== 'staff' && planOf() === 'free') { openPricingModal('pro'); return; }
   document.querySelectorAll('.page').forEach(p => { p.classList.remove('active'); p.style.display = 'none'; });
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('settings-nav-btn')?.classList.remove('active');
@@ -4836,6 +4894,83 @@ function renderClients(list) {
 }
 
 // ─── PROJECTS ──────────────────────────────────────────────────────────────
+// ── Plans / pricing ──
+const PLAN_INFO = {
+  free:   { ru:'Старт',  en:'Start'  },
+  pro:    { ru:'Pro',    en:'Pro'    },
+  studio: { ru:'Studio', en:'Studio' },
+};
+function planOf() {
+  if (user?.trial_ends_at && new Date(user.trial_ends_at) > new Date()) return 'studio';
+  return user?.plan || 'free';
+}
+function trialDaysLeft() {
+  if (!user?.trial_ends_at) return 0;
+  const ms = new Date(user.trial_ends_at) - new Date();
+  return ms > 0 ? Math.ceil(ms / 86400000) : 0;
+}
+function renderPlanChip() {
+  const el = document.getElementById('plan-chip');
+  if (!el) return;
+  if (user?.role === 'staff') { el.style.display = 'none'; return; }
+  const ru = currentLang === 'ru';
+  const d = trialDaysLeft();
+  if (d > 0) {
+    el.innerHTML = `<b>Studio</b><span>· ${ru ? `триал ещё ${d} ${d===1?'день':d<5?'дня':'дней'}` : `trial, ${d}d left`}</span>`;
+  } else {
+    const key = user?.plan || 'free';
+    el.innerHTML = `<b>${ru ? PLAN_INFO[key].ru : PLAN_INFO[key].en}</b>${key==='free' ? `<span class="plan-chip-up">${ru?'Улучшить →':'Upgrade →'}</span>` : ''}`;
+  }
+  el.style.display = 'flex';
+}
+function openPricingModal(highlight) {
+  const ru = currentLang === 'ru';
+  const cur = planOf();
+  const onTrial = trialDaysLeft() > 0;
+  const cards = [
+    { key:'free', price:'0 ₽', feats: ru
+      ? ['Проекты, клиенты, счета, воронка','Команда до 2 человек','Базовая статистика']
+      : ['Projects, clients, invoices, pipeline','Team up to 2 people','Basic stats'] },
+    { key:'pro', price: ru?'990 ₽/мес':'₽990/mo', feats: ru
+      ? ['Всё из Старта','Команда до 7 человек','Аналитика и отчёты','Прогнозы, маржа, cash flow','100 ИИ-запросов в месяц']
+      : ['Everything in Start','Team up to 7','Analytics & reports','Forecasts, margins, cash flow','100 AI requests/mo'] },
+    { key:'studio', price: ru?'2 490 ₽/мес':'₽2,490/mo', feats: ru
+      ? ['Всё из Pro','Команда без лимита','ИИ без лимита','Недельный ИИ-дайджест в Telegram','Приоритетная поддержка']
+      : ['Everything in Pro','Unlimited team','Unlimited AI','Weekly AI digest in Telegram','Priority support'] },
+  ];
+  const hlKey = highlight || 'pro';
+  document.getElementById('pricing-sub').textContent = onTrial
+    ? (ru ? `Сейчас у вас триал Studio — осталось ${trialDaysLeft()} дн.` : `You're on a Studio trial — ${trialDaysLeft()} days left`)
+    : (ru ? 'Выберите план под размер студии' : 'Pick a plan that fits your studio');
+  document.getElementById('pricing-cards').innerHTML = cards.map(c => {
+    const isCur = !onTrial && cur === c.key;
+    const hl = hlKey === c.key;
+    return `<div class="price-card ${hl?'hl':''}">
+      ${hl ? `<div class="price-pop">${ru?'Популярный':'Popular'}</div>` : ''}
+      <div class="price-name">${ru ? PLAN_INFO[c.key].ru : PLAN_INFO[c.key].en}</div>
+      <div class="price-amount">${c.price}</div>
+      <div class="price-feats">${c.feats.map(f=>`<div class="price-feat">${f}</div>`).join('')}</div>
+      ${isCur
+        ? `<div class="price-cur">${ru?'Текущий план':'Current plan'}</div>`
+        : c.key === 'free'
+          ? `<div class="price-cur" style="opacity:0.45">${ru?'Бесплатный':'Free'}</div>`
+          : `<button class="price-btn ${hl?'primary':''}" onclick="requestUpgrade('${c.key}')">${ru?'Выбрать':'Choose'}</button>`}
+    </div>`;
+  }).join('');
+  document.getElementById('pricing-overlay').style.display = 'flex';
+}
+function closePricingModal(e) {
+  if (e && e.target !== document.getElementById('pricing-overlay')) return;
+  document.getElementById('pricing-overlay').style.display = 'none';
+}
+async function requestUpgrade(plan) {
+  try {
+    await api('POST', '/api/upgrade-request', { plan });
+    document.getElementById('pricing-overlay').style.display = 'none';
+    toast(currentLang==='ru' ? 'Заявка отправлена — свяжемся в течение дня' : 'Request sent — we will reach out today');
+  } catch (e) { toast(e.message); }
+}
+
 const DEFAULT_AVATAR = 'avatar-default.png';
 function defAv() { return `<img src="${DEFAULT_AVATAR}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;display:block;flex-shrink:0" onerror="this.style.display='none'">`; }
 
