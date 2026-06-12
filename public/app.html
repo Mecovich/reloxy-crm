@@ -5030,8 +5030,8 @@ function openPricingModal(highlight) {
   const hlKey = highlight || 'pro';
   document.getElementById('pricing-title').textContent = ru ? 'Тарифы' : 'Plans';
   document.getElementById('pricing-note').textContent = ru
-    ? 'Оплата активируется после заявки — мы свяжемся и подключим план. Триал не требует карты.'
-    : 'We will reach out and enable your plan after the request. Trial needs no card.';
+    ? 'Оплата через СБП, карты или крипту. План включается автоматически в течение минуты после оплаты.'
+    : 'Pay via SBP, card or crypto. Your plan activates automatically within a minute after payment.';
   document.getElementById('pricing-sub').textContent = onTrial
     ? (ru ? `Сейчас у вас триал Studio — осталось ${trialDaysLeft()} дн.` : `You're on a Studio trial — ${trialDaysLeft()} days left`)
     : (ru ? 'Выберите план под размер студии' : 'Pick a plan that fits your studio');
@@ -5057,10 +5057,22 @@ function closePricingModal(e) {
   document.getElementById('pricing-overlay').style.display = 'none';
 }
 async function requestUpgrade(plan) {
+  const ru = currentLang === 'ru';
+  try {
+    const d = await api('POST', '/api/billing/checkout', { plan });
+    if (d && d.pay_url) {
+      toast(ru ? 'Переходим к оплате…' : 'Redirecting to payment…');
+      window.location.href = d.pay_url;
+      return;
+    }
+  } catch (e) {
+    if (e.message !== 'billing_not_configured') { toast(e.message); return; }
+  }
+  // биллинг не настроен — отправляем заявку
   try {
     await api('POST', '/api/upgrade-request', { plan });
     document.getElementById('pricing-overlay').style.display = 'none';
-    toast(currentLang==='ru' ? 'Заявка отправлена — свяжемся в течение дня' : 'Request sent — we will reach out today');
+    toast(ru ? 'Заявка отправлена — свяжемся в течение дня' : 'Request sent — we will reach out today');
   } catch (e) { toast(e.message); }
 }
 

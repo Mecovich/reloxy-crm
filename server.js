@@ -56,7 +56,7 @@ app.use(cors({
   origin: process.env.APP_URL || 'https://reloxy.tech',
   credentials: true,
 }));
-app.use(express.json());
+app.use(express.json({ verify: (req, res, buf) => { req.rawBody = buf; } }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ─── Shared helpers ──────────────────────────────────────────────────────────
@@ -210,6 +210,17 @@ async function initDB() {
   const migrations = [
     `ALTER TABLE users ADD COLUMN plan TEXT DEFAULT 'free'`,
     `ALTER TABLE users ADD COLUMN trial_ends_at TEXT DEFAULT NULL`,
+    `ALTER TABLE users ADD COLUMN plan_expires_at TEXT DEFAULT NULL`,
+    `CREATE TABLE IF NOT EXISTS payments (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      plan TEXT NOT NULL,
+      amount TEXT NOT NULL,
+      order_id TEXT UNIQUE NOT NULL,
+      payment_id TEXT,
+      status TEXT DEFAULT 'pending',
+      created_at TEXT DEFAULT (datetime('now'))
+    )`,
     `ALTER TABLE users ADD COLUMN studio_name TEXT DEFAULT ''`,
     `ALTER TABLE clients ADD COLUMN industry TEXT DEFAULT ''`,
     `ALTER TABLE clients ADD COLUMN contact_name TEXT DEFAULT ''`,
@@ -446,15 +457,97 @@ app.get('/api/auth/google/callback', async (req, res) => {
   }
 });
 app.get('/api/auth/me', authMiddleware, async (req, res) => {
-  const result = await db.execute({ sql: 'SELECT id, name, email, role, plan, trial_ends_at, studio_name, owner_id, created_at FROM users WHERE id = ?', args: [req.user.id] });
+  const result = await db.execute({ sql: 'SELECT id, name, email, role, plan, trial_ends_at, plan_expires_at, studio_name, owner_id, created_at FROM users WHERE id = ?', args: [req.user.id] });
   res.json(result.rows[0]);
 });
 
 app.post('/api/register', authLimiter, handleRegister);
 app.post('/api/login',    authLimiter, handleLogin);
 app.get('/api/me', authMiddleware, async (req, res) => {
-  const result = await db.execute({ sql: 'SELECT id, name, email, role, plan, trial_ends_at, studio_name, owner_id, created_at FROM users WHERE id = ?', args: [req.user.id] });
+  const result = await db.execute({ sql: 'SELECT id, name, email, role, plan, trial_ends_at, plan_expires_at, studio_name, owner_id, created_at FROM users WHERE id = ?', args: [req.user.id] });
   res.json(result.rows[0]);
+});
+
+// ─── RollyPay billing ─────────────────────────────────────────────────────────
+const ROLLYPAY_API_KEY = process.env.ROLLYPAY_API_KEY || '';
+const ROLLYPAY_SIGNING_SECRET = process.env.ROLLYPAY_SIGNING_SECRET || '';
+const PLAN_PRICES = { pro: '990.00', studio: '2490.00' };
+
+app.post('/api/billing/checkout', authMiddleware, async (req, res) => {
+  try {
+    if (!ROLLYPAY_API_KEY) return res.status(503).json({ error: 'billing_not_configured' });
+    const { plan } = req.body;
+    if (!PLAN_PRICES[plan]) return res.status(400).json({ error: 'Unknown plan' });
+    const orderId = `rlx_${req.user.id}_${plan}_${Date.now()}`;
+    const rpRes = await fetch('https://rollypay.io/api/v1/payments', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-API-Key': ROLLYPAY_API_KEY,
+        'X-Nonce': crypto.randomUUID(),
+      },
+      body: JSON.stringify({
+        amount: PLAN_PRICES[plan],
+        payment_currency: 'RUB',
+        order_id: orderId,
+        description: `Reloxy ${plan === 'pro' ? 'Pro' : 'Studio'} — 30 days`,
+      }),
+    });
+    const data = await rpRes.json();
+    if (!rpRes.ok || !data.pay_url) {
+      console.error('RollyPay error:', data);
+      return res.status(502).json({ error: 'Payment provider error' });
+    }
+    await db.execute({
+      sql: 'INSERT INTO payments (user_id, plan, amount, order_id, payment_id, status) VALUES (?, ?, ?, ?, ?, ?)',
+      args: [req.user.id, plan, PLAN_PRICES[plan], orderId, data.payment_id || data.id || null, 'pending'],
+    });
+    res.json({ pay_url: data.pay_url });
+  } catch (e) {
+    console.error('checkout error:', e.message);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+function verifyRollypaySignature(rawBody, timestamp, signature) {
+  if (!signature || !timestamp || !rawBody) return false;
+  try {
+    const expected = crypto.createHmac('sha256', ROLLYPAY_SIGNING_SECRET)
+      .update(timestamp + '.' + rawBody.toString('utf8')).digest('hex');
+    return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(signature));
+  } catch { return false; }
+}
+
+app.post('/api/billing/webhook', async (req, res) => {
+  if (!verifyRollypaySignature(req.rawBody, req.headers['x-timestamp'], req.headers['x-signature'])) {
+    return res.status(403).send('Invalid signature');
+  }
+  try {
+    const ev = req.body;
+    if (ev.event_type === 'payment.paid' && ev.order_id) {
+      const payRow = await db.execute({ sql: 'SELECT * FROM payments WHERE order_id = ?', args: [ev.order_id] });
+      const pay = payRow.rows[0];
+      if (pay && pay.status !== 'paid') {
+        const expires = new Date(); expires.setDate(expires.getDate() + 31);
+        await db.execute({ sql: 'UPDATE payments SET status=?, payment_id=? WHERE order_id=?', args: ['paid', ev.payment_id || pay.payment_id, ev.order_id] });
+        await db.execute({ sql: 'UPDATE users SET plan=?, plan_expires_at=? WHERE id=?', args: [pay.plan, expires.toISOString(), pay.user_id] });
+        await sendTelegram(`✅ <b>Оплата тарифа</b>\nUser ID: ${pay.user_id}\nПлан: ${tgEsc(pay.plan)}\nСумма: ${tgEsc(String(ev.amount || pay.amount))} ₽`);
+      }
+    }
+    if ((ev.event_type === 'payment.refunded' || ev.event_type === 'payment.chargeback') && ev.order_id) {
+      const payRow = await db.execute({ sql: 'SELECT * FROM payments WHERE order_id = ?', args: [ev.order_id] });
+      const pay = payRow.rows[0];
+      if (pay) {
+        await db.execute({ sql: 'UPDATE payments SET status=? WHERE order_id=?', args: [String(ev.status || 'refunded'), ev.order_id] });
+        await db.execute({ sql: 'UPDATE users SET plan=?, plan_expires_at=NULL WHERE id=?', args: ['free', pay.user_id] });
+        await sendTelegram(`⚠️ <b>Возврат/чарджбек</b>\nUser ID: ${pay.user_id}\nПлан снят.`);
+      }
+    }
+    res.status(200).send('OK');
+  } catch (e) {
+    console.error('webhook error:', e.message);
+    res.status(200).send('OK'); // 2xx, чтобы RollyPay не ретраил вечно; ошибка в логах
+  }
 });
 
 app.post('/api/upgrade-request', authMiddleware, async (req, res) => {
@@ -472,9 +565,10 @@ function ownerId(req)  { return req.user.owner_id || req.user.id; }
 const PLAN_STAFF_LIMITS = { free: 2, pro: 7, studio: Infinity };
 function trialEnd() { const d = new Date(); d.setDate(d.getDate() + 14); return d.toISOString(); }
 async function getEffectivePlan(userId) {
-  const r = await db.execute({ sql: 'SELECT plan, trial_ends_at FROM users WHERE id = ?', args: [userId] });
+  const r = await db.execute({ sql: 'SELECT plan, trial_ends_at, plan_expires_at FROM users WHERE id = ?', args: [userId] });
   const u = r.rows[0] || {};
   if (u.trial_ends_at && new Date(u.trial_ends_at) > new Date()) return 'studio';
+  if (u.plan && u.plan !== 'free' && u.plan_expires_at && new Date(u.plan_expires_at) < new Date()) return 'free';
   return u.plan || 'free';
 }
 function isStaff(req)  { return req.user.role === 'staff'; }
