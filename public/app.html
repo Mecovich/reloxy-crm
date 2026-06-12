@@ -1179,8 +1179,8 @@ body { background:#0E0E0E !important; }
 body::before { content:''; position:fixed; inset:0; z-index:0; pointer-events:none;
   background:radial-gradient(1000px 540px at 50% -12%, rgba(255,255,255,0.045), transparent 62%),
              radial-gradient(800px 600px at 88% 112%, rgba(255,255,255,0.022), transparent 58%); }
-.sidebar, .main { position:relative; z-index:1; }
-.sidebar { background:transparent; }
+.main { position:relative; z-index:1; }
+.sidebar { background:transparent; z-index:100; }
 
 /* Boot veil — instant feedback, no frozen feel */
 #boot-veil { position:fixed; inset:0; z-index:99999; display:flex; align-items:center; justify-content:center;
