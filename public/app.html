@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script async src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" onload="try{ if (typeof renderDashboard==='function' && window.__appReady) renderDashboard(); }catch(e){}"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; overflow-anchor: none; }
 :root {
@@ -1776,6 +1776,7 @@ td { border-bottom-color:var(--line) !important; }
 </head>
 <body>
 <div id="boot-veil"><div class="boot-spin"></div></div>
+<script>setTimeout(function(){ var v=document.getElementById('boot-veil'); if(v){ v.classList.add('off'); setTimeout(function(){ v.remove(); }, 450); } }, 5000);</script>
 <div id="atmosphere"></div>
 <aside class="sidebar">
   <div class="brand">
@@ -3211,10 +3212,14 @@ async function init() {
   if (addBtnInit) addBtnInit.style.display = 'none';
 
   applyStaffMode();
+  hideBootVeil();
+  window.__appReady = 1;
   await loadAll();
   applyLang(currentLang);
-  const _veil = document.getElementById('boot-veil');
-  if (_veil) { _veil.classList.add('off'); setTimeout(() => _veil.remove(), 450); }
+}
+function hideBootVeil() {
+  const v = document.getElementById('boot-veil');
+  if (v) { v.classList.add('off'); setTimeout(() => v.remove(), 450); }
 }
 
 // ── Staff role restrictions ──────────────────────────────────────
@@ -3692,6 +3697,7 @@ function drawRevenueChart(period) {
 
   const canvas = document.getElementById('revenue-chart');
   if (!canvas) return;
+  if (typeof Chart === 'undefined') return; // chart lib not loaded yet — onload колбэк дорисует
   if (revenueChartInstance) { revenueChartInstance.destroy(); revenueChartInstance = null; }
 
   const ctx = canvas.getContext('2d');
@@ -4775,7 +4781,7 @@ function renderReports() {
   });
   const months = Object.keys(byMonth).sort().slice(-6);
   const ctx = document.getElementById('rep-chart');
-  if (ctx) {
+  if (ctx && typeof Chart !== 'undefined') {
     if (repChart) { repChart.destroy(); repChart = null; }
     repChart = new Chart(ctx, {
       type:'bar',
@@ -6470,7 +6476,7 @@ document.addEventListener('click', e => {
   }
 });
 
-if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+init();
 
 // ── SPOTLIGHT CARDS ─────────────────────────────────────────────
 function bindSpotlightCards() {
