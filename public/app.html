@@ -2000,10 +2000,8 @@ td { border-bottom-color:var(--line) !important; }
 #user-popup #plan-chip:hover .plan-ic { opacity:0.85; }
 #user-popup #plan-chip .plan-ic svg { width:15px !important; height:15px !important; }
 #user-popup #plan-chip .plan-chip-name { font-size:13px !important; font-weight:400 !important; color:inherit !important; letter-spacing:0 !important; }
-/* — "upgrade" as a quiet pill — */
-#user-popup #plan-chip .plan-chip-sub { margin-left:auto !important; font-size:9.5px !important; font-weight:600 !important; letter-spacing:0.4px !important; text-transform:uppercase !important;
-  color:rgba(237,237,237,0.55) !important; background:rgba(255,255,255,0.06) !important; border:1px solid rgba(255,255,255,0.08) !important; padding:2px 8px !important; border-radius:20px !important; }
-#user-popup #plan-chip:hover .plan-chip-sub { color:rgba(237,237,237,0.8) !important; border-color:rgba(255,255,255,0.14) !important; }
+/* upgrade label/status removed from the menu */
+#user-popup #plan-chip .plan-chip-sub { display:none !important; }
 #user-popup #plan-chip .plan-bar { display:none !important; }
 /* hide the trailing divider when the chip is hidden (e.g. staff) */
 #plan-chip[style*="display: none"] + #plan-chip-divider { display:none !important; }
