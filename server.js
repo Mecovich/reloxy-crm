@@ -335,6 +335,7 @@ async function handleRegister(req, res) {
     );
 
     await sendTelegram(`🆕 <b>New user</b>\nName: ${tgEsc(name)}\nEmail: ${tgEsc(email)}`);
+    sendWelcomeEmail(email, name);
 
     res.json({ token, user: { id: result.lastInsertRowid, name, email, role, plan: 'free', trial_ends_at: trialEnd(), studioName: studioName || '' } });
   } catch (e) {
@@ -373,6 +374,63 @@ const SMTP_USER = process.env.SMTP_USER || '';
 const SMTP_PASS = process.env.SMTP_PASS || '';
 const mailer = SMTP_USER ? nodemailer.createTransport({ service: 'gmail', auth: { user: SMTP_USER, pass: SMTP_PASS } }) : null;
 const otpHash = (email, code) => crypto.createHmac('sha256', JWT_SECRET).update(email.toLowerCase() + ':' + code).digest('hex');
+
+async function sendWelcomeEmail(email, name) {
+  if (!mailer) return;
+  const first = (name || '').split(' ')[0] || 'there';
+  try {
+    await mailer.sendMail({
+      from: `"Reloxy" <${SMTP_USER}>`,
+      to: email,
+      subject: 'Welcome to Reloxy — your studio workspace is ready',
+      text: `Hi ${first}!\n\nYour Reloxy workspace is ready: projects, clients, invoices and team — all in one place.\nYour 14-day Studio trial is already on: forecasts, analytics and the AI assistant are unlocked.\n\nOpen your workspace: https://reloxy.tech/app\n\n— Reloxy`,
+      html: `
+<table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#0E0E0E" style="background-color:#0E0E0E;padding:40px 16px">
+  <tr><td align="center">
+    <table width="520" cellpadding="0" cellspacing="0" border="0" style="max-width:520px;width:100%">
+      <tr><td align="center" style="padding-bottom:28px">
+        <span style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:20px;font-weight:700;color:#EDEDED;letter-spacing:-0.5px">Reloxy</span>
+      </td></tr>
+      <tr><td bgcolor="#161616" style="background-color:#161616;border:1px solid #262626;border-radius:18px;padding:40px 36px">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr><td align="center" style="padding-bottom:24px">
+            <img src="https://www.reloxy.tech/avatar-default.png" width="84" height="84" alt="" style="border-radius:50%;display:block">
+          </td></tr>
+          <tr><td align="center" style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:24px;font-weight:800;color:#F0F0F0;letter-spacing:-0.6px;padding-bottom:10px">
+            Welcome, ${first}!
+          </td></tr>
+          <tr><td align="center" style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:14px;line-height:22px;color:#8a8a8a;padding-bottom:28px">
+            Your studio workspace is ready — projects, clients,<br>invoices and team in one clean place.
+          </td></tr>
+          <tr><td style="padding-bottom:28px">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top:1px solid #242424">
+              <tr><td style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:13px;color:#bbbbbb;padding:13px 4px;border-bottom:1px solid #242424">
+                <span style="color:#EDEDED;font-weight:600">✓&nbsp; Kanban projects</span> &nbsp;<span style="color:#777">— drag, drop, done</span>
+              </td></tr>
+              <tr><td style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:13px;color:#bbbbbb;padding:13px 4px;border-bottom:1px solid #242424">
+                <span style="color:#EDEDED;font-weight:600">✓&nbsp; Invoices &amp; pipeline</span> &nbsp;<span style="color:#777">— money under control</span>
+              </td></tr>
+              <tr><td style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:13px;color:#bbbbbb;padding:13px 4px">
+                <span style="color:#E8C883;font-weight:600">♛&nbsp; Studio trial — 14 days</span> &nbsp;<span style="color:#777">— AI assistant &amp; analytics unlocked</span>
+              </td></tr>
+            </table>
+          </td></tr>
+          <tr><td align="center">
+            <a href="https://reloxy.tech/app" style="display:inline-block;background-color:#D9D9D9;color:#121212;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:14px;font-weight:700;text-decoration:none;padding:13px 34px;border-radius:11px">
+              Open your workspace
+            </a>
+          </td></tr>
+        </table>
+      </td></tr>
+      <tr><td align="center" style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:11px;color:#555;padding-top:22px;line-height:17px">
+        You're receiving this email because you signed up at reloxy.tech<br>© 2026 Reloxy
+      </td></tr>
+    </table>
+  </td></tr>
+</table>`,
+    });
+  } catch (e) { console.error('welcome email:', e.message); }
+}
 
 app.post('/api/auth/otp/send', authLimiter, async (req, res) => {
   try {
@@ -425,6 +483,7 @@ app.post('/api/auth/otp/verify', authLimiter, async (req, res) => {
       });
       user = { id: ins.lastInsertRowid, name, email, role, plan: 'free', trial_ends_at: trialEnd() };
       await sendTelegram(`🆕 <b>New user (email code)</b>\nName: ${tgEsc(name)}\nEmail: ${tgEsc(email)}`);
+      sendWelcomeEmail(email, name);
     }
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role, name: user.name, owner_id: user.owner_id || null },
@@ -511,6 +570,7 @@ app.get('/api/auth/google/callback', async (req, res) => {
       });
       user = { id: ins.lastInsertRowid, name, email, role, plan: 'free', trial_ends_at: trialEnd() };
       await sendTelegram(`🆕 <b>New Google user</b>\nName: ${tgEsc(name)}\nEmail: ${tgEsc(email)}`);
+      sendWelcomeEmail(email, name);
     } else if (!user.google_id) {
       await db.execute({ sql: 'UPDATE users SET google_id = ? WHERE id = ?', args: [googleId, user.id] });
     }
