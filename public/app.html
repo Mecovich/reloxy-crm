@@ -1977,14 +1977,33 @@ td { border-bottom-color:var(--line) !important; }
 /* ══════════════════ /PROJECTS — MINIMAL REFINEMENT ══════════════════ */
 
 /* ══════════════════ PLAN CHIP MOVED INTO ACCOUNT MENU ══════════════════ */
-#user-popup #plan-chip { margin:0 !important; padding:9px 16px !important; border-radius:0 !important; background:transparent !important; color:var(--g1); cursor:pointer; transition:background .1s ease, color .1s ease; }
-#user-popup #plan-chip:hover { background:rgba(255,255,255,0.05) !important; color:var(--white); }
+/* — Menu container — */
+#user-popup { width:238px !important; border-radius:14px !important; border:1px solid rgba(255,255,255,0.08) !important;
+  background:rgba(20,20,20,0.92) !important; backdrop-filter:blur(40px) saturate(1.2) !important; -webkit-backdrop-filter:blur(40px) saturate(1.2) !important;
+  box-shadow:0 14px 44px rgba(0,0,0,0.62), 0 2px 10px rgba(0,0,0,0.4) !important; overflow:hidden !important; }
+#user-popup .user-popup-list { padding:6px !important; }
+
+/* — Menu rows: inset rounded highlight — */
+#user-popup .user-popup-item { margin:1px 0 !important; padding:9px 11px !important; border-radius:9px !important; font-size:13px !important; gap:11px !important; color:var(--g1) !important; transition:background .12s ease, color .12s ease !important; }
+#user-popup .user-popup-item:hover { background:rgba(255,255,255,0.06) !important; color:#EDEDED !important; }
+#user-popup .user-popup-item.danger { color:#f87171 !important; }
+#user-popup .user-popup-item.danger:hover { background:rgba(248,113,113,0.1) !important; color:#f87171 !important; }
+#user-popup .user-popup-item svg { opacity:0.5 !important; }
+#user-popup .user-popup-item:hover svg { opacity:0.85 !important; }
+#user-popup .user-popup-divider { margin:5px 9px !important; background:rgba(255,255,255,0.06) !important; }
+
+/* — Plans row: same shape as menu rows — */
+#user-popup #plan-chip { margin:1px 0 !important; padding:9px 11px !important; border-radius:9px !important; background:transparent !important; color:var(--g1); cursor:pointer; transition:background .12s ease, color .12s ease; }
+#user-popup #plan-chip:hover { background:rgba(255,255,255,0.06) !important; color:#EDEDED; }
 #user-popup #plan-chip .plan-chip-row { display:flex; align-items:center; gap:11px; }
-#user-popup #plan-chip .plan-ic { width:15px !important; height:15px !important; color:inherit !important; opacity:0.45; transition:opacity .1s ease; }
-#user-popup #plan-chip:hover .plan-ic { opacity:0.8; }
+#user-popup #plan-chip .plan-ic { width:15px !important; height:15px !important; color:inherit !important; opacity:0.5; transition:opacity .12s ease; }
+#user-popup #plan-chip:hover .plan-ic { opacity:0.85; }
 #user-popup #plan-chip .plan-ic svg { width:15px !important; height:15px !important; }
 #user-popup #plan-chip .plan-chip-name { font-size:13px !important; font-weight:400 !important; color:inherit !important; letter-spacing:0 !important; }
-#user-popup #plan-chip .plan-chip-sub { margin-left:auto !important; font-size:11px !important; font-weight:400 !important; color:rgba(217,217,217,0.38) !important; }
+/* — "upgrade" as a quiet pill — */
+#user-popup #plan-chip .plan-chip-sub { margin-left:auto !important; font-size:9.5px !important; font-weight:600 !important; letter-spacing:0.4px !important; text-transform:uppercase !important;
+  color:rgba(237,237,237,0.55) !important; background:rgba(255,255,255,0.06) !important; border:1px solid rgba(255,255,255,0.08) !important; padding:2px 8px !important; border-radius:20px !important; }
+#user-popup #plan-chip:hover .plan-chip-sub { color:rgba(237,237,237,0.8) !important; border-color:rgba(255,255,255,0.14) !important; }
 #user-popup #plan-chip .plan-bar { display:none !important; }
 /* hide the trailing divider when the chip is hidden (e.g. staff) */
 #plan-chip[style*="display: none"] + #plan-chip-divider { display:none !important; }
