@@ -386,7 +386,12 @@ app.post('/api/auth/login',    authLimiter, handleLogin);
 // ─── Email OTP login ──────────────────────────────────────────────────────────
 const SMTP_USER = process.env.SMTP_USER || '';
 const SMTP_PASS = process.env.SMTP_PASS || '';
-const mailer = SMTP_USER ? nodemailer.createTransport({ service: 'gmail', auth: { user: SMTP_USER, pass: SMTP_PASS } }) : null;
+const SMTP_HOST = process.env.SMTP_HOST || 'smtp.gmail.com';
+const SMTP_PORT = Number(process.env.SMTP_PORT || 465);
+const mailer = SMTP_USER ? nodemailer.createTransport({
+  host: SMTP_HOST, port: SMTP_PORT, secure: SMTP_PORT === 465,
+  auth: { user: SMTP_USER, pass: SMTP_PASS },
+}) : null;
 const otpHash = (email, code) => crypto.createHmac('sha256', JWT_SECRET).update(email.toLowerCase() + ':' + code).digest('hex');
 
 app.post('/api/auth/otp/send', authLimiter, async (req, res) => {
