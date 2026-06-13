@@ -5569,10 +5569,10 @@ function openPricingModal(highlight) {
     { key:'free', price:'0', per:'', feats: ru
       ? ['Проекты, клиенты, счета, воронка','Команда до 2 человек','Базовая статистика']
       : ['Projects, clients, invoices, pipeline','Team up to 2 people','Basic stats'] },
-    { key:'pro', price:'990', per: ru?'/мес':'/mo', feats: ru
+    { key:'pro', price:'19', per: ru?'/мес':'/mo', feats: ru
       ? ['Всё из Старта','Команда до 7 человек','Аналитика и отчёты','Прогнозы, маржа, cash flow','100 ИИ-запросов в месяц']
       : ['Everything in Start','Team up to 7','Analytics & reports','Forecasts, margins, cash flow','100 AI requests/mo'] },
-    { key:'studio', price:'2 490', per: ru?'/мес':'/mo', feats: ru
+    { key:'studio', price:'49', per: ru?'/мес':'/mo', feats: ru
       ? ['Всё из Pro','Команда без лимита','ИИ без лимита','Недельный ИИ-дайджест в Telegram','Приоритетная поддержка']
       : ['Everything in Pro','Unlimited team','Unlimited AI','Weekly AI digest in Telegram','Priority support'] },
   ];
@@ -5590,7 +5590,7 @@ function openPricingModal(highlight) {
     return `<div class="price-card ${hl?'hl':''}">
       ${hl ? `<div class="price-pop">${ru?'Популярный':'Popular'}</div>` : ''}
       <div class="price-name">${c.key==='studio' ? '<span class=\"pc-crown\"><svg viewBox=\"0 0 14 14\" fill=\"currentColor\"><path d=\"M1.6 4.2l2.6 2.4L7 2.6l2.8 4 2.6-2.4-1 6.2H2.6l-1-6.2zm1.2 7.4h8.4v1.2H2.8v-1.2z\"/></svg></span>' : ''}${ru ? PLAN_INFO[c.key].ru : PLAN_INFO[c.key].en}</div>
-      <div class="price-amount"><span class="price-sym">₽</span>${c.price}${c.per ? `<span class="price-per">${c.per}</span>` : ''}</div>
+      <div class="price-amount"><span class="price-sym">$</span>${c.price}${c.per ? `<span class="price-per">${c.per}</span>` : ''}</div>
       <div class="price-feats">${c.feats.map(f=>`<div class="price-feat">${f}</div>`).join('')}</div>
       ${isCur
         ? `<div class="price-cur">${ru?'Текущий план':'Current plan'}</div>`
