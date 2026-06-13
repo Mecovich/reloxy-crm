@@ -3534,7 +3534,9 @@ async function init() {
   document.getElementById('popup-initials').innerHTML = defAv();
   renderPlanChip();
   document.getElementById('popup-name').textContent   = user.name;
-  document.getElementById('popup-email').textContent  = (user.role === 'staff') ? 'Staff' : 'CEO';
+  const _planKey = planOf();
+  const _planName = PLAN_INFO[_planKey] ? (currentLang === 'ru' ? PLAN_INFO[_planKey].ru : PLAN_INFO[_planKey].en) : _planKey;
+  document.getElementById('popup-email').textContent  = (user.role === 'staff') ? 'Staff' : _planName;
 
   // Topbar user chip — just name, no avatar circle
   const tbName = document.getElementById('topbar-username');
