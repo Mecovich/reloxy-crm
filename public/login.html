@@ -197,6 +197,7 @@ body::before {
 .btn-google:hover { background:rgba(255,255,255,0.06); border-color:var(--line3); transform:translateY(-1px); }
 .btn-google svg { width:17px; height:17px; flex-shrink:0; }
 
+.otp-hint { font-size:11.5px; color:var(--g1); margin-top:7px; }
 .otp-link { margin-top:14px; text-align:center; font-size:12.5px; color:var(--g1); cursor:pointer; transition:color .12s; user-select:none; }
 .otp-link:hover { color:var(--white); }
 .otp-code-input { text-align:center; font-size:22px !important; letter-spacing:10px; font-weight:700; }
@@ -342,6 +343,11 @@ body::before {
         <label class="field-label">Password</label>
         <input class="field-input" type="password" id="r-pass" placeholder="at least 6 characters" required>
       </div>
+      <div class="field" id="r-code-field" style="display:none">
+        <label class="field-label">Code from email</label>
+        <input class="field-input otp-code-input" type="text" id="r-code" placeholder="••••••" maxlength="6" inputmode="numeric" autocomplete="one-time-code">
+        <div class="otp-hint" id="r-hint">We sent a 6-digit code to your email — enter it to finish</div>
+      </div>
       <button class="btn-primary" type="submit" id="btn-register">Create account</button>
     </form>
 
@@ -475,29 +481,48 @@ body::before {
     btn.disabled = false;
   }
 
+  let regCodeMode = false;
   async function register(e) {
     e.preventDefault(); hideErr('err-register');
     const btn = document.getElementById('btn-register');
-    btn.disabled = true; btn.textContent = 'Creating...';
+    const email = document.getElementById('r-email').value.trim();
+    btn.disabled = true; btn.textContent = regCodeMode ? 'Checking code...' : 'Creating...';
     try {
+      const body = {
+        name: document.getElementById('r-name').value,
+        email,
+        password: document.getElementById('r-pass').value,
+        studioName: document.getElementById('r-studio').value
+      };
+      const codeVal = document.getElementById('r-code').value.trim();
+      if (codeVal) body.code = codeVal;
       const res = await fetch('/api/auth/register', {
         method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({
-          name: document.getElementById('r-name').value,
-          email: document.getElementById('r-email').value,
-          password: document.getElementById('r-pass').value,
-          studioName: document.getElementById('r-studio').value
-        })
+        body: JSON.stringify(body)
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
+      if (!res.ok) {
+        if (data.error === 'email_code_required') {
+          const sr = await fetch('/api/auth/otp/send', {
+            method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email })
+          });
+          const sd = await sr.json();
+          if (!sr.ok) throw new Error(sd.error);
+          regCodeMode = true;
+          document.getElementById('r-code-field').style.display = 'block';
+          document.getElementById('r-code').focus();
+          btn.disabled = false; btn.textContent = 'Confirm code & create';
+          return;
+        }
+        throw new Error(data.error);
+      }
       localStorage.setItem('crm_token', data.token);
       localStorage.setItem('crm_user', JSON.stringify(data.user));
       localStorage.setItem('reloxy_email', data.user.email);
       window.location.href = '/app';
     } catch (err) {
       showErr('err-register', err.message);
-      btn.disabled = false; btn.textContent = 'Create account';
+      btn.disabled = false; btn.textContent = regCodeMode ? 'Confirm code & create' : 'Create account';
     }
   }
 </script>
