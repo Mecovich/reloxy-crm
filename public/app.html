@@ -1917,6 +1917,65 @@ td { border-bottom-color:var(--line) !important; }
 .bento-week-bar.peak { background:#D9D9D9; box-shadow:0 0 10px rgba(217,217,217,0.35); }
 .bento-week-bar.peak::after { content:attr(data-val); position:absolute; top:-22px; left:50%; transform:translateX(-50%); font-size:9px; font-weight:700; color:#D9D9D9; background:rgba(255,255,255,0.08); padding:2px 6px; border-radius:5px; white-space:nowrap; }
 .bento-week-lbl { font-size:10px; font-weight:700; color:rgba(217,217,217,0.40); text-transform:uppercase; }
+
+/* ══════════════════ PROJECTS — MINIMAL REFINEMENT (final pass) ══════════════════ */
+/* Board grid — more breathing room between columns */
+#page-projects .kanban { gap:30px !important; }
+
+/* Column headers — quiet, airy, lower-case labels */
+#page-projects .k-col-head { padding:0 2px 16px !important; align-items:baseline !important; }
+#page-projects .k-col-name { font-size:11.5px !important; letter-spacing:0.2px !important; font-weight:600 !important; text-transform:none !important; color:rgba(237,237,237,0.8) !important; gap:9px !important; }
+#page-projects .k-col-name::before { width:5px !important; height:5px !important; box-shadow:none !important; }
+#page-projects .k-col[data-col="inprogress"] .k-col-name::before { background:#EDEDED !important; box-shadow:none !important; }
+#page-projects .k-col-sub { display:none !important; }            /* drop per-column budget line for a cleaner head */
+#page-projects .k-col-n { color:rgba(217,217,217,0.3) !important; font-size:12px !important; font-weight:500 !important; }
+
+/* Cards — flat, roomy, one clear focus */
+#page-projects .k-cards { gap:7px !important; }
+#page-projects .k-card { padding:15px 16px 14px !important; border-radius:12px !important;
+  background:rgba(255,255,255,0.022) !important;
+  border:1px solid rgba(255,255,255,0.05) !important;
+  border-left:1px solid rgba(255,255,255,0.05) !important;
+  box-shadow:none !important; transform:none !important;
+  transition:background .15s ease, border-color .15s ease, opacity .15s ease !important; }
+#page-projects .k-card:hover { background:rgba(255,255,255,0.04) !important; border-color:rgba(255,255,255,0.12) !important; box-shadow:none !important; transform:none !important; }
+#page-projects .k-card.st-queue, #page-projects .k-card.st-inprogress,
+#page-projects .k-card.st-review, #page-projects .k-card.st-done { border-left:1px solid rgba(255,255,255,0.05) !important; }
+
+#page-projects .k-card-top { margin-bottom:13px !important; align-items:flex-start !important; }
+#page-projects .k-card-title { font-size:13.5px !important; font-weight:500 !important; line-height:1.45 !important; letter-spacing:-0.1px !important; color:#ECECEC !important; margin-bottom:0 !important; }
+
+/* Progress — hairline */
+#page-projects .k-prog-bar { height:2px !important; background:rgba(255,255,255,0.05) !important; margin-bottom:13px !important; }
+#page-projects .k-prog-fill { background:rgba(237,237,237,0.6) !important; box-shadow:none !important; }
+#page-projects .k-prog-fill.is-complete { background:#EDEDED !important; }
+
+/* Footer — flat */
+#page-projects .k-card-foot { margin-top:0 !important; }
+#page-projects .k-av { width:17px !important; height:17px !important; background:#2a2a2a !important; border:none !important; }
+#page-projects .k-budget-tag { background:transparent !important; border:none !important; padding:0 !important; font-size:11.5px !important; font-weight:600 !important; color:rgba(237,237,237,0.6) !important; }
+
+/* Deadline — plain muted text, no chip */
+#page-projects .k-dl-badge { background:transparent !important; border:none !important; padding:0 !important; font-size:10px !important; font-weight:600 !important; letter-spacing:0.2px !important; flex-shrink:0 !important; }
+
+/* Delete affordance — quiet */
+#page-projects .k-card-del { top:13px !important; right:13px !important; }
+
+/* Done cards — fade back, hide progress noise */
+#page-projects .k-card.st-done { opacity:0.42 !important; }
+#page-projects .k-card.st-done:hover { opacity:0.85 !important; }
+#page-projects .k-card.st-done .k-prog-bar { display:none !important; }
+
+/* Empty column — barely there */
+#page-projects .k-col-empty { border:1px dashed rgba(255,255,255,0.06) !important; padding:22px 10px !important; }
+
+/* List view — lighter rows, matching headers */
+#page-projects .pj-group { margin-bottom:34px !important; }
+#page-projects .pj-group-name { font-size:11.5px !important; letter-spacing:0.2px !important; text-transform:none !important; font-weight:600 !important; color:rgba(237,237,237,0.8) !important; }
+#page-projects .pj-rows { border-top:1px solid rgba(255,255,255,0.05) !important; }
+#page-projects .pj-row { padding:12px 4px !important; border-bottom:1px solid rgba(255,255,255,0.04) !important; }
+#page-projects .pj-title { font-weight:500 !important; }
+/* ══════════════════ /PROJECTS — MINIMAL REFINEMENT ══════════════════ */
 </style>
 </head>
 <body>
