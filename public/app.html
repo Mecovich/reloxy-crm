@@ -2041,6 +2041,21 @@ td { border-bottom-color:var(--line) !important; }
   #page-settings .set-nav-item { flex:1; justify-content:center; }
   #page-settings .set-section .set-fields { grid-template-columns:1fr; }
 }
+
+/* Bigger settings + billing card */
+#page-settings .set-shell { grid-template-columns:260px minmax(0,1fr) !important; gap:24px !important; }
+#page-settings .set-nav { padding:9px !important; gap:4px !important; }
+#page-settings .set-nav-item { padding:11px 14px !important; font-size:13.5px !important; }
+#page-settings .set-body { padding:26px 30px !important; }
+#page-settings .set-card-top { padding:24px 30px 6px !important; }
+#page-settings .set-section-label { font-size:17px !important; }
+#page-settings .set-section .set-fields { gap:18px 20px !important; }
+#page-settings .set-footer { padding:18px 30px !important; }
+#page-settings .set-avatar { width:80px !important; height:80px !important; font-size:24px !important; }
+#page-settings .set-billing-card { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:22px 24px; background:var(--glass-bg); border:1px solid var(--glass-border); border-radius:14px; }
+#page-settings .set-billing-label { font-size:11px; color:rgba(217,217,217,0.5); text-transform:uppercase; letter-spacing:0.6px; font-weight:600; }
+#page-settings .set-billing-plan { font-size:24px; font-weight:700; color:#EDEDED; letter-spacing:-0.5px; margin-top:5px; }
+#page-settings .set-billing-hint { font-size:12.5px; color:rgba(217,217,217,0.5); line-height:1.7; margin:16px 2px 0; }
 /* ══════════════════ /SETTINGS — FULL-WIDTH REDESIGN ══════════════════ */
 </style>
 </head>
@@ -2611,6 +2626,18 @@ td { border-bottom-color:var(--line) !important; }
             <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>
             <span data-i18n="set_nav_profile">Profile</span>
           </div>
+          <div class="set-nav-item set-picker-item" onclick="switchSetSection('notifications',this)">
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 2a4 4 0 00-4 4v3l-1.5 2h11L12 9V6a4 4 0 00-4-4z"/><path d="M6.5 13a1.5 1.5 0 003 0"/></svg>
+            <span data-i18n="set_nav_notifications">Notifications</span>
+          </div>
+          <div class="set-nav-item set-picker-item" onclick="switchSetSection('appearance',this)">
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 2a6 6 0 010 12c-1.5 0-1.5-1.5-1.5-2.5S6 9 4.5 9 2.5 8.5 2.5 7"/></svg>
+            <span data-i18n="set_nav_appearance">Appearance</span>
+          </div>
+          <div class="set-nav-item set-picker-item" onclick="switchSetSection('billing',this)">
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="12" height="8" rx="1.5"/><line x1="2" y1="7" x2="14" y2="7"/></svg>
+            <span data-i18n="set_nav_billing">Billing</span>
+          </div>
           <div class="set-nav-item set-picker-item" onclick="switchSetSection('studio',this)">
             <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="12" height="9" rx="1.5"/><path d="M5 4V3a1 1 0 011-1h4a1 1 0 011 1v1"/></svg>
             <span data-i18n="set_nav_studio">Studio</span>
@@ -2681,32 +2708,17 @@ td { border-bottom-color:var(--line) !important; }
                   <label class="set-label" data-i18n="set_email">Email</label>
                   <input class="set-input" id="set-email" disabled>
                 </div>
-                <div class="set-row">
-                  <div class="set-field">
-                    <label class="set-label" data-i18n="set_currency">Currency</label>
-                    <select class="set-input" id="set-currency">
-                      <option value="RUB">₽ Russian Ruble</option>
-                      <option value="USD">$ US Dollar</option>
-                      <option value="EUR">€ Euro</option>
-                      <option value="GBP">£ British Pound</option>
-                    </select>
-                  </div>
-                  <div class="set-field">
-                    <label class="set-label" data-i18n="set_language">Language</label>
-                    <div class="lang-switcher" id="lang-switcher">
-                      <button class="lang-btn" data-lang="en" onclick="setLang('en',this)">
-                        <span class="lang-flag">🇬🇧</span> EN
-                      </button>
-                      <button class="lang-btn" data-lang="ru" onclick="setLang('ru',this)">
-                        <span class="lang-flag">🇷🇺</span> RU
-                      </button>
-                    </div>
-                  </div>
-                </div>
               </div>
-              <div class="set-divider"></div>
-              <!-- Notification toggles -->
-              <!-- Telegram linking block -->
+            </div>
+            <div class="set-footer">
+              <span class="set-msg" id="profile-msg"></span>
+              <button class="set-save-btn" onclick="saveProfile()" data-i18n="btn_save_profile">Save profile</button>
+            </div>
+          </div>
+
+          <!-- NOTIFICATIONS SECTION -->
+          <div id="set-tab-notifications" class="set-section" style="display:none">
+            <div class="set-body">
               <div style="border:1px solid var(--line);border-radius:12px;overflow:hidden">
                 <div style="display:flex;align-items:center;gap:14px;padding:16px 18px;background:var(--s3)">
                   <div style="width:36px;height:36px;border-radius:10px;background:rgba(38,134,255,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0">
@@ -2738,9 +2750,47 @@ td { border-bottom-color:var(--line) !important; }
                 </div>
               </div>
             </div>
-            <div class="set-footer">
-              <span class="set-msg" id="profile-msg"></span>
-              <button class="set-save-btn" onclick="saveProfile()" data-i18n="btn_save_profile">Save profile</button>
+          </div>
+
+          <!-- APPEARANCE SECTION -->
+          <div id="set-tab-appearance" class="set-section" style="display:none">
+            <div class="set-body">
+              <div class="set-fields">
+                <div class="set-field">
+                  <label class="set-label" data-i18n="set_language">Language</label>
+                  <div class="lang-switcher" id="lang-switcher">
+                    <button class="lang-btn" data-lang="en" onclick="setLang('en',this)">
+                      <span class="lang-flag">🇬🇧</span> EN
+                    </button>
+                    <button class="lang-btn" data-lang="ru" onclick="setLang('ru',this)">
+                      <span class="lang-flag">🇷🇺</span> RU
+                    </button>
+                  </div>
+                </div>
+                <div class="set-field">
+                  <label class="set-label" data-i18n="set_currency">Currency</label>
+                  <select class="set-input" id="set-currency" onchange="setCurrency(this.value)">
+                    <option value="RUB">₽ Russian Ruble</option>
+                    <option value="USD">$ US Dollar</option>
+                    <option value="EUR">€ Euro</option>
+                    <option value="GBP">£ British Pound</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- BILLING SECTION -->
+          <div id="set-tab-billing" class="set-section" style="display:none">
+            <div class="set-body">
+              <div class="set-billing-card">
+                <div class="set-billing-info">
+                  <div class="set-billing-label" data-i18n="set_current_plan">Current plan</div>
+                  <div class="set-billing-plan" id="set-plan-name">—</div>
+                </div>
+                <button class="set-save-btn" onclick="openPricingModal()" data-i18n="btn_change_plan">Change plan</button>
+              </div>
+              <p class="set-billing-hint" data-i18n="set_billing_hint">Manage your subscription and unlock more features for your studio.</p>
             </div>
           </div>
 
@@ -2837,43 +2887,6 @@ td { border-bottom-color:var(--line) !important; }
             </div>
           </div>
 
-          <!-- TELEGRAM SECTION -->
-          <div id="set-tab-telegram" class="set-section" style="display:none">
-            <div class="set-body">
-              <div style="display:flex;align-items:center;gap:16px;padding:20px;background:var(--s2);border:1px solid var(--line);border-radius:12px;margin-bottom:16px">
-                <div style="width:44px;height:44px;border-radius:12px;background:var(--s3);border:1px solid var(--line2);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-                  <svg width="22" height="22" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.7"><path d="M14.5 2L1.5 6.5l4 1.5 1.5 5 2-2.5 3.5 2.5L14.5 2z"/></svg>
-                </div>
-                <div>
-                  <div style="font-size:14px;font-weight:600;color:var(--white);margin-bottom:3px">Telegram Notifications</div>
-                  <div style="font-size:12px;color:var(--g1)" id="tg-status-text">Not connected</div>
-                </div>
-                <div style="margin-left:auto">
-                  <span id="tg-status-badge" style="font-size:11px;padding:3px 10px;border-radius:20px;background:var(--s3);border:1px solid var(--line2);color:var(--g2)">●  Disconnected</span>
-                </div>
-              </div>
-              <div id="tg-connect-block">
-                <div style="font-size:13px;color:var(--g1);margin-bottom:14px;line-height:1.7">
-                  Connect Telegram to receive notifications when projects are assigned to you, deadlines approach, or invoices are created.
-                </div>
-                <div style="background:var(--s2);border:1px solid var(--line2);border-radius:12px;padding:16px 20px;margin-bottom:16px">
-                  <div style="font-size:11.5px;color:var(--g2);margin-bottom:8px;font-weight:500;text-transform:uppercase;letter-spacing:0.3px">Your link code</div>
-                  <div style="display:flex;align-items:center;gap:12px">
-                    <div id="tg-code-display" style="font-size:28px;font-weight:800;letter-spacing:4px;color:var(--white);font-variant-numeric:tabular-nums">——</div>
-                    <button class="btn btn-ghost" onclick="loadTgCode()" style="font-size:12px">Refresh</button>
-                  </div>
-                </div>
-                <div style="font-size:13px;color:var(--g1);line-height:1.8">
-                  1. Open <a href="https://t.me/ReloxyCRMBot" target="_blank" style="color:var(--white);text-decoration:underline">@ReloxyCRMBot</a> in Telegram<br>
-                  2. Send: <code style="background:var(--s3);padding:2px 8px;border-radius:5px;color:var(--white);font-size:13px">/start <span id="tg-code-inline">YOUR_CODE</span></code>
-                </div>
-              </div>
-              <div id="tg-connected-block" style="display:none">
-                <div style="font-size:13px;color:var(--g1);margin-bottom:16px">Your account is linked. You will receive notifications in Telegram.</div>
-                <button class="btn btn-ghost" onclick="unlinkTelegram()" style="font-size:12px;color:#f87171;border-color:rgba(248,113,113,0.3)">Disconnect Telegram</button>
-              </div>
-            </div>
-          </div>
 
         </div>
        </div>
@@ -3228,6 +3241,7 @@ const TRANS = {
     search_word:'Search',
     nav_finance:'Finance', nav_settings:'Settings', sign_out:'Sign out',
     set_nav_profile:'Profile', set_nav_studio:'Studio', set_nav_security:'Security', set_nav_goal:'Revenue Goal',
+    set_nav_notifications:'Notifications', set_nav_appearance:'Appearance', set_nav_billing:'Billing', set_current_plan:'Current plan', btn_change_plan:'Change plan', set_billing_hint:'Manage your subscription and unlock more features for your studio.',
     search_ph:'Search analytics, projects, users...', btn_add:'+ Add new',
     page_dashboard:'Dashboard', page_calendar:'Calendar', page_clients:'Clients',
     page_projects:'Projects', page_pipeline:'Pipeline', page_team:'Team',
@@ -3371,6 +3385,7 @@ const TRANS = {
     search_word:'Поиск',
     nav_finance:'Финансы', nav_settings:'Настройки', sign_out:'Выйти',
     set_nav_profile:'Профиль', set_nav_studio:'Студия', set_nav_security:'Безопасность', set_nav_goal:'Цель по доходу',
+    set_nav_notifications:'Уведомления', set_nav_appearance:'Оформление', set_nav_billing:'Тариф', set_current_plan:'Текущий тариф', btn_change_plan:'Сменить тариф', set_billing_hint:'Управляйте подпиской и открывайте больше возможностей для студии.',
     search_ph:'Поиск по аналитике, проектам, пользователям...', btn_add:'+ Добавить',
     page_dashboard:'Дашборд', page_calendar:'Календарь', page_clients:'Клиенты',
     page_projects:'Проекты', page_pipeline:'Воронка', page_team:'Команда',
@@ -3537,6 +3552,7 @@ async function init() {
   const _planKey = planOf();
   const _planName = PLAN_INFO[_planKey] ? (currentLang === 'ru' ? PLAN_INFO[_planKey].ru : PLAN_INFO[_planKey].en) : _planKey;
   document.getElementById('popup-email').textContent  = (user.role === 'staff') ? 'Staff' : _planName;
+  const _bp = document.getElementById('set-plan-name'); if (_bp) _bp.textContent = _planName;
 
   // Topbar user chip — just name, no avatar circle
   const tbName = document.getElementById('topbar-username');
@@ -6126,8 +6142,21 @@ function setLang(lang, btn) {
   setMsg('profile-msg', t('msg_lang_set'), 'ok');
 }
 
+
+function setCurrency(cur) {
+  try { localStorage.setItem('reloxy_currency', cur); } catch(_) {}
+  if (typeof renderAll === 'function') { try { renderAll(); } catch(_) {} }
+  setMsg('profile-msg', t('msg_profile_saved'), 'ok');
+}
+function renderBillingTab() {
+  const el = document.getElementById('set-plan-name');
+  if (!el) return;
+  const k = (typeof planOf === 'function') ? planOf() : (user?.plan || 'free');
+  el.textContent = PLAN_INFO[k] ? (currentLang === 'ru' ? PLAN_INFO[k].ru : PLAN_INFO[k].en) : k;
+}
+
 // ── SETTINGS SECTION PICKER ────────────────────────────────────
-const SET_SECTION_LABELS = { profile:'Profile', studio:'Studio', security:'Security', goal:'Revenue Goal', telegram:'Telegram' };
+const SET_SECTION_LABELS = { profile:'Profile', notifications:'Notifications', appearance:'Appearance', billing:'Billing', studio:'Studio', security:'Security', goal:'Revenue Goal', telegram:'Telegram' };
 
 function toggleSetPicker(e) {
   e.stopPropagation();
@@ -6154,7 +6183,8 @@ function switchSetSection(section, el) {
   document.getElementById('set-picker-drop').classList.remove('open');
   document.getElementById('set-picker-btn').classList.remove('open');
   // auto-load telegram code
-  if (section === 'telegram') loadTgCode();
+  if (section === 'notifications') loadTgCode();
+  if (section === 'billing') renderBillingTab();
 }
 
 // close picker on outside click
