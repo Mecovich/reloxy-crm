@@ -2006,6 +2006,42 @@ td { border-bottom-color:var(--line) !important; }
 /* hide the trailing divider when the chip is hidden (e.g. staff) */
 #plan-chip[style*="display: none"] + #plan-chip-divider { display:none !important; }
 /* ══════════════════ /PLAN CHIP IN ACCOUNT MENU ══════════════════ */
+
+/* ══════════════════ SETTINGS — FULL-WIDTH REDESIGN ══════════════════ */
+#page-settings .settings-wrap { max-width:none !important; }
+#page-settings .set-shell { display:grid; grid-template-columns:240px minmax(0,1fr); gap:20px; align-items:start; }
+
+/* Left nav */
+#page-settings .set-nav { display:flex; flex-direction:column; gap:3px; padding:8px; background:var(--glass-bg); border:1px solid var(--glass-border); border-radius:14px; position:sticky; top:8px; }
+#page-settings .set-nav-item { display:flex; align-items:center; gap:11px; padding:10px 12px; border-radius:10px; font-size:13px; font-weight:500; color:var(--g1); cursor:pointer; transition:background .12s ease, color .12s ease; }
+#page-settings .set-nav-item svg { opacity:0.5; flex-shrink:0; transition:opacity .12s ease; }
+#page-settings .set-nav-item:hover { background:rgba(255,255,255,0.05); color:#EDEDED; }
+#page-settings .set-nav-item:hover svg { opacity:0.8; }
+#page-settings .set-nav-item.active { background:rgba(255,255,255,0.08); color:#EDEDED; }
+#page-settings .set-nav-item.active svg { opacity:0.95; }
+
+/* Hide old dropdown picker (replaced by left nav); keep header label */
+#page-settings .set-picker-wrap { display:none !important; }
+#page-settings .set-card { width:100%; }
+#page-settings .set-card-top { padding:20px 24px 4px; }
+#page-settings .set-section-label { font-size:15px; }
+
+/* Fields fill the width: responsive 2-column grid */
+#page-settings .set-section .set-fields { display:grid !important; grid-template-columns:1fr 1fr; gap:16px 18px; }
+#page-settings .set-section .set-row { display:contents !important; }
+#page-settings .set-section .set-fields > .set-field { min-width:0; }
+#page-settings .set-section .set-fields > .set-field:has(#set-email),
+#page-settings .set-section .set-fields > .set-field:has(#set-website),
+#page-settings .set-section .set-fields > .set-field:has(#set-description) { grid-column:1 / -1; }
+#page-settings .set-footer { padding:16px 24px; }
+
+@media (max-width:860px) {
+  #page-settings .set-shell { grid-template-columns:1fr; }
+  #page-settings .set-nav { position:static; flex-direction:row; flex-wrap:wrap; }
+  #page-settings .set-nav-item { flex:1; justify-content:center; }
+  #page-settings .set-section .set-fields { grid-template-columns:1fr; }
+}
+/* ══════════════════ /SETTINGS — FULL-WIDTH REDESIGN ══════════════════ */
 </style>
 </head>
 <body>
@@ -2567,8 +2603,29 @@ td { border-bottom-color:var(--line) !important; }
         <div><h1 data-i18n="page_settings">Settings</h1><p data-i18n="settings_sub">Account and CRM preferences</p></div>
       </div>
       <div class="settings-wrap">
+       <div class="set-shell">
 
-        <!-- SINGLE CARD -->
+        <!-- LEFT NAV -->
+        <nav class="set-nav">
+          <div class="set-nav-item set-picker-item active" onclick="switchSetSection('profile',this)">
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>
+            <span data-i18n="set_nav_profile">Profile</span>
+          </div>
+          <div class="set-nav-item set-picker-item" onclick="switchSetSection('studio',this)">
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="12" height="9" rx="1.5"/><path d="M5 4V3a1 1 0 011-1h4a1 1 0 011 1v1"/></svg>
+            <span data-i18n="set_nav_studio">Studio</span>
+          </div>
+          <div class="set-nav-item set-picker-item" onclick="switchSetSection('security',this)">
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="7" width="10" height="7" rx="1.5"/><path d="M5 7V5a3 3 0 016 0v2"/></svg>
+            <span data-i18n="set_nav_security">Security</span>
+          </div>
+          <div class="set-nav-item set-picker-item" onclick="switchSetSection('goal',this)">
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><circle cx="8" cy="8" r="3"/><line x1="8" y1="2" x2="8" y2="4"/></svg>
+            <span data-i18n="set_nav_goal">Revenue Goal</span>
+          </div>
+        </nav>
+
+        <!-- CONTENT CARD -->
         <div class="set-card">
           <div class="set-card-top">
             <div class="set-section-label" id="set-section-label">Profile</div>
@@ -2819,6 +2876,7 @@ td { border-bottom-color:var(--line) !important; }
           </div>
 
         </div>
+       </div>
       </div>
     </div>
 
@@ -3169,6 +3227,7 @@ const TRANS = {
     nav_projects:'Projects', nav_pipeline:'Pipeline', nav_team:'Team',
     search_word:'Search',
     nav_finance:'Finance', nav_settings:'Settings', sign_out:'Sign out',
+    set_nav_profile:'Profile', set_nav_studio:'Studio', set_nav_security:'Security', set_nav_goal:'Revenue Goal',
     search_ph:'Search analytics, projects, users...', btn_add:'+ Add new',
     page_dashboard:'Dashboard', page_calendar:'Calendar', page_clients:'Clients',
     page_projects:'Projects', page_pipeline:'Pipeline', page_team:'Team',
@@ -3311,6 +3370,7 @@ const TRANS = {
     nav_projects:'Проекты', nav_pipeline:'Воронка', nav_team:'Команда',
     search_word:'Поиск',
     nav_finance:'Финансы', nav_settings:'Настройки', sign_out:'Выйти',
+    set_nav_profile:'Профиль', set_nav_studio:'Студия', set_nav_security:'Безопасность', set_nav_goal:'Цель по доходу',
     search_ph:'Поиск по аналитике, проектам, пользователям...', btn_add:'+ Добавить',
     page_dashboard:'Дашборд', page_calendar:'Календарь', page_clients:'Клиенты',
     page_projects:'Проекты', page_pipeline:'Воронка', page_team:'Команда',
