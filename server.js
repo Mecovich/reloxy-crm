@@ -7,6 +7,7 @@ if (!process.env.JWT_SECRET) {
 const JWT_SECRET = process.env.JWT_SECRET;
 
 const express = require('express');
+const compression = require('compression');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
@@ -57,6 +58,7 @@ app.use(cors({
   origin: process.env.APP_URL || 'https://reloxy.tech',
   credentials: true,
 }));
+app.use(compression());
 app.use(express.json({ verify: (req, res, buf) => { req.rawBody = buf; } }));
 app.use(express.static(path.join(__dirname, 'public')));
 
