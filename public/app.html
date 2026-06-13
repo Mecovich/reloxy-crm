@@ -1285,6 +1285,16 @@ body.is-staff .ai-fab { display:none; }
 @keyframes sb-pulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
 body.is-staff .sb-quick, body.is-staff .sb-alert { display:none !important; }
 /* ══════════ /SIDEBAR EXTRAS ══════════ */
+
+/* Forecast panel v2 */
+.fc-main { display:flex; align-items:center; gap:8px; font-size:13px; color:rgba(217,217,217,0.7); }
+.fc-main b { color:#EDEDED; }
+.fc-sub { font-size:11px; color:rgba(217,217,217,0.38); margin-top:5px; margin-left:24px; }
+.fc-chips { display:flex; gap:8px; margin-top:12px; margin-left:24px; }
+.fc-chip { display:flex; flex-direction:column; gap:3px; padding:8px 14px; border-radius:10px;
+  background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); }
+.fc-chip span { font-size:9.5px; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; color:rgba(217,217,217,0.35); }
+.fc-chip b { font-size:13px; font-weight:700; color:rgba(237,237,237,0.85); font-variant-numeric:tabular-nums; }
 /* ══════════ /PRICING ══════════ */
 
 /* ══════════ GLOBAL POLISH ══════════ */
@@ -3815,6 +3825,7 @@ function setChartPeriod(period, el) {
 // ── Analytics / Forecasting toggle ──
 let dashChartMode = 'analytics';
 function setChartMode(mode, el) {
+  if (mode === 'forecast' && planOf() === 'free') { openPricingModal('pro'); return; }
   dashChartMode = mode;
   document.querySelectorAll('.bento-toggle-opt').forEach(o => o.classList.remove('active'));
   el.classList.add('active');
@@ -3833,23 +3844,47 @@ function computeForecast(period) {
   const projected = Math.max(0, Math.round(last * (1 + avgRate)));
   return { projected, avgRate };
 }
+const PJ_STAGE_PROB = { new: 0.1, qualify: 0.25, proposal: 0.5, negotiate: 0.75 };
+function weightedPipeline() {
+  return Math.round((deals || []).filter(d => d.stage !== 'closed')
+    .reduce((s, d) => s + (d.value || 0) * (PJ_STAGE_PROB[d.stage] || 0.1), 0));
+}
 function renderForecastPanel() {
   const note = document.getElementById('dash-forecast-note');
   if (!note) return;
   if (dashChartMode !== 'forecast') { note.style.display = 'none'; return; }
-  note.style.display = 'flex';
+  note.style.display = 'block';
+  const ru = currentLang === 'ru';
   const f = computeForecast(currentChartPeriod);
-  if (!f) {
-    note.innerHTML = `<span class="material-symbols-outlined" style="font-size:16px;opacity:.5">query_stats</span><span>${esc(t('dash_forecast_no_data')||'Not enough data yet for a forecast')}</span>`;
+  const pipe = weightedPipeline();
+  if (!f && !pipe) {
+    note.innerHTML = `<span style="opacity:.55">${esc(t('dash_forecast_no_data')||'Not enough data yet for a forecast')}</span>`;
     return;
   }
-  const pct = Math.round(f.avgRate * 100);
+  const trendPart = f ? f.projected : 0;
+  const pipePart = currentChartPeriod === 'week' ? Math.round(pipe / 4) : pipe;
+  const total = trendPart + pipePart;
   const periodWord = currentChartPeriod === 'week' ? (t('dash_forecast_period_week')||'next week')
     : currentChartPeriod === 'year' ? (t('dash_forecast_period_year')||'next year')
     : (t('dash_forecast_period_month')||'next month');
-  note.innerHTML = `<span class="material-symbols-outlined" style="font-size:16px">trending_up</span>` +
-    `<span>${esc(t('dash_forecast_label')||'Projected for')} ${esc(periodWord)}: <b>₽ ${Number(f.projected).toLocaleString('en')}</b> ` +
-    `<span style="opacity:.55">(${pct >= 0 ? '+' : ''}${pct}% ${esc(t('dash_forecast_trend')||'avg. trend')})</span></span>`;
+  // три месяца вперёд с затуханием тренда
+  let chips = '';
+  if (currentChartPeriod === 'month' && f) {
+    let v = f.projected;
+    const names = [];
+    for (let k = 1; k <= 3; k++) {
+      const d = new Date(); d.setMonth(d.getMonth() + k);
+      names.push([d.toLocaleDateString(ru ? 'ru-RU' : 'en-US', { month: 'short' }), Math.max(0, Math.round(v + (k === 1 ? pipePart : pipePart * 0.4)))]);
+      v = v * (1 + f.avgRate * 0.6);
+    }
+    chips = `<div class="fc-chips">` + names.map(([m, val]) =>
+      `<div class="fc-chip"><span>${esc(m)}</span><b>₽ ${Number(val).toLocaleString('en')}</b></div>`).join('') + `</div>`;
+  }
+  note.innerHTML = `
+    <div class="fc-main"><span class="material-symbols-outlined" style="font-size:16px">trending_up</span>
+      <span>${esc(t('dash_forecast_label')||'Projected for')} ${esc(periodWord)}: <b>₽ ${Number(total).toLocaleString('en')}</b></span></div>
+    <div class="fc-sub">${ru ? 'тренд оплат' : 'payment trend'} ₽ ${Number(trendPart).toLocaleString('en')} · ${ru ? 'взвешенная воронка' : 'weighted pipeline'} ₽ ${Number(pipePart).toLocaleString('en')}</div>
+    ${chips}`;
 }
 
 function drawRevenueChart(period) {
@@ -4063,6 +4098,30 @@ function renderGoal() {
 
   document.getElementById('goal-current').textContent = '₽ ' + fmtNum(current);
   document.getElementById('goal-target-label').textContent = g.amount ? '₽ ' + fmtNum(g.amount) : 'not set';
+
+  // Темп: успеваем ли к цели при текущей скорости
+  if (g.amount) {
+    const mini = document.getElementById('goal-wrap-mini');
+    let paceEl = document.getElementById('goal-mini-pace');
+    if (mini && !paceEl) {
+      paceEl = document.createElement('span');
+      paceEl.id = 'goal-mini-pace';
+      paceEl.style.cssText = 'font-size:11px;font-weight:700;margin-left:8px';
+      mini.appendChild(paceEl);
+    }
+    if (paceEl) {
+      const now2 = new Date();
+      const daysIn = g.period === 'year' ? 365 : new Date(now2.getFullYear(), now2.getMonth()+1, 0).getDate();
+      const dayNum = g.period === 'year'
+        ? Math.ceil((now2 - new Date(now2.getFullYear(),0,1)) / 86400000)
+        : now2.getDate();
+      const projectedEnd = dayNum > 0 ? (current / dayNum) * daysIn : 0;
+      const pacePct = Math.round((projectedEnd / g.amount) * 100);
+      paceEl.textContent = `→ ${pacePct}%`;
+      paceEl.title = (currentLang==='ru' ? 'Прогноз к концу периода при текущем темпе: ' : 'Projected by period end at current pace: ') + '₽ ' + fmtNum(Math.round(projectedEnd));
+      paceEl.style.color = pacePct >= 100 ? '#EDEDED' : pacePct >= 70 ? 'rgba(232,200,131,0.85)' : 'rgba(240,140,140,0.85)';
+    }
+  }
 
   const fill = document.getElementById('goal-fill');
   const pctEl = document.getElementById('goal-pct');
@@ -5385,13 +5444,29 @@ function renderPjStats() {
   if (c) c.textContent = fmt(totalBudget);
 }
 
+function pjRisk(p, today) {
+  // отстаёт ли проект от темпа: ожидаемый прогресс по времени vs фактический
+  if (!p.deadline || !p.created_at || p.status === 'done' || !(p.progress >= 0)) return null;
+  const start = new Date(String(p.created_at).slice(0,10) + 'T00:00:00');
+  const end = new Date(p.deadline + 'T00:00:00');
+  if (!(end > start) || end < today) return null;
+  const expected = Math.min(1, Math.max(0.05, (today - start) / (end - start)));
+  const ratio = (p.progress / 100) / expected;
+  if (expected < 0.25) return null; // рано судить
+  if (ratio < 0.55) return 'hot';
+  if (ratio < 0.85) return 'warm';
+  return null;
+}
 function pjDl(p, today) {
   if (!p.deadline || p.status === 'done') return '';
   const d = new Date(p.deadline + 'T00:00:00');
   const diff = Math.ceil((d - today) / 86400000);
   if (diff < 0)  return `<span class="pj-dl overdue">${currentLang==='ru'?'Просрочен':'Overdue'}</span>`;
   if (diff === 0) return `<span class="pj-dl urgent">${currentLang==='ru'?'Сегодня':'Today'}</span>`;
-  return `<span class="pj-dl">${diff}${currentLang==='ru'?'д':'d'}</span>`;
+  const risk = pjRisk(p, today);
+  const riskTag = risk === 'hot' ? `<span class="pj-dl overdue" title="${currentLang==='ru'?'Сильно отстаёт от темпа':'Far behind pace'}">⚠</span> `
+    : risk === 'warm' ? `<span class="pj-dl" style="color:rgba(232,200,131,0.8)" title="${currentLang==='ru'?'Отстаёт от темпа':'Behind pace'}">⚠</span> ` : '';
+  return riskTag + `<span class="pj-dl">${diff}${currentLang==='ru'?'д':'d'}</span>`;
 }
 
 function renderPjList() {
@@ -5506,6 +5581,8 @@ function renderProjects() {
         if (diff < 0)       dlBadge = `<span class="k-dl-badge overdue">${currentLang==='ru'?'Просрочен':'Overdue'}</span>`;
         else if (diff === 0)dlBadge = `<span class="k-dl-badge urgent">${currentLang==='ru'?'Сегодня':'Today'}</span>`;
         else if (diff <= 5) dlBadge = `<span class="k-dl-badge ok">${diff}${currentLang==='ru'?'д':'d'}</span>`;
+        const _risk = pjRisk(p, today);
+        if (_risk) dlBadge = `<span class="k-dl-badge ${_risk==='hot'?'overdue':''}" style="${_risk==='warm'?'color:rgba(232,200,131,0.8) !important;':''}" title="${currentLang==='ru'?'Отстаёт от темпа':'Behind pace'}">⚠</span> ` + dlBadge;
       }
       const clientAv = `<div class="k-av">${defAv()}</div>`;
       const isComplete = p.progress >= 100;
