@@ -1975,6 +1975,19 @@ td { border-bottom-color:var(--line) !important; }
 #page-projects .pj-row { padding:12px 4px !important; border-bottom:1px solid rgba(255,255,255,0.04) !important; }
 #page-projects .pj-title { font-weight:500 !important; }
 /* ══════════════════ /PROJECTS — MINIMAL REFINEMENT ══════════════════ */
+
+/* ══════════════════ PLAN CHIP MOVED INTO ACCOUNT MENU ══════════════════ */
+#user-popup #plan-chip { margin:0 !important; padding:11px 16px !important; border-radius:0 !important; background:transparent !important; cursor:pointer; transition:background .1s ease; }
+#user-popup #plan-chip:hover { background:rgba(255,255,255,0.05) !important; }
+#user-popup #plan-chip .plan-chip-row { display:flex; align-items:center; gap:11px; }
+#user-popup #plan-chip .plan-ic { width:15px !important; height:15px !important; }
+#user-popup #plan-chip .plan-ic svg { width:15px !important; height:15px !important; }
+#user-popup #plan-chip .plan-chip-name { font-size:13px !important; font-weight:600 !important; color:#EDEDED !important; letter-spacing:-0.1px; }
+#user-popup #plan-chip .plan-chip-sub { margin-left:auto !important; font-size:11px !important; font-weight:500 !important; color:rgba(217,217,217,0.4) !important; }
+#user-popup #plan-chip .plan-bar { display:none !important; }
+/* hide the trailing divider when the chip is hidden (e.g. staff) */
+#plan-chip[style*="display: none"] + #plan-chip-divider { display:none !important; }
+/* ══════════════════ /PLAN CHIP IN ACCOUNT MENU ══════════════════ */
 </style>
 </head>
 <body>
@@ -2061,7 +2074,6 @@ td { border-bottom-color:var(--line) !important; }
   </nav>
   <div class="sidebar-profile" id="tb-user-wrap">
     <div id="sb-alert" style="display:none" onclick="go('projects',document.querySelectorAll('.nav-item')[3])"></div>
-    <div id="plan-chip" onclick="openPricingModal()"></div>
     <div class="sidebar-profile-card" onclick="toggleUserPopup(event)" id="tb-user-chip">
       <div class="sidebar-profile-avatar" id="popup-initials">—</div>
       <div class="sidebar-profile-text">
@@ -2073,6 +2085,8 @@ td { border-bottom-color:var(--line) !important; }
     <!-- Dropdown -->
     <div class="user-popup user-popup--sidebar" id="user-popup">
       <div class="user-popup-list">
+        <div id="plan-chip" onclick="openPricingModal()"></div>
+        <div class="user-popup-divider" id="plan-chip-divider"></div>
         <div class="user-popup-item" onclick="popupGoSettings()">
           <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v1.5M8 13.5V15M1 8h1.5M13.5 8H15M3.05 3.05l1.06 1.06M11.89 11.89l1.06 1.06M3.05 12.95l1.06-1.06M11.89 4.11l1.06-1.06"/></svg>
           <span data-i18n="nav_settings">Settings</span>
