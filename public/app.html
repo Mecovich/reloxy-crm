@@ -1286,6 +1286,14 @@ body.is-staff .ai-fab { display:none; }
 body.is-staff .sb-quick, body.is-staff .sb-alert { display:none !important; }
 /* ══════════ /SIDEBAR EXTRAS ══════════ */
 
+/* ABC + sleep badges */
+.abc-badge { display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px; border-radius:5px;
+  font-size:9px; font-weight:800; vertical-align:1px; margin-left:2px; }
+.abc-badge.abc-A { background:#D9D9D9; color:#121212; }
+.abc-badge.abc-B { background:rgba(255,255,255,0.08); color:rgba(237,237,237,0.8); border:1px solid rgba(255,255,255,0.14); }
+.abc-badge.abc-C { background:transparent; color:rgba(217,217,217,0.35); border:1px solid rgba(255,255,255,0.08); }
+.cl-sleep { font-size:9.5px; font-weight:700; color:rgba(232,200,131,0.7); margin-left:2px; letter-spacing:0.5px; }
+
 /* Forecast panel v2 */
 .fc-main { display:flex; align-items:center; gap:8px; font-size:13px; color:rgba(217,217,217,0.7); }
 .fc-main b { color:#EDEDED; }
@@ -2751,6 +2759,10 @@ td { border-bottom-color:var(--line) !important; }
           <div class="fin-delta" data-i18n="fi_all_time">All time</div>
         </div>
       </div>
+      <div class="an-section" id="fin-cashflow-wrap" style="margin-bottom:26px">
+        <div class="an-section-title" id="fin-cashflow-title">Cash flow — next 8 weeks</div>
+        <div id="fin-cashflow"></div>
+      </div>
       <div class="section-header" id="fin-table-section">
         <div class="section-title" data-i18n="fi_invoices">Invoices</div>
       </div>
@@ -2782,6 +2794,10 @@ td { border-bottom-color:var(--line) !important; }
         <div class="an-section">
           <div class="an-section-title" data-i18n="an_top_clients">Top clients by revenue</div>
           <div id="an-top-clients"></div>
+        </div>
+        <div class="an-section" style="grid-column:1/-1">
+          <div class="an-section-title">Margin by project type</div>
+          <div id="an-margin"></div>
         </div>
       </div>
     </div>
@@ -4774,7 +4790,34 @@ function renderDashboard() {
 }
 
 // ─── ANALYTICS ─────────────────────────────────────────────────────────────
+function renderMarginByType() {
+  const el = document.getElementById('an-margin');
+  if (!el) return;
+  const ru = currentLang === 'ru';
+  const withBudget = projects.filter(p => p.budget > 0);
+  const withCost = withBudget.filter(p => p.cost > 0);
+  if (!withCost.length) {
+    el.innerHTML = `<div class="empty-compact">${ru ? 'Укажите расходы в проектах — и здесь появится рентабельность по типам работ' : 'Add costs to your projects to see profitability by work type'}</div>`;
+    return;
+  }
+  const byType = {};
+  withBudget.forEach(p => {
+    const k = p.type || (ru ? 'Другое' : 'Other');
+    byType[k] = byType[k] || { b: 0, c: 0, n: 0 };
+    byType[k].b += p.budget || 0; byType[k].c += p.cost || 0; byType[k].n++;
+  });
+  const rows = Object.entries(byType).map(([k, v]) => ({ k, margin: v.b - v.c, pct: v.b ? Math.round((v.b - v.c) / v.b * 100) : 0, n: v.n }))
+    .sort((a, b) => b.pct - a.pct);
+  el.innerHTML = rows.map(r => `
+    <div style="display:flex;align-items:center;gap:12px;padding:9px 2px;border-bottom:1px solid rgba(255,255,255,0.05)">
+      <span style="flex:0 0 160px;font-size:12.5px;color:rgba(237,237,237,0.8);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.k)} <span style="color:rgba(217,217,217,0.3);font-size:11px">×${r.n}</span></span>
+      <div style="flex:1;height:4px;border-radius:4px;background:rgba(255,255,255,0.06);overflow:hidden"><div style="height:100%;width:${Math.max(2, Math.min(100, r.pct))}%;border-radius:4px;background:${r.pct >= 40 ? 'rgba(237,237,237,0.85)' : r.pct >= 15 ? 'rgba(232,200,131,0.7)' : 'rgba(240,140,140,0.7)'}"></div></div>
+      <b style="flex:0 0 64px;text-align:right;font-size:12px;color:#EDEDED;font-variant-numeric:tabular-nums">${r.pct}%</b>
+      <span style="flex:0 0 110px;text-align:right;font-size:11.5px;color:rgba(217,217,217,0.45);font-variant-numeric:tabular-nums">${fmt(r.margin)}</span>
+    </div>`).join('');
+}
 function renderAnalytics() {
+  renderMarginByType();
   // Top metric cards
   const paidTotal = invoices.filter(i=>i.status==='paid').reduce((s,i)=>s+(i.amount||0),0);
   const budgeted  = projects.filter(p=>p.budget>0);
@@ -5159,6 +5202,15 @@ function renderClients(list) {
   const statusClass = { active:'is-active', lead:'is-lead', archive:'is-archive' };
   const maxRevenue = Math.max(1, ...allMetrics.map(m => m.revenue));
   const dateLocale = (currentLang === 'ru') ? 'ru-RU' : 'en-US';
+  // ABC-сегментация по выручке (Pro)
+  const abcMap = {};
+  if (planOf() !== 'free') {
+    const ranked = clients.map((c, i) => ({ id: c.id, rev: allMetrics[i].revenue })).filter(x => x.rev > 0).sort((a, b) => b.rev - a.rev);
+    const totR = ranked.reduce((s, x) => s + x.rev, 0);
+    let acc = 0;
+    ranked.forEach(x => { acc += x.rev; abcMap[x.id] = acc <= totR * 0.8 ? 'A' : acc <= totR * 0.95 ? 'B' : 'C'; });
+  }
+  const now60 = Date.now() - 60 * 86400000;
 
   if (grid) grid.innerHTML = `
     <div class="cl-grid">
@@ -5174,7 +5226,7 @@ function renderClients(list) {
             <div class="cl-card-id">
               <div class="cl-avatar">${defAv()}</div>
               <div style="min-width:0">
-                <div class="cl-card-name">${esc(c.name)}</div>
+                <div class="cl-card-name">${esc(c.name)}${abcMap[c.id] ? ` <span class="abc-badge abc-${abcMap[c.id]}" title="${abcMap[c.id]==='A' ? (currentLang==='ru'?'Топ-клиент: даёт основную выручку':'Top client: core revenue') : abcMap[c.id]==='B' ? (currentLang==='ru'?'Средний сегмент':'Mid segment') : (currentLang==='ru'?'Хвост выручки':'Revenue tail')}">${abcMap[c.id]}</span>` : ''}${(c.status==='active' && m.lastActive && m.lastActive.getTime() < now60) ? ` <span class="cl-sleep" title="${currentLang==='ru'?'Нет активности 60+ дней — пора написать':'No activity for 60+ days — time to reach out'}">zZ</span>` : ''}</div>
                 <div class="cl-card-industry">${c.industry ? esc(c.industry) : (c.contact_name ? esc(c.contact_name) : '')}</div>
               </div>
             </div>
@@ -5646,7 +5698,7 @@ async function moveProjectTo(pid, colKey) {
   try {
     await api('PUT', '/api/projects/' + pid, {
       title: p.title, type: p.type, client_id: p.client_id, status: p.status,
-      progress: p.progress, deadline: p.deadline, budget: p.budget, assigned_to: p.assigned_to
+      progress: p.progress, deadline: p.deadline, budget: p.budget, cost: p.cost || 0, assigned_to: p.assigned_to
     });
     toast(currentLang==='ru' ? 'Статус обновлён' : 'Status updated');
   } catch (err) {
@@ -5721,7 +5773,64 @@ function renderFunnel() {
 }
 
 // ─── FINANCE ───────────────────────────────────────────────────────────────
+function renderCashflow() {
+  const el = document.getElementById('fin-cashflow');
+  const title = document.getElementById('fin-cashflow-title');
+  if (!el) return;
+  const ru = currentLang === 'ru';
+  if (title) title.textContent = ru ? 'Денежный поток — 8 недель вперёд' : 'Cash flow — next 8 weeks';
+  if (planOf() === 'free') {
+    el.innerHTML = `<div class="bento-empty bento-empty-mini" style="flex-direction:row;gap:12px;justify-content:flex-start">
+      <span style="color:rgba(232,200,131,0.8)">♛</span>
+      <span class="bento-empty-title" style="font-weight:500;color:rgba(217,217,217,0.5)">${ru ? 'Прогноз поступлений и расходов доступен на Pro' : 'Inflow & outflow forecast is available on Pro'}</span>
+      <button class="bento-empty-btn" style="margin:0 0 0 auto" onclick="openPricingModal('pro')">${ru ? 'Открыть' : 'Unlock'}</button>
+    </div>`;
+    return;
+  }
+  const today = new Date(); today.setHours(0,0,0,0);
+  // средний месячный расход за 3 мес → недельный
+  const exps = (typeof getExpenses === 'function') ? getExpenses() : [];
+  const threeAgo = new Date(today); threeAgo.setMonth(threeAgo.getMonth() - 3);
+  const recentExp = exps.filter(e => e.date && new Date(e.date) >= threeAgo);
+  const weeklyOut = recentExp.length ? Math.round(recentExp.reduce((s, e) => s + e.amount, 0) / 13) : 0;
+  // притоки: неоплаченные счета по неделям (просроченные — на этой неделе с коэф. 0.6)
+  const unpaid = invoices.filter(i => i.status !== 'paid');
+  const weeks = Array.from({ length: 8 }, () => 0);
+  unpaid.forEach(i => {
+    const due = i.due_date || i.due_at;
+    let w = 0, k = 1;
+    if (due) {
+      const d = new Date(due + 'T00:00:00');
+      const diff = Math.floor((d - today) / 86400000);
+      if (diff < 0) { w = 0; k = 0.6; } else w = Math.min(7, Math.floor(diff / 7));
+    } else { w = 1; k = 0.8; }
+    weeks[w] += (i.amount || 0) * k;
+  });
+  if (!unpaid.length && !weeklyOut) {
+    el.innerHTML = `<div class="empty-compact">${ru ? 'Появится, когда будут неоплаченные счета или расходы' : 'Shows up once you have open invoices or expenses'}</div>`;
+    return;
+  }
+  let acc = 0;
+  const maxAbs = Math.max(1, ...weeks.map((v, i) => Math.abs(v - weeklyOut)));
+  el.innerHTML = `<div style="display:grid;grid-template-columns:repeat(8,1fr);gap:8px">` + weeks.map((inflow, i) => {
+    const net = Math.round(inflow - weeklyOut);
+    acc += net;
+    const d = new Date(today); d.setDate(d.getDate() + i * 7);
+    const lbl = d.toLocaleDateString(ru ? 'ru-RU' : 'en-US', { day: 'numeric', month: 'short' });
+    const h = Math.max(4, Math.round(Math.abs(net) / maxAbs * 52));
+    const pos = net >= 0;
+    return `<div style="display:flex;flex-direction:column;align-items:center;gap:6px" title="${ru ? 'Приток' : 'In'}: ₽${Math.round(inflow).toLocaleString('en')} · ${ru ? 'Расход' : 'Out'}: ₽${weeklyOut.toLocaleString('en')} · ${ru ? 'Накопленно' : 'Cumulative'}: ₽${acc.toLocaleString('en')}">
+      <div style="height:60px;display:flex;align-items:flex-end">
+        <div style="width:22px;height:${h}px;border-radius:5px;background:${pos ? 'rgba(237,237,237,0.75)' : 'rgba(240,140,140,0.55)'}"></div>
+      </div>
+      <span style="font-size:9.5px;color:rgba(217,217,217,0.35);white-space:nowrap">${lbl}</span>
+      <b style="font-size:10.5px;color:${pos ? 'rgba(237,237,237,0.75)' : '#f0a0a0'};font-variant-numeric:tabular-nums">${net >= 0 ? '+' : ''}${Math.round(net / 1000)}k</b>
+    </div>`;
+  }).join('') + `</div>
+  <div style="margin-top:14px;font-size:11.5px;color:rgba(217,217,217,0.4)">${ru ? 'Итог за 8 недель' : '8-week total'}: <b style="color:${acc >= 0 ? '#EDEDED' : '#f0a0a0'}">₽ ${acc.toLocaleString('en')}</b>${weeklyOut ? ` · ${ru ? 'средний расход' : 'avg outflow'} ₽ ${weeklyOut.toLocaleString('en')}/${ru ? 'нед' : 'wk'}` : ''}</div>`;
+}
 function renderFinance() {
+  renderCashflow();
   const paid    = invoices.filter(i=>i.status==='paid');
   const pending = invoices.filter(i=>i.status==='pending');
   const overdue = invoices.filter(i=>i.status==='overdue');
@@ -6292,12 +6401,13 @@ function openProjectModal(p) {
     </div>
     <div class="field-row">
       <div class="field"><label class="field-label">${t('f_budget')}</label><input class="field-input" id="m-budget" type="number" value="${p?.budget||0}" placeholder="0" style="text-align:left"></div>
-      <div class="field">
-        <label class="field-label" style="display:flex;justify-content:space-between;align-items:center">
-          <span>${t('f_progress')}</span><span class="proj-progress-readout" id="m-progress-readout">${progressVal}%</span>
-        </label>
-        <input class="proj-progress-slider" id="m-progress" type="range" min="0" max="100" step="5" value="${progressVal}" oninput="document.getElementById('m-progress-readout').textContent=this.value+'%'">
-      </div>
+      <div class="field"><label class="field-label">${currentLang==='ru'?'Расходы ₽':'Costs ₽'}</label><input class="field-input" id="m-cost" type="number" value="${p?.cost||0}" placeholder="0" style="text-align:left" title="${currentLang==='ru'?'Подрядчики, стоки, реклама — для расчёта маржи':'Contractors, stocks, ads — for margin'}"></div>
+    </div>
+    <div class="field">
+      <label class="field-label" style="display:flex;justify-content:space-between;align-items:center">
+        <span>${t('f_progress')}</span><span class="proj-progress-readout" id="m-progress-readout">${progressVal}%</span>
+      </label>
+      <input class="proj-progress-slider" id="m-progress" type="range" min="0" max="100" step="5" value="${progressVal}" oninput="document.getElementById('m-progress-readout').textContent=this.value+'%'">
     </div>
     ${p ? `
     <div class="field" style="margin-top:6px;border-top:1px solid var(--line);padding-top:16px">
@@ -6318,7 +6428,7 @@ function openProjectModal(p) {
       <div id="m-share-link"><button class="proj-share-action" onclick="generateShareLink(${p.id})"><span class="material-symbols-outlined">link</span>${t('btn_generate_link')}</button></div>
     </div>` : ''}
   `, async () => {
-    const body = { title:val('m-title'), type:val('m-type'), client_id:val('m-client')||null, status:val('m-status'), progress:+val('m-progress'), deadline:val('m-deadline'), budget:+val('m-budget'), assigned_to:val('m-assigned')||null };
+    const body = { title:val('m-title'), type:val('m-type'), client_id:val('m-client')||null, status:val('m-status'), progress:+val('m-progress'), deadline:val('m-deadline'), budget:+val('m-budget'), cost:+val('m-cost')||0, assigned_to:val('m-assigned')||null };
     try {
       if (p) {
         const updated = await api('PUT', `/api/projects/${p.id}`, body);
@@ -6511,6 +6621,13 @@ function viewProject(id) {
       <span style="font-size:11px;font-weight:600;color:var(--g1);background:var(--s3);border-left:2px solid ${stColor[p.status]||'var(--line2)'};border-top:1px solid var(--line);border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:3px 10px;border-radius:5px">${stLabels[p.status]||p.status}</span>
       ${p.budget ? `<span style="margin-left:auto;font-size:14px;font-weight:700;color:var(--white);font-variant-numeric:tabular-nums">${fmt(p.budget)}</span>` : ''}
     </div>
+    ${p.budget && p.cost > 0 ? (() => {
+      const mg = p.budget - p.cost, mp = Math.round(mg / p.budget * 100);
+      return `<div style="display:flex;justify-content:space-between;align-items:center;margin:-8px 0 18px;padding:10px 14px;border:1px solid rgba(255,255,255,0.07);border-radius:10px;font-size:12px">
+        <span style="color:rgba(217,217,217,0.45)">${ru?'Маржа':'Margin'} <span style="opacity:0.6">(${ru?'расходы':'costs'} ${fmt(p.cost)})</span></span>
+        <b style="color:${mp >= 40 ? '#EDEDED' : mp >= 15 ? 'rgba(232,200,131,0.85)' : '#f0a0a0'};font-variant-numeric:tabular-nums">${fmt(mg)} · ${mp}%</b>
+      </div>`;
+    })() : ''}
     ${p.progress > 0 ? `
     <div style="margin-bottom:20px">
       <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--g2);margin-bottom:8px"><span>${ru?'Прогресс':'Progress'}</span><span style="color:var(--white);font-weight:700">${p.progress}%</span></div>
