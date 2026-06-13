@@ -1286,6 +1286,19 @@ body.is-staff .ai-fab { display:none; }
 body.is-staff .sb-quick, body.is-staff .sb-alert { display:none !important; }
 /* ══════════ /SIDEBAR EXTRAS ══════════ */
 
+/* Projects polish v4 */
+.k-col-name { font-size:10px !important; letter-spacing:0.9px !important; font-weight:600 !important; color:rgba(217,217,217,0.5) !important; }
+.k-col-n { font-size:11px !important; color:rgba(217,217,217,0.28) !important; }
+.kanban { gap:26px !important; }
+.k-card { cursor:grab !important; touch-action:pan-y; -webkit-touch-callout:none; user-select:none; -webkit-user-select:none; }
+.pj-row { touch-action:pan-y; -webkit-touch-callout:none; user-select:none; -webkit-user-select:none; }
+.k-col-empty { padding:22px 10px !important; }
+body.pj-grabbing, body.pj-grabbing * { cursor:grabbing !important; }
+.pj-ghost { opacity:0.96; transform:scale(1.03) rotate(1deg); border-radius:12px;
+  background:#1d1d1d !important; border:1px solid rgba(255,255,255,0.22) !important;
+  box-shadow:0 28px 70px -14px rgba(0,0,0,0.85) !important; transition:none !important; animation:none !important; }
+.pj-group.drag-over { outline:1px dashed rgba(255,255,255,0.22); outline-offset:8px; border-radius:8px; background:rgba(255,255,255,0.015); }
+
 /* ABC + sleep badges */
 .abc-badge { display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px; border-radius:5px;
   font-size:9px; font-weight:800; vertical-align:1px; margin-left:2px; }
@@ -5539,7 +5552,7 @@ function renderPjList() {
     const arr = projects.filter(p => norm(p.status) === key || (key==='queue' && !['inprogress','queue','review','done'].includes(norm(p.status))));
     if (!arr.length) return '';
     const budget = arr.reduce((s,p) => s + (p.budget||0), 0);
-    return `<div class="pj-group">
+    return `<div class="pj-group" data-group="${key}">
       <div class="pj-group-head">
         <span class="pj-dot st-${key}"></span>
         <span class="pj-group-name">${t(i18n)}</span>
@@ -5547,7 +5560,7 @@ function renderPjList() {
       </div>
       <div class="pj-rows">
         ${arr.map(p => `
-        <div class="pj-row ${key==='done'?'is-done':''}" onclick="viewProject(${p.id})">
+        <div class="pj-row ${key==='done'?'is-done':''}" data-pid="${p.id}" onclick="viewProject(${p.id})">
           <button class="pj-status-btn" title="${ru?'Сменить статус':'Change status'}" onclick="event.stopPropagation();pjOpenStatusMenu(event, ${p.id})"><span class="pj-dot st-${key}"></span></button>
           <span class="pj-title">${esc(p.title)}</span>
           <div class="pj-right">
@@ -5561,6 +5574,7 @@ function renderPjList() {
       </div>
     </div>`;
   }).join('');
+  if (user?.role !== 'staff') initPjPointerDnD();
 }
 
 // status popup menu
@@ -5638,7 +5652,7 @@ function renderProjects() {
       }
       const clientAv = `<div class="k-av">${defAv()}</div>`;
       const isComplete = p.progress >= 100;
-      return `<div class="k-card ${stCls[k]||''} ${k==='done'?'is-done':''}" ${canDrag?'draggable="true"':''} data-pid="${p.id}" onclick="viewProject(${p.id})">
+      return `<div class="k-card ${stCls[k]||''} ${k==='done'?'is-done':''}" data-pid="${p.id}" onclick="viewProject(${p.id})">
         <button class="k-card-del" onclick="deleteProject(${p.id},event)">✕</button>
         <div class="k-card-top">
           <div class="k-card-title">${esc(p.title)}</div>
@@ -5652,7 +5666,7 @@ function renderProjects() {
       </div>`;
     }).join('') : `<div class="k-col-empty"><div>${t('k_empty')}</div></div>`;
   }
-  if (canDrag) initKanbanDnD();
+  if (canDrag) initPjPointerDnD();
 }
 
 // ── Kanban drag & drop ──
@@ -5685,6 +5699,94 @@ function initKanbanDnD() {
       if (pid) moveProjectTo(pid, col.dataset.col);
     });
   });
+}
+
+// ── Перетаскивание зажатием: работает мышью и пальцем ──
+let pjSuppressClick = false, pjDragActive = false;
+function initPjPointerDnD() {
+  const roots = [
+    [document.getElementById('kanban-board'), '.k-card', '.k-col'],
+    [document.getElementById('pj-list'), '.pj-row', '.pj-group'],
+  ];
+  roots.forEach(([root, cardSel, colSel]) => {
+    if (!root || root.dataset.pdnd) return;
+    root.dataset.pdnd = '1';
+    root.addEventListener('pointerdown', e => pjPointerDown(e, cardSel, colSel));
+  });
+  if (!document.body.dataset.pdndGlobal) {
+    document.body.dataset.pdndGlobal = '1';
+    document.addEventListener('click', e => {
+      if (pjSuppressClick) { pjSuppressClick = false; e.stopPropagation(); e.preventDefault(); }
+    }, true);
+    document.addEventListener('contextmenu', e => { if (pjDragActive) e.preventDefault(); });
+  }
+}
+function pjPointerDown(e, cardSel, colSel) {
+  if (e.button && e.button !== 0) return;
+  const card = e.target.closest(cardSel);
+  if (!card || e.target.closest('button, .pj-status-btn, .k-card-del, .pj-del, a')) return;
+  const pid = +card.dataset.pid;
+  if (!pid) return;
+  const startX = e.clientX, startY = e.clientY, isMouse = e.pointerType === 'mouse';
+  let active = false, ghost = null, overCol = null;
+  const timer = setTimeout(activate, isMouse ? 180 : 280);
+
+  function activate() {
+    if (active) return;
+    active = true; pjDragActive = true;
+    const r = card.getBoundingClientRect();
+    ghost = card.cloneNode(true);
+    ghost.classList.add('pj-ghost');
+    ghost.style.cssText += `;position:fixed;left:${r.left}px;top:${r.top}px;width:${r.width}px;margin:0;z-index:99999;pointer-events:none;`;
+    ghost._dx = startX - r.left; ghost._dy = startY - r.top;
+    document.body.appendChild(ghost);
+    card.classList.add('is-dragging');
+    document.body.classList.add('pj-grabbing');
+    if (navigator.vibrate) { try { navigator.vibrate(12); } catch (_) {} }
+  }
+  function onMove(ev) {
+    if (!active) {
+      if (Math.hypot(ev.clientX - startX, ev.clientY - startY) > 8) {
+        if (isMouse) { clearTimeout(timer); activate(); }
+        else { cancel(); return; } // палец поехал раньше удержания — это скролл
+      }
+      return;
+    }
+    ev.preventDefault();
+    ghost.style.left = (ev.clientX - ghost._dx) + 'px';
+    ghost.style.top = (ev.clientY - ghost._dy) + 'px';
+    ghost.style.display = 'none';
+    const el = document.elementFromPoint(ev.clientX, ev.clientY);
+    ghost.style.display = '';
+    const col = el ? el.closest(colSel) : null;
+    if (overCol && overCol !== col) overCol.classList.remove('drag-over');
+    overCol = col;
+    if (col) col.classList.add('drag-over');
+  }
+  function onUp() {
+    clearTimeout(timer);
+    const wasActive = active;
+    const key = overCol ? (overCol.dataset.col || overCol.dataset.group) : null;
+    cleanup();
+    if (wasActive) {
+      pjSuppressClick = true;
+      if (key) moveProjectTo(pid, key);
+    }
+  }
+  function cancel() { clearTimeout(timer); cleanup(); }
+  function cleanup() {
+    document.removeEventListener('pointermove', onMove);
+    document.removeEventListener('pointerup', onUp);
+    document.removeEventListener('pointercancel', cancel);
+    if (ghost) ghost.remove();
+    card.classList.remove('is-dragging');
+    document.body.classList.remove('pj-grabbing');
+    if (overCol) overCol.classList.remove('drag-over');
+    pjDragActive = false;
+  }
+  document.addEventListener('pointermove', onMove, { passive: false });
+  document.addEventListener('pointerup', onUp);
+  document.addEventListener('pointercancel', cancel);
 }
 
 async function moveProjectTo(pid, colKey) {
@@ -6429,6 +6531,8 @@ function openProjectModal(p) {
     </div>` : ''}
   `, async () => {
     const body = { title:val('m-title'), type:val('m-type'), client_id:val('m-client')||null, status:val('m-status'), progress:+val('m-progress'), deadline:val('m-deadline'), budget:+val('m-budget'), cost:+val('m-cost')||0, assigned_to:val('m-assigned')||null };
+    const autoDone = body.progress >= 100 && body.status !== 'done';
+    if (autoDone) body.status = 'done';
     try {
       if (p) {
         const updated = await api('PUT', `/api/projects/${p.id}`, body);
@@ -6439,7 +6543,8 @@ function openProjectModal(p) {
         created.client_name = clients.find(c=>c.id==created.client_id)?.name || null;
         projects.push(created);
       }
-      closeModal(); renderProjects(); renderCounts(); toast(p?t('toast_project_updated'):t('toast_project_added'));
+      closeModal(); renderProjects(); renderCounts();
+      toast(autoDone ? (currentLang==='ru' ? '100% — проект перемещён в «Готово» ✓' : '100% — moved to Done ✓') : (p?t('toast_project_updated'):t('toast_project_added')));
       loadAll();
     } catch(e) { showErr(e.message); }
   });
