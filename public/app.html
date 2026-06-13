@@ -1977,13 +1977,14 @@ td { border-bottom-color:var(--line) !important; }
 /* ══════════════════ /PROJECTS — MINIMAL REFINEMENT ══════════════════ */
 
 /* ══════════════════ PLAN CHIP MOVED INTO ACCOUNT MENU ══════════════════ */
-#user-popup #plan-chip { margin:0 !important; padding:11px 16px !important; border-radius:0 !important; background:transparent !important; cursor:pointer; transition:background .1s ease; }
-#user-popup #plan-chip:hover { background:rgba(255,255,255,0.05) !important; }
+#user-popup #plan-chip { margin:0 !important; padding:9px 16px !important; border-radius:0 !important; background:transparent !important; color:var(--g1); cursor:pointer; transition:background .1s ease, color .1s ease; }
+#user-popup #plan-chip:hover { background:rgba(255,255,255,0.05) !important; color:var(--white); }
 #user-popup #plan-chip .plan-chip-row { display:flex; align-items:center; gap:11px; }
-#user-popup #plan-chip .plan-ic { width:15px !important; height:15px !important; }
+#user-popup #plan-chip .plan-ic { width:15px !important; height:15px !important; color:inherit !important; opacity:0.45; transition:opacity .1s ease; }
+#user-popup #plan-chip:hover .plan-ic { opacity:0.8; }
 #user-popup #plan-chip .plan-ic svg { width:15px !important; height:15px !important; }
-#user-popup #plan-chip .plan-chip-name { font-size:13px !important; font-weight:600 !important; color:#EDEDED !important; letter-spacing:-0.1px; }
-#user-popup #plan-chip .plan-chip-sub { margin-left:auto !important; font-size:11px !important; font-weight:500 !important; color:rgba(217,217,217,0.4) !important; }
+#user-popup #plan-chip .plan-chip-name { font-size:13px !important; font-weight:400 !important; color:inherit !important; letter-spacing:0 !important; }
+#user-popup #plan-chip .plan-chip-sub { margin-left:auto !important; font-size:11px !important; font-weight:400 !important; color:rgba(217,217,217,0.38) !important; }
 #user-popup #plan-chip .plan-bar { display:none !important; }
 /* hide the trailing divider when the chip is hidden (e.g. staff) */
 #plan-chip[style*="display: none"] + #plan-chip-divider { display:none !important; }
