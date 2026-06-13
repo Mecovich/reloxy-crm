@@ -3822,22 +3822,7 @@ function renderCounts() {
 function renderSbAlert() {
   const el = document.getElementById('sb-alert');
   if (!el) return;
-  const today = new Date(); today.setHours(0,0,0,0);
-  let overdue = 0, dueToday = 0;
-  projects.forEach(p => {
-    if (!p.deadline || p.status === 'done') return;
-    const d = new Date(p.deadline + 'T00:00:00');
-    if (d < today) overdue++; else if (d.getTime() === today.getTime()) dueToday++;
-  });
-  const ru = currentLang === 'ru';
-  if (overdue) {
-    el.className = 'sb-alert hot';
-    el.innerHTML = `<span class="sb-alert-dot"></span>${overdue} ${ru ? 'просрочено' : 'overdue'}`;
-  } else if (dueToday) {
-    el.className = 'sb-alert warm';
-    el.innerHTML = `<span class="sb-alert-dot"></span>${dueToday} ${ru ? 'сдать сегодня' : 'due today'}`;
-  } else { el.style.display = 'none'; return; }
-  el.style.display = 'flex';
+  el.style.display = 'none';
 }
 
 // ─── STATS ─────────────────────────────────────────────────────────────────
