@@ -2120,6 +2120,8 @@ td { border-bottom-color:var(--line) !important; }
 /* Helvetica Neue everywhere — icon fonts kept intact */
 body, body * { font-family:"Helvetica Neue",Helvetica,-apple-system,"Segoe UI",Arial,sans-serif; }
 .material-symbols-outlined, [class*="material-symbols"] { font-family:'Material Symbols Outlined' !important; }
+/* Unify every icon to one thin outline weight (matches the custom thin SVG icons) */
+.material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 300,'opsz' 24,'GRAD' 0 !important; }
 body::before { display:none !important; }
 #atmosphere { display:none !important; }
 body { background:#0E0E0E !important; }
