@@ -4558,7 +4558,6 @@ function renderBanners() {
         <button class="bn-cta" onclick="event.stopPropagation();bnAction(${i})">${b.cta[L]}<i>→</i></button>
       </div>`).join('')}
     </div>
-    <div class="bn-counter" id="bn-counter">01 / 0${DASH_BANNERS.length}</div>
     <button class="bn-arrow prev" aria-label="${L==='ru'?'Назад':'Previous'}" onclick="event.stopPropagation();bnGoTo(bnIdx-1, true)">${chev('l')}</button>
     <button class="bn-arrow next" aria-label="${L==='ru'?'Вперёд':'Next'}" onclick="event.stopPropagation();bnGoTo(bnIdx+1, true)">${chev('r')}</button>
     <div class="bn-dots">
