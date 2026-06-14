@@ -995,6 +995,8 @@ app.put('/api/projects/:id/stages-reorder', authMiddleware, async (req, res) => 
 app.post('/api/projects/:id/share', authMiddleware, async (req, res) => {
   if (denyStaff(req, res)) return;
   if (!(await assertOwnsProject(req, req.params.id))) return res.status(404).json({ error: 'Project not found' });
+  const ur = await db.execute({ sql: 'SELECT plan, trial_ends_at, plan_expires_at FROM users WHERE id=?', args: [req.user.id] });
+  if (!isPaidRow(ur.rows[0] || {})) return res.status(403).json({ error: 'premium_only' });
   const row = await db.execute({ sql: 'SELECT share_token FROM projects WHERE id=?', args: [req.params.id] });
   let token = row.rows[0]?.share_token;
   if (!token) {

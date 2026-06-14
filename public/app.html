@@ -7114,7 +7114,10 @@ async function generateShareLink(projectId) {
     if (p) p.share_token = url.split('/share/')[1];
     renderShareLinkBox(projectId, url);
     toast(t('toast_link_created'));
-  } catch(e) { toast(e.message); }
+  } catch(e) {
+    if (e.message === 'premium_only') { openPricingModal('studio'); toast(currentLang==='ru'?'Клиентский портал — на Studio':'Client portal is on Studio'); }
+    else toast(e.message);
+  }
 }
 
 async function revokeShareLink(projectId) {

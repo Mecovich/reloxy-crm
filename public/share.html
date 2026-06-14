@@ -165,9 +165,11 @@ async function load(){
     if(!r.ok) throw new Error();
     const d = await r.json();
     render(d);
+    const bn = document.querySelector('.brand-name');
+    if (bn && d.studio_name) bn.textContent = d.studio_name;
     document.getElementById('brand').style.display='flex';
     document.getElementById('footer').style.display='block';
-    document.title = `${d.title} — Reloxy`;
+    document.title = `${d.title} — ${d.studio_name || 'Reloxy'}`;
   }catch(_){
     document.getElementById('brand').style.display='flex';
     document.getElementById('root').innerHTML = `
