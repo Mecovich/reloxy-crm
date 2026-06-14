@@ -4170,12 +4170,12 @@ function renderForecastPanel() {
       v = v * (1 + f.avgRate * 0.6);
     }
     chips = `<div class="fc-chips">` + names.map(([m, val]) =>
-      `<div class="fc-chip"><span>${esc(m)}</span><b>$ ${Number(val).toLocaleString('en')}</b></div>`).join('') + `</div>`;
+      `<div class="fc-chip"><span>${esc(m)}</span><b>${fmt(val)}</b></div>`).join('') + `</div>`;
   }
   note.innerHTML = `
     <div class="fc-main"><span class="material-symbols-outlined" style="font-size:16px">trending_up</span>
-      <span>${esc(t('dash_forecast_label')||'Projected for')} ${esc(periodWord)}: <b>$ ${Number(total).toLocaleString('en')}</b></span></div>
-    <div class="fc-sub">${ru ? 'тренд оплат' : 'payment trend'} $ ${Number(trendPart).toLocaleString('en')} · ${ru ? 'взвешенная воронка' : 'weighted pipeline'} $ ${Number(pipePart).toLocaleString('en')}</div>
+      <span>${esc(t('dash_forecast_label')||'Projected for')} ${esc(periodWord)}: <b>${fmt(total)}</b></span></div>
+    <div class="fc-sub">${ru ? 'тренд оплат' : 'payment trend'} ${fmt(trendPart)} · ${ru ? 'взвешенная воронка' : 'weighted pipeline'} ${fmt(pipePart)}</div>
     ${chips}`;
 }
 
@@ -4195,7 +4195,7 @@ function drawRevenueChart(period) {
     badge.className = 'chart-badge';
   }
 
-  animateCount(document.getElementById('chart-total'), total, { prefix: '$ ' });
+  animateCount(document.getElementById('chart-total'), cvt(total), { prefix: curSym()+' ' });
   const subPeriodLabel = period === 'week' ? t('period_week') : period === 'month' ? t('period_month') : t('period_year');
   document.getElementById('chart-sub').textContent = total
     ? subPeriodLabel
@@ -4295,7 +4295,7 @@ function drawRevenueChart(period) {
           bodyFont: { size: 16, family: 'Geist', weight: '700' },
           callbacks: {
             title: items => items[0].label,
-            label: item => item.raw > 0 ? '$ ' + fmtNum(item.raw) : '—'
+            label: item => item.raw > 0 ? curSym()+' ' + fmtNum(item.raw) : '—'
           }
         }
       },
@@ -4388,8 +4388,8 @@ function renderGoal() {
     current = paid.filter(i => i.issued_at.startsWith(yr)).reduce((a,b) => a+(b.amount||0), 0);
   }
 
-  document.getElementById('goal-current').textContent = '$ ' + fmtNum(current);
-  document.getElementById('goal-target-label').textContent = g.amount ? '$ ' + fmtNum(g.amount) : 'not set';
+  document.getElementById('goal-current').textContent = curSym()+' ' + fmtNum(current);
+  document.getElementById('goal-target-label').textContent = g.amount ? curSym()+' ' + fmtNum(g.amount) : 'not set';
 
   // Темп: успеваем ли к цели при текущей скорости
   if (g.amount) {
@@ -4410,7 +4410,7 @@ function renderGoal() {
       const projectedEnd = dayNum > 0 ? (current / dayNum) * daysIn : 0;
       const pacePct = Math.round((projectedEnd / g.amount) * 100);
       paceEl.textContent = `→ ${pacePct}%`;
-      paceEl.title = (currentLang==='ru' ? 'Прогноз к концу периода при текущем темпе: ' : 'Projected by period end at current pace: ') + '$ ' + fmtNum(Math.round(projectedEnd));
+      paceEl.title = (currentLang==='ru' ? 'Прогноз к концу периода при текущем темпе: ' : 'Projected by period end at current pace: ') + curSym()+' ' + fmtNum(Math.round(projectedEnd));
       paceEl.style.color = pacePct >= 100 ? '#EDEDED' : pacePct >= 70 ? 'rgba(232,200,131,0.85)' : 'rgba(240,140,140,0.85)';
     }
   }
@@ -4435,8 +4435,8 @@ function renderGoal() {
   const miniWrap = document.getElementById('goal-wrap-mini');
   if (miniWrap) {
     miniWrap.style.display = 'flex';
-    document.getElementById('goal-mini-current').textContent = '$ ' + fmtNum(current);
-    document.getElementById('goal-mini-target').textContent  = '$ ' + fmtNum(g.amount);
+    document.getElementById('goal-mini-current').textContent = curSym()+' ' + fmtNum(current);
+    document.getElementById('goal-mini-target').textContent  = curSym()+' ' + fmtNum(g.amount);
     document.getElementById('goal-mini-fill').style.width = pct + '%';
   }
 }
@@ -4719,7 +4719,7 @@ function renderDashboard() {
   if (unpaidSubEl) {
     const unpaidSum = unpaid.reduce((s,i)=>s+(i.amount||0),0);
     unpaidSubEl.textContent = unpaid.length
-      ? `${unpaid.length} · $ ${Number(unpaidSum).toLocaleString('en')}`
+      ? `${unpaid.length} · ${fmt(unpaidSum)}`
       : (t('dash_unpaid_sub')||'Awaiting payment');
   }
   const elUP = document.getElementById('dash-unpaid');
@@ -4746,7 +4746,7 @@ function renderDashboard() {
             <span class="bento-tx-status">${esc(i.status||'pending')}</span>
             <button class="dash-pay-btn" style="margin-left:8px" onclick="markPaid(${i.id})">${t('dash_mark_paid')}</button>
           </td>
-          <td><b>${i.amount ? '$ '+Number(i.amount).toLocaleString('en') : '—'}</b></td>
+          <td><b>${i.amount ? fmt(i.amount) : '—'}</b></td>
           <td>${i.due_date||i.created_at||'—'}</td>
         </tr>`).join('')}
       </tbody>
@@ -4755,7 +4755,7 @@ function renderDashboard() {
   // ── Total Portfolio (paid + pending invoice value) ──
   const portfolioTotal = paidTotal + pendingTotal;
   const ptEl = document.getElementById('dash-portfolio-total');
-  if (ptEl) { if (portfolioTotal) animateCount(ptEl, portfolioTotal, { prefix: '$ ', duration: 1100 }); else ptEl.textContent = '—'; }
+  if (ptEl) { if (portfolioTotal) animateCount(ptEl, cvt(portfolioTotal), { prefix: curSym()+' ', duration: 1100 }); else ptEl.textContent = '—'; }
   const barPaidEl = document.getElementById('dash-portfolio-bar-paid');
   const barPendEl = document.getElementById('dash-portfolio-bar-pending');
   const legPaidEl = document.getElementById('dash-portfolio-paid-val');
@@ -4766,8 +4766,8 @@ function renderDashboard() {
     barPaidEl.style.width = paidPct + '%';
     barPendEl.style.width = pendPct + '%';
   }
-  if (legPaidEl) legPaidEl.textContent = '$ ' + Number(paidTotal).toLocaleString('en');
-  if (legPendEl) legPendEl.textContent = '$ ' + Number(pendingTotal).toLocaleString('en');
+  if (legPaidEl) legPaidEl.textContent = curSym()+' ' + fmtNum(paidTotal);
+  if (legPendEl) legPendEl.textContent = curSym()+' ' + fmtNum(pendingTotal);
   const pbEl = document.getElementById('dash-portfolio-badge');
   if (pbEl) {
     let pct = 0;
@@ -5105,8 +5105,8 @@ function renderAnalytics() {
   const activeClients = [...new Set(projects.filter(p=>p.status!=='done'&&p.client_id).map(p=>p.client_id))].length;
 
   const set = (id, val) => { const el=document.getElementById(id); if(el) el.textContent=val; };
-  set('an-revenue',    paidTotal ? '$ '+Number(paidTotal).toLocaleString('en') : '—');
-  set('an-avg',        avgBudget ? '$ '+Number(avgBudget).toLocaleString('en') : '—');
+  set('an-revenue',    paidTotal ? curSym()+' '+fmtNum(paidTotal) : '—');
+  set('an-avg',        avgBudget ? curSym()+' '+fmtNum(avgBudget) : '—');
   set('an-completion', projects.length ? completion+'%' : '—');
   set('an-clients',    activeClients || '—');
 
@@ -5145,7 +5145,7 @@ function renderAnalytics() {
       return `<div class="an-bar-row">
         <div class="an-bar-label" style="max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c.name)}</div>
         <div class="an-bar-track"><div class="an-bar-fill" style="width:${pct}%"></div></div>
-        <div style="font-size:12px;color:var(--g1);font-variant-numeric:tabular-nums;min-width:60px;text-align:right">$ ${Number(c.rev).toLocaleString('en')}</div>
+        <div style="font-size:12px;color:var(--g1);font-variant-numeric:tabular-nums;min-width:60px;text-align:right">${fmt(c.rev)}</div>
       </div>`;
     }).join('') : `<div style="padding:20px 0;text-align:center;font-size:13px;color:var(--g3)">No data yet</div>`;
   }
@@ -5582,8 +5582,8 @@ function renderClients(list) {
   const elAvg    = document.getElementById('cl-stat-avg');
   if (elTotal)  animateCount(elTotal, clients.length);
   if (elActive) animateCount(elActive, activeCount);
-  if (elRev)    animateCount(elRev, totalRevenue, { prefix: '$ ' });
-  if (elAvg)    animateCount(elAvg, avgRevenue, { prefix: '$ ' });
+  if (elRev)    animateCount(elRev, cvt(totalRevenue), { prefix: curSym()+' ' });
+  if (elAvg)    animateCount(elAvg, cvt(avgRevenue), { prefix: curSym()+' ' });
 
   if (!data.length) {
     if (grid) grid.innerHTML = '';
@@ -6322,7 +6322,7 @@ function renderCashflow() {
     const lbl = d.toLocaleDateString(ru ? 'ru-RU' : 'en-US', { day: 'numeric', month: 'short' });
     const h = Math.max(4, Math.round(Math.abs(net) / maxAbs * 52));
     const pos = net >= 0;
-    return `<div style="display:flex;flex-direction:column;align-items:center;gap:6px" title="${ru ? 'Приток' : 'In'}: $${Math.round(inflow).toLocaleString('en')} · ${ru ? 'Расход' : 'Out'}: $${weeklyOut.toLocaleString('en')} · ${ru ? 'Накопленно' : 'Cumulative'}: $${acc.toLocaleString('en')}">
+    return `<div style="display:flex;flex-direction:column;align-items:center;gap:6px" title="${ru ? 'Приток' : 'In'}: ${fmt(inflow)} · ${ru ? 'Расход' : 'Out'}: ${fmt(weeklyOut)} · ${ru ? 'Накопленно' : 'Cumulative'}: ${fmt(acc)}">
       <div style="height:60px;display:flex;align-items:flex-end">
         <div style="width:22px;height:${h}px;border-radius:5px;background:${pos ? 'rgba(237,237,237,0.75)' : 'rgba(240,140,140,0.55)'}"></div>
       </div>
@@ -6330,7 +6330,7 @@ function renderCashflow() {
       <b style="font-size:10.5px;color:${pos ? 'rgba(237,237,237,0.75)' : '#f0a0a0'};font-variant-numeric:tabular-nums">${net >= 0 ? '+' : ''}${Math.round(net / 1000)}k</b>
     </div>`;
   }).join('') + `</div>
-  <div style="margin-top:14px;font-size:11.5px;color:rgba(217,217,217,0.4)">${ru ? 'Итог за 8 недель' : '8-week total'}: <b style="color:${acc >= 0 ? '#EDEDED' : '#f0a0a0'}">$ ${acc.toLocaleString('en')}</b>${weeklyOut ? ` · ${ru ? 'средний расход' : 'avg outflow'} $ ${weeklyOut.toLocaleString('en')}/${ru ? 'нед' : 'wk'}` : ''}</div>`;
+  <div style="margin-top:14px;font-size:11.5px;color:rgba(217,217,217,0.4)">${ru ? 'Итог за 8 недель' : '8-week total'}: <b style="color:${acc >= 0 ? '#EDEDED' : '#f0a0a0'}">${fmt(acc)}</b>${weeklyOut ? ` · ${ru ? 'средний расход' : 'avg outflow'} ${fmt(weeklyOut)}/${ru ? 'нед' : 'wk'}` : ''}</div>`;
 }
 function renderFinance() {
   renderCashflow();
@@ -7472,7 +7472,7 @@ function printInvoice(id) {
 
 function fmtRaw(n) {
   if (!n) return '$ 0';
-  return '$ ' + Number(n).toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return curSym()+' ' + cvt(n).toLocaleString('en', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 // ─── SEARCH ────────────────────────────────────────────────────────────────
@@ -7486,11 +7486,29 @@ function doSearch(q) {
 function val(id)  { return document.getElementById(id)?.value || ''; }
 function esc(s)   { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 const _CUR_SYMS = { USD:'$', RUB:'₽', EUR:'€', GBP:'£' };
-function curSym(){ try { return _CUR_SYMS[localStorage.getItem('reloxy_currency')] || '$'; } catch(_) { return '$'; } }
-function fmt(n)   { const s = curSym(); return n ? s + ' ' + fmtNum(n) : s + ' —'; }
-function fmtNum(n) {
-  return Math.round(n).toLocaleString('ru-RU');
+const _FX_DEFAULT = { RUB:1, USD:1/92, EUR:1/100, GBP:1/117 };
+let _fx = (function(){ try { const c=JSON.parse(localStorage.getItem('reloxy_fx')||'null'); if(c&&c.f) return c.f; } catch(_){} return Object.assign({},_FX_DEFAULT); })();
+function curCode(){ try { return localStorage.getItem('reloxy_currency')||'USD'; } catch(_){ return 'USD'; } }
+function curSym(){ return _CUR_SYMS[curCode()] || '$'; }
+function cvt(n){ return (+n||0) * (_fx[curCode()] || _fx.USD || _FX_DEFAULT.USD); }   // ruble amount -> display currency number
+function fmtNum(n){ return Math.round(cvt(n)).toLocaleString('en'); }
+function fmt(n){ const s = curSym(); return n ? s + ' ' + fmtNum(n) : s + ' —'; }
+async function loadFx(){
+  try {
+    const cached = JSON.parse(localStorage.getItem('reloxy_fx')||'null');
+    if (cached && cached.f && cached.d === new Date().toISOString().slice(0,10)) { _fx = cached.f; return; }
+    const r = await fetch('https://open.er-api.com/v6/latest/RUB');
+    const d = await r.json();
+    if (d && d.rates && d.rates.USD) {
+      _fx = { RUB:1, USD:d.rates.USD, EUR:d.rates.EUR||_FX_DEFAULT.EUR, GBP:d.rates.GBP||_FX_DEFAULT.GBP };
+      localStorage.setItem('reloxy_fx', JSON.stringify({ d:new Date().toISOString().slice(0,10), f:_fx }));
+      try { if (typeof renderDashboard==='function') renderDashboard(); } catch(_){}
+      try { if (typeof renderClients==='function') renderClients(); } catch(_){}
+      try { if (typeof renderFinance==='function') renderFinance(); } catch(_){}
+    }
+  } catch(_){}
 }
+loadFx();
 // Smooth count-up animation for headline numbers — small touch that makes the
 // dashboard feel alive whenever it (re)renders.
 const _countAnim = new WeakMap();
@@ -7499,7 +7517,7 @@ function animateCount(el, target, opts) {
   opts = opts || {};
   const prefix = opts.prefix || '';
   const suffix = opts.suffix || '';
-  const fmtFn  = opts.format || (n => Math.round(n).toLocaleString('ru-RU'));
+  const fmtFn  = opts.format || (n => Math.round(n).toLocaleString('en'));
   const dur    = opts.duration || 900;
   if (!isFinite(target)) { el.textContent = prefix + target + suffix; return; }
   if (_countAnim.has(el)) cancelAnimationFrame(_countAnim.get(el));

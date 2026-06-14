@@ -251,11 +251,20 @@ async function deleteUser(id, name) {
   } catch(e) { toast(e.message); }
 }
 
+let ADMIN_FX = (1/92); // USD per 1 RUB (fallback), refreshed from live rate
+(async () => {
+  try {
+    const r = await fetch('https://open.er-api.com/v6/latest/RUB');
+    const d = await r.json();
+    if (d && d.rates && d.rates.USD) { ADMIN_FX = d.rates.USD; loadStats(); loadUsers(); }
+  } catch(_) {}
+})();
 function fmtRub(n) {
-  if (!n) return '$ —';
-  if (n >= 1000000) return '$ ' + (n/1000000).toFixed(1) + 'M';
-  if (n >= 1000)    return '$ ' + (n/1000).toFixed(0) + 'K';
-  return '$ ' + Math.round(n);
+  const v = (n || 0) * ADMIN_FX;   // amounts stored in RUB -> show in USD
+  if (!v) return '$ —';
+  if (v >= 1000000) return '$ ' + (v/1000000).toFixed(1) + 'M';
+  if (v >= 1000)    return '$ ' + (v/1000).toFixed(1) + 'K';
+  return '$ ' + Math.round(v);
 }
 
 function fmtDate(s) {
