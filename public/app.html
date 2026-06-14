@@ -1294,6 +1294,9 @@ body.is-staff .sb-quick, body.is-staff .sb-alert { display:none !important; }
 .pj-row { touch-action:pan-y; -webkit-touch-callout:none; user-select:none; -webkit-user-select:none; }
 .k-col-empty { padding:22px 10px !important; }
 body.pj-grabbing, body.pj-grabbing * { cursor:grabbing !important; }
+body.pj-grabbing { overflow:hidden !important; }
+body.pj-grabbing .page.active { overflow:hidden !important; }
+.pj-ghost { position:fixed !important; max-width:100vw; will-change:left,top; }
 .pj-ghost { opacity:0.96; transform:scale(1.03) rotate(1deg); border-radius:12px;
   background:#1d1d1d !important; border:1px solid rgba(255,255,255,0.22) !important;
   box-shadow:0 28px 70px -14px rgba(0,0,0,0.85) !important; transition:none !important; animation:none !important; }
@@ -5696,8 +5699,8 @@ const DEFAULT_AVATAR = 'avatar-default.png';
 function defAv() { return `<img src="${DEFAULT_AVATAR}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;display:block;flex-shrink:0" onerror="this.style.display='none'">`; }
 
 // ── Projects: list view (Linear-style) + view toggle ──
-let projView = localStorage.getItem('reloxy_proj_view') || 'list';
-function setProjView(v) { projView = v; localStorage.setItem('reloxy_proj_view', v); renderProjects(); }
+let projView = 'board';
+function setProjView(v) { projView = 'board'; renderProjects(); }
 
 const PJ_GROUPS = [
   ['inprogress', 'k_inprogress'],
@@ -5709,14 +5712,7 @@ const PJ_GROUPS = [
 function renderPjToolbar() {
   const el = document.getElementById('pj-toolbar');
   if (!el) return;
-  const ru = currentLang === 'ru';
-  const icoList  = '<svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><line x1="1" y1="3" x2="13" y2="3"/><line x1="1" y1="7" x2="13" y2="7"/><line x1="1" y1="11" x2="13" y2="11"/></svg>';
-  const icoBoard = '<svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="1" y="1" width="3.4" height="12" rx="1"/><rect x="5.3" y="1" width="3.4" height="8" rx="1"/><rect x="9.6" y="1" width="3.4" height="5" rx="1"/></svg>';
-  el.innerHTML = `
-    <div class="pj-seg">
-      <button class="pj-seg-btn ${projView==='list'?'active':''}" onclick="setProjView('list')">${icoList} ${ru?'Список':'List'}</button>
-      <button class="pj-seg-btn ${projView==='board'?'active':''}" onclick="setProjView('board')">${icoBoard} ${ru?'Доска':'Board'}</button>
-    </div>`;
+  el.innerHTML = '';
 }
 
 function renderPjStats() {
@@ -5972,8 +5968,12 @@ function pjPointerDown(e, cardSel, colSel) {
       return;
     }
     ev.preventDefault();
-    ghost.style.left = (ev.clientX - ghost._dx) + 'px';
-    ghost.style.top = (ev.clientY - ghost._dy) + 'px';
+    const gw = ghost.offsetWidth, gh = ghost.offsetHeight;
+    let nx = ev.clientX - ghost._dx, ny = ev.clientY - ghost._dy;
+    nx = Math.max(0, Math.min(nx, window.innerWidth  - gw));
+    ny = Math.max(0, Math.min(ny, window.innerHeight - gh));
+    ghost.style.left = nx + 'px';
+    ghost.style.top  = ny + 'px';
     ghost.style.display = 'none';
     const el = document.elementFromPoint(ev.clientX, ev.clientY);
     ghost.style.display = '';
