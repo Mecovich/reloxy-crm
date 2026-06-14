@@ -6665,7 +6665,7 @@ function renderTeam() {
   const avHtml = m => {
     const ini = (m.name||'?').split(' ').slice(0,2).map(w=>w[0]||'').join('').toUpperCase();
     const on = (m.status||'active') === 'active';
-    return `<div class="tm-av">${avGeo(m.name||m.id)}<span class="tm-dot ${on?'on':'off'}" title="${on?t('st_active'):t('st_inactive')}"></span></div>`;
+    return `<div class="tm-av">${avInitials(m.name)}<span class="tm-dot ${on?'on':'off'}" title="${on?t('st_active'):t('st_inactive')}"></span></div>`;
   };
   const tgHtml = m => m.phone
     ? `<a href="https://t.me/${esc(m.phone.replace(/^@/,''))}" target="_blank" onclick="event.stopPropagation()">@${esc(m.phone.replace(/^@/,''))}</a>`
