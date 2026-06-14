@@ -2057,6 +2057,32 @@ td { border-bottom-color:var(--line) !important; }
 #page-settings .set-billing-plan { font-size:24px; font-weight:700; color:#EDEDED; letter-spacing:-0.5px; margin-top:5px; }
 #page-settings .set-billing-hint { font-size:12.5px; color:rgba(217,217,217,0.5); line-height:1.7; margin:16px 2px 0; }
 /* ══════════════════ /SETTINGS — FULL-WIDTH REDESIGN ══════════════════ */
+/* ══════════════════ SETTINGS — BEAUTIFY ══════════════════ */
+#page-settings, #page-settings * { font-family:"Helvetica Neue",Helvetica,-apple-system,"Segoe UI",Arial,sans-serif; }
+#page-settings .set-card { background:rgba(255,255,255,0.02) !important; border:1px solid rgba(255,255,255,0.07) !important; border-radius:18px !important; }
+#page-settings .set-card-top { padding:26px 32px 0 !important; border:none !important; }
+#page-settings .set-section-label { font-size:18px !important; font-weight:600 !important; letter-spacing:-0.3px !important; }
+#page-settings .set-section-desc { font-size:13px; color:rgba(217,217,217,0.45); line-height:1.6; margin:7px 0 24px; max-width:560px; }
+#page-settings .set-body { padding:22px 32px 30px !important; }
+#page-settings .set-label { font-size:10.5px !important; font-weight:600 !important; letter-spacing:0.4px !important; text-transform:uppercase !important; color:rgba(217,217,217,0.42) !important; }
+#page-settings .set-fields { gap:20px 24px !important; }
+#page-settings .set-input { background:rgba(255,255,255,0.025) !important; border:1px solid rgba(255,255,255,0.08) !important; border-radius:11px !important; padding:12px 14px !important; font-size:13.5px !important; }
+#page-settings .set-input:hover:not(:focus) { border-color:rgba(255,255,255,0.15) !important; }
+#page-settings .set-input:focus { border-color:rgba(255,255,255,0.3) !important; box-shadow:0 0 0 3px rgba(255,255,255,0.05) !important; background:rgba(255,255,255,0.045) !important; }
+#page-settings .set-footer { padding:18px 32px !important; border-top:1px solid rgba(255,255,255,0.06) !important; }
+#page-settings .set-save-btn { border-radius:10px !important; padding:10px 22px !important; font-weight:600 !important; }
+#page-settings .set-nav { background:rgba(255,255,255,0.02) !important; border:1px solid rgba(255,255,255,0.07) !important; border-radius:16px !important; }
+#page-settings .lang-switcher { gap:8px !important; }
+#page-settings .lang-btn { border-radius:11px !important; padding:11px 14px !important; }
+#page-settings .set-avatar-row { gap:20px !important; margin-bottom:26px !important; }
+/* Billing perks */
+#page-settings .set-billing-card { padding:24px 26px !important; border-radius:16px !important; }
+#page-settings .set-billing-hint { margin:18px 2px 0 !important; }
+#page-settings .set-plan-perks { margin-top:20px; display:flex; flex-direction:column; gap:11px; }
+#page-settings .set-perk { display:flex; align-items:center; gap:11px; font-size:13px; color:rgba(237,237,237,0.78); }
+#page-settings .set-perk svg { flex-shrink:0; color:rgba(237,237,237,0.5); }
+/* ══════════════════ /SETTINGS — BEAUTIFY ══════════════════ */
+
 </style>
 </head>
 <body>
@@ -2686,6 +2712,7 @@ td { border-bottom-color:var(--line) !important; }
           <!-- PROFILE SECTION -->
           <div id="set-tab-profile" class="set-section">
             <div class="set-body">
+              <div class="set-section-desc" data-i18n="set_desc_profile">Your personal info and how you appear in the studio.</div>
               <div class="set-avatar-row">
                 <div class="set-avatar" id="set-big-avatar">—</div>
                 <div class="set-avatar-info">
@@ -2719,6 +2746,7 @@ td { border-bottom-color:var(--line) !important; }
           <!-- NOTIFICATIONS SECTION -->
           <div id="set-tab-notifications" class="set-section" style="display:none">
             <div class="set-body">
+              <div class="set-section-desc" data-i18n="set_desc_notifications">Connect Telegram to get alerts about projects and deadlines.</div>
               <div style="border:1px solid var(--line);border-radius:12px;overflow:hidden">
                 <div style="display:flex;align-items:center;gap:14px;padding:16px 18px;background:var(--s3)">
                   <div style="width:36px;height:36px;border-radius:10px;background:rgba(38,134,255,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0">
@@ -2755,6 +2783,7 @@ td { border-bottom-color:var(--line) !important; }
           <!-- APPEARANCE SECTION -->
           <div id="set-tab-appearance" class="set-section" style="display:none">
             <div class="set-body">
+              <div class="set-section-desc" data-i18n="set_desc_appearance">Language and currency used across your CRM.</div>
               <div class="set-fields">
                 <div class="set-field">
                   <label class="set-label" data-i18n="set_language">Language</label>
@@ -2783,6 +2812,7 @@ td { border-bottom-color:var(--line) !important; }
           <!-- BILLING SECTION -->
           <div id="set-tab-billing" class="set-section" style="display:none">
             <div class="set-body">
+              <div class="set-section-desc" data-i18n="set_desc_billing">Your plan and subscription.</div>
               <div class="set-billing-card">
                 <div class="set-billing-info">
                   <div class="set-billing-label" data-i18n="set_current_plan">Current plan</div>
@@ -2791,12 +2821,14 @@ td { border-bottom-color:var(--line) !important; }
                 <button class="set-save-btn" onclick="openPricingModal()" data-i18n="btn_change_plan">Change plan</button>
               </div>
               <p class="set-billing-hint" data-i18n="set_billing_hint">Manage your subscription and unlock more features for your studio.</p>
+              <div class="set-plan-perks" id="set-plan-perks"></div>
             </div>
           </div>
 
           <!-- STUDIO SECTION -->
           <div id="set-tab-studio" class="set-section" style="display:none">
             <div class="set-body">
+              <div class="set-section-desc" data-i18n="set_desc_studio">Public details about your studio.</div>
               <div class="set-fields">
                 <div class="set-field">
                   <label class="set-label" data-i18n="set_studio_name">Studio name</label>
@@ -2843,6 +2875,7 @@ td { border-bottom-color:var(--line) !important; }
           <!-- SECURITY SECTION -->
           <div id="set-tab-security" class="set-section" style="display:none">
             <div class="set-body">
+              <div class="set-section-desc" data-i18n="set_desc_security">Update your password and keep your account safe.</div>
               <div class="set-fields">
                 <div class="set-field">
                   <label class="set-label" data-i18n="set_cur_pass">Current password</label>
@@ -2867,6 +2900,7 @@ td { border-bottom-color:var(--line) !important; }
           <!-- REVENUE GOAL SECTION -->
           <div id="set-tab-goal" class="set-section" style="display:none">
             <div class="set-body">
+              <div class="set-section-desc" data-i18n="set_desc_goal">Set a revenue target to track on your dashboard.</div>
               <div class="set-fields">
                 <div class="set-field">
                   <label class="set-label" data-i18n="set_goal_amount">Target amount ₽</label>
@@ -3242,6 +3276,7 @@ const TRANS = {
     nav_finance:'Finance', nav_settings:'Settings', sign_out:'Sign out',
     set_nav_profile:'Profile', set_nav_studio:'Studio', set_nav_security:'Security', set_nav_goal:'Revenue Goal',
     set_nav_notifications:'Notifications', set_nav_appearance:'Appearance', set_nav_billing:'Billing', set_current_plan:'Current plan', btn_change_plan:'Change plan', set_billing_hint:'Manage your subscription and unlock more features for your studio.',
+    set_desc_profile:'Your personal info and how you appear in the studio.', set_desc_notifications:'Connect Telegram to get alerts about projects and deadlines.', set_desc_appearance:'Language and currency used across your CRM.', set_desc_billing:'Your plan and subscription.', set_desc_studio:'Public details about your studio.', set_desc_security:'Update your password and keep your account safe.', set_desc_goal:'Set a revenue target to track on your dashboard.',
     search_ph:'Search analytics, projects, users...', btn_add:'+ Add new',
     page_dashboard:'Dashboard', page_calendar:'Calendar', page_clients:'Clients',
     page_projects:'Projects', page_pipeline:'Pipeline', page_team:'Team',
@@ -3386,6 +3421,7 @@ const TRANS = {
     nav_finance:'Финансы', nav_settings:'Настройки', sign_out:'Выйти',
     set_nav_profile:'Профиль', set_nav_studio:'Студия', set_nav_security:'Безопасность', set_nav_goal:'Цель по доходу',
     set_nav_notifications:'Уведомления', set_nav_appearance:'Оформление', set_nav_billing:'Тариф', set_current_plan:'Текущий тариф', btn_change_plan:'Сменить тариф', set_billing_hint:'Управляйте подпиской и открывайте больше возможностей для студии.',
+    set_desc_profile:'Личные данные и то, как вы отображаетесь в студии.', set_desc_notifications:'Подключите Telegram, чтобы получать уведомления о проектах и дедлайнах.', set_desc_appearance:'Язык и валюта, используемые в CRM.', set_desc_billing:'Ваш тариф и подписка.', set_desc_studio:'Публичная информация о вашей студии.', set_desc_security:'Смените пароль и защитите аккаунт.', set_desc_goal:'Задайте цель по доходу для отслеживания на дашборде.',
     search_ph:'Поиск по аналитике, проектам, пользователям...', btn_add:'+ Добавить',
     page_dashboard:'Дашборд', page_calendar:'Календарь', page_clients:'Клиенты',
     page_projects:'Проекты', page_pipeline:'Воронка', page_team:'Команда',
@@ -6149,10 +6185,23 @@ function setCurrency(cur) {
   setMsg('profile-msg', t('msg_profile_saved'), 'ok');
 }
 function renderBillingTab() {
-  const el = document.getElementById('set-plan-name');
-  if (!el) return;
   const k = (typeof planOf === 'function') ? planOf() : (user?.plan || 'free');
-  el.textContent = PLAN_INFO[k] ? (currentLang === 'ru' ? PLAN_INFO[k].ru : PLAN_INFO[k].en) : k;
+  const ru = currentLang === 'ru';
+  const nameEl = document.getElementById('set-plan-name');
+  if (nameEl) nameEl.textContent = PLAN_INFO[k] ? (ru ? PLAN_INFO[k].ru : PLAN_INFO[k].en) : k;
+  const perksEl = document.getElementById('set-plan-perks');
+  if (perksEl) {
+    const PERKS = {
+      free:   ru ? ['Проекты, клиенты, счета, воронка','Команда до 2 человек','Базовая статистика']
+                 : ['Projects, clients, invoices, pipeline','Team up to 2 people','Basic stats'],
+      pro:    ru ? ['Всё из Старта','Команда до 7 человек','Аналитика и отчёты','100 ИИ-запросов в месяц']
+                 : ['Everything in Start','Team up to 7','Analytics & reports','100 AI requests/mo'],
+      studio: ru ? ['Всё из Pro','Команда без лимита','ИИ без лимита','Приоритетная поддержка']
+                 : ['Everything in Pro','Unlimited team','Unlimited AI','Priority support'],
+    };
+    const check = '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 8.5l3.5 3.5L13 4.5"/></svg>';
+    perksEl.innerHTML = (PERKS[k]||[]).map(f=>`<div class="set-perk">${check}<span>${f}</span></div>`).join('');
+  }
 }
 
 // ── SETTINGS SECTION PICKER ────────────────────────────────────
