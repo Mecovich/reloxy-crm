@@ -2118,6 +2118,9 @@ td { border-bottom-color:var(--line) !important; }
 #page-clients .cl-since b { color:rgba(217,217,217,0.62) !important; font-weight:600 !important; }
 /* ══════════════════ /CLIENTS — MINIMAL REDESIGN ══════════════════ */
 /* ══════════════════ CLEAN MONOCHROME + ACTIVITY ══════════════════ */
+/* Banner slides with image background */
+.bn-slide.has-bg::before { display:none !important; }
+.bn-slide.has-bg .bn-title, .bn-slide.has-bg .bn-text { text-shadow:0 1px 14px rgba(0,0,0,0.65); }
 /* Helvetica Neue everywhere — icon fonts kept intact */
 body, body * { font-family:"Helvetica Neue",Helvetica,-apple-system,"Segoe UI",Arial,sans-serif; }
 .material-symbols-outlined, [class*="material-symbols"] { font-family:'Material Symbols Outlined' !important; }
@@ -4482,25 +4485,28 @@ function getGreeting() {
 const BN_INTERVAL = 6000;
 const DASH_BANNERS = [
   {
-    tag:   { ru:'Новое',   en:'New' },
-    title: { ru:'Канбан стал удобнее', en:'Kanban got better' },
-    text:  { ru:'Перетаскивайте проекты между колонками — статус сохраняется автоматически.', en:'Drag projects between columns — status saves automatically.' },
+    bg:    '/banners/1.png',
+    tag:   { ru:'Reloxy',  en:'Reloxy' },
+    title: { ru:'Добро пожаловать в Reloxy', en:'Welcome to Reloxy' },
+    text:  { ru:'Клиенты, проекты и счета — всё в одном месте.', en:'Clients, projects and invoices — all in one place.' },
     cta:   { ru:'Открыть проекты', en:'Open projects' },
     nav:   ['projects', 3],
   },
   {
-    tag:   { ru:'Совет',   en:'Tip' },
-    title: { ru:'Поставьте цель месяца', en:'Set a monthly goal' },
-    text:  { ru:'Задайте план по выручке и следите за прогрессом прямо на дашборде.', en:'Set a revenue target and track progress right on the dashboard.' },
-    cta:   { ru:'Указать цель', en:'Set goal' },
-    fn:    () => openGoalModal(),
+    bg:    '/banners/2.png',
+    tag:   { ru:'Везде с вами', en:'Anywhere' },
+    title: { ru:'Студия в одном окне', en:'Your studio in one window' },
+    text:  { ru:'Управляйте делами с любого устройства, где бы вы ни были.', en:'Run everything from any device, wherever you are.' },
+    cta:   { ru:'Открыть клиентов', en:'Open clients' },
+    nav:   ['clients', 2],
   },
   {
-    tag:   { ru:'Команда', en:'Team' },
-    title: { ru:'Работайте вместе', en:'Work together' },
-    text:  { ru:'Пригласите сотрудников по ссылке — они увидят свои проекты и задачи.', en:'Invite teammates via link — they will see their projects and tasks.' },
-    cta:   { ru:'Открыть команду', en:'Open team' },
-    nav:   ['team', 5],
+    bg:    '/banners/3.png',
+    tag:   { ru:'Studio', en:'Studio' },
+    title: { ru:'Перейдите на Studio', en:'Upgrade to Studio' },
+    text:  { ru:'Безлимит команды, ИИ без ограничений и приоритетная поддержка.', en:'Unlimited team, unlimited AI and priority support.' },
+    cta:   { ru:'Сменить тариф', en:'Upgrade' },
+    fn:    () => openPricingModal('studio'),
   },
 ];
 let bnIdx = 0, bnTimer = null;
@@ -4542,8 +4548,8 @@ function renderBanners() {
   wrap.innerHTML = `
     <div class="bn-track" id="bn-track">
       ${DASH_BANNERS.map((b, i) => `
-      <div class="bn-slide ${i===0?'active':''}" onclick="bnAction(${i})">
-        <div class="bn-art" aria-hidden="true">${art}</div>
+      <div class="bn-slide ${i===0?'active':''} ${b.bg?'has-bg':''}" onclick="bnAction(${i})" ${b.bg?`style="background-image:linear-gradient(90deg, rgba(12,12,13,0.94) 0%, rgba(12,12,13,0.7) 42%, rgba(12,12,13,0.25) 100%), url('${b.bg}');background-size:cover;background-position:center;"`:''}>
+        ${b.bg?'':`<div class="bn-art" aria-hidden="true">${art}</div>`}
         <div class="bn-sheen" aria-hidden="true"></div>
         <div class="bn-body">
           <span class="bn-tag">${b.tag[L]}</span>
