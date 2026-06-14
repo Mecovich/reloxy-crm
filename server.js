@@ -1449,6 +1449,46 @@ async function notifyUser(userId, text) {
   if (chatId) await tgSend(chatId, text);
 }
 
+// ─── Premium: daily Telegram reminders ───────────────────────────────────────
+function isPaidRow(u) {
+  if (u.trial_ends_at && new Date(u.trial_ends_at) > new Date()) return true;
+  if (u.plan && u.plan !== 'free') {
+    if (u.plan_expires_at && new Date(u.plan_expires_at) < new Date()) return false;
+    return true;
+  }
+  return false;
+}
+async function buildReminderDigest(u) {
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const in2 = new Date(today.getTime() + 2 * 86400000);
+  const pr = await db.execute({ sql: "SELECT title, deadline FROM projects WHERE user_id=? AND status!='done' AND deadline IS NOT NULL AND deadline!=''", args: [u.id] });
+  const soon = pr.rows.filter(p => { const d = new Date(p.deadline + 'T00:00:00'); return !isNaN(d) && d <= in2; });
+  const iv = await db.execute({ sql: "SELECT number, amount, due_at, status FROM invoices WHERE user_id=? AND status IN ('pending','overdue')", args: [u.id] });
+  const dueInv = iv.rows.filter(i => !i.due_at || new Date(i.due_at) <= in2);
+  if (!soon.length && !dueInv.length) return null;
+  let msg = `🔔 <b>Reloxy — reminders</b>\n`;
+  if (soon.length) msg += `\n📅 <b>Deadlines</b>\n` + soon.map(p => { const d = new Date(p.deadline + 'T00:00:00'); const diff = Math.ceil((d - today) / 86400000); const tag = diff < 0 ? 'overdue' : diff === 0 ? 'today' : diff + 'd'; return `• ${p.title} — ${tag}`; }).join('\n') + '\n';
+  if (dueInv.length) msg += `\n💰 <b>Invoices</b>\n` + dueInv.map(i => `• #${i.number || ''} ${i.amount ? ('· ' + i.amount) : ''} — ${i.status}`).join('\n') + '\n';
+  msg += `\n→ <a href="https://reloxy.tech/app">Open Reloxy</a>`;
+  return msg;
+}
+const _remindSent = new Map(); // userId -> 'YYYY-MM-DD'
+async function runReminders() {
+  if (!TG_API) return;
+  try {
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const us = await db.execute({ sql: 'SELECT id, name, plan, trial_ends_at, plan_expires_at, owner_id, telegram_chat_id FROM users WHERE telegram_chat_id IS NOT NULL', args: [] });
+    for (const u of us.rows) {
+      if (u.owner_id) continue;          // studio owners only
+      if (!isPaidRow(u)) continue;       // premium gate
+      if (_remindSent.get(u.id) === todayStr) continue;
+      const msg = await buildReminderDigest(u);
+      if (msg) await tgSend(u.telegram_chat_id, msg);
+      _remindSent.set(u.id, todayStr);
+    }
+  } catch (e) { console.error('Reminders error:', e.message); }
+}
+
 // Generate a cryptographically-strong link code (8 hex chars)
 function genCode() { return crypto.randomBytes(4).toString('hex').toUpperCase(); }
 
@@ -1486,6 +1526,20 @@ app.get('/api/tg/link-code', authMiddleware, async (req, res) => {
 app.post('/api/tg/unlink', authMiddleware, async (req, res) => {
   await db.execute({ sql: 'UPDATE users SET telegram_chat_id = NULL, tg_link_code = NULL WHERE id = ?', args: [req.user.id] });
   res.json({ ok: true });
+});
+
+// API: send a reminder digest right now (premium) — used by the "test reminder" button
+app.post('/api/tg/remind-now', authMiddleware, async (req, res) => {
+  try {
+    const r = await db.execute({ sql: 'SELECT id, name, plan, trial_ends_at, plan_expires_at, telegram_chat_id FROM users WHERE id = ?', args: [req.user.id] });
+    const u = r.rows[0];
+    if (!u) return res.status(404).json({ error: 'User not found' });
+    if (!isPaidRow(u)) return res.status(403).json({ error: 'premium_only' });
+    if (!u.telegram_chat_id) return res.status(400).json({ error: 'telegram_not_linked' });
+    const msg = (await buildReminderDigest(u)) || '✅ <b>Reloxy</b>\nNo upcoming deadlines or unpaid invoices right now.';
+    await tgSend(u.telegram_chat_id, msg);
+    res.json({ ok: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 // Long-polling loop
@@ -1564,6 +1618,8 @@ initDB().then(() => {
   // concurrent getUpdates calls cause 409 conflicts — disable with TELEGRAM_POLLING=false.
   if (process.env.TELEGRAM_POLLING !== 'false') {
     tgPoll();
+    // Premium daily reminders — fire around 09:00 server time
+    setInterval(() => { if (new Date().getHours() === 9) runReminders(); }, 60 * 60 * 1000).unref?.();
   } else {
     console.log('ℹ️ Telegram polling disabled on this instance');
   }

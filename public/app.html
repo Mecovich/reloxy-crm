@@ -2831,7 +2831,11 @@ body { background:#0E0E0E !important; }
                 </div>
                 <div style="padding:18px;display:none" id="tg-connected-block">
                   <div style="font-size:13px;color:var(--g1);margin-bottom:14px">✅ Your Telegram is connected. You will receive notifications for new tasks and projects.</div>
-                  <button class="btn btn-ghost" onclick="unlinkTelegram()" style="font-size:12px;color:#f87171;border-color:rgba(248,113,113,0.25)">Disconnect</button>
+                  <div style="display:flex;gap:8px;flex-wrap:wrap">
+                    <button class="btn btn-ghost" onclick="remindNow()" style="font-size:12px"><span class="material-symbols-outlined" style="font-size:15px;margin-right:5px;vertical-align:-3px">notifications_active</span><span data-i18n="btn_test_reminder">Send test reminder</span></button>
+                    <button class="btn btn-ghost" onclick="unlinkTelegram()" style="font-size:12px;color:#f87171;border-color:rgba(248,113,113,0.25)">Disconnect</button>
+                  </div>
+                  <p style="font-size:11.5px;color:rgba(217,217,217,0.4);margin-top:10px" data-i18n="reminder_hint">Daily reminders about upcoming deadlines and unpaid invoices (Pro).</p>
                 </div>
               </div>
             </div>
@@ -3336,7 +3340,7 @@ const TRANS = {
     search_word:'Search',
     nav_finance:'Finance', nav_settings:'Settings', sign_out:'Sign out',
     set_nav_profile:'Profile', set_nav_studio:'Studio', set_nav_security:'Security', set_nav_goal:'Revenue Goal',
-    set_nav_notifications:'Notifications', set_nav_appearance:'Appearance', set_nav_billing:'Billing', set_current_plan:'Current plan', btn_change_plan:'Change plan', set_billing_hint:'Manage your subscription and unlock more features for your studio.', rep_profit_title:'Profit by project',
+    set_nav_notifications:'Notifications', set_nav_appearance:'Appearance', set_nav_billing:'Billing', set_current_plan:'Current plan', btn_change_plan:'Change plan', set_billing_hint:'Manage your subscription and unlock more features for your studio.', rep_profit_title:'Profit by project', btn_test_reminder:'Send test reminder', reminder_hint:'Daily reminders about upcoming deadlines and unpaid invoices (Pro).',
     set_desc_profile:'Your personal info and how you appear in the studio.', set_desc_notifications:'Connect Telegram to get alerts about projects and deadlines.', set_desc_appearance:'Language and currency used across your CRM.', set_desc_billing:'Your plan and subscription.', set_desc_studio:'Public details about your studio.', set_desc_security:'Update your password and keep your account safe.', set_desc_goal:'Set a revenue target to track on your dashboard.',
     search_ph:'Search analytics, projects, users...', btn_add:'+ Add new',
     page_dashboard:'Dashboard', page_calendar:'Calendar', page_clients:'Clients',
@@ -3481,7 +3485,7 @@ const TRANS = {
     search_word:'Поиск',
     nav_finance:'Финансы', nav_settings:'Настройки', sign_out:'Выйти',
     set_nav_profile:'Профиль', set_nav_studio:'Студия', set_nav_security:'Безопасность', set_nav_goal:'Цель по доходу',
-    set_nav_notifications:'Уведомления', set_nav_appearance:'Оформление', set_nav_billing:'Тариф', set_current_plan:'Текущий тариф', btn_change_plan:'Сменить тариф', set_billing_hint:'Управляйте подпиской и открывайте больше возможностей для студии.', rep_profit_title:'Прибыль по проектам',
+    set_nav_notifications:'Уведомления', set_nav_appearance:'Оформление', set_nav_billing:'Тариф', set_current_plan:'Текущий тариф', btn_change_plan:'Сменить тариф', set_billing_hint:'Управляйте подпиской и открывайте больше возможностей для студии.', rep_profit_title:'Прибыль по проектам', btn_test_reminder:'Отправить тест-напоминание', reminder_hint:'Ежедневные напоминания о близких дедлайнах и неоплаченных счетах (Pro).',
     set_desc_profile:'Личные данные и то, как вы отображаетесь в студии.', set_desc_notifications:'Подключите Telegram, чтобы получать уведомления о проектах и дедлайнах.', set_desc_appearance:'Язык и валюта, используемые в CRM.', set_desc_billing:'Ваш тариф и подписка.', set_desc_studio:'Публичная информация о вашей студии.', set_desc_security:'Смените пароль и защитите аккаунт.', set_desc_goal:'Задайте цель по доходу для отслеживания на дашборде.',
     search_ph:'Поиск по аналитике, проектам, пользователям...', btn_add:'+ Добавить',
     page_dashboard:'Дашборд', page_calendar:'Календарь', page_clients:'Клиенты',
@@ -5485,6 +5489,18 @@ function renderActivity() {
       <span class="activity-ic material-symbols-outlined">${x.ic}</span>
       <div class="activity-body"><div class="activity-txt">${x.txt} <b>${esc(x.name||'')}</b></div><div class="activity-time">${fd(x.t)}</div></div>
     </div>`).join('');
+}
+
+// ── Premium: Telegram reminders test ──
+async function remindNow() {
+  try {
+    await api('POST', '/api/tg/remind-now', {});
+    toast(currentLang==='ru' ? 'Напоминание отправлено в Telegram' : 'Reminder sent to Telegram');
+  } catch(e) {
+    if (e.message === 'premium_only') { openPricingModal('pro'); toast(currentLang==='ru'?'Доступно на Pro и Studio':'Available on Pro & Studio'); }
+    else if (e.message === 'telegram_not_linked') { toast(currentLang==='ru'?'Сначала подключите Telegram':'Link Telegram first'); }
+    else toast(e.message);
+  }
 }
 
 // ── Premium: CSV export + studio report ──
