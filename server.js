@@ -258,6 +258,15 @@ async function initDB() {
     `ALTER TABLE users ADD COLUMN telegram_chat_id TEXT DEFAULT NULL`,
     `ALTER TABLE users ADD COLUMN tg_link_code TEXT DEFAULT NULL`,
     `ALTER TABLE projects ADD COLUMN share_token TEXT DEFAULT NULL`,
+    `CREATE TABLE IF NOT EXISTS time_logs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      project_id INTEGER NOT NULL,
+      minutes INTEGER NOT NULL,
+      note TEXT DEFAULT '',
+      logged_at TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`,
   ];
   for (const sql of migrations) {
     try {
@@ -1032,6 +1041,31 @@ app.get('/api/share/:token', async (req, res) => {
     studio_name: p.studio_name || p.owner_name,
     stages: stages.rows,
   });
+});
+
+// ─── Premium: time tracking ──────────────────────────────────────────────────
+app.get('/api/projects/:id/time', authMiddleware, async (req, res) => {
+  if (!(await assertOwnsProject(req, req.params.id))) return res.status(404).json({ error: 'Project not found' });
+  const r = await db.execute({ sql: 'SELECT id, minutes, note, logged_at, created_at FROM time_logs WHERE project_id=? ORDER BY created_at DESC', args: [req.params.id] });
+  res.json(r.rows);
+});
+app.post('/api/projects/:id/time', authMiddleware, async (req, res) => {
+  if (denyStaff(req, res)) return;
+  if (!(await assertOwnsProject(req, req.params.id))) return res.status(404).json({ error: 'Project not found' });
+  const ur = await db.execute({ sql: 'SELECT plan, trial_ends_at, plan_expires_at FROM users WHERE id=?', args: [req.user.id] });
+  if (!isPaidRow(ur.rows[0] || {})) return res.status(403).json({ error: 'premium_only' });
+  const minutes = Math.max(1, Math.round(+req.body.minutes || 0));
+  if (!minutes) return res.status(400).json({ error: 'minutes required' });
+  const note = (req.body.note || '').slice(0, 200);
+  const logged_at = req.body.logged_at || new Date().toISOString().slice(0, 10);
+  const ins = await db.execute({ sql: 'INSERT INTO time_logs (user_id, project_id, minutes, note, logged_at) VALUES (?,?,?,?,?)', args: [req.user.id, req.params.id, minutes, note, logged_at] });
+  const row = await db.execute({ sql: 'SELECT id, minutes, note, logged_at, created_at FROM time_logs WHERE id=?', args: [ins.lastInsertRowid] });
+  res.json(row.rows[0]);
+});
+app.delete('/api/projects/:id/time/:logId', authMiddleware, async (req, res) => {
+  if (!(await assertOwnsProject(req, req.params.id))) return res.status(404).json({ error: 'Project not found' });
+  await db.execute({ sql: 'DELETE FROM time_logs WHERE id=? AND project_id=?', args: [req.params.logId, req.params.id] });
+  res.json({ ok: true });
 });
 
 // GET staff list with their user_ids (for assignment dropdown)

@@ -6919,6 +6919,17 @@ function openProjectModal(p) {
       <label class="field-label">${t('f_share_link')}</label>
       <p class="field-hint" style="font-size:11px;color:rgba(217,217,217,0.35);margin:2px 0 8px">${t('hint_share_link')}</p>
       <div id="m-share-link"><button class="proj-share-action" onclick="generateShareLink(${p.id})"><span class="material-symbols-outlined">link</span>${t('btn_generate_link')}</button></div>
+    </div>
+    <div class="field" style="margin-top:6px;border-top:1px solid var(--line);padding-top:16px">
+      <label class="field-label">${currentLang==='ru'?'Учёт времени':'Time tracking'}</label>
+      <p class="field-hint" style="font-size:11px;color:rgba(217,217,217,0.35);margin:2px 0 8px">${currentLang==='ru'?'Логируйте часы по проекту для расчёта трудозатрат — Pro':'Log hours on this project to track effort — Pro'}</p>
+      <div id="m-time-summary" style="font-size:13px;color:#EDEDED;font-weight:600;margin-bottom:10px">—</div>
+      <div id="m-time-list" class="proj-stages-list"></div>
+      <div class="proj-stage-add-row" style="display:flex;gap:8px;margin-top:8px">
+        <input id="m-time-min" type="number" min="1" placeholder="${currentLang==='ru'?'Минуты':'Minutes'}" style="width:120px">
+        <input id="m-time-note" placeholder="${currentLang==='ru'?'Заметка':'Note'}" onkeydown="if(event.key==='Enter')submitTimeLog(${p.id})">
+        <button class="proj-stage-add-btn" onclick="submitTimeLog(${p.id})">+ ${currentLang==='ru'?'Время':'Time'}</button>
+      </div>
     </div>` : ''}
   `, async () => {
     const body = { title:val('m-title'), type:val('m-type'), client_id:val('m-client')||null, status:val('m-status'), progress:+val('m-progress'), deadline:val('m-deadline'), budget:+val('m-budget'), cost:+val('m-cost')||0, assigned_to:val('m-assigned')||null };
@@ -6939,7 +6950,43 @@ function openProjectModal(p) {
       loadAll();
     } catch(e) { showErr(e.message); }
   });
-  if (p) { loadProjectStages(p.id); loadShareLinkState(p.id); }
+  if (p) { loadProjectStages(p.id); loadShareLinkState(p.id); loadProjectTime(p.id); }
+}
+
+// ── Premium: time tracking (project modal) ──
+async function loadProjectTime(projectId) {
+  const list = document.getElementById('m-time-list');
+  const sum = document.getElementById('m-time-summary');
+  if (!list) return;
+  try {
+    const logs = await api('GET', `/api/projects/${projectId}/time`);
+    const total = logs.reduce((s,l)=>s+(l.minutes||0),0);
+    const h = Math.floor(total/60), m = total%60;
+    if (sum) sum.textContent = (currentLang==='ru'?'Всего: ':'Total: ') + (h?h+(currentLang==='ru'?'ч ':'h '):'') + m + (currentLang==='ru'?'м':'m') + ` · ${logs.length}`;
+    list.innerHTML = logs.length ? logs.map(l => {
+      const hh = Math.floor(l.minutes/60), mm = l.minutes%60;
+      const dur = (hh?hh+(currentLang==='ru'?'ч ':'h '):'') + mm + (currentLang==='ru'?'м':'m');
+      return `<div class="proj-stage-item"><span style="flex:1">${dur}${l.note?` · <span style="color:rgba(217,217,217,0.5)">${esc(l.note)}</span>`:''}</span><span style="font-size:11px;color:rgba(217,217,217,0.35);margin-right:8px">${l.logged_at||''}</span><span class="proj-stage-del" onclick="deleteTimeLog(${projectId},${l.id})">✕</span></div>`;
+    }).join('') : '';
+  } catch(e) { /* ignore (e.g. not premium on read is allowed) */ }
+}
+async function submitTimeLog(projectId) {
+  const minEl = document.getElementById('m-time-min');
+  const noteEl = document.getElementById('m-time-note');
+  const min = +minEl.value;
+  if (!min || min < 1) { toast(currentLang==='ru'?'Введите минуты':'Enter minutes'); return; }
+  try {
+    await api('POST', `/api/projects/${projectId}/time`, { minutes: min, note: noteEl.value.trim() });
+    minEl.value = ''; noteEl.value = '';
+    loadProjectTime(projectId);
+  } catch(e) {
+    if (e.message === 'premium_only') { openPricingModal('pro'); toast(currentLang==='ru'?'Учёт времени — на Pro и Studio':'Time tracking is on Pro & Studio'); }
+    else toast(e.message);
+  }
+}
+async function deleteTimeLog(projectId, logId) {
+  try { await api('DELETE', `/api/projects/${projectId}/time/${logId}`); loadProjectTime(projectId); }
+  catch(e) { toast(e.message); }
 }
 
 function editProject(id)    { openProjectModal(projects.find(p=>p.id===id)); }
