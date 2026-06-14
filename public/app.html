@@ -2117,6 +2117,9 @@ td { border-bottom-color:var(--line) !important; }
 #page-clients .cl-since b { color:rgba(217,217,217,0.62) !important; font-weight:600 !important; }
 /* ══════════════════ /CLIENTS — MINIMAL REDESIGN ══════════════════ */
 /* ══════════════════ CLEAN MONOCHROME + ACTIVITY ══════════════════ */
+/* Helvetica Neue everywhere — icon fonts kept intact */
+body, body * { font-family:"Helvetica Neue",Helvetica,-apple-system,"Segoe UI",Arial,sans-serif; }
+.material-symbols-outlined, [class*="material-symbols"] { font-family:'Material Symbols Outlined' !important; }
 body::before { display:none !important; }
 #atmosphere { display:none !important; }
 body { background:#0E0E0E !important; }
@@ -3356,7 +3359,7 @@ const TRANS = {
     dash_inprogress:'In progress', dash_deadlines:'Deadlines',
     dash_unpaid:'Unpaid invoices', dash_all:'All →', dash_calendar:'Calendar →',
     dash_no_projects:'No active projects', dash_no_deadlines:'No upcoming deadlines',
-    dash_all_paid:'All invoices paid 🎉', dash_mark_paid:'Mark paid',
+    dash_all_paid:'All invoices paid', dash_mark_paid:'Mark paid',
     dash_today:'Today', dash_tomorrow:'Tomorrow',
     cal_sub:'Project deadlines and important dates', cal_today:'Today',
     clients_sub:'All companies and contacts', btn_new_client:'+ New client',
@@ -3501,7 +3504,7 @@ const TRANS = {
     dash_inprogress:'В работе', dash_deadlines:'Дедлайны',
     dash_unpaid:'Неоплаченные счета', dash_all:'Все →', dash_calendar:'Календарь →',
     dash_no_projects:'Нет активных проектов', dash_no_deadlines:'Нет дедлайнов',
-    dash_all_paid:'Все счета оплачены 🎉', dash_mark_paid:'Оплачено',
+    dash_all_paid:'Все счета оплачены', dash_mark_paid:'Оплачено',
     dash_today:'Сегодня', dash_tomorrow:'Завтра',
     cal_sub:'Дедлайны проектов и важные даты', cal_today:'Сегодня',
     clients_sub:'Все компании и контакты', btn_new_client:'+ Новый клиент',
