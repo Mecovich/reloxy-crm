@@ -2127,6 +2127,14 @@ body { background:#0E0E0E !important; }
 .activity-txt b { color:#EDEDED; font-weight:600; }
 .activity-time { font-size:11px; color:rgba(217,217,217,0.36); margin-top:3px; font-variant-numeric:tabular-nums; }
 .activity-empty { padding:64px 20px; text-align:center; color:rgba(217,217,217,0.35); font-size:13px; }
+/* Profit by project (Reports) */
+.rep-pr-row { display:grid; grid-template-columns:2fr 1fr 1fr 1fr 0.8fr; gap:10px; align-items:center; padding:11px 2px; border-bottom:1px solid var(--line); font-size:13px; color:var(--white); font-variant-numeric:tabular-nums; }
+.rep-pr-head { font-size:10px; text-transform:uppercase; letter-spacing:0.6px; color:var(--g1); border-bottom:1px solid var(--line2); }
+.rep-pr-name { color:var(--white); font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.rep-pr-margin { font-size:11.5px; font-weight:600; padding:2px 9px; border-radius:20px; }
+.rep-pr-margin.good { color:#EDEDED; background:rgba(255,255,255,0.08); }
+.rep-pr-margin.ok { color:rgba(217,217,217,0.7); background:rgba(255,255,255,0.04); }
+.rep-pr-margin.low { color:#f0b48c; background:rgba(240,140,80,0.08); }
 /* ══════════════════ /CLEAN MONOCHROME + ACTIVITY ══════════════════ */
 
 </style>
@@ -3113,6 +3121,12 @@ body { background:#0E0E0E !important; }
           <div id="rep-exp-cats" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px"></div>
         </div>
       </div>
+      <div style="margin-top:14px">
+        <div class="an-section">
+          <div class="an-section-title" data-i18n="rep_profit_title">Profit by project</div>
+          <div id="rep-profit" style="margin-top:10px"></div>
+        </div>
+      </div>
     </div>
 
   </div>
@@ -3322,7 +3336,7 @@ const TRANS = {
     search_word:'Search',
     nav_finance:'Finance', nav_settings:'Settings', sign_out:'Sign out',
     set_nav_profile:'Profile', set_nav_studio:'Studio', set_nav_security:'Security', set_nav_goal:'Revenue Goal',
-    set_nav_notifications:'Notifications', set_nav_appearance:'Appearance', set_nav_billing:'Billing', set_current_plan:'Current plan', btn_change_plan:'Change plan', set_billing_hint:'Manage your subscription and unlock more features for your studio.',
+    set_nav_notifications:'Notifications', set_nav_appearance:'Appearance', set_nav_billing:'Billing', set_current_plan:'Current plan', btn_change_plan:'Change plan', set_billing_hint:'Manage your subscription and unlock more features for your studio.', rep_profit_title:'Profit by project',
     set_desc_profile:'Your personal info and how you appear in the studio.', set_desc_notifications:'Connect Telegram to get alerts about projects and deadlines.', set_desc_appearance:'Language and currency used across your CRM.', set_desc_billing:'Your plan and subscription.', set_desc_studio:'Public details about your studio.', set_desc_security:'Update your password and keep your account safe.', set_desc_goal:'Set a revenue target to track on your dashboard.',
     search_ph:'Search analytics, projects, users...', btn_add:'+ Add new',
     page_dashboard:'Dashboard', page_calendar:'Calendar', page_clients:'Clients',
@@ -3467,7 +3481,7 @@ const TRANS = {
     search_word:'Поиск',
     nav_finance:'Финансы', nav_settings:'Настройки', sign_out:'Выйти',
     set_nav_profile:'Профиль', set_nav_studio:'Студия', set_nav_security:'Безопасность', set_nav_goal:'Цель по доходу',
-    set_nav_notifications:'Уведомления', set_nav_appearance:'Оформление', set_nav_billing:'Тариф', set_current_plan:'Текущий тариф', btn_change_plan:'Сменить тариф', set_billing_hint:'Управляйте подпиской и открывайте больше возможностей для студии.',
+    set_nav_notifications:'Уведомления', set_nav_appearance:'Оформление', set_nav_billing:'Тариф', set_current_plan:'Текущий тариф', btn_change_plan:'Сменить тариф', set_billing_hint:'Управляйте подпиской и открывайте больше возможностей для студии.', rep_profit_title:'Прибыль по проектам',
     set_desc_profile:'Личные данные и то, как вы отображаетесь в студии.', set_desc_notifications:'Подключите Telegram, чтобы получать уведомления о проектах и дедлайнах.', set_desc_appearance:'Язык и валюта, используемые в CRM.', set_desc_billing:'Ваш тариф и подписка.', set_desc_studio:'Публичная информация о вашей студии.', set_desc_security:'Смените пароль и защитите аккаунт.', set_desc_goal:'Задайте цель по доходу для отслеживания на дашборде.',
     search_ph:'Поиск по аналитике, проектам, пользователям...', btn_add:'+ Добавить',
     page_dashboard:'Дашборд', page_calendar:'Календарь', page_clients:'Клиенты',
@@ -5342,6 +5356,33 @@ function renderReports() {
   if (repEC) repEC.innerHTML = Object.entries(expCats).length ? Object.entries(expCats).sort((a,b)=>b[1]-a[1]).map(([cat,val])=>`
     <div class="an-card"><div class="an-label">${cat}</div><div class="an-value" style="font-size:20px">${fmt(val)}</div></div>`).join('')
     : '<div style="color:var(--g2);font-size:13px;padding:16px 0">No expense data</div>';
+
+  // Profit / margin by project
+  const repPr = document.getElementById('rep-profit');
+  if (repPr) {
+    const ru = currentLang === 'ru';
+    const rows = (projects||[]).map(p => {
+      const invRev = (invoices||[]).filter(i=>i.status==='paid' && i.project_id===p.id).reduce((s,i)=>s+(i.amount||0),0);
+      const rev = invRev || (p.budget||0);
+      const cost = p.cost||0;
+      const prof = rev - cost;
+      const margin = rev>0 ? Math.round(prof/rev*100) : 0;
+      return { name:p.title, rev, cost, prof, margin };
+    }).filter(r => r.rev>0 || r.cost>0).sort((a,b)=>b.prof-a.prof);
+    if (!rows.length) {
+      repPr.innerHTML = `<div style="padding:18px 0;color:var(--g2);font-size:13px">${ru?'Нет данных по прибыли — добавьте бюджет и расходы проектам':'No profit data — add budget and costs to projects'}</div>`;
+    } else {
+      const head = `<div class="rep-pr-row rep-pr-head"><span>${ru?'Проект':'Project'}</span><span>${ru?'Выручка':'Revenue'}</span><span>${ru?'Расходы':'Cost'}</span><span>${ru?'Прибыль':'Profit'}</span><span>${ru?'Маржа':'Margin'}</span></div>`;
+      repPr.innerHTML = head + rows.map(r=>`
+        <div class="rep-pr-row">
+          <span class="rep-pr-name">${esc(r.name)}</span>
+          <span>${fmt(r.rev)}</span>
+          <span style="color:rgba(217,217,217,0.55)">${fmt(r.cost)}</span>
+          <span style="color:${r.prof>=0?'#EDEDED':'#f08c8c'};font-weight:600">${fmt(r.prof)}</span>
+          <span><span class="rep-pr-margin ${r.margin>=50?'good':r.margin>=20?'ok':'low'}">${r.margin}%</span></span>
+        </div>`).join('');
+    }
+  }
 }
 
 // ─── CALENDAR ──────────────────────────────────────────────────────────────
