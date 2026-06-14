@@ -382,8 +382,9 @@ tr:hover td { background:transparent; }
 /* ── CALENDAR ── */
 .cal-nav { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; }
 .cal-nav-title { font-size:15px; font-weight:700; letter-spacing:-0.4px; }
-.cal-nav-btns { display:flex; gap:4px; }
-.cal-nav-btn { width:30px; height:30px; background:var(--s2); border:1px solid var(--line); border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; color:var(--g1); font-size:13px; transition:all 0.1s; }
+.cal-nav-btns { display:flex; align-items:center; gap:6px; }
+.cal-nav-btn { height:32px; min-width:32px; padding:0 13px; box-sizing:border-box; background:var(--s2); border:1px solid var(--line); border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; color:var(--g1); font-size:13px; font-weight:500; line-height:1; white-space:nowrap; transition:all 0.1s; }
+.cal-nav-btn.cal-nav-arrow { width:32px; padding:0; font-size:14px; }
 .cal-nav-btn:hover { border-color:var(--line2); color:var(--white); background:var(--s3); }
 .cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:var(--r-lg); overflow:hidden; }
 .cal-day-head { background:var(--s2); padding:10px 8px; text-align:center; font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.6px; color:var(--g2); }
@@ -2578,9 +2579,9 @@ body { background:#0E0E0E !important; }
       <div class="cal-nav">
         <div class="cal-nav-title" id="cal-month-title"></div>
         <div class="cal-nav-btns">
-          <div class="cal-nav-btn" onclick="calPrev()">←</div>
+          <div class="cal-nav-btn cal-nav-arrow" onclick="calPrev()">←</div>
           <div class="cal-nav-btn" onclick="calToday()" data-i18n="cal_today">Today</div>
-          <div class="cal-nav-btn" onclick="calNext()">→</div>
+          <div class="cal-nav-btn cal-nav-arrow" onclick="calNext()">→</div>
         </div>
       </div>
       <div class="cal-grid" id="cal-grid"></div>
