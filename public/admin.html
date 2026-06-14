@@ -65,6 +65,12 @@ tr:hover { background:rgba(255,255,255,0.02); }
 .role-admin { background:var(--white); color:#050505; }
 .role-user  { background:var(--s3); color:var(--g1); border:1px solid var(--line2); }
 
+.plan-select { font-size:12px; font-weight:600; padding:5px 11px; border-radius:7px; background:var(--s3); border:1px solid var(--line2); color:var(--white); font-family:inherit; cursor:pointer; outline:none; transition:border-color 0.15s,background 0.15s; -webkit-appearance:none; appearance:none; padding-right:24px; background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10' fill='none' stroke='%237a7a82' stroke-width='1.4'><path d='M2 3.5L5 6.5 8 3.5'/></svg>"); background-repeat:no-repeat; background-position:right 8px center; }
+.plan-select:hover { border-color:var(--line3); background-color:var(--s4); }
+.plan-select.plan-pro    { border-color:rgba(232,200,131,0.35); color:#e8c883; }
+.plan-select.plan-studio { border-color:rgba(232,200,131,0.55); color:#f0d79a; box-shadow:0 0 0 1px rgba(232,200,131,0.12); }
+.plan-select option { background:#18181c; color:var(--white); }
+
 .actions { display:flex; gap:8px; }
 .td-action { font-size:12px; color:var(--g2); cursor:pointer; transition:color 0.1s; padding:3px 6px; border-radius:5px; }
 .td-action:hover { color:var(--white); }
@@ -120,6 +126,7 @@ tr:hover { background:rgba(255,255,255,0.02); }
         <th>User</th>
         <th>Studio</th>
         <th>Role</th>
+        <th>Plan</th>
         <th>Clients</th>
         <th>Projects</th>
         <th>Revenue</th>
@@ -136,13 +143,14 @@ tr:hover { background:rgba(255,255,255,0.02); }
 
 <script>
 const token = localStorage.getItem('crm_token');
+let me = null;
 
 async function init() {
   if (!token) return (window.location.href = '/');
   try {
     const res = await fetch('/api/me', { headers: { 'Authorization': `Bearer ${token}` } });
     if (!res.ok) return (window.location.href = '/');
-    const me = await res.json();
+    me = await res.json();
     if (me.role !== 'admin') {
       alert('Admin access only');
       return (window.location.href = '/app');
@@ -191,6 +199,13 @@ async function loadUsers() {
         </td>
         <td>${esc(u.studio_name || '—')}</td>
         <td><span class="role-badge role-${u.role}">${u.role === 'admin' ? 'Admin' : 'User'}</span></td>
+        <td>
+          <select class="plan-select plan-${u.plan || 'free'}" onchange="setPlan(${u.id}, this.value, '${u.role}')">
+            <option value="free"   ${(u.plan||'free')==='free'   ? 'selected' : ''}>Start</option>
+            <option value="pro"    ${u.plan==='pro'    ? 'selected' : ''}>Pro</option>
+            <option value="studio" ${u.plan==='studio' ? 'selected' : ''}>Studio</option>
+          </select>
+        </td>
         <td>${u.clients_count}</td>
         <td>${u.projects_count}</td>
         <td style="font-variant-numeric:tabular-nums">${fmtRub(u.revenue)}</td>
@@ -205,6 +220,15 @@ async function loadUsers() {
         </td>
       </tr>`).join('');
   } catch(e) { console.error(e); }
+}
+
+async function setPlan(id, plan, role) {
+  const labels = { free:'Start', pro:'Pro', studio:'Studio' };
+  try {
+    await api('PUT', `/api/admin/users/${id}`, { role, plan });
+    toast('Plan → ' + (labels[plan] || plan));
+    loadUsers();
+  } catch(e) { toast(e.message); loadUsers(); }
 }
 
 async function toggleRole(id, currentRole) {
