@@ -2116,6 +2116,18 @@ td { border-bottom-color:var(--line) !important; }
 #page-clients .cl-since { font-size:10.5px !important; color:rgba(217,217,217,0.38) !important; }
 #page-clients .cl-since b { color:rgba(217,217,217,0.62) !important; font-weight:600 !important; }
 /* ══════════════════ /CLIENTS — MINIMAL REDESIGN ══════════════════ */
+/* ══════════════════ CLEAN MONOCHROME + ACTIVITY ══════════════════ */
+body::before { display:none !important; }
+#atmosphere { display:none !important; }
+body { background:#0E0E0E !important; }
+.activity-feed { display:flex; flex-direction:column; max-width:780px; }
+.activity-item { display:flex; align-items:flex-start; gap:14px; padding:14px 4px; border-bottom:1px solid rgba(255,255,255,0.05); }
+.activity-ic { font-size:18px !important; color:rgba(217,217,217,0.55); width:32px; height:32px; display:inline-flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:10px; flex-shrink:0; }
+.activity-txt { font-size:13.5px; color:rgba(237,237,237,0.78); line-height:1.5; }
+.activity-txt b { color:#EDEDED; font-weight:600; }
+.activity-time { font-size:11px; color:rgba(217,217,217,0.36); margin-top:3px; font-variant-numeric:tabular-nums; }
+.activity-empty { padding:64px 20px; text-align:center; color:rgba(217,217,217,0.35); font-size:13px; }
+/* ══════════════════ /CLEAN MONOCHROME + ACTIVITY ══════════════════ */
 
 </style>
 </head>
@@ -2185,8 +2197,8 @@ td { border-bottom-color:var(--line) !important; }
         <span>Expenses</span>
       </div>
       <div class="nav-item" onclick="go('notes',this)">
-        <span class="material-symbols-outlined nav-ms">edit_note</span>
-        <span data-i18n="nav_notes">Notes</span>
+        <span class="material-symbols-outlined nav-ms">bolt</span>
+        <span data-i18n="nav_activity">Activity</span>
       </div>
       <div class="nav-paid-sep"></div>
       <div class="nav-item" onclick="go('analytics',this)">
@@ -2565,7 +2577,10 @@ td { border-bottom-color:var(--line) !important; }
     <div class="page" id="page-clients">
       <div class="page-header">
         <div><h1 data-i18n="page_clients">Clients</h1><p data-i18n="clients_sub">All companies and contacts</p></div>
-        <button class="btn btn-white" onclick="openAddModal()" data-i18n="btn_new_client">+ New client</button>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="btn btn-ghost" onclick="exportCSV('clients')"><span class="material-symbols-outlined" style="font-size:16px;margin-right:5px;vertical-align:-3px">download</span><span data-i18n="btn_export">Export</span></button>
+          <button class="btn btn-white" onclick="openAddModal()" data-i18n="btn_new_client">+ New client</button>
+        </div>
       </div>
       <div class="cl-stats-bar" id="cl-stats-bar">
         <div class="cl-stat"><div class="cl-stat-num" id="cl-stat-total">0</div><div class="cl-stat-lbl" data-i18n="cl_stat_total">Total clients</div></div>
@@ -2965,7 +2980,10 @@ td { border-bottom-color:var(--line) !important; }
     <div class="page" id="page-finance">
       <div class="page-header">
         <div><h1>Finance</h1><p>Invoices, payments and revenue tracking</p></div>
-        <button class="btn btn-white" onclick="openAddModal()">+ New invoice</button>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="btn btn-ghost" onclick="exportCSV('invoices')"><span class="material-symbols-outlined" style="font-size:16px;margin-right:5px;vertical-align:-3px">download</span><span data-i18n="btn_export">Export</span></button>
+          <button class="btn btn-white" onclick="openAddModal()">+ New invoice</button>
+        </div>
       </div>
       <div class="fin-grid">
         <div class="fin-card">
@@ -3047,15 +3065,9 @@ td { border-bottom-color:var(--line) !important; }
     <!-- NOTES -->
     <div class="page" id="page-notes">
       <div class="page-header">
-        <div><h1 data-i18n="nav_notes">Notes</h1><p data-i18n="notes_sub">Quick notes and thoughts</p></div>
-        <button class="btn btn-ghost" onclick="clearNotes()" data-i18n="btn_clear_notes">Clear</button>
+        <div><h1 data-i18n="nav_activity">Activity</h1><p data-i18n="activity_sub">Recent activity across your studio</p></div>
       </div>
-      <div class="notes-page-wrap">
-        <textarea class="notes-full-area" id="notes-main-area" placeholder="Start typing..." oninput="saveMainNote(this)"></textarea>
-        <div class="notes-footer">
-          <span class="notes-saved-label" id="notes-main-saved"></span>
-        </div>
-      </div>
+      <div id="activity-feed" class="activity-feed"></div>
     </div>
 
     <!-- TASKS -->
@@ -3082,6 +3094,7 @@ td { border-bottom-color:var(--line) !important; }
     <div class="page" id="page-reports">
       <div class="page-header">
         <div><h1>Reports</h1><p>Revenue, expenses and profit overview</p></div>
+        <button class="btn btn-white" onclick="exportStudioReport()"><span class="material-symbols-outlined" style="font-size:16px;margin-right:5px;vertical-align:-3px">summarize</span><span data-i18n="btn_gen_report">Generate report</span></button>
       </div>
       <div class="an-grid" id="rep-kpi"></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:0">
@@ -3412,7 +3425,7 @@ const TRANS = {
     goal_period_month:'This month', goal_period_year:'This year',
     goal_achieved: n => `🎉 Goal achieved! You hit ₽ ${fmtNum(n)}`,
     goal_progress: (pct, rem) => `${pct}% complete · ₽ ${fmtNum(rem)} to go`,
-    nav_analytics:'Analytics', nav_notes:'Notes', grp_tools:'Tools',
+    nav_analytics:'Analytics', nav_notes:'Notes', nav_activity:'Activity', activity_sub:'Recent activity across your studio', btn_export:'Export', btn_gen_report:'Generate report', grp_tools:'Tools',
     analytics_sub:'Revenue, clients and project insights',
     an_by_status:'Projects by status', an_top_clients:'Top clients by revenue',
     notes_sub:'Quick notes and thoughts', btn_clear_notes:'Clear',
@@ -3557,7 +3570,7 @@ const TRANS = {
     goal_period_month:'Этот месяц', goal_period_year:'Этот год',
     goal_achieved: n => `🎉 Цель достигнута! Вы заработали ₽ ${fmtNum(n)}`,
     goal_progress: (pct, rem) => `${pct}% выполнено · ещё ₽ ${fmtNum(rem)}`,
-    nav_analytics:'Аналитика', nav_notes:'Заметки', grp_tools:'Инструменты',
+    nav_analytics:'Аналитика', nav_notes:'Заметки', nav_activity:'Активность', activity_sub:'Последние действия в вашей студии', btn_export:'Экспорт', btn_gen_report:'Сформировать отчёт', grp_tools:'Инструменты',
     analytics_sub:'Выручка, клиенты и проекты',
     an_by_status:'Проекты по статусам', an_top_clients:'Топ клиентов по выручке',
     notes_sub:'Быстрые заметки', btn_clear_notes:'Очистить',
@@ -3593,7 +3606,7 @@ function applyLang(lang) {
   TITLES.clients    = t('page_clients');   TITLES.projects   = t('page_projects');
   TITLES.funnel     = t('page_pipeline');  TITLES.team       = t('page_team');
   TITLES.finance    = t('page_finance');   TITLES.settings   = t('page_settings');
-  TITLES.analytics  = t('nav_analytics');  TITLES.notes      = t('nav_notes');
+  TITLES.analytics  = t('nav_analytics');  TITLES.notes      = t('nav_activity');
   // Topbar date (Figma-style: "OCT 24, 2026")
   const dateEl = document.getElementById('topbar-date');
   if (dateEl) {
@@ -3955,7 +3968,7 @@ function renderPage(id) {
   if (id === 'team')      renderTeam();
   if (id === 'finance')   renderFinance();
   if (id === 'analytics') renderAnalytics();
-  if (id === 'notes')     renderNotes();
+  if (id === 'notes')     renderActivity();
   if (id === 'tasks')     renderTasks();
   if (id === 'expenses')  renderExpenses();
   if (id === 'reports')   renderReports();
@@ -5408,6 +5421,81 @@ function clientMetrics(c) {
     .filter(d => !isNaN(d));
   const lastActive = dates.length ? new Date(Math.max(...dates.map(d=>d.getTime()))) : null;
   return { revenue, projectCount: cProjects.length, interactions, lastActive };
+}
+
+// ── Activity feed (replaces Notes) ──
+function renderActivity() {
+  const el = document.getElementById('activity-feed');
+  if (!el) return;
+  const ru = currentLang === 'ru';
+  const items = [];
+  (clients||[]).forEach(c => { if (c.created_at) items.push({ t:new Date(c.created_at), ic:'person_add', txt:(ru?'Добавлен клиент':'Client added'), name:c.name }); });
+  (projects||[]).forEach(p => { if (p.created_at) items.push({ t:new Date(p.created_at), ic:'folder', txt:(ru?'Новый проект':'New project'), name:p.title }); });
+  (invoices||[]).forEach(i => {
+    if (i.created_at) items.push({ t:new Date(i.created_at), ic:'receipt_long', txt:(ru?'Счёт создан':'Invoice created'), name:(i.number||'')+(i.amount?` · ${fmt(i.amount)}`:'') });
+    if (i.status==='paid' && (i.paid_at||i.issued_at)) items.push({ t:new Date(i.paid_at||i.issued_at), ic:'payments', txt:(ru?'Оплата получена':'Payment received'), name:(i.number||'')+(i.amount?` · ${fmt(i.amount)}`:'') });
+  });
+  (typeof deals!=='undefined'?deals:[]).forEach(d => { if (d.created_at) items.push({ t:new Date(d.created_at), ic:'trending_up', txt:(ru?'Новая сделка':'New deal'), name:d.title }); });
+  items.sort((a,b) => b.t - a.t);
+  if (!items.length) { el.innerHTML = `<div class="activity-empty">${ru?'Пока нет активности':'No activity yet'}</div>`; return; }
+  const fd = d => d.toLocaleDateString(ru?'ru-RU':'en-US',{day:'numeric',month:'short'}) + ' · ' + d.toLocaleTimeString(ru?'ru-RU':'en-US',{hour:'2-digit',minute:'2-digit'});
+  el.innerHTML = items.slice(0,40).map(x => `
+    <div class="activity-item">
+      <span class="activity-ic material-symbols-outlined">${x.ic}</span>
+      <div class="activity-body"><div class="activity-txt">${x.txt} <b>${esc(x.name||'')}</b></div><div class="activity-time">${fd(x.t)}</div></div>
+    </div>`).join('');
+}
+
+// ── Premium: CSV export + studio report ──
+function _planGate() {
+  if (planOf() === 'free') { openPricingModal('pro'); toast(currentLang==='ru'?'Доступно на Pro и Studio':'Available on Pro & Studio'); return false; }
+  return true;
+}
+function downloadCSV(name, rows) {
+  const csv = rows.map(r => r.map(v => `"${String(v==null?'':v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob(['\ufeff'+csv], { type:'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob); const a = document.createElement('a');
+  a.href = url; a.download = `reloxy-${name}-${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+  toast(currentLang==='ru'?'Экспортировано':'Exported');
+}
+function exportCSV(kind) {
+  if (!_planGate()) return;
+  let rows = [], name = kind;
+  if (kind === 'clients') {
+    rows = [['Name','Industry','Status','Contact','Email','Phone','Revenue','Projects','Interactions']];
+    (clients||[]).forEach(c => { const m = clientMetrics(c); rows.push([c.name,c.industry||'',c.status||'',c.contact_name||'',c.email||'',c.phone||'',m.revenue,m.projectCount,m.interactions]); });
+  } else if (kind === 'invoices') {
+    rows = [['Number','Client','Amount','Status','Issued','Due']];
+    (invoices||[]).forEach(i => { const cl=(clients||[]).find(c=>c.id===i.client_id); rows.push([i.number||'',cl?cl.name:'',i.amount||0,i.status||'',i.issued_at||'',i.due_at||'']); });
+  } else if (kind === 'projects') {
+    rows = [['Title','Type','Status','Progress','Budget','Deadline']];
+    (projects||[]).forEach(p => rows.push([p.title,p.type||'',p.status||'',(p.progress||0)+'%',p.budget||0,p.deadline||'']));
+  }
+  downloadCSV(name, rows);
+}
+function exportStudioReport() {
+  if (!_planGate()) return;
+  const ru = currentLang === 'ru';
+  const paid    = (invoices||[]).filter(i=>i.status==='paid').reduce((s,i)=>s+(i.amount||0),0);
+  const pending = (invoices||[]).filter(i=>i.status==='pending').reduce((s,i)=>s+(i.amount||0),0);
+  const activeP = (projects||[]).filter(p=>p.status!=='done').length;
+  const doneP   = (projects||[]).filter(p=>p.status==='done').length;
+  const top = (clients||[]).map(c=>({name:c.name,rev:clientMetrics(c).revenue})).filter(x=>x.rev>0).sort((a,b)=>b.rev-a.rev).slice(0,5);
+  const rows = [
+    [ru?'Reloxy — Сводный отчёт студии':'Reloxy — Studio summary', new Date().toLocaleDateString(ru?'ru-RU':'en-US')],
+    [],
+    [ru?'Выручка (оплачено)':'Revenue (paid)', paid],
+    [ru?'Ожидает оплаты':'Pending', pending],
+    [ru?'Клиентов':'Clients', (clients||[]).length],
+    [ru?'Активных проектов':'Active projects', activeP],
+    [ru?'Завершено проектов':'Completed projects', doneP],
+    [],
+    [ru?'Топ-клиенты по выручке':'Top clients by revenue', ''],
+    ...top.map(t => [t.name, t.rev]),
+  ];
+  downloadCSV('studio-report', rows);
+  toast(ru?'Отчёт сформирован':'Report generated');
 }
 
 function renderClients(list) {
