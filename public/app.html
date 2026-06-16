@@ -2121,6 +2121,15 @@ td { border-bottom-color:var(--line) !important; }
 /* Banner slides with image background */
 .bn-slide.has-bg::before { display:none !important; }
 .bn-slide.has-bg .bn-title, .bn-slide.has-bg .bn-text { text-shadow:0 1px 14px rgba(0,0,0,0.65); }
+/* AI assistant page */
+.aip-wrap { max-width:780px; display:flex; flex-direction:column; height:calc(100vh - 200px); min-height:420px; }
+.aip-msgs { flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:10px; padding:4px 2px 14px; }
+.aip-input-row { display:flex; gap:10px; align-items:center; border-top:1px solid var(--line); padding-top:14px; }
+.aip-input { flex:1; background:rgba(255,255,255,0.03); border:1px solid var(--glass-border); border-radius:11px; padding:12px 14px; color:var(--white); font-size:14px; font-family:inherit; outline:none; }
+.aip-input:focus { border-color:rgba(255,255,255,0.3); }
+.aip-msgs .ai-msg { max-width:82%; font-size:13.5px; line-height:1.55; padding:11px 14px; border-radius:14px; word-wrap:break-word; }
+.aip-msgs .ai-msg.user { align-self:flex-end; background:#D9D9D9; color:#121212; }
+.aip-msgs .ai-msg.ai { align-self:flex-start; background:rgba(255,255,255,0.04); border:1px solid var(--glass-border); color:#EDEDED; }
 /* Bigger sidebar tabs */
 .sidebar { width:256px !important; }
 .main { margin-left:256px !important; }
@@ -2235,6 +2244,16 @@ body { background:#0E0E0E !important; }
       <div class="nav-item" onclick="go('reports',this)">
         <span class="material-symbols-outlined nav-ms">description</span>
         <span>Reports</span>
+        <span class="nav-pro" title="Pro"><svg viewBox="0 0 14 14" fill="currentColor"><path d="M1.6 4.2l2.6 2.4L7 2.6l2.8 4 2.6-2.4-1 6.2H2.6l-1-6.2zm1.2 7.4h8.4v1.2H2.8v-1.2z"/></svg></span>
+      </div>
+      <div class="nav-item" onclick="go('ai',this)">
+        <span class="material-symbols-outlined nav-ms">auto_awesome</span>
+        <span data-i18n="nav_ai">AI Assistant</span>
+        <span class="nav-pro" title="Pro"><svg viewBox="0 0 14 14" fill="currentColor"><path d="M1.6 4.2l2.6 2.4L7 2.6l2.8 4 2.6-2.4-1 6.2H2.6l-1-6.2zm1.2 7.4h8.4v1.2H2.8v-1.2z"/></svg></span>
+      </div>
+      <div class="nav-item" onclick="go('forecast',this)">
+        <span class="material-symbols-outlined nav-ms">monitoring</span>
+        <span data-i18n="nav_forecast">Forecast</span>
         <span class="nav-pro" title="Pro"><svg viewBox="0 0 14 14" fill="currentColor"><path d="M1.6 4.2l2.6 2.4L7 2.6l2.8 4 2.6-2.4-1 6.2H2.6l-1-6.2zm1.2 7.4h8.4v1.2H2.8v-1.2z"/></svg></span>
       </div>
     </div>
@@ -3151,6 +3170,32 @@ body { background:#0E0E0E !important; }
       </div>
     </div>
 
+    <!-- AI ASSISTANT (premium) -->
+    <div class="page" id="page-ai">
+      <div class="page-header">
+        <div><h1 data-i18n="nav_ai">AI Assistant</h1><p data-i18n="ai_sub">Ask about your clients, projects and money</p></div>
+      </div>
+      <div class="aip-wrap">
+        <div class="aip-msgs" id="aip-msgs"></div>
+        <div class="aip-input-row">
+          <input id="aip-input" class="aip-input" placeholder="Ask anything…" data-i18n-ph="ai_ph" onkeydown="if(event.key==='Enter')aiPageSend()">
+          <button class="btn btn-white" onclick="aiPageSend()" data-i18n="ai_send">Ask</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- FORECAST / CASH FLOW (premium) -->
+    <div class="page" id="page-forecast">
+      <div class="page-header">
+        <div><h1 data-i18n="nav_forecast">Forecast</h1><p data-i18n="forecast_sub">Projected revenue and cash flow</p></div>
+      </div>
+      <div class="an-grid" id="fc-kpi"></div>
+      <div class="an-section" style="margin-top:14px">
+        <div class="an-section-title" id="fc-cashflow-title">Cash flow — next 8 weeks</div>
+        <div id="fc-cashflow"></div>
+      </div>
+    </div>
+
   </div>
 </main>
 
@@ -3461,7 +3506,7 @@ const TRANS = {
     goal_period_month:'This month', goal_period_year:'This year',
     goal_achieved: n => `🎉 Goal achieved! You hit $ ${fmtNum(n)}`,
     goal_progress: (pct, rem) => `${pct}% complete · $ ${fmtNum(rem)} to go`,
-    nav_analytics:'Analytics', nav_notes:'Notes', nav_activity:'Activity', activity_sub:'Recent activity across your studio', btn_export:'Export', btn_gen_report:'Generate report', grp_tools:'Tools',
+    nav_analytics:'Analytics', nav_notes:'Notes', nav_activity:'Activity', activity_sub:'Recent activity across your studio', btn_export:'Export', btn_gen_report:'Generate report', nav_ai:'AI Assistant', nav_forecast:'Forecast', ai_sub:'Ask about your clients, projects and money', forecast_sub:'Projected revenue and cash flow', ai_send:'Ask', ai_ph:'Ask anything…', grp_tools:'Tools',
     analytics_sub:'Revenue, clients and project insights',
     an_by_status:'Projects by status', an_top_clients:'Top clients by revenue',
     notes_sub:'Quick notes and thoughts', btn_clear_notes:'Clear',
@@ -3606,7 +3651,7 @@ const TRANS = {
     goal_period_month:'Этот месяц', goal_period_year:'Этот год',
     goal_achieved: n => `🎉 Цель достигнута! Вы заработали $ ${fmtNum(n)}`,
     goal_progress: (pct, rem) => `${pct}% выполнено · ещё $ ${fmtNum(rem)}`,
-    nav_analytics:'Аналитика', nav_notes:'Заметки', nav_activity:'Активность', activity_sub:'Последние действия в вашей студии', btn_export:'Экспорт', btn_gen_report:'Сформировать отчёт', grp_tools:'Инструменты',
+    nav_analytics:'Аналитика', nav_notes:'Заметки', nav_activity:'Активность', activity_sub:'Последние действия в вашей студии', btn_export:'Экспорт', btn_gen_report:'Сформировать отчёт', nav_ai:'AI-ассистент', nav_forecast:'Прогноз', ai_sub:'Спросите про клиентов, проекты и деньги', forecast_sub:'Прогноз выручки и денежный поток', ai_send:'Спросить', ai_ph:'Спросите что угодно…', grp_tools:'Инструменты',
     analytics_sub:'Выручка, клиенты и проекты',
     an_by_status:'Проекты по статусам', an_top_clients:'Топ клиентов по выручке',
     notes_sub:'Быстрые заметки', btn_clear_notes:'Очистить',
@@ -3769,7 +3814,7 @@ const TITLES = { dashboard:'Dashboard', calendar:'Calendar', clients:'Clients', 
 function go(id, el) {
   const staffBlocked = ['finance','team','funnel'];
   if (user?.role === 'staff' && staffBlocked.includes(id)) return;
-  if (['analytics','reports'].includes(id) && user?.role !== 'staff' && planOf() === 'free') { openPricingModal('pro'); return; }
+  if (['analytics','reports','ai','forecast'].includes(id) && user?.role !== 'staff' && planOf() === 'free') { openPricingModal('pro'); return; }
   document.querySelectorAll('.page').forEach(p => { p.classList.remove('active'); p.style.display = 'none'; });
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('settings-nav-btn')?.classList.remove('active');
@@ -3786,7 +3831,7 @@ function go(id, el) {
   if (addBtn) {
     const labels = { finance:t('btn_new_invoice'), clients:t('btn_new_client'), projects:t('btn_new_project'), funnel:t('btn_new_deal'), team:t('btn_invite') };
     addBtn.textContent = labels[id] || t('btn_add_new');
-    const noBtn = ['analytics','notes','calendar','dashboard','tasks','expenses','reports'];
+    const noBtn = ['analytics','notes','calendar','dashboard','tasks','expenses','reports','ai','forecast'];
     addBtn.style.display = noBtn.includes(id) ? 'none' : '';
     if (id === 'expenses') { addBtn.style.display = ''; addBtn.textContent = t('btn_add_expense'); }
   }
@@ -4008,6 +4053,8 @@ function renderPage(id) {
   if (id === 'tasks')     renderTasks();
   if (id === 'expenses')  renderExpenses();
   if (id === 'reports')   renderReports();
+  if (id === 'ai')        renderAiPage();
+  if (id === 'forecast')  renderForecastPage();
 }
 
 function renderCounts() {
@@ -5712,6 +5759,39 @@ async function aiSend() {
   }
   aiBusy = false;
 }
+
+// ── Premium pages: AI Assistant + Forecast ──
+function renderAiPage(){
+  setTimeout(()=>document.getElementById('aip-input')?.focus(),60);
+  const m=document.getElementById('aip-msgs');
+  if(m && !m.childElementCount){
+    aipPush('ai', currentLang==='ru'
+      ? 'Привет! Я знаю про ваших клиентов, проекты и деньги. Спросите, например: «Сколько мне должны?» или «Какие проекты горят?»'
+      : 'Hi! I know your clients, projects and money. Ask e.g. “How much is owed to me?” or “Which projects are at risk?”');
+  }
+}
+function aipPush(role,text){ const m=document.getElementById('aip-msgs'); if(!m)return; const d=document.createElement('div'); d.className='ai-msg '+role; d.innerHTML=esc(text).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/\n/g,'<br>'); m.appendChild(d); m.scrollTop=m.scrollHeight; }
+let aipBusy=false;
+async function aiPageSend(){
+  if(aipBusy)return; const inp=document.getElementById('aip-input'); const q=(inp&&inp.value||'').trim(); if(!q)return; inp.value='';
+  aipPush('user',q); aipBusy=true;
+  const t=document.createElement('div'); t.className='ai-msg ai'; t.id='aip-typing'; t.innerHTML='<span class="ai-dots"><i></i><i></i><i></i></span>'; document.getElementById('aip-msgs').appendChild(t); document.getElementById('aip-msgs').scrollTop=1e9;
+  try{ const d=await api('POST','/api/ai/assistant',{question:q,lang:currentLang}); document.getElementById('aip-typing')?.remove(); aipPush('ai',d.answer); }
+  catch(e){ document.getElementById('aip-typing')?.remove(); if(e.message==='ai_requires_pro'){openPricingModal('pro');} else aipPush('ai','⚠ '+e.message); }
+  aipBusy=false;
+}
+function renderForecastPage(){
+  const ru=currentLang==='ru';
+  const pend=(invoices||[]).filter(i=>i.status==='pending').reduce((a,i)=>a+(i.amount||0),0);
+  const over=(invoices||[]).filter(i=>i.status==='overdue').reduce((a,i)=>a+(i.amount||0),0);
+  const kpi=document.getElementById('fc-kpi');
+  if(kpi) kpi.innerHTML=[
+    {l:(ru?'Ожидается к поступлению':'Expected inflow'),v:fmt(pend+over),s:(ru?'все неоплаченные счета':'all unpaid invoices')},
+    {l:(ru?'Ожидает оплаты':'Pending'),v:fmt(pend),s:''},
+    {l:(ru?'Просрочено':'Overdue'),v:fmt(over),s:''},
+  ].map(c=>`<div class="an-card"><div class="an-label">${c.l}</div><div class="an-value">${c.v}</div><div class="an-sub">${c.s||''}</div></div>`).join('');
+  renderCashflow('fc-cashflow','fc-cashflow-title');
+}
 async function aiInvoiceLetter(id) {
   if (!aiGate()) return;
   const ov = document.getElementById('ai-letter-overlay');
@@ -6274,9 +6354,9 @@ function renderFunnel() {
 }
 
 // ─── FINANCE ───────────────────────────────────────────────────────────────
-function renderCashflow() {
-  const el = document.getElementById('fin-cashflow');
-  const title = document.getElementById('fin-cashflow-title');
+function renderCashflow(elId, titleId) {
+  const el = document.getElementById(elId || 'fin-cashflow');
+  const title = document.getElementById(titleId || 'fin-cashflow-title');
   if (!el) return;
   const ru = currentLang === 'ru';
   if (title) title.textContent = ru ? 'Денежный поток — 8 недель вперёд' : 'Cash flow — next 8 weeks';
