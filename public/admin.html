@@ -5,100 +5,143 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Reloxy Admin</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --black:#040404; --s1:#0c0c0e; --s2:#111114; --s3:#18181c; --s4:#222228;
+  --black:#0a0a0b; --s1:#0e0e10; --s2:#141417; --s3:#1a1a1e; --s4:#232329;
   --line:rgba(255,255,255,0.06); --line2:rgba(255,255,255,0.12); --line3:rgba(255,255,255,0.2);
-  --white:#f0f0f0; --g1:#7a7a82; --g2:#4a4a52; --g3:#2e2e36;
-  --accent:#fff;
-  --sh-sm:0 1px 3px rgba(0,0,0,0.5),0 1px 8px rgba(0,0,0,0.3);
+  --white:#f0f0f0; --g1:#8a8a92; --g2:#5a5a62; --g3:#3a3a42;
+  --accent:#fff; --gold:#e8c883;
   --sh-md:0 4px 16px rgba(0,0,0,0.6),0 1px 4px rgba(0,0,0,0.4);
   --r:10px; --r-lg:14px;
 }
-body { font-family:'Inter',-apple-system,sans-serif; background:var(--black); color:var(--white); min-height:100vh; font-size:14px; line-height:1.55; -webkit-font-smoothing:antialiased; letter-spacing:-0.1px; }
+body { font-family:"Helvetica Neue",Helvetica,-apple-system,"Segoe UI",Arial,sans-serif; background:var(--black); color:var(--white); min-height:100vh; font-size:14px; line-height:1.55; -webkit-font-smoothing:antialiased; letter-spacing:-0.1px; }
 
-.topbar { height:56px; border-bottom:1px solid var(--line); display:flex; align-items:center; padding:0 44px; gap:16px; background:rgba(4,4,4,0.95); backdrop-filter:blur(16px); position:sticky; top:0; z-index:50; }
+.topbar { height:58px; border-bottom:1px solid var(--line); display:flex; align-items:center; padding:0 40px; gap:16px; background:rgba(10,10,11,0.95); backdrop-filter:blur(16px); position:sticky; top:0; z-index:50; }
 .topbar-brand { display:flex; align-items:center; gap:10px; }
-.topbar-logo { width:32px; height:32px; display:flex; align-items:center; }
-.topbar-logo img { width:28px; height:28px; object-fit:contain; }
+.topbar-logo img { width:26px; height:26px; object-fit:contain; }
 .topbar-name { font-size:15px; font-weight:700; letter-spacing:-0.4px; }
 .admin-badge { font-size:10px; font-weight:700; background:var(--accent); color:#050505; padding:2px 10px; border-radius:10px; letter-spacing:0.3px; }
-.topbar-right { margin-left:auto; display:flex; align-items:center; gap:12px; }
+.topbar-right { margin-left:auto; display:flex; align-items:center; gap:10px; }
 .topbar-user { font-size:13px; color:var(--g1); }
-.btn { font-size:13px; font-weight:600; padding:7px 16px; border-radius:7px; cursor:pointer; border:none; font-family:inherit; transition:all 0.15s; display:inline-flex; align-items:center; gap:6px; letter-spacing:-0.1px; }
+.btn { font-size:13px; font-weight:600; padding:8px 16px; border-radius:8px; cursor:pointer; border:none; font-family:inherit; transition:all 0.15s; display:inline-flex; align-items:center; gap:6px; letter-spacing:-0.1px; }
 .btn-ghost { background:transparent; color:var(--g1); border:1px solid var(--line2); }
 .btn-ghost:hover { color:var(--white); border-color:var(--line3); background:rgba(255,255,255,0.04); }
-.btn-danger { background:rgba(248,113,113,0.1); color:#f87171; border:1px solid rgba(248,113,113,0.2); }
-.btn-danger:hover { background:rgba(248,113,113,0.18); }
-.btn-accent { background:var(--white); color:#050505; font-weight:700; box-shadow:var(--sh-sm); }
+.btn-accent { background:var(--white); color:#050505; font-weight:700; }
 
-.content { padding:48px 52px; max-width:1160px; margin:0 auto; }
+.content { padding:36px 40px 80px; max-width:1500px; margin:0 auto; }
+.page-header { margin-bottom:28px; }
+.page-header h1 { font-size:28px; font-weight:700; letter-spacing:-1px; }
+.page-header p  { font-size:13px; color:var(--g1); margin-top:5px; }
 
-.page-header { margin-bottom:40px; }
-.page-header h1 { font-size:30px; font-weight:700; letter-spacing:-1px; }
-.page-header p  { font-size:13px; color:var(--g1); margin-top:6px; }
+/* Metrics */
+.metrics { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:16px; }
+.metric { padding:20px 22px; background:var(--s1); border:1px solid var(--line); border-radius:var(--r-lg); transition:border-color 0.15s; }
+.metric:hover { border-color:var(--line2); }
+.metric-label { font-size:11px; font-weight:600; color:var(--g1); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:12px; }
+.metric-value { font-size:28px; font-weight:700; letter-spacing:-1px; color:var(--white); font-variant-numeric:tabular-nums; line-height:1; }
+.metric-sub { font-size:11px; color:var(--g2); margin-top:7px; }
+.metric.gold .metric-value { color:var(--gold); }
 
-.stats { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:40px; }
-.stat { padding:28px 26px 24px; background:var(--s1); border:1px solid var(--line); border-radius:var(--r-lg); transition:border-color 0.15s,box-shadow 0.15s; }
-.stat:hover { border-color:var(--line2); box-shadow:var(--sh-md); }
-.stat-label { font-size:12px; font-weight:500; color:var(--g1); margin-bottom:14px; letter-spacing:-0.1px; }
-.stat-value { font-size:34px; font-weight:700; letter-spacing:-1.4px; color:var(--white); font-variant-numeric:tabular-nums; line-height:1; }
+/* Plan distribution */
+.plan-dist { background:var(--s1); border:1px solid var(--line); border-radius:var(--r-lg); padding:20px 24px; margin-bottom:28px; }
+.plan-dist-title { font-size:11px; font-weight:600; color:var(--g1); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:16px; }
+.pd-row { display:flex; align-items:center; gap:14px; margin-bottom:12px; }
+.pd-row:last-child { margin-bottom:0; }
+.pd-name { width:70px; font-size:13px; font-weight:600; flex-shrink:0; }
+.pd-bar { flex:1; height:8px; background:var(--s3); border-radius:6px; overflow:hidden; }
+.pd-fill { height:100%; border-radius:6px; background:var(--white); transition:width .6s cubic-bezier(.16,1,.3,1); }
+.pd-fill.pro { background:var(--gold); }
+.pd-fill.studio { background:linear-gradient(90deg,var(--gold),#fff); }
+.pd-num { width:44px; text-align:right; font-size:13px; font-weight:600; font-variant-numeric:tabular-nums; flex-shrink:0; color:var(--g1); }
 
-.section-header { display:flex; align-items:center; justify-content:space-between; padding-bottom:14px; border-bottom:1px solid var(--line); margin-bottom:0; }
-.section-title { font-size:15px; font-weight:600; letter-spacing:-0.3px; color:var(--white); }
-.section-count { font-size:12px; color:var(--g2); }
+/* Tabs */
+.tabs { display:flex; gap:4px; margin-bottom:18px; border-bottom:1px solid var(--line); }
+.tab { font-size:13px; font-weight:600; color:var(--g1); padding:10px 16px; cursor:pointer; border-bottom:2px solid transparent; transition:all .12s; margin-bottom:-1px; }
+.tab:hover { color:var(--white); }
+.tab.active { color:var(--white); border-bottom-color:var(--white); }
 
-table { width:100%; border-collapse:collapse; margin-top:0; }
-th { text-align:left; font-size:11px; font-weight:500; letter-spacing:0; color:var(--g1); padding:14px 0; border-bottom:1px solid var(--line); }
-th:not(:first-child) { padding-left:24px; }
-td { padding:16px 0; border-bottom:1px solid var(--line); font-size:13.5px; color:var(--g1); vertical-align:middle; transition:color 0.1s; }
-td:not(:first-child) { padding-left:24px; }
+.toolbar { display:flex; align-items:center; gap:12px; margin-bottom:14px; flex-wrap:wrap; }
+.search { flex:1; min-width:200px; max-width:340px; display:flex; align-items:center; gap:8px; background:var(--s2); border:1px solid var(--line2); border-radius:9px; padding:8px 13px; }
+.search input { background:none; border:none; outline:none; color:var(--white); font-size:13px; width:100%; font-family:inherit; }
+.section-count { font-size:12px; color:var(--g2); margin-left:auto; }
+
+.table-wrap { overflow-x:auto; border:1px solid var(--line); border-radius:var(--r-lg); background:var(--s1); }
+table { width:100%; border-collapse:collapse; }
+th { text-align:left; font-size:10.5px; font-weight:600; letter-spacing:0.4px; text-transform:uppercase; color:var(--g1); padding:14px 16px; border-bottom:1px solid var(--line); white-space:nowrap; background:var(--s2); position:sticky; top:0; }
+td { padding:13px 16px; border-bottom:1px solid var(--line); font-size:13px; color:var(--g1); vertical-align:middle; white-space:nowrap; max-width:280px; overflow:hidden; text-overflow:ellipsis; }
 tr:last-child td { border-bottom:none; }
 tr:hover td { color:var(--white); }
 tr:hover { background:rgba(255,255,255,0.02); }
-.td-main { color:var(--white); font-weight:500; font-size:14px; }
-.td-sub  { font-size:12px; color:var(--g2); margin-top:3px; }
+.td-main { color:var(--white); font-weight:500; }
+.td-sub  { font-size:11.5px; color:var(--g2); margin-top:2px; }
+.is-blocked td { opacity:0.5; }
 
-.role-badge { font-size:11px; font-weight:600; padding:3px 10px; border-radius:20px; display:inline-block; letter-spacing:0; }
+.role-badge { font-size:11px; font-weight:600; padding:3px 10px; border-radius:20px; display:inline-block; }
 .role-admin { background:var(--white); color:#050505; }
 .role-user  { background:var(--s3); color:var(--g1); border:1px solid var(--line2); }
+.role-staff { background:var(--s3); color:var(--g2); border:1px solid var(--line); }
 
-.plan-select { font-size:12px; font-weight:600; padding:5px 11px; border-radius:7px; background:var(--s3); border:1px solid var(--line2); color:var(--white); font-family:inherit; cursor:pointer; outline:none; transition:border-color 0.15s,background 0.15s; -webkit-appearance:none; appearance:none; padding-right:24px; background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10' fill='none' stroke='%237a7a82' stroke-width='1.4'><path d='M2 3.5L5 6.5 8 3.5'/></svg>"); background-repeat:no-repeat; background-position:right 8px center; }
-.plan-select:hover { border-color:var(--line3); background-color:var(--s4); }
-.plan-select.plan-pro    { border-color:rgba(232,200,131,0.35); color:#e8c883; }
-.plan-select.plan-studio { border-color:rgba(232,200,131,0.55); color:#f0d79a; box-shadow:0 0 0 1px rgba(232,200,131,0.12); }
+.plan-select { font-size:12px; font-weight:600; padding:5px 24px 5px 11px; border-radius:7px; background:var(--s3); border:1px solid var(--line2); color:var(--white); font-family:inherit; cursor:pointer; outline:none; -webkit-appearance:none; appearance:none; background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10' fill='none' stroke='%238a8a92' stroke-width='1.4'><path d='M2 3.5L5 6.5 8 3.5'/></svg>"); background-repeat:no-repeat; background-position:right 8px center; }
+.plan-select.plan-pro    { border-color:rgba(232,200,131,0.35); color:var(--gold); }
+.plan-select.plan-studio { border-color:rgba(232,200,131,0.6); color:#f0d79a; }
 .plan-select option { background:#18181c; color:var(--white); }
 
-.actions { display:flex; gap:8px; }
-.td-action { font-size:12px; color:var(--g2); cursor:pointer; transition:color 0.1s; padding:3px 6px; border-radius:5px; }
-.td-action:hover { color:var(--white); }
-.td-action.danger:hover { color:#f87171; }
+.exp-input { font-size:12px; padding:5px 9px; border-radius:7px; background:var(--s3); border:1px solid var(--line2); color:var(--white); font-family:inherit; outline:none; color-scheme:dark; width:130px; }
+.mini-btn { font-size:11.5px; font-weight:600; padding:5px 10px; border-radius:7px; background:transparent; border:1px solid var(--line2); color:var(--g1); cursor:pointer; font-family:inherit; transition:all .12s; }
+.mini-btn:hover { color:var(--white); border-color:var(--line3); background:rgba(255,255,255,0.04); }
+.mini-btn.danger { color:#f0908a; border-color:rgba(240,140,130,0.25); }
+.mini-btn.danger:hover { background:rgba(240,140,130,0.1); }
+.mini-btn.gold { color:var(--gold); border-color:rgba(232,200,131,0.3); }
 
-.empty { padding:70px 0; text-align:center; color:var(--g2); font-size:14px; }
+.status-pill { font-size:11px; font-weight:600; padding:3px 9px; border-radius:20px; display:inline-flex; align-items:center; gap:6px; }
+.status-pill.ok { background:rgba(110,200,140,0.1); color:#7ad19a; }
+.status-pill.blocked { background:rgba(240,140,130,0.1); color:#f0908a; }
+.dot { width:6px; height:6px; border-radius:50%; background:currentColor; }
 
-::-webkit-scrollbar { width:3px; }
-::-webkit-scrollbar-track { background:transparent; }
+.actions { display:flex; gap:6px; }
+.empty { padding:60px 0; text-align:center; color:var(--g2); font-size:14px; }
+
+/* Modal */
+.overlay { position:fixed; inset:0; background:rgba(0,0,0,0.6); backdrop-filter:blur(4px); display:none; align-items:flex-start; justify-content:center; z-index:200; padding:48px 20px; overflow-y:auto; }
+.overlay.open { display:flex; }
+.modal { width:100%; max-width:780px; background:var(--s2); border:1px solid var(--line2); border-radius:18px; box-shadow:var(--sh-md); overflow:hidden; }
+.modal-head { padding:22px 26px; border-bottom:1px solid var(--line); display:flex; align-items:center; gap:14px; }
+.modal-avatar { width:46px; height:46px; border-radius:50%; background:#222228; border:1px solid var(--line2); display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:700; color:var(--white); flex-shrink:0; }
+.modal-title { font-size:17px; font-weight:700; letter-spacing:-0.3px; }
+.modal-sub { font-size:12.5px; color:var(--g1); margin-top:2px; }
+.modal-close { margin-left:auto; width:30px; height:30px; border-radius:8px; background:transparent; border:1px solid var(--line2); color:var(--g1); cursor:pointer; font-size:16px; display:flex; align-items:center; justify-content:center; }
+.modal-close:hover { color:var(--white); background:rgba(255,255,255,0.05); }
+.modal-body { padding:22px 26px; max-height:62vh; overflow-y:auto; }
+.detail-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:22px; }
+.detail-stat { background:var(--s1); border:1px solid var(--line); border-radius:10px; padding:14px; }
+.detail-stat-val { font-size:20px; font-weight:700; }
+.detail-stat-lbl { font-size:10.5px; color:var(--g2); text-transform:uppercase; letter-spacing:0.4px; margin-top:4px; }
+.detail-sec-title { font-size:11px; font-weight:600; color:var(--g1); text-transform:uppercase; letter-spacing:0.5px; margin:18px 0 8px; }
+.mini-table { width:100%; border-collapse:collapse; }
+.mini-table td { padding:8px 10px; border-bottom:1px solid var(--line); font-size:12.5px; white-space:nowrap; }
+.mini-list-empty { font-size:12.5px; color:var(--g2); padding:10px 0; }
+
+::-webkit-scrollbar { width:4px; height:4px; }
 ::-webkit-scrollbar-thumb { background:var(--s4); border-radius:3px; }
 
 .toast { position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(4px); background:var(--s3); border:1px solid var(--line2); border-radius:var(--r); padding:11px 22px; font-size:13px; font-weight:500; color:var(--white); z-index:999; opacity:0; transition:opacity 0.2s,transform 0.2s; pointer-events:none; box-shadow:var(--sh-md); }
 .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+@media (max-width:1100px){ .metrics{ grid-template-columns:repeat(2,1fr); } .detail-grid{ grid-template-columns:repeat(2,1fr); } }
 </style>
 </head>
 <body>
 
 <div class="topbar">
   <div class="topbar-brand">
-    <div class="topbar-logo">
-      <img src="/logo.svg" alt="Reloxy">
-    </div>
+    <div class="topbar-logo"><img src="/logo.svg" alt="Reloxy"></div>
     <div class="topbar-name">Reloxy</div>
     <div class="admin-badge">ADMIN</div>
   </div>
   <div class="topbar-right">
     <div class="topbar-user" id="admin-name">...</div>
-    <button class="btn btn-ghost" onclick="window.location.href='/app'">← Back to CRM</button>
+    <button class="btn btn-ghost" onclick="window.location.href='/app'">← CRM</button>
     <button class="btn btn-ghost" onclick="logout()">Sign out</button>
   </div>
 </div>
@@ -106,44 +149,43 @@ tr:hover { background:rgba(255,255,255,0.02); }
 <div class="content">
   <div class="page-header">
     <h1>Admin panel</h1>
-    <p>User management and general statistics</p>
+    <p>Users, subscriptions, metrics and database</p>
   </div>
 
-  <div class="stats">
-    <div class="stat"><div class="stat-label">Users</div><div class="stat-value" id="s-users">—</div></div>
-    <div class="stat"><div class="stat-label">Clients</div><div class="stat-value" id="s-clients">—</div></div>
-    <div class="stat"><div class="stat-label">Projects</div><div class="stat-value" id="s-projects">—</div></div>
-    <div class="stat"><div class="stat-label">Total revenue</div><div class="stat-value" id="s-revenue">—</div></div>
+  <div class="metrics" id="metrics"></div>
+  <div class="plan-dist" id="plan-dist" style="display:none">
+    <div class="plan-dist-title">Users by plan</div>
+    <div id="pd-rows"></div>
   </div>
 
-  <div class="section-header">
-    <div class="section-title">Users</div>
-    <div class="section-count" id="users-count"></div>
+  <div class="tabs" id="tabs">
+    <div class="tab active" data-tab="users" onclick="switchTab('users')">Users</div>
+    <div class="tab" data-tab="clients" onclick="switchTab('clients')">Clients</div>
+    <div class="tab" data-tab="projects" onclick="switchTab('projects')">Projects</div>
+    <div class="tab" data-tab="invoices" onclick="switchTab('invoices')">Invoices</div>
+    <div class="tab" data-tab="payments" onclick="switchTab('payments')">Payments</div>
+    <div class="tab" data-tab="deals" onclick="switchTab('deals')">Deals</div>
   </div>
-  <table>
-    <thead>
-      <tr>
-        <th>User</th>
-        <th>Studio</th>
-        <th>Role</th>
-        <th>Plan</th>
-        <th>Clients</th>
-        <th>Projects</th>
-        <th>Revenue</th>
-        <th>Joined</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody id="users-tbody"></tbody>
-  </table>
-  <div id="users-empty" class="empty" style="display:none">No users found</div>
+
+  <div class="toolbar">
+    <div class="search"><span style="color:var(--g2)">⌕</span><input id="search" placeholder="Search..." oninput="applySearch()"></div>
+    <div class="section-count" id="count"></div>
+  </div>
+
+  <div class="table-wrap"><table><thead id="thead"></thead><tbody id="tbody"></tbody></table></div>
+  <div id="empty" class="empty" style="display:none">No data</div>
+</div>
+
+<div class="overlay" id="overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modal"></div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
 const token = localStorage.getItem('crm_token');
-let me = null;
+let me = null, currentTab = 'users', usersCache = [], rowsCache = [];
+let ADMIN_FX = (1/92);
 
 async function init() {
   if (!token) return (window.location.href = '/');
@@ -151,143 +193,220 @@ async function init() {
     const res = await fetch('/api/me', { headers: { 'Authorization': `Bearer ${token}` } });
     if (!res.ok) return (window.location.href = '/');
     me = await res.json();
-    if (me.role !== 'admin') {
-      alert('Admin access only');
-      return (window.location.href = '/app');
-    }
+    if (me.role !== 'admin') { alert('Admin access only'); return (window.location.href = '/app'); }
     document.getElementById('admin-name').textContent = me.name;
-  } catch {
-    return (window.location.href = '/');
-  }
-  await Promise.all([loadStats(), loadUsers()]);
+  } catch { return (window.location.href = '/'); }
+  loadFx();
+  await Promise.all([loadMetrics(), loadUsers()]);
+}
+
+async function loadFx() {
+  try {
+    const r = await fetch('https://open.er-api.com/v6/latest/RUB');
+    const d = await r.json();
+    if (d && d.rates && d.rates.USD) { ADMIN_FX = d.rates.USD; loadMetrics(); if (currentTab==='users') loadUsers(); }
+  } catch(_) {}
 }
 
 async function api(method, url, body) {
   const opts = { method, headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` } };
   if (body) opts.body = JSON.stringify(body);
-  const res  = await fetch(url, opts);
-  const data = await res.json();
+  const res = await fetch(url, opts);
+  const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.error || 'Error');
   return data;
 }
 
-async function loadStats() {
+// ── Metrics ──
+async function loadMetrics() {
   try {
-    const s = await api('GET', '/api/admin/stats');
-    document.getElementById('s-users').textContent    = s.totalUsers;
-    document.getElementById('s-clients').textContent  = s.totalClients;
-    document.getElementById('s-projects').textContent = s.totalProjects;
-    document.getElementById('s-revenue').textContent  = fmtRub(s.totalRevenue);
+    const [s, m] = await Promise.all([ api('GET','/api/admin/stats'), api('GET','/api/admin/metrics') ]);
+    const cards = [
+      { label:'Users', value:s.totalUsers, sub:`+${m.newUsers30} in 30d` },
+      { label:'Paid users', value:m.paidUsers, sub:`${m.usersByPlan.pro} Pro · ${m.usersByPlan.studio} Studio` },
+      { label:'MRR', value:'$ '+Number(m.mrr).toLocaleString('en'), sub:'Monthly recurring', gold:true },
+      { label:'Revenue', value:fmtRub(s.totalRevenue), sub:'All paid invoices' },
+      { label:'Clients', value:s.totalClients, sub:'' },
+      { label:'Projects', value:s.totalProjects, sub:'' },
+      { label:'Invoices', value:m.invoicesCount, sub:'' },
+      { label:'Payments', value:m.paymentsCount, sub:fmtRub(m.paymentsSum) },
+    ];
+    document.getElementById('metrics').innerHTML = cards.map(c =>
+      `<div class="metric ${c.gold?'gold':''}"><div class="metric-label">${c.label}</div><div class="metric-value">${c.value}</div>${c.sub?`<div class="metric-sub">${c.sub}</div>`:''}</div>`).join('');
+
+    const bp = m.usersByPlan, tot = Math.max(1, bp.free+bp.pro+bp.studio);
+    document.getElementById('pd-rows').innerHTML = [
+      ['Start', bp.free, ''], ['Pro', bp.pro, 'pro'], ['Studio', bp.studio, 'studio']
+    ].map(([n,c,cls]) => `<div class="pd-row"><span class="pd-name">${n}</span><div class="pd-bar"><div class="pd-fill ${cls}" style="width:${Math.round(c/tot*100)}%"></div></div><span class="pd-num">${c}</span></div>`).join('');
+    document.getElementById('plan-dist').style.display = 'block';
   } catch(e) { console.error(e); }
 }
 
+// ── Tabs ──
+function switchTab(t) {
+  currentTab = t;
+  document.querySelectorAll('.tab').forEach(el => el.classList.toggle('active', el.dataset.tab === t));
+  document.getElementById('search').value = '';
+  if (t === 'users') loadUsers(); else loadTable(t);
+}
+
+// ── Users ──
 async function loadUsers() {
   try {
-    const users = await api('GET', '/api/admin/users');
-    document.getElementById('users-count').textContent = users.length + (users.length===1?' user':' users');
-    const tbody = document.getElementById('users-tbody');
-    const empty = document.getElementById('users-empty');
-
-    if (!users.length) { tbody.innerHTML=''; empty.style.display='block'; return; }
-    empty.style.display = 'none';
-
-    tbody.innerHTML = users.map(u => `
-      <tr>
-        <td>
-          <div class="td-main">${esc(u.name)}</div>
-          <div class="td-sub">${esc(u.email)}</div>
-        </td>
-        <td>${esc(u.studio_name || '—')}</td>
-        <td><span class="role-badge role-${u.role}">${u.role === 'admin' ? 'Admin' : 'User'}</span></td>
-        <td>
-          <select class="plan-select plan-${u.plan || 'free'}" onchange="setPlan(${u.id}, this.value, '${u.role}')">
-            <option value="free"   ${(u.plan||'free')==='free'   ? 'selected' : ''}>Start</option>
-            <option value="pro"    ${u.plan==='pro'    ? 'selected' : ''}>Pro</option>
-            <option value="studio" ${u.plan==='studio' ? 'selected' : ''}>Studio</option>
-          </select>
-        </td>
-        <td>${u.clients_count}</td>
-        <td>${u.projects_count}</td>
-        <td style="font-variant-numeric:tabular-nums">${fmtRub(u.revenue)}</td>
-        <td style="font-size:11px;color:var(--g3)">${fmtDate(u.created_at)}</td>
-        <td>
-          <div class="actions">
-            ${u.id !== me.id ? `
-              <span class="td-action" onclick="toggleRole(${u.id}, '${u.role}')">${u.role === 'admin' ? '↓ User' : '↑ Admin'}</span>
-              <span class="td-action danger" onclick="deleteUser(${u.id}, '${esc(u.name)}')">Delete</span>
-            ` : '<span style="font-size:11px;color:var(--g3)">You</span>'}
-          </div>
-        </td>
-      </tr>`).join('');
+    usersCache = await api('GET', '/api/admin/users');
+    renderUsers(usersCache);
   } catch(e) { console.error(e); }
 }
-
-async function setPlan(id, plan, role) {
-  const labels = { free:'Start', pro:'Pro', studio:'Studio' };
-  try {
-    await api('PUT', `/api/admin/users/${id}`, { role, plan });
-    toast('Plan → ' + (labels[plan] || plan));
-    loadUsers();
-  } catch(e) { toast(e.message); loadUsers(); }
+function planExpiryText(u) {
+  if (u.trial_ends_at && new Date(u.trial_ends_at) > new Date()) {
+    const d = Math.ceil((new Date(u.trial_ends_at) - new Date())/86400000);
+    return `<span style="color:var(--gold);font-size:11.5px">trial · ${d}d</span>`;
+  }
+  return `<input type="date" class="exp-input" value="${(u.plan_expires_at||'').slice(0,10)}" onchange="setExpiry(${u.id}, this.value)" title="Plan expiry">`;
+}
+function renderUsers(list) {
+  document.getElementById('thead').innerHTML = `<tr>
+    <th>User</th><th>Studio</th><th>Role</th><th>Plan</th><th>Expiry / trial</th><th>Status</th>
+    <th>Clients</th><th>Projects</th><th>Revenue</th><th>Joined</th><th></th></tr>`;
+  const tb = document.getElementById('tbody'), empty = document.getElementById('empty');
+  document.getElementById('count').textContent = list.length + (list.length===1?' user':' users');
+  if (!list.length) { tb.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  tb.innerHTML = list.map(u => `
+    <tr class="${u.blocked?'is-blocked':''}">
+      <td><div class="td-main" style="cursor:pointer" onclick="openUserDetail(${u.id})">${esc(u.name)}</div><div class="td-sub">${esc(u.email)}</div></td>
+      <td>${esc(u.studio_name || '—')}</td>
+      <td><span class="role-badge role-${u.role}">${u.role==='admin'?'Admin':u.role==='staff'?'Staff':'User'}</span></td>
+      <td><select class="plan-select plan-${u.plan||'free'}" onchange="setPlan(${u.id}, this.value)">
+        <option value="free"   ${(u.plan||'free')==='free'?'selected':''}>Start</option>
+        <option value="pro"    ${u.plan==='pro'?'selected':''}>Pro</option>
+        <option value="studio" ${u.plan==='studio'?'selected':''}>Studio</option>
+      </select></td>
+      <td>${planExpiryText(u)}</td>
+      <td>${u.blocked ? '<span class="status-pill blocked"><span class="dot"></span>Blocked</span>' : '<span class="status-pill ok"><span class="dot"></span>Active</span>'}</td>
+      <td style="font-variant-numeric:tabular-nums">${u.clients_count}</td>
+      <td style="font-variant-numeric:tabular-nums">${u.projects_count}</td>
+      <td style="font-variant-numeric:tabular-nums">${fmtRub(u.revenue)}</td>
+      <td style="font-size:11px;color:var(--g2)">${fmtDate(u.created_at)}</td>
+      <td><div class="actions">
+        ${u.id!==me.id ? `
+          <button class="mini-btn gold" onclick="grantTrial(${u.id})" title="Grant 14-day Studio trial">Trial</button>
+          <button class="mini-btn ${u.blocked?'':'danger'}" onclick="toggleBlock(${u.id}, ${u.blocked?1:0})">${u.blocked?'Unblock':'Block'}</button>
+          <button class="mini-btn danger" onclick="deleteUser(${u.id}, '${esc(u.name).replace(/'/g,"\\'")}')">Delete</button>
+        ` : '<span style="font-size:11px;color:var(--g3)">You</span>'}
+      </div></td>
+    </tr>`).join('');
 }
 
-async function toggleRole(id, currentRole) {
-  const newRole = currentRole === 'admin' ? 'user' : 'admin';
-  if (!confirm(`Change role to "${newRole}"?`)) return;
-  try {
-    await api('PUT', `/api/admin/users/${id}/role`, { role: newRole });
-    toast('Role updated');
-    loadUsers();
-  } catch(e) { toast(e.message); }
+async function setPlan(id, plan) {
+  try { await api('PUT', `/api/admin/users/${id}`, { plan }); toast('Plan → ' + plan); loadUsers(); loadMetrics(); }
+  catch(e) { toast(e.message); }
 }
-
+async function setExpiry(id, value) {
+  try { await api('PUT', `/api/admin/users/${id}`, { plan_expires_at: value || null }); toast(value?'Expiry set':'Expiry cleared'); }
+  catch(e) { toast(e.message); }
+}
+async function grantTrial(id) {
+  const ends = new Date(Date.now() + 14*86400000).toISOString();
+  try { await api('PUT', `/api/admin/users/${id}`, { trial_ends_at: ends }); toast('14-day trial granted'); loadUsers(); }
+  catch(e) { toast(e.message); }
+}
+async function toggleBlock(id, blocked) {
+  try { await api('PUT', `/api/admin/users/${id}`, { blocked: blocked ? 0 : 1 }); toast(blocked?'Unblocked':'User blocked'); loadUsers(); }
+  catch(e) { toast(e.message); }
+}
 async function deleteUser(id, name) {
   if (!confirm(`Delete user "${name}" and all their data? This cannot be undone.`)) return;
-  try {
-    await api('DELETE', `/api/admin/users/${id}`);
-    toast('User deleted');
-    loadStats();
-    loadUsers();
-  } catch(e) { toast(e.message); }
+  try { await api('DELETE', `/api/admin/users/${id}`); toast('User deleted'); loadMetrics(); loadUsers(); }
+  catch(e) { toast(e.message); }
 }
 
-let ADMIN_FX = (1/92); // USD per 1 RUB (fallback), refreshed from live rate
-(async () => {
+// ── DB table viewer ──
+async function loadTable(t) {
   try {
-    const r = await fetch('https://open.er-api.com/v6/latest/RUB');
-    const d = await r.json();
-    if (d && d.rates && d.rates.USD) { ADMIN_FX = d.rates.USD; loadStats(); loadUsers(); }
-  } catch(_) {}
-})();
+    const d = await api('GET', `/api/admin/db/${t}`);
+    rowsCache = d.rows;
+    renderTable(d.rows, d.total);
+  } catch(e) { console.error(e); document.getElementById('tbody').innerHTML=''; document.getElementById('empty').style.display='block'; }
+}
+const MONEY_COLS = new Set(['amount','budget','cost','value','total','minutes']);
+function renderTable(rows, total) {
+  const empty = document.getElementById('empty');
+  document.getElementById('count').textContent = `${rows.length} shown · ${total} total`;
+  if (!rows.length) { document.getElementById('thead').innerHTML=''; document.getElementById('tbody').innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  const cols = Object.keys(rows[0]);
+  document.getElementById('thead').innerHTML = '<tr>' + cols.map(c => `<th>${esc(c)}</th>`).join('') + '</tr>';
+  document.getElementById('tbody').innerHTML = rows.map(r => '<tr>' + cols.map(c => {
+    let v = r[c];
+    if (v === null || v === undefined) v = '—';
+    else if (c === 'amount' || c === 'budget' || c === 'cost' || c === 'value') v = fmtRub(Number(v)||0);
+    else v = String(v);
+    if (v.length > 60) v = v.slice(0,60) + '…';
+    return `<td title="${esc(String(r[c]??''))}">${esc(v)}</td>`;
+  }).join('') + '</tr>').join('');
+}
+
+// ── Search filter ──
+function applySearch() {
+  const q = document.getElementById('search').value.toLowerCase().trim();
+  if (currentTab === 'users') {
+    renderUsers(!q ? usersCache : usersCache.filter(u => (u.name+' '+u.email+' '+(u.studio_name||'')).toLowerCase().includes(q)));
+  } else {
+    renderTable(!q ? rowsCache : rowsCache.filter(r => JSON.stringify(r).toLowerCase().includes(q)), rowsCache.length);
+  }
+}
+
+// ── User detail modal ──
+async function openUserDetail(id) {
+  try {
+    const d = await api('GET', `/api/admin/users/${id}/detail`);
+    const u = d.user;
+    const ini = (u.name||'?').split(' ').slice(0,2).map(w=>w[0]||'').join('').toUpperCase();
+    const tbl = (rows, cols, fmtRow, emptyTxt) => rows.length
+      ? `<table class="mini-table">${rows.map(fmtRow).join('')}</table>`
+      : `<div class="mini-list-empty">${emptyTxt}</div>`;
+    document.getElementById('modal').innerHTML = `
+      <div class="modal-head">
+        <div class="modal-avatar">${esc(ini)}</div>
+        <div><div class="modal-title">${esc(u.name)}</div><div class="modal-sub">${esc(u.email)} · ${esc(u.studio_name||'—')}</div></div>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="detail-grid">
+          <div class="detail-stat"><div class="detail-stat-val">${d.clients.length}</div><div class="detail-stat-lbl">Clients</div></div>
+          <div class="detail-stat"><div class="detail-stat-val">${d.projects.length}</div><div class="detail-stat-lbl">Projects</div></div>
+          <div class="detail-stat"><div class="detail-stat-val">${d.invoices.length}</div><div class="detail-stat-lbl">Invoices</div></div>
+          <div class="detail-stat"><div class="detail-stat-val">${d.payments.length}</div><div class="detail-stat-lbl">Payments</div></div>
+        </div>
+        <div class="detail-sec-title">Clients</div>
+        ${tbl(d.clients, null, c => `<tr><td class="td-main">${esc(c.name)}</td><td>${esc(c.status||'')}</td><td>${esc(c.industry||'')}</td></tr>`, 'No clients')}
+        <div class="detail-sec-title">Projects</div>
+        ${tbl(d.projects, null, p => `<tr><td class="td-main">${esc(p.title)}</td><td>${esc(p.status||'')}</td><td style="text-align:right">${fmtRub(p.budget||0)}</td><td>${esc(p.deadline||'')}</td></tr>`, 'No projects')}
+        <div class="detail-sec-title">Invoices</div>
+        ${tbl(d.invoices, null, i => `<tr><td class="td-main">#${esc(i.number||i.id)}</td><td style="text-align:right">${fmtRub(i.amount||0)}</td><td>${esc(i.status||'')}</td><td>${esc((i.issued_at||'').slice(0,10))}</td></tr>`, 'No invoices')}
+        <div class="detail-sec-title">Payments</div>
+        ${tbl(d.payments, null, p => `<tr><td class="td-main">${esc(p.plan||p.id)}</td><td style="text-align:right">${fmtRub(p.amount||0)}</td><td>${esc(p.status||'')}</td><td>${esc((p.created_at||'').slice(0,10))}</td></tr>`, 'No payments')}
+      </div>`;
+    document.getElementById('overlay').classList.add('open');
+  } catch(e) { toast(e.message); }
+}
+function closeModal() { document.getElementById('overlay').classList.remove('open'); }
+
+// ── Helpers ──
 function fmtRub(n) {
-  const v = (n || 0) * ADMIN_FX;   // amounts stored in RUB -> show in USD
+  const v = (n || 0) * ADMIN_FX;
   if (!v) return '$ —';
   if (v >= 1000000) return '$ ' + (v/1000000).toFixed(1) + 'M';
   if (v >= 1000)    return '$ ' + (v/1000).toFixed(1) + 'K';
   return '$ ' + Math.round(v);
 }
+function fmtDate(s) { return s ? s.slice(0,10) : '—'; }
+function esc(s) { return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function toast(msg) { const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),2500); }
+function logout() { localStorage.removeItem('crm_token'); localStorage.removeItem('crm_user'); window.location.href='/'; }
 
-function fmtDate(s) {
-  if (!s) return '—';
-  return s.slice(0,10);
-}
-
-function esc(s) {
-  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-function toast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg; el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 2500);
-}
-
-function logout() {
-  localStorage.removeItem('crm_token');
-  localStorage.removeItem('crm_user');
-  window.location.href = '/';
-}
-
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 init();
 </script>
 </body>

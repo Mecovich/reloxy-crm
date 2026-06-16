@@ -267,6 +267,7 @@ async function initDB() {
       logged_at TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )`,
+    `ALTER TABLE users ADD COLUMN blocked INTEGER DEFAULT 0`,
   ];
   for (const sql of migrations) {
     try {
@@ -376,6 +377,7 @@ async function handleLogin(req, res) {
     const result = await db.execute({ sql: 'SELECT * FROM users WHERE email = ?', args: [email] });
     const user = result.rows[0];
     if (!user) return res.status(400).json({ error: 'User not found' });
+    if (user.blocked) return res.status(403).json({ error: 'Account blocked. Contact support.' });
 
     const valid = await bcrypt.compare(password, user.password);
     if (!valid) return res.status(400).json({ error: 'Wrong password' });
@@ -1357,17 +1359,76 @@ app.delete('/api/staff/:id', authMiddleware, async (req, res) => {
 
 // ─── ADMIN ROUTES ────────────────────────────────────────────────────────────
 app.get('/api/admin/users', authMiddleware, adminMiddleware, async (req, res) => {
-  const result = await db.execute({ sql: 'SELECT id, name, email, role, plan, created_at FROM users ORDER BY created_at DESC', args: [] });
+  const result = await db.execute({ sql: `
+    SELECT u.id, u.name, u.email, u.role, u.plan, u.plan_expires_at, u.trial_ends_at, u.blocked, u.studio_name, u.owner_id, u.created_at,
+      (SELECT COUNT(*) FROM clients c  WHERE c.user_id = u.id) AS clients_count,
+      (SELECT COUNT(*) FROM projects p WHERE p.user_id = u.id) AS projects_count,
+      (SELECT COALESCE(SUM(amount),0) FROM invoices i WHERE i.user_id = u.id AND i.status='paid') AS revenue
+    FROM users u ORDER BY u.created_at DESC`, args: [] });
   res.json(result.rows);
 });
 
 app.put('/api/admin/users/:id', authMiddleware, adminMiddleware, async (req, res) => {
-  const { role, plan } = req.body;
+  const { role, plan, plan_expires_at, trial_ends_at, blocked } = req.body;
+  const cur = (await db.execute({ sql: 'SELECT role, plan, plan_expires_at, trial_ends_at, blocked FROM users WHERE id=?', args: [req.params.id] })).rows[0];
+  if (!cur) return res.status(404).json({ error: 'User not found' });
+  const v = (a, b) => a === undefined ? b : a;
   await db.execute({
-    sql: 'UPDATE users SET role=?, plan=? WHERE id=?',
-    args: [role, plan, req.params.id],
+    sql: 'UPDATE users SET role=?, plan=?, plan_expires_at=?, trial_ends_at=?, blocked=? WHERE id=?',
+    args: [v(role, cur.role), v(plan, cur.plan), v(plan_expires_at, cur.plan_expires_at), v(trial_ends_at, cur.trial_ends_at), (v(blocked, cur.blocked) ? 1 : 0), req.params.id],
   });
   res.json({ ok: true });
+});
+
+// Richer admin metrics for the dashboard
+app.get('/api/admin/metrics', authMiddleware, adminMiddleware, async (req, res) => {
+  const q = sql => db.execute({ sql, args: [] });
+  const [byPlan, newU, paidInv, payAgg, invCnt, signups] = await Promise.all([
+    q("SELECT COALESCE(plan,'free') AS plan, COUNT(*) AS c FROM users WHERE owner_id IS NULL GROUP BY plan"),
+    q("SELECT COUNT(*) AS c FROM users WHERE created_at >= datetime('now','-30 days')"),
+    q("SELECT COALESCE(SUM(amount),0) AS s FROM invoices WHERE status='paid'"),
+    q("SELECT COUNT(*) AS c, COALESCE(SUM(amount),0) AS s FROM payments"),
+    q("SELECT COUNT(*) AS c FROM invoices"),
+    q("SELECT substr(created_at,1,10) AS d, COUNT(*) AS c FROM users WHERE created_at >= datetime('now','-56 days') GROUP BY d ORDER BY d"),
+  ]).catch(() => []);
+  const plans = { free: 0, pro: 0, studio: 0 };
+  (byPlan?.rows || []).forEach(r => { plans[r.plan] = Number(r.c); });
+  const mrr = plans.pro * 19 + plans.studio * 49;
+  res.json({
+    usersByPlan: plans,
+    paidUsers: plans.pro + plans.studio,
+    mrr,
+    newUsers30: Number(newU?.rows?.[0]?.c || 0),
+    paidRevenue: Number(paidInv?.rows?.[0]?.s || 0),
+    paymentsCount: Number(payAgg?.rows?.[0]?.c || 0),
+    paymentsSum: Number(payAgg?.rows?.[0]?.s || 0),
+    invoicesCount: Number(invCnt?.rows?.[0]?.c || 0),
+    signups: (signups?.rows || []).map(r => ({ d: r.d, c: Number(r.c) })),
+  });
+});
+
+// DB table viewer (read-only, allowlisted)
+const ADMIN_TABLES = ['clients', 'projects', 'invoices', 'payments', 'deals', 'tasks', 'events', 'staff', 'time_logs'];
+app.get('/api/admin/db/:table', authMiddleware, adminMiddleware, async (req, res) => {
+  const t = String(req.params.table || '');
+  if (!ADMIN_TABLES.includes(t)) return res.status(400).json({ error: 'Unknown table' });
+  const r = await db.execute({ sql: `SELECT * FROM ${t} ORDER BY id DESC LIMIT 200`, args: [] });
+  const cnt = await db.execute({ sql: `SELECT COUNT(*) AS c FROM ${t}`, args: [] });
+  res.json({ table: t, total: Number(cnt.rows[0].c), rows: r.rows });
+});
+
+// Single user detail — their clients, projects, invoices, payments
+app.get('/api/admin/users/:id/detail', authMiddleware, adminMiddleware, async (req, res) => {
+  const id = req.params.id;
+  const u = (await db.execute({ sql: 'SELECT id, name, email, role, plan, plan_expires_at, trial_ends_at, blocked, studio_name, owner_id, created_at FROM users WHERE id=?', args: [id] })).rows[0];
+  if (!u) return res.status(404).json({ error: 'User not found' });
+  const [clients, projects, invoices, payments] = await Promise.all([
+    db.execute({ sql: 'SELECT id, name, status, industry FROM clients WHERE user_id=? ORDER BY id DESC LIMIT 100', args: [id] }),
+    db.execute({ sql: 'SELECT id, title, status, budget, deadline FROM projects WHERE user_id=? ORDER BY id DESC LIMIT 100', args: [id] }),
+    db.execute({ sql: 'SELECT id, number, amount, status, issued_at FROM invoices WHERE user_id=? ORDER BY id DESC LIMIT 100', args: [id] }),
+    db.execute({ sql: 'SELECT * FROM payments WHERE user_id=? ORDER BY id DESC LIMIT 100', args: [id] }).catch(() => ({ rows: [] })),
+  ]);
+  res.json({ user: u, clients: clients.rows, projects: projects.rows, invoices: invoices.rows, payments: payments.rows });
 });
 
 app.put('/api/admin/users/:id/role', authMiddleware, adminMiddleware, async (req, res) => {
