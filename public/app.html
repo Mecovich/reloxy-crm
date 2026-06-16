@@ -2118,6 +2118,34 @@ td { border-bottom-color:var(--line) !important; }
 #page-clients .cl-since b { color:rgba(217,217,217,0.62) !important; font-weight:600 !important; }
 /* ══════════════════ /CLIENTS — MINIMAL REDESIGN ══════════════════ */
 
+/* ══════════════════ PRICING — MINIMAL ══════════════════ */
+.pricing-modal { background:#121214 !important; border:1px solid rgba(255,255,255,0.08) !important; border-radius:24px !important; padding:38px 38px 28px !important; box-shadow:0 40px 100px -24px rgba(0,0,0,0.9) !important; }
+.pricing-modal::before { display:none !important; }
+.pricing-head { margin-bottom:32px !important; }
+.pricing-title { font-weight:600 !important; letter-spacing:-0.6px !important; }
+.pricing-sub { color:rgba(217,217,217,0.4) !important; }
+.pricing-x { border-radius:9px !important; }
+.pricing-grid { gap:16px !important; }
+.price-card { padding:32px 28px !important; border:1px solid rgba(255,255,255,0.06) !important; border-radius:18px !important; background:transparent !important; transition:border-color .15s ease, background .15s ease !important; }
+.price-card:hover { transform:none !important; border-color:rgba(255,255,255,0.13) !important; background:rgba(255,255,255,0.012) !important; }
+.price-card.hl { border-color:rgba(255,255,255,0.14) !important; background:rgba(255,255,255,0.025) !important; }
+.price-pop { background:rgba(240,240,242,0.95) !important; color:#121212 !important; font-weight:600 !important; letter-spacing:0.5px !important; padding:4px 13px !important; top:-10px !important; }
+.price-name { font-weight:600 !important; letter-spacing:1px !important; color:rgba(217,217,217,0.5) !important; }
+.price-name .pc-crown { color:rgba(232,200,131,0.75) !important; }
+.price-amount { font-size:36px !important; font-weight:700 !important; letter-spacing:-1.6px !important; margin:16px 0 28px !important; }
+.price-sym { font-size:18px !important; vertical-align:3px !important; margin-right:3px !important; color:rgba(217,217,217,0.42) !important; }
+.price-per { color:rgba(217,217,217,0.32) !important; }
+.price-feats { gap:14px !important; margin-bottom:28px !important; }
+.price-feat { font-size:13px !important; color:rgba(217,217,217,0.62) !important; padding-left:23px !important; }
+.price-feat::before { color:rgba(237,237,237,0.4) !important; font-size:11px !important; }
+.price-btn { font-weight:600 !important; padding:12px 16px !important; border-radius:11px !important; background:rgba(255,255,255,0.05) !important; border:1px solid rgba(255,255,255,0.1) !important; }
+.price-btn:hover { background:rgba(255,255,255,0.09) !important; }
+.price-btn.primary { background:#EDEDED !important; border:none !important; }
+.price-btn.primary:hover { transform:none !important; background:#fff !important; }
+.price-cur { font-weight:500 !important; color:rgba(217,217,217,0.42) !important; }
+.pricing-note { margin-top:24px !important; color:rgba(217,217,217,0.3) !important; }
+/* ══════════════════ /PRICING — MINIMAL ══════════════════ */
+
 /* ══════════════════ CLIENTS — TABLE VIEW ══════════════════ */
 /* Minimal: hide stats bar + subtitle */
 #page-clients .cl-stats-bar { display:none !important; }
@@ -5916,8 +5944,8 @@ function openPricingModal(highlight) {
   const hlKey = highlight || 'pro';
   document.getElementById('pricing-title').textContent = ru ? 'Тарифы' : 'Plans';
   document.getElementById('pricing-note').textContent = ru
-    ? 'Оплата через СБП, карты или крипту. План включается автоматически в течение минуты после оплаты.'
-    : 'Pay via SBP, card or crypto. Your plan activates automatically within a minute after payment.';
+    ? 'Подписка активируется автоматически сразу после оплаты. Отмена в любой момент.'
+    : 'Your plan activates automatically right after payment. Cancel anytime.';
   document.getElementById('pricing-sub').textContent = onTrial
     ? (ru ? `Сейчас у вас триал Studio — осталось ${trialDaysLeft()} дн.` : `You're on a Studio trial — ${trialDaysLeft()} days left`)
     : (ru ? 'Выберите план под размер студии' : 'Pick a plan that fits your studio');
