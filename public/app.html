@@ -2117,6 +2117,44 @@ td { border-bottom-color:var(--line) !important; }
 #page-clients .cl-since { font-size:10.5px !important; color:rgba(217,217,217,0.38) !important; }
 #page-clients .cl-since b { color:rgba(217,217,217,0.62) !important; font-weight:600 !important; }
 /* ══════════════════ /CLIENTS — MINIMAL REDESIGN ══════════════════ */
+
+/* ══════════════════ CLIENTS — TABLE VIEW ══════════════════ */
+#page-clients .cl-search { display:flex; align-items:center; gap:10px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:11px 15px; margin-bottom:16px; max-width:440px; }
+#page-clients .cl-search input { flex:1; background:none; border:none; outline:none; color:#EDEDED; font-size:13.5px; font-family:inherit; }
+#page-clients .cl-search input::placeholder { color:rgba(217,217,217,0.35); }
+#page-clients .cl-search svg { color:rgba(217,217,217,0.4); flex-shrink:0; }
+#page-clients .cl-tbl-wrap { border:1px solid rgba(255,255,255,0.07); border-radius:14px; overflow:hidden; background:rgba(255,255,255,0.012); }
+#page-clients .cl-tbl { width:100%; border-collapse:collapse; }
+#page-clients .cl-tbl th { text-align:left; font-size:10.5px; font-weight:600; letter-spacing:0.5px; text-transform:uppercase; color:rgba(217,217,217,0.42); padding:14px 18px; border-bottom:1px solid rgba(255,255,255,0.07); white-space:nowrap; background:rgba(255,255,255,0.015); }
+#page-clients .cl-tbl td { padding:13px 18px; border-bottom:1px solid rgba(255,255,255,0.045); font-size:13px; color:rgba(217,217,217,0.7); vertical-align:middle; }
+#page-clients .cl-tbl tbody tr:last-child td { border-bottom:none; }
+#page-clients .cl-row { cursor:pointer; transition:background .12s ease; }
+#page-clients .cl-row:hover { background:rgba(255,255,255,0.025); }
+#page-clients .cl-cell-name { display:flex; align-items:center; gap:11px; min-width:0; }
+#page-clients .cl-av-sm { width:30px; height:30px; border-radius:50%; overflow:hidden; border:1px solid rgba(255,255,255,0.08); flex-shrink:0; display:inline-block; }
+#page-clients .cl-nm { font-size:13.5px; font-weight:500; color:#EDEDED; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+#page-clients .cl-nm-sub { font-size:11px; color:rgba(217,217,217,0.4); margin-top:1px; }
+#page-clients .cl-em { color:rgba(217,217,217,0.72); }
+#page-clients .cl-em-sub { font-size:11.5px; color:rgba(217,217,217,0.38); margin-top:2px; }
+#page-clients .cl-when { display:flex; align-items:center; gap:7px; color:rgba(217,217,217,0.72); white-space:nowrap; }
+#page-clients .cl-when svg { color:rgba(217,217,217,0.4); flex-shrink:0; }
+#page-clients .cl-when-sub { font-size:11px; color:rgba(217,217,217,0.36); margin-top:2px; margin-left:20px; }
+#page-clients .cl-th-num, #page-clients .cl-td-num { text-align:right; font-variant-numeric:tabular-nums; }
+#page-clients .cl-td-num { color:#EDEDED; font-weight:500; }
+#page-clients .cl-th-check, #page-clients .cl-td-check { width:42px; }
+#page-clients .cl-check { width:17px; height:17px; border-radius:5px; border:1.5px solid rgba(255,255,255,0.18); display:inline-block; vertical-align:middle; transition:border-color .12s, background .12s; }
+#page-clients .cl-td-check:hover .cl-check { border-color:rgba(255,255,255,0.4); }
+#page-clients .cl-tbl-empty { padding:48px 20px; text-align:center; font-size:13px; color:rgba(217,217,217,0.35); }
+/* Status pills — soft tinted, table only */
+#page-clients .cl-tbl .cl-status-pill { display:inline-flex; align-items:center; gap:7px; padding:4px 11px; border-radius:20px; font-size:11px; font-weight:600; letter-spacing:0; text-transform:none; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); color:rgba(217,217,217,0.6); }
+#page-clients .cl-tbl .cl-status-dot { width:6px; height:6px; border-radius:50%; box-shadow:none; }
+#page-clients .cl-tbl .cl-status-pill.is-active { color:#86d6a3; background:rgba(110,200,140,0.1); border-color:rgba(110,200,140,0.22); }
+#page-clients .cl-tbl .cl-status-pill.is-active .cl-status-dot { background:#86d6a3; }
+#page-clients .cl-tbl .cl-status-pill.is-lead { color:#e8c279; background:rgba(232,194,121,0.1); border-color:rgba(232,194,121,0.22); }
+#page-clients .cl-tbl .cl-status-pill.is-lead .cl-status-dot { background:#e8c279; }
+#page-clients .cl-tbl .cl-status-pill.is-archive { color:rgba(217,217,217,0.5); }
+#page-clients .cl-tbl .cl-status-pill.is-archive .cl-status-dot { background:rgba(217,217,217,0.4); }
+/* ══════════════════ /CLIENTS — TABLE VIEW ══════════════════ */
 /* ══════════════════ CLEAN MONOCHROME + ACTIVITY ══════════════════ */
 /* Banner slides with image background */
 .bn-slide.has-bg::before { display:none !important; }
@@ -2635,6 +2673,10 @@ body { background:#0E0E0E !important; }
         <div class="tab" onclick="filterClients('active',this)" data-i18n="tab_active">Active</div>
         <div class="tab" onclick="filterClients('lead',this)" data-i18n="tab_leads">Leads</div>
         <div class="tab" onclick="filterClients('archive',this)" data-i18n="tab_archive">Archive</div>
+      </div>
+      <div class="cl-search">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="7" cy="7" r="5"/><path d="M11 11l3.5 3.5" stroke-linecap="round"/></svg>
+        <input id="cl-search-input" placeholder="Search clients…" oninput="clSearch(this.value)">
       </div>
       <div id="clients-grid"></div>
       <div id="clients-empty" style="display:none"></div>
@@ -5496,6 +5538,8 @@ function renderCalendar() {
 
 // ─── CLIENTS ───────────────────────────────────────────────────────────────
 let clientFilter = 'all';
+let clSearchQuery = '';
+function clSearch(v) { clSearchQuery = v; renderClients(); }
 function filterClients(f, el) {
   clientFilter = f;
   document.querySelectorAll('#page-clients .tab').forEach(t => t.classList.remove('active'));
@@ -5631,62 +5675,48 @@ function renderClients(list) {
   }
   empty.style.display = 'none';
   const statusClass = { active:'is-active', lead:'is-lead', archive:'is-archive' };
-  const maxRevenue = Math.max(1, ...allMetrics.map(m => m.revenue));
   const dateLocale = (currentLang === 'ru') ? 'ru-RU' : 'en-US';
-  // ABC-сегментация по выручке (Pro)
-  const abcMap = {};
-  if (planOf() !== 'free') {
-    const ranked = clients.map((c, i) => ({ id: c.id, rev: allMetrics[i].revenue })).filter(x => x.rev > 0).sort((a, b) => b.rev - a.rev);
-    const totR = ranked.reduce((s, x) => s + x.rev, 0);
-    let acc = 0;
-    ranked.forEach(x => { acc += x.rev; abcMap[x.id] = acc <= totR * 0.8 ? 'A' : acc <= totR * 0.95 ? 'B' : 'C'; });
-  }
-  const now60 = Date.now() - 60 * 86400000;
+  const ru = currentLang === 'ru';
+
+  // search filter
+  const si = document.getElementById('cl-search-input');
+  if (si) si.placeholder = ru ? 'Поиск клиентов…' : 'Search clients…';
+  const q = (clSearchQuery || '').toLowerCase().trim();
+  const rows = q ? data.filter(c => (`${c.name} ${c.email||''} ${c.phone||''} ${c.industry||''}`).toLowerCase().includes(q)) : data;
+
+  const calIc = '<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="3" width="12" height="11" rx="2"/><path d="M5 1.5v3M11 1.5v3M2 7h12"/></svg>';
 
   if (grid) grid.innerHTML = `
-    <div class="cl-grid">
-      ${data.map(c => {
-        const m   = clientMetrics(c);
-        const ini = (c.name||'?').split(' ').slice(0,2).map(w=>w[0]||'').join('').toUpperCase();
-        const sCls = statusClass[c.status] || 'is-archive';
-        const since = c.created_at ? new Date(c.created_at).toLocaleDateString(dateLocale, { month:'short', year:'numeric' }) : '—';
-        const lastActiveTxt = m.lastActive ? m.lastActive.toLocaleDateString(dateLocale, { day:'numeric', month:'short' }) : t('cl_never');
-        const revPct = Math.round((m.revenue / maxRevenue) * 100);
-        return `<div class="cl-card" onclick="viewClient(${c.id})">
-          <div class="cl-card-top">
-            <div class="cl-card-id">
-              <div class="cl-avatar">${avInitials(c.name)}</div>
-              <div style="min-width:0">
-                <div class="cl-card-name">${esc(c.name)}${abcMap[c.id] ? ` <span class="abc-badge abc-${abcMap[c.id]}" title="${abcMap[c.id]==='A' ? (currentLang==='ru'?'Топ-клиент: даёт основную выручку':'Top client: core revenue') : abcMap[c.id]==='B' ? (currentLang==='ru'?'Средний сегмент':'Mid segment') : (currentLang==='ru'?'Хвост выручки':'Revenue tail')}">${abcMap[c.id]}</span>` : ''}${(c.status==='active' && m.lastActive && m.lastActive.getTime() < now60) ? ` <span class="cl-sleep" title="${currentLang==='ru'?'Нет активности 60+ дней — пора написать':'No activity for 60+ days — time to reach out'}">zZ</span>` : ''}</div>
-                <div class="cl-card-industry">${c.industry ? esc(c.industry) : (c.contact_name ? esc(c.contact_name) : '')}</div>
-              </div>
-            </div>
-            <div class="cl-status-pill ${sCls}"><span class="cl-status-dot"></span>${statusClientLabel(c.status)}</div>
-          </div>
-
-          <div class="cl-stat-grid">
-            <div class="cl-mini-stat">
-              <div class="cl-mini-stat-val">${fmt(m.revenue)}</div>
-              <div class="cl-mini-stat-lbl">${t('cl_revenue')}</div>
-            </div>
-            <div class="cl-mini-stat">
-              <div class="cl-mini-stat-val">${m.projectCount}</div>
-              <div class="cl-mini-stat-lbl">${t('cl_projects')}</div>
-            </div>
-            <div class="cl-mini-stat">
-              <div class="cl-mini-stat-val">${m.interactions}</div>
-              <div class="cl-mini-stat-lbl">${t('cl_interactions')}</div>
-            </div>
-          </div>
-
-          <div class="cl-revenue-bar"><div class="cl-revenue-bar-fill" style="width:${revPct}%"></div></div>
-
-          <div class="cl-card-foot" style="border-top:none;padding-top:0">
-            <div class="cl-since">${t('cl_last_active')} <b>${lastActiveTxt}</b></div>
-            <div class="cl-since" style="text-align:right">${t('cl_client_since')} <b>${since}</b></div>
-          </div>
-        </div>`;
-      }).join('')}
+    <div class="cl-tbl-wrap">
+      <table class="cl-tbl">
+        <thead><tr>
+          <th class="cl-th-check"><span class="cl-check"></span></th>
+          <th>${ru?'Имя':'Name'}</th>
+          <th>${ru?'Контакты':'Email'}</th>
+          <th>${ru?'Активность':'Last activity'}</th>
+          <th class="cl-th-num">${t('cl_projects')}</th>
+          <th class="cl-th-num">${t('cl_revenue')}</th>
+          <th>${ru?'Статус':'Status'}</th>
+        </tr></thead>
+        <tbody>
+          ${rows.map(c => {
+            const m = clientMetrics(c);
+            const sCls = statusClass[c.status] || 'is-archive';
+            const since = c.created_at ? new Date(c.created_at).toLocaleDateString(dateLocale, { month:'short', year:'numeric' }) : '—';
+            const lastActiveTxt = m.lastActive ? m.lastActive.toLocaleDateString(dateLocale, { day:'numeric', month:'short' }) : t('cl_never');
+            return `<tr class="cl-row" onclick="viewClient(${c.id})">
+              <td class="cl-td-check" onclick="event.stopPropagation()"><span class="cl-check"></span></td>
+              <td><div class="cl-cell-name"><span class="cl-av-sm">${avInitials(c.name)}</span><div style="min-width:0"><div class="cl-nm">${esc(c.name)}</div>${(c.industry||c.contact_name)?`<div class="cl-nm-sub">${esc(c.industry||c.contact_name)}</div>`:''}</div></div></td>
+              <td><div class="cl-em">${esc(c.email||'—')}</div>${c.phone?`<div class="cl-em-sub">${esc(c.phone)}</div>`:''}</td>
+              <td><div class="cl-when">${calIc} ${lastActiveTxt}</div><div class="cl-when-sub">${ru?'клиент с':'since'} ${since}</div></td>
+              <td class="cl-td-num">${m.projectCount}</td>
+              <td class="cl-td-num">${fmt(m.revenue)}</td>
+              <td><span class="cl-status-pill ${sCls}"><span class="cl-status-dot"></span>${statusClientLabel(c.status)}</span></td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+      ${rows.length ? '' : `<div class="cl-tbl-empty">${ru?'Ничего не найдено':'No matches'}</div>`}
     </div>`;
 }
 
