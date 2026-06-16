@@ -2175,18 +2175,15 @@ td { border-bottom-color:var(--line) !important; }
 /* Bigger sidebar tabs — taller rows only (no container resize, keeps layout safe) */
 .nav-item { padding:13px 16px !important; font-size:14px !important; gap:13px !important; }
 .nav-ms { font-size:21px !important; }
-/* Sidebar profile card — richer */
-.sidebar-profile-card { padding:11px 12px !important; gap:12px !important; border-radius:14px !important;
-  background:linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.015)) !important;
-  border:1px solid rgba(255,255,255,0.08) !important;
-  transition:transform .15s ease, border-color .15s ease, background .15s ease !important; }
-.sidebar-profile-card:hover { transform:translateY(-1px); border-color:rgba(255,255,255,0.16) !important;
-  background:linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.025)) !important; }
-.sidebar-profile-avatar { width:38px !important; height:38px !important; overflow:visible !important; position:relative; box-shadow:0 0 0 1px rgba(255,255,255,0.07), 0 0 16px rgba(255,255,255,0.04) !important; }
-.sidebar-profile-avatar::after { content:''; position:absolute; right:0; bottom:0; width:10px; height:10px; border-radius:50%; background:#86d6a3; border:2.5px solid #0e0e0e; }
-.sidebar-profile-name { font-size:13.5px !important; font-weight:600 !important; letter-spacing:-0.2px !important; }
-.sidebar-profile-role { display:inline-block !important; margin-top:5px !important; padding:2px 8px !important; border-radius:6px !important; font-size:9px !important; font-weight:700 !important; letter-spacing:0.8px !important; text-transform:uppercase !important; background:rgba(255,255,255,0.06) !important; border:1px solid rgba(255,255,255,0.09) !important; color:rgba(217,217,217,0.6) !important; opacity:1 !important; }
-body.plan-paid .sidebar-profile-role { color:#e8c279 !important; background:rgba(232,194,121,0.12) !important; border-color:rgba(232,194,121,0.25) !important; }
+/* Sidebar profile card — minimal */
+.sidebar-profile-card { padding:11px 12px !important; gap:11px !important; border-radius:12px !important;
+  background:rgba(255,255,255,0.025) !important; border:1px solid rgba(255,255,255,0.06) !important;
+  box-shadow:none !important; transition:background .15s ease, border-color .15s ease !important; }
+.sidebar-profile-card:hover { transform:none !important; background:rgba(255,255,255,0.04) !important; border-color:rgba(255,255,255,0.12) !important; }
+.sidebar-profile-avatar { width:34px !important; height:34px !important; overflow:hidden !important; box-shadow:none !important; }
+.sidebar-profile-avatar::after { display:none !important; }
+.sidebar-profile-name { font-size:13px !important; font-weight:500 !important; letter-spacing:-0.1px !important; }
+.sidebar-profile-role { display:block !important; margin-top:2px !important; padding:0 !important; background:none !important; border:none !important; font-size:10px !important; font-weight:500 !important; letter-spacing:0.6px !important; text-transform:uppercase !important; color:rgba(217,217,217,0.4) !important; }
 /* Helvetica Neue everywhere — icon fonts kept intact */
 body, body * { font-family:"Helvetica Neue",Helvetica,-apple-system,"Segoe UI",Arial,sans-serif; }
 .material-symbols-outlined, [class*="material-symbols"] { font-family:'Material Symbols Outlined' !important; }
