@@ -2119,6 +2119,9 @@ td { border-bottom-color:var(--line) !important; }
 /* ══════════════════ /CLIENTS — MINIMAL REDESIGN ══════════════════ */
 
 /* ══════════════════ CLIENTS — TABLE VIEW ══════════════════ */
+/* Minimal: hide stats bar + subtitle */
+#page-clients .cl-stats-bar { display:none !important; }
+#page-clients .page-header p { display:none !important; }
 #page-clients .cl-search { display:flex; align-items:center; gap:10px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:11px 15px; margin-bottom:16px; max-width:440px; }
 #page-clients .cl-search input { flex:1; background:none; border:none; outline:none; color:#EDEDED; font-size:13.5px; font-family:inherit; }
 #page-clients .cl-search input::placeholder { color:rgba(217,217,217,0.35); }
@@ -5694,8 +5697,6 @@ function renderClients(list) {
           <th>${ru?'Имя':'Name'}</th>
           <th>${ru?'Контакты':'Email'}</th>
           <th>${ru?'Активность':'Last activity'}</th>
-          <th class="cl-th-num">${t('cl_projects')}</th>
-          <th class="cl-th-num">${t('cl_revenue')}</th>
           <th>${ru?'Статус':'Status'}</th>
         </tr></thead>
         <tbody>
@@ -5706,11 +5707,9 @@ function renderClients(list) {
             const lastActiveTxt = m.lastActive ? m.lastActive.toLocaleDateString(dateLocale, { day:'numeric', month:'short' }) : t('cl_never');
             return `<tr class="cl-row" onclick="viewClient(${c.id})">
               <td class="cl-td-check" onclick="event.stopPropagation()"><span class="cl-check"></span></td>
-              <td><div class="cl-cell-name"><span class="cl-av-sm">${avInitials(c.name)}</span><div style="min-width:0"><div class="cl-nm">${esc(c.name)}</div>${(c.industry||c.contact_name)?`<div class="cl-nm-sub">${esc(c.industry||c.contact_name)}</div>`:''}</div></div></td>
+              <td><div class="cl-cell-name"><span class="cl-av-sm">${avInitials(c.name)}</span><div class="cl-nm">${esc(c.name)}</div></div></td>
               <td><div class="cl-em">${esc(c.email||'—')}</div>${c.phone?`<div class="cl-em-sub">${esc(c.phone)}</div>`:''}</td>
-              <td><div class="cl-when">${calIc} ${lastActiveTxt}</div><div class="cl-when-sub">${ru?'клиент с':'since'} ${since}</div></td>
-              <td class="cl-td-num">${m.projectCount}</td>
-              <td class="cl-td-num">${fmt(m.revenue)}</td>
+              <td><div class="cl-when">${calIc} ${lastActiveTxt}</div></td>
               <td><span class="cl-status-pill ${sCls}"><span class="cl-status-dot"></span>${statusClientLabel(c.status)}</span></td>
             </tr>`;
           }).join('')}
