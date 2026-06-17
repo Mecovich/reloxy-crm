@@ -5932,11 +5932,11 @@ function openPricingModal(highlight) {
   const onTrial = trialDaysLeft() > 0;
   const cards = [
     { key:'free', price:'0', per:'', feats: ru
-      ? ['Проекты, клиенты, счета, воронка','Команда до 2 человек','Базовая статистика']
-      : ['Projects, clients, invoices, pipeline','Team up to 2 people','Basic stats'] },
+      ? ['Проекты, клиенты, счета, воронка','Команда до 3 человек','Базовая статистика']
+      : ['Projects, clients, invoices, pipeline','Team up to 3 people','Basic stats'] },
     { key:'pro', price:'19', per: ru?'/мес':'/mo', feats: ru
-      ? ['Всё из Старта','Команда до 7 человек','Аналитика и отчёты','Прогнозы, маржа, cash flow','100 ИИ-запросов в месяц']
-      : ['Everything in Start','Team up to 7','Analytics & reports','Forecasts, margins, cash flow','100 AI requests/mo'] },
+      ? ['Всё из Старта','Команда до 10 человек','Аналитика и отчёты','Прогнозы, маржа, cash flow','100 ИИ-запросов в месяц']
+      : ['Everything in Start','Team up to 10','Analytics & reports','Forecasts, margins, cash flow','100 AI requests/mo'] },
     { key:'studio', price:'49', per: ru?'/мес':'/mo', feats: ru
       ? ['Всё из Pro','Команда без лимита','ИИ без лимита','Недельный ИИ-дайджест в Telegram','Приоритетная поддержка']
       : ['Everything in Pro','Unlimited team','Unlimited AI','Weekly AI digest in Telegram','Priority support'] },
@@ -6544,10 +6544,10 @@ function renderBillingTab() {
   const perksEl = document.getElementById('set-plan-perks');
   if (perksEl) {
     const PERKS = {
-      free:   ru ? ['Проекты, клиенты, счета, воронка','Команда до 2 человек','Базовая статистика']
-                 : ['Projects, clients, invoices, pipeline','Team up to 2 people','Basic stats'],
-      pro:    ru ? ['Всё из Старта','Команда до 7 человек','Аналитика и отчёты','100 ИИ-запросов в месяц']
-                 : ['Everything in Start','Team up to 7','Analytics & reports','100 AI requests/mo'],
+      free:   ru ? ['Проекты, клиенты, счета, воронка','Команда до 3 человек','Базовая статистика']
+                 : ['Projects, clients, invoices, pipeline','Team up to 3 people','Basic stats'],
+      pro:    ru ? ['Всё из Старта','Команда до 10 человек','Аналитика и отчёты','100 ИИ-запросов в месяц']
+                 : ['Everything in Start','Team up to 10','Analytics & reports','100 AI requests/mo'],
       studio: ru ? ['Всё из Pro','Команда без лимита','ИИ без лимита','Приоритетная поддержка']
                  : ['Everything in Pro','Unlimited team','Unlimited AI','Priority support'],
     };

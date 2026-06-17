@@ -778,7 +778,7 @@ app.post('/api/upgrade-request', authMiddleware, async (req, res) => {
 function ownerId(req)  { return req.user.owner_id || req.user.id; }
 
 // ─── Plans ───────────────────────────────────────────────────────────────────
-const PLAN_STAFF_LIMITS = { free: 2, pro: 7, studio: Infinity };
+const PLAN_STAFF_LIMITS = { free: 3, pro: 10, studio: Infinity }; // total team incl. owner
 function trialEnd() { const d = new Date(); d.setDate(d.getDate() + 14); return d.toISOString(); }
 async function getEffectivePlan(userId) {
   const r = await db.execute({ sql: 'SELECT plan, trial_ends_at, plan_expires_at FROM users WHERE id = ?', args: [userId] });
@@ -1323,13 +1323,13 @@ app.post('/api/staff', authMiddleware, async (req, res) => {
   if (!name) return res.status(400).json({ error: 'Name required' });
   // Plan limit on team size
   const _plan = await getEffectivePlan(ownerId(req));
-  const _limit = PLAN_STAFF_LIMITS[_plan] ?? 2;
+  const _limit = PLAN_STAFF_LIMITS[_plan] ?? 3;
   if (_limit !== Infinity) {
     const _cnt = await db.execute({ sql: 'SELECT COUNT(*) AS c FROM staff WHERE user_id = ?', args: [ownerId(req)] });
-    if (Number(_cnt.rows[0].c) >= _limit) {
+    if (Number(_cnt.rows[0].c) >= (_limit - 1)) {  // owner counts toward the total
       return res.status(403).json({ error: _plan === 'free'
-        ? 'Start plan limit: up to 2 team members. Open Plans to upgrade.'
-        : 'Pro plan limit: up to 7 team members. Switch to Studio for an unlimited team.' });
+        ? 'Start plan limit: up to 3 people. Open Plans to upgrade.'
+        : 'Pro plan limit: up to 10 people. Switch to Studio for an unlimited team.' });
     }
   }
   const result = await db.execute({
