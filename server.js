@@ -394,6 +394,9 @@ async function handleLogin(req, res) {
   }
 }
 
+// Lightweight health check — used to keep the instance warm (no DB, fast)
+app.get('/healthz', (req, res) => res.status(200).type('text').send('ok'));
+
 app.post('/api/auth/register', authLimiter, handleRegister);
 app.post('/api/auth/login',    authLimiter, handleLogin);
 
@@ -1717,8 +1720,13 @@ initDB().then(() => {
     tgPoll();
     // Premium daily reminders — fire around 09:00 server time
     setInterval(() => { if (new Date().getHours() === 9) runReminders(); }, 60 * 60 * 1000).unref?.();
-  } else {
-    console.log('ℹ️ Telegram polling disabled on this instance');
+  }
+  // Keep-warm: ping our own public URL every ~10 min so the instance never sleeps
+  // (an inbound request resets the host's idle timer — no more cold-start screen).
+  const SELF_URL = (process.env.APP_URL || '').replace(/\/$/, '');
+  if (/^https?:\/\//.test(SELF_URL) && !/localhost|127\.0\.0\.1/.test(SELF_URL)) {
+    setInterval(() => { fetch(SELF_URL + '/healthz').catch(() => {}); }, 10 * 60 * 1000).unref?.();
+    console.log('⏰ Keep-warm self-ping enabled →', SELF_URL + '/healthz');
   }
 }).catch(err => {
   console.error('DB init failed:', err);
