@@ -2146,6 +2146,13 @@ td { border-bottom-color:var(--line) !important; }
 .pricing-note { margin-top:24px !important; color:rgba(217,217,217,0.3) !important; }
 /* ══════════════════ /PRICING — MINIMAL ══════════════════ */
 
+/* Dashboard upgrade promo — subtle, hidden for paid plans */
+body.plan-paid .bento-promo { display:none !important; }
+.bento-promo { background:rgba(255,255,255,0.025) !important; border:1px solid rgba(255,255,255,0.07) !important; padding:20px !important; }
+.bento-promo-eyebrow { color:rgba(217,217,217,0.5) !important; }
+.bento-promo-text { color:rgba(217,217,217,0.45) !important; }
+.bento-promo-btn { background:#EDEDED !important; font-size:10.5px !important; padding:11px !important; border-radius:11px !important; letter-spacing:0.05em !important; }
+
 /* ══════════════════ CLIENTS — TABLE VIEW ══════════════════ */
 /* Minimal: hide stats bar + subtitle */
 #page-clients .cl-stats-bar { display:none !important; }
@@ -2564,9 +2571,9 @@ body { background:#0E0E0E !important; }
             <div id="dash-events" style="display:flex;flex-direction:column;gap:16px"></div>
           </div>
           <div class="bento-promo">
-            <div class="bento-promo-eyebrow" data-i18n="dash_enterprise_plan">Enterprise Plan</div>
-            <div class="bento-promo-text" data-i18n="dash_enterprise_text">Unlock advanced analytics, unlimited team seats and priority support.</div>
-            <button class="bento-promo-btn" onclick="openPricingModal('studio')" data-i18n="dash_upgrade_now">Upgrade Now</button>
+            <div class="bento-promo-eyebrow" data-i18n="dash_enterprise_plan">Unlock more</div>
+            <div class="bento-promo-text" data-i18n="dash_enterprise_text">Analytics, forecasts and unlimited AI on a paid plan.</div>
+            <button class="bento-promo-btn" onclick="openPricingModal()" data-i18n="dash_upgrade_now">See plans</button>
           </div>
         </div>
 
@@ -3463,7 +3470,7 @@ const TRANS = {
     dash_tx_asset:'Asset', dash_tx_volume:'Volume', dash_tx_timestamp:'Timestamp',
     dash_earned_title:'Earned',
     dash_subtitle:'How much you\'ve earned, over time.',
-    dash_enterprise_plan:'Enterprise Plan', dash_enterprise_text:'Unlock advanced analytics, unlimited team seats and priority support.', dash_upgrade_now:'Upgrade Now',
+    dash_enterprise_plan:'Unlock more', dash_enterprise_text:'Analytics, forecasts and unlimited AI on a paid plan.', dash_upgrade_now:'See plans',
     dash_project_milestones:'Project Milestones',
     dash_activity_timeline:'Activity Timeline',
     dash_resource_allocation:'Resource Allocation',
@@ -3608,7 +3615,7 @@ const TRANS = {
     dash_tx_asset:'Актив', dash_tx_volume:'Объём', dash_tx_timestamp:'Время',
     dash_earned_title:'Заработано',
     dash_subtitle:'Сколько вы заработали за выбранный период.',
-    dash_enterprise_plan:'Корпоративный план', dash_enterprise_text:'Откройте расширенную аналитику, неограниченные места в команде и приоритетную поддержку.', dash_upgrade_now:'Перейти на план',
+    dash_enterprise_plan:'Больше возможностей', dash_enterprise_text:'Аналитика, прогнозы и ИИ без лимита на платном тарифе.', dash_upgrade_now:'Тарифы',
     dash_project_milestones:'Этапы проектов',
     dash_activity_timeline:'Лента активности',
     dash_resource_allocation:'Распределение ресурсов',
