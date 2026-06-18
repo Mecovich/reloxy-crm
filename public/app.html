@@ -4798,6 +4798,30 @@ function renderBanners() {
   bnRestart();
 }
 
+// Premium: real AI-generated insight on the dashboard (cached per day). Free users
+// see the rule-based summary plus an upgrade nudge.
+function loadDashAiInsight(fallbackHTML){
+  const el = document.getElementById('dash-ai-text');
+  if (!el) return;
+  if (typeof planOf === 'function' && planOf() === 'free') {
+    el.innerHTML = fallbackHTML + ` <span style="display:inline-flex;align-items:center;gap:5px;margin-left:4px;font-size:11px;font-weight:600;color:rgba(232,200,131,0.85);cursor:pointer" onclick="openPricingModal('pro')">✦ ${currentLang==='ru'?'Живой AI-анализ на Pro':'Live AI analysis on Pro'}</span>`;
+    return;
+  }
+  el.innerHTML = fallbackHTML; // show instantly while AI loads
+  const today = new Date().toISOString().slice(0,10);
+  try { const c = JSON.parse(localStorage.getItem('reloxy_ai_insight')||'null'); if (c && c.d===today && c.lang===currentLang && c.html) { el.innerHTML = c.html; return; } } catch(_){}
+  const q = currentLang==='ru'
+    ? 'Кратко, 1–2 предложения: главный вывод по моему бизнесу прямо сейчас — динамика выручки, риски, на что обратить внимание. Без вступлений.'
+    : 'In 1–2 sentences, the single most useful insight about my business right now: revenue momentum, risks, what to focus on. No preamble.';
+  api('POST','/api/ai/assistant',{question:q,lang:currentLang}).then(d=>{
+    if (d && d.answer) {
+      const html = `<span style="opacity:.55">✦ </span>` + esc(String(d.answer).trim());
+      const cur = document.getElementById('dash-ai-text');
+      if (cur) cur.innerHTML = html;
+      try { localStorage.setItem('reloxy_ai_insight', JSON.stringify({ d:today, lang:currentLang, html })); } catch(_){}
+    }
+  }).catch(()=>{});
+}
 function renderDashboard() {
   renderGoal();
   renderBanners();
@@ -5227,9 +5251,10 @@ function renderDashboard() {
       const sorted = Object.entries(byClient).sort((a,b)=>b[1]-a[1]);
       return sorted.length ? sorted[0][0] : null;
     })();
-    aiText.innerHTML = currentLang === 'ru'
+    const ruleHTML = currentLang === 'ru'
       ? `Выручка <b>${dirWord} на ${Math.abs(pctRev)}%</b> по сравнению с прошлым месяцем.${topClient ? ` Лучший клиент по оплатам — <b>${esc(topClient)}</b>.` : ''} ${unpaid.length ? `Сейчас <b>${unpaid.length}</b> неоплаченных счетов ожидают внимания.` : 'Все счета оплачены — отличная динамика.'}`
       : `Your revenue has <b>${dirWord} ${Math.abs(pctRev)}%</b> vs last month.${topClient ? ` Your top client by payments is <b>${esc(topClient)}</b>.` : ''} ${unpaid.length ? `There ${unpaid.length===1?'is':'are'} <b>${unpaid.length}</b> unpaid invoice${unpaid.length===1?'':'s'} needing attention.` : 'All invoices are settled — great momentum.'}`;
+    loadDashAiInsight(ruleHTML);
     aiActions.innerHTML = `
       <button class="bento-ai-action-btn" onclick="go('finance',document.querySelectorAll('.nav-item')[6])">${esc(t('dash_ai_review_invoices')||'Review invoices')}</button>
       <button class="bento-ai-action-btn" onclick="go('projects',document.querySelectorAll('.nav-item')[2])">${esc(t('dash_ai_view_projects')||'View projects')}</button>`;
@@ -7602,6 +7627,7 @@ async function deleteInvoice(id) {
 function printInvoice(id) {
   const i = invoices.find(x => x.id === id);
   if (!i) return;
+  if (typeof planOf === 'function' && planOf() === 'free') { openPricingModal('pro'); toast(currentLang==='ru'?'PDF-счета доступны на Pro и Studio':'PDF invoices are available on Pro & Studio'); return; }
   const studioName = (user && user.studio_name) ? user.studio_name : (user && user.name ? user.name : 'Reloxy Studio');
   const statusMap = { paid: 'Paid', pending: 'Pending', overdue: 'Overdue' };
   const statusColor = { paid: '#ffffff', pending: '#aaaaaa', overdue: '#888888' };
@@ -7614,7 +7640,7 @@ function printInvoice(id) {
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:'Inter',-apple-system,sans-serif;background:#fff;color:#111;font-size:13px;-webkit-font-smoothing:antialiased;padding:0}
+  body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#fff;color:#111;font-size:13px;-webkit-font-smoothing:antialiased;padding:0}
   .page{max-width:720px;margin:0 auto;padding:56px 64px}
   .header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:56px}
   .logo-wrap{display:flex;align-items:center;gap:10px}
