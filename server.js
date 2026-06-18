@@ -1778,7 +1778,11 @@ async function tgPoll() {
   try {
     const r = await fetch(`${TG_API}/getUpdates?timeout=25&offset=${tgOffset}&allowed_updates=["message"]`);
     const data = await r.json();
-    if (!data.ok) { setTimeout(tgPoll, 5000); return; }
+    if (!data.ok) {
+      if (data.error_code === 409) console.error('🤖 TG poll: 409 conflict — a webhook is set or another instance is polling. Webhook is auto-cleared at startup; ensure only ONE instance polls (TELEGRAM_POLLING=false on extras).');
+      else console.error('🤖 TG poll: getUpdates failed —', data.description || JSON.stringify(data));
+      setTimeout(tgPoll, 5000); return;
+    }
     for (const upd of data.result || []) {
       tgOffset = upd.update_id + 1;
       const msg = upd.message;
@@ -1880,7 +1884,12 @@ initDB().then(() => {
   // Telegram long-polling must run on ONE instance only. With multiple instances,
   // concurrent getUpdates calls cause 409 conflicts — disable with TELEGRAM_POLLING=false.
   if (process.env.TELEGRAM_POLLING !== 'false') {
-    tgPoll();
+    if (TG_API) {
+      // Clear any stale webhook so long-polling (getUpdates) works, then start.
+      fetch(`${TG_API}/deleteWebhook`).catch(() => {}).finally(() => { tgPoll(); console.log('🤖 Telegram bot ready — polling for /start, commands and link codes'); });
+    } else {
+      console.warn('🤖 TELEGRAM_BOT_TOKEN not set — bot disabled (no linking, commands or notifications).');
+    }
     // Daily jobs — fire once around 09:00 server time (digest, deadline pings, overdue, weekly)
     let _dailyJobsRan = null;
     setInterval(() => {
