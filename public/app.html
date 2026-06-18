@@ -373,6 +373,18 @@ tr:hover td { background:transparent; }
 .pipe-drop span{font-size:11.5px}
 .pipe-add{margin:0 9px 10px;border:1px dashed var(--line2);background:transparent;color:var(--g1);border-radius:11px;padding:9px;font-size:12px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .14s;font-family:inherit}
 .pipe-add:hover{border-color:var(--line3);background:var(--s2);color:var(--white)}
+/* COMING SOON placeholder */
+.soon-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:480px;padding:24px;animation:soonIn .5s ease both}
+@keyframes soonIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.soon-ico{width:54px;height:54px;border-radius:50%;border:1px solid var(--line2);display:flex;align-items:center;justify-content:center;color:var(--g1);position:relative}
+.soon-ico::after{content:"";position:absolute;inset:-1px;border-radius:50%;border:1px solid var(--line2);animation:soonPulse 2.8s ease-out infinite}
+@keyframes soonPulse{0%{transform:scale(1);opacity:.6}100%{transform:scale(1.55);opacity:0}}
+.soon-ico svg{width:23px;height:23px}
+.soon-title{font-size:21px;font-weight:600;letter-spacing:-.4px;color:var(--white);margin-top:26px}
+.soon-sub{font-size:13px;color:var(--g2);max-width:340px;line-height:1.6;margin-top:11px}
+.soon-status{display:inline-flex;align-items:center;gap:7px;margin-top:24px;font-size:10.5px;font-weight:500;letter-spacing:.6px;text-transform:uppercase;color:var(--g2)}
+.soon-dot{width:6px;height:6px;border-radius:50%;background:var(--g1);animation:soonBlink 1.8s ease-in-out infinite}
+@keyframes soonBlink{0%,100%{opacity:.25}50%{opacity:1}}
 @media(max-width:900px){.pipe-kpis{grid-template-columns:repeat(2,1fr)}.pipe-kpi:nth-child(2){border-right:none}.pipe-board{grid-template-columns:1fr}}
 .f-amt { width:110px; text-align:right; font-size:12.5px; color:var(--g1); font-variant-numeric:tabular-nums; }
 
@@ -3295,13 +3307,11 @@ body { background:#0E0E0E !important; }
       <div class="page-header">
         <div><h1 data-i18n="nav_ai">AI Assistant</h1><p data-i18n="ai_sub">Ask about your clients, projects and money</p></div>
       </div>
-      <div class="soon-wrap" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:440px;gap:16px">
-        <div style="width:64px;height:64px;border-radius:18px;background:var(--s2);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--g1)">
-          <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2-2 2.6-2.6z"/></svg>
-        </div>
-        <div style="font-size:20px;font-weight:700;letter-spacing:-0.5px;color:var(--white)" data-i18n="soon_title">Coming soon</div>
-        <div style="font-size:13.5px;color:var(--g1);max-width:420px;line-height:1.55" data-i18n="soon_sub">We are putting the finishing touches on this. It will be available shortly.</div>
-        <div style="margin-top:4px;font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--g2);background:var(--s2);border:1px solid var(--line);border-radius:999px;padding:6px 14px" data-i18n="soon_badge">In development</div>
+      <div class="soon-wrap">
+        <div class="soon-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2-2 2.6-2.6z"/></svg></div>
+        <div class="soon-title" data-i18n="soon_title">Coming soon</div>
+        <div class="soon-sub" data-i18n="soon_sub">We are putting the finishing touches on this. It will be available shortly.</div>
+        <div class="soon-status"><span class="soon-dot"></span><span data-i18n="soon_badge">In development</span></div>
       </div>
     </div>
 
@@ -3310,13 +3320,11 @@ body { background:#0E0E0E !important; }
       <div class="page-header">
         <div><h1 data-i18n="nav_forecast">Forecast</h1><p data-i18n="forecast_sub">Projected revenue and cash flow</p></div>
       </div>
-      <div class="soon-wrap" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:440px;gap:16px">
-        <div style="width:64px;height:64px;border-radius:18px;background:var(--s2);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--g1)">
-          <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2-2 2.6-2.6z"/></svg>
-        </div>
-        <div style="font-size:20px;font-weight:700;letter-spacing:-0.5px;color:var(--white)" data-i18n="soon_title">Coming soon</div>
-        <div style="font-size:13.5px;color:var(--g1);max-width:420px;line-height:1.55" data-i18n="soon_sub">We are putting the finishing touches on this. It will be available shortly.</div>
-        <div style="margin-top:4px;font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--g2);background:var(--s2);border:1px solid var(--line);border-radius:999px;padding:6px 14px" data-i18n="soon_badge">In development</div>
+      <div class="soon-wrap">
+        <div class="soon-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2-2 2.6-2.6z"/></svg></div>
+        <div class="soon-title" data-i18n="soon_title">Coming soon</div>
+        <div class="soon-sub" data-i18n="soon_sub">We are putting the finishing touches on this. It will be available shortly.</div>
+        <div class="soon-status"><span class="soon-dot"></span><span data-i18n="soon_badge">In development</span></div>
       </div>
     </div>
 
