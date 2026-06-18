@@ -373,6 +373,35 @@ tr:hover td { background:transparent; }
 .pipe-drop span{font-size:11.5px}
 .pipe-add{margin:0 9px 10px;border:1px dashed var(--line2);background:transparent;color:var(--g1);border-radius:11px;padding:9px;font-size:12px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .14s;font-family:inherit}
 .pipe-add:hover{border-color:var(--line3);background:var(--s2);color:var(--white)}
+/* TELEGRAM notifications card */
+.tg-card{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--s1)}
+.tg-head{display:flex;align-items:center;gap:13px;padding:15px 18px;border-bottom:1px solid var(--line)}
+.tg-ico{width:38px;height:38px;border-radius:11px;background:rgba(38,134,255,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.tg-head-txt{flex:1;min-width:0}
+.tg-title{font-size:13.5px;font-weight:600;color:var(--white)}
+.tg-status{font-size:12px;color:var(--g1);margin-top:2px}
+.tg-badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--g2);background:var(--s2);border:1px solid var(--line2);border-radius:999px;padding:4px 11px;white-space:nowrap}
+.tg-badge-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+.tg-body{padding:18px}
+.tg-desc{font-size:12.5px;color:var(--g1);line-height:1.6;margin:0 0 16px}
+.tg-steps{display:flex;flex-direction:column;gap:11px;margin-bottom:13px}
+.tg-step{display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--g1)}
+.tg-step-n{width:20px;height:20px;border-radius:50%;border:1px solid var(--line2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--g1);flex-shrink:0}
+.tg-link{color:var(--white);text-decoration:none;border-bottom:1px solid var(--line2)}
+.tg-link:hover{border-color:var(--white)}
+.tg-cmd-row{display:flex;align-items:center;gap:8px;background:var(--s2);border:1px solid var(--line2);border-radius:10px;padding:9px 10px 9px 13px}
+.tg-cmd{flex:1;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:14px;font-weight:600;letter-spacing:1px;color:var(--white);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tg-iconbtn{width:30px;height:30px;border-radius:8px;border:1px solid var(--line2);background:transparent;color:var(--g1);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all .12s}
+.tg-iconbtn:hover{color:var(--white);border-color:var(--line3);background:var(--s3)}
+.tg-iconbtn svg{width:15px;height:15px}
+.tg-ok{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--g1);margin-bottom:16px}
+.tg-ok svg{width:18px;height:18px;color:var(--white);flex-shrink:0}
+.tg-actions{display:flex;gap:8px;flex-wrap:wrap}
+.tg-btn{font-size:12px;padding:7px 13px;border-radius:9px;background:transparent;border:1px solid var(--line2);color:var(--g1);cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:6px;transition:all .12s}
+.tg-btn:hover{color:var(--white);border-color:var(--line3);background:var(--s2)}
+.tg-disconnect{font-size:12px;padding:7px 14px;border-radius:9px;background:transparent;border:1px solid rgba(248,113,113,0.3);color:#f87171;cursor:pointer;font-family:inherit}
+.tg-disconnect:hover{background:rgba(248,113,113,0.08)}
+.tg-hint{font-size:11.5px;color:var(--g2);margin-top:12px}
 /* COMING SOON placeholder */
 .soon-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:480px;padding:24px;animation:soonIn .5s ease both}
 @keyframes soonIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
@@ -2973,38 +3002,34 @@ body { background:#0E0E0E !important; }
           <div id="set-tab-notifications" class="set-section" style="display:none">
             <div class="set-body">
               <div class="set-section-desc" data-i18n="set_desc_notifications">Connect Telegram to get alerts about projects and deadlines.</div>
-              <div style="border:1px solid var(--line);border-radius:12px;overflow:hidden">
-                <div style="display:flex;align-items:center;gap:14px;padding:16px 18px;background:var(--s3)">
-                  <div style="width:36px;height:36px;border-radius:10px;background:rgba(38,134,255,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="#2688ff"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.869 4.326-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.83.941z"/></svg>
+              <div class="tg-card">
+                <div class="tg-head">
+                  <div class="tg-ico"><svg width="19" height="19" viewBox="0 0 24 24" fill="#2688ff"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.869 4.326-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.83.941z"/></svg></div>
+                  <div class="tg-head-txt">
+                    <div class="tg-title">Telegram Notifications</div>
+                    <div class="tg-status" id="tg-status-text">Not connected</div>
                   </div>
-                  <div style="flex:1">
-                    <div style="font-size:13.5px;font-weight:600;color:var(--white)">Telegram Notifications</div>
-                    <div style="font-size:12px;color:var(--g1);margin-top:2px" id="tg-status-text">Not connected</div>
-                  </div>
-                  <span id="tg-status-badge" style="font-size:11px;padding:3px 10px;border-radius:20px;background:var(--s4);border:1px solid var(--line2);color:var(--g2)">● Disconnected</span>
+                  <span class="tg-badge" id="tg-status-badge"><span class="tg-badge-dot"></span>Disconnected</span>
                 </div>
-                <div style="padding:18px" id="tg-connect-block">
-                  <div style="font-size:12.5px;color:var(--g1);margin-bottom:14px;line-height:1.7">Get notified in Telegram when projects are assigned to you or deadlines are near.</div>
-                  <div style="background:var(--s2);border:1px solid var(--line2);border-radius:10px;padding:14px 18px;margin-bottom:14px">
-                    <div style="font-size:10.5px;color:var(--g2);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.4px;font-weight:600">Your link code</div>
-                    <div style="display:flex;align-items:center;gap:12px">
-                      <div id="tg-code-display" style="font-size:26px;font-weight:800;letter-spacing:5px;color:var(--white);font-variant-numeric:tabular-nums">——</div>
-                      <button class="btn btn-ghost" onclick="loadTgCode()" style="font-size:11px;padding:5px 12px">Refresh</button>
-                    </div>
+                <div class="tg-body" id="tg-connect-block">
+                  <p class="tg-desc">Get notified in Telegram when projects are assigned to you or deadlines are near.</p>
+                  <div class="tg-steps">
+                    <div class="tg-step"><span class="tg-step-n">1</span><span>Open <a href="https://t.me/ReloxyCRMBot" target="_blank" class="tg-link">@ReloxyCRMBot</a> in Telegram</span></div>
+                    <div class="tg-step"><span class="tg-step-n">2</span><span>Send this command to the bot:</span></div>
                   </div>
-                  <div style="font-size:12.5px;color:var(--g1);line-height:2">
-                    1. Open <a href="https://t.me/ReloxyCRMBot" target="_blank" style="color:var(--white)">@ReloxyCRMBot</a> in Telegram<br>
-                    2. Send: <code id="tg-code-cmd" style="background:var(--s3);padding:2px 8px;border-radius:5px;color:var(--white)">/start ——</code>
+                  <div class="tg-cmd-row">
+                    <code class="tg-cmd" id="tg-code-cmd">/start ——</code>
+                    <button class="tg-iconbtn" onclick="copyTgCmd()" title="Copy" aria-label="Copy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg></button>
+                    <button class="tg-iconbtn" onclick="loadTgCode()" title="Refresh" aria-label="Refresh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/></svg></button>
                   </div>
                 </div>
-                <div style="padding:18px;display:none" id="tg-connected-block">
-                  <div style="font-size:13px;color:var(--g1);margin-bottom:14px">✅ Your Telegram is connected. You will receive notifications for new tasks and projects.</div>
-                  <div style="display:flex;gap:8px;flex-wrap:wrap">
-                    <button class="btn btn-ghost" onclick="remindNow()" style="font-size:12px"><span class="material-symbols-outlined" style="font-size:15px;margin-right:5px;vertical-align:-3px">notifications_active</span><span data-i18n="btn_test_reminder">Send test reminder</span></button>
-                    <button class="btn btn-ghost" onclick="unlinkTelegram()" style="font-size:12px;color:#f87171;border-color:rgba(248,113,113,0.25)">Disconnect</button>
+                <div class="tg-body" id="tg-connected-block" style="display:none">
+                  <div class="tg-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><span>Your Telegram is linked and active.</span></div>
+                  <div class="tg-actions">
+                    <button class="tg-btn" onclick="remindNow()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg><span data-i18n="btn_test_reminder">Send test reminder</span></button>
+                    <button class="tg-disconnect" onclick="unlinkTelegram()">Disconnect</button>
                   </div>
-                  <p style="font-size:11.5px;color:rgba(217,217,217,0.4);margin-top:10px" data-i18n="reminder_hint">Daily reminders about upcoming deadlines and unpaid invoices (Pro).</p>
+                  <p class="tg-hint" data-i18n="reminder_hint">Daily reminders about upcoming deadlines and unpaid invoices (Pro).</p>
                 </div>
               </div>
             </div>
@@ -6783,17 +6808,24 @@ async function loadTgCode() {
     const cmdEl = document.getElementById('tg-code-cmd');
     if (cmdEl) cmdEl.textContent = `/start ${code || '——'}`;
     if (linked) {
-      badge.textContent = '●  Connected'; badge.style.color = 'var(--white)'; badge.style.borderColor = 'var(--line2)';
+      badge.innerHTML = '<span class="tg-badge-dot"></span>Connected'; badge.style.color = 'var(--white)';
       statusText.textContent = 'Your Telegram is linked and active';
       if (connectBlock) connectBlock.style.display = 'none';
       if (connectedBlock) connectedBlock.style.display = 'block';
     } else {
-      badge.textContent = '●  Disconnected'; badge.style.color = 'var(--g2)';
+      badge.innerHTML = '<span class="tg-badge-dot"></span>Disconnected'; badge.style.color = 'var(--g2)';
       statusText.textContent = 'Not connected';
       if (connectBlock) connectBlock.style.display = 'block';
       if (connectedBlock) connectedBlock.style.display = 'none';
     }
   } catch(e) { console.error('TG code load failed', e); }
+}
+
+async function copyTgCmd() {
+  const el = document.getElementById('tg-code-cmd');
+  if (!el) return;
+  try { await navigator.clipboard.writeText(el.textContent.trim()); toast(currentLang==='ru' ? 'Скопировано' : 'Copied'); }
+  catch(_) { toast(currentLang==='ru' ? 'Не удалось скопировать' : 'Copy failed'); }
 }
 
 async function unlinkTelegram() {
