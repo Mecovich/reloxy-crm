@@ -1329,6 +1329,7 @@ body.plan-paid .nav-pro { display:none; }
   border:1px solid rgba(255,255,255,0.09); border-radius:9px; padding:8px 16px; cursor:pointer; font-family:inherit; }
 .ai-letter-close:hover { color:#EDEDED; }
 body.is-staff .ai-fab { display:none; }
+.ai-fab { display:none !important; } /* AI under maintenance — hide floating button */
 /* дашборд: без лишнего места внизу */
 #revenue-chart { max-height:100% !important; }
 #page-dashboard { padding-bottom:28px !important; }
@@ -2310,10 +2311,10 @@ body { background:#0E0E0E !important; }
 .rep-pr-row { display:grid; grid-template-columns:2fr 1fr 1fr 1fr 0.8fr; gap:10px; align-items:center; padding:11px 2px; border-bottom:1px solid var(--line); font-size:13px; color:var(--white); font-variant-numeric:tabular-nums; }
 .rep-pr-head { font-size:10px; text-transform:uppercase; letter-spacing:0.6px; color:var(--g1); border-bottom:1px solid var(--line2); }
 .rep-pr-name { color:var(--white); font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.rep-pr-margin { font-size:11.5px; font-weight:600; padding:2px 9px; border-radius:20px; }
-.rep-pr-margin.good { color:#EDEDED; background:rgba(255,255,255,0.08); }
-.rep-pr-margin.ok { color:rgba(217,217,217,0.7); background:rgba(255,255,255,0.04); }
-.rep-pr-margin.low { color:#f0b48c; background:rgba(240,140,80,0.08); }
+.rep-pr-margin { font-size:11.5px; font-weight:600; padding:2px 8px; border-radius:7px; border:1px solid var(--line); background:transparent; font-variant-numeric:tabular-nums; }
+.rep-pr-margin.good { color:#EDEDED; }
+.rep-pr-margin.ok { color:rgba(217,217,217,0.65); }
+.rep-pr-margin.low { color:#f0b48c; border-color:rgba(240,140,80,0.25); }
 /* ══════════════════ /CLEAN MONOCHROME + ACTIVITY ══════════════════ */
 
 </style>
@@ -3295,7 +3296,7 @@ body { background:#0E0E0E !important; }
     <div class="page" id="page-reports">
       <div class="page-header">
         <div><h1>Reports</h1><p>Revenue, expenses and profit overview</p></div>
-        <button class="btn btn-white" onclick="exportStudioReport()"><span class="material-symbols-outlined" style="font-size:16px;margin-right:5px;vertical-align:-3px">summarize</span><span data-i18n="btn_gen_report">Generate report</span></button>
+        <button class="btn btn-ghost" onclick="exportStudioReport()" style="font-weight:500"><span class="material-symbols-outlined" style="font-size:16px;margin-right:6px;vertical-align:-3px">summarize</span><span data-i18n="btn_gen_report">Generate report</span></button>
       </div>
       <div class="an-grid" id="rep-kpi"></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:0">
