@@ -268,6 +268,8 @@ async function initDB() {
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )`,
     `ALTER TABLE users ADD COLUMN blocked INTEGER DEFAULT 0`,
+    `ALTER TABLE projects ADD COLUMN deadline_reminded TEXT DEFAULT NULL`,
+    `ALTER TABLE invoices ADD COLUMN overdue_notified INTEGER DEFAULT 0`,
   ];
   for (const sql of migrations) {
     try {
@@ -334,7 +336,7 @@ async function handleRegister(req, res) {
     if (existing.rows.length > 0) return res.status(400).json({ error: 'Email already exists' });
 
     // Анти-фрод: почта должна быть подтверждена кодом
-    if (mailer) {
+    if (emailEnabled) {
       const em = email.toLowerCase();
       const row = await db.execute({ sql: 'SELECT * FROM otp_codes WHERE email = ? ORDER BY id DESC LIMIT 1', args: [em] });
       const otp = row.rows[0];
@@ -408,28 +410,72 @@ const SMTP_PORT = Number(process.env.SMTP_PORT || 465);
 const mailer = SMTP_USER ? nodemailer.createTransport({
   host: SMTP_HOST, port: SMTP_PORT, secure: SMTP_PORT === 465,
   auth: { user: SMTP_USER, pass: SMTP_PASS },
+  connectionTimeout: 10000, greetingTimeout: 10000, socketTimeout: 15000, // fail fast instead of hanging
 }) : null;
+
+// ─── Email delivery ──────────────────────────────────────────────────────────
+// Render (and many hosts) block outbound SMTP, so prefer an HTTPS email API when
+// configured. Whichever provider's env vars are set is used (Mailopost → UniOne →
+// SMTP fallback).
+const MAILOPOST_TOKEN = process.env.MAILOPOST_TOKEN || '';
+const UNIONE_API_KEY  = process.env.UNIONE_API_KEY || '';
+// RU UniOne accounts: https://go1.unisender.ru/ru/... (or go2); Intl: https://api.unione.io/en/...
+const UNIONE_API_URL  = process.env.UNIONE_API_URL || 'https://go1.unisender.ru/ru/transactional/api/v1/email/send.json';
+const MAIL_FROM       = process.env.MAIL_FROM || SMTP_USER || 'no-reply@reloxy.tech';
+const MAIL_FROM_NAME  = process.env.MAIL_FROM_NAME || 'Reloxy';
+const emailEnabled    = !!(MAILOPOST_TOKEN || UNIONE_API_KEY || mailer);
+
+async function sendEmail({ to, subject, text, html }) {
+  if (MAILOPOST_TOKEN) {
+    const r = await fetch('https://api.mailopost.ru/v1/email/messages', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${MAILOPOST_TOKEN}`, 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({ from_email: MAIL_FROM, from_name: MAIL_FROM_NAME, to, subject, text, html }),
+    });
+    if (!r.ok) { const body = await r.text().catch(() => ''); throw new Error(`Mailopost ${r.status} ${body}`); }
+    return;
+  }
+  if (UNIONE_API_KEY) {
+    const r = await fetch(UNIONE_API_URL, {
+      method: 'POST',
+      headers: { 'X-API-KEY': UNIONE_API_KEY, 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({ message: { recipients: [{ email: to }], subject, from_email: MAIL_FROM, from_name: MAIL_FROM_NAME, body: { html, plaintext: text } } }),
+    });
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok || data.status === 'error') throw new Error(`UniOne ${r.status} ${JSON.stringify(data)}`);
+    return;
+  }
+  if (mailer) { await mailer.sendMail({ from: `"${MAIL_FROM_NAME}" <${MAIL_FROM}>`, to, subject, text, html }); return; }
+  throw new Error('email not configured');
+}
+
+// Boot-time diagnostics so Render logs say plainly how email is delivered.
+if (MAILOPOST_TOKEN)   console.log(`✉️  Email via Mailopost — from ${MAIL_FROM}`);
+else if (UNIONE_API_KEY) console.log(`✉️  Email via Unisender Go / UniOne — from ${MAIL_FROM}`);
+else if (mailer)       console.log(`✉️  Email via SMTP ${SMTP_HOST}:${SMTP_PORT} (often blocked on Render — codes may time out)`);
+else                   console.warn('✉️  Email DISABLED — set MAILOPOST_TOKEN + MAIL_FROM to enable codes.');
+
 const otpHash = (email, code) => crypto.createHmac('sha256', JWT_SECRET).update(email.toLowerCase() + ':' + code).digest('hex');
 
 app.post('/api/auth/otp/send', authLimiter, async (req, res) => {
   try {
-    if (!mailer) return res.status(503).json({ error: 'Email sign-in is not configured yet' });
+    if (!emailEnabled) return res.status(503).json({ error: 'Email sign-in is not configured yet' });
     const email = String(req.body.email || '').trim().toLowerCase();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return res.status(400).json({ error: 'Invalid email' });
     const code = String(Math.floor(100000 + Math.random() * 900000));
     const expires = new Date(Date.now() + 10 * 60 * 1000).toISOString();
     await db.execute({ sql: 'DELETE FROM otp_codes WHERE email = ?', args: [email] });
     await db.execute({ sql: 'INSERT INTO otp_codes (email, code_hash, expires_at) VALUES (?,?,?)', args: [email, otpHash(email, code), expires] });
-    await mailer.sendMail({
-      from: `"Reloxy" <${SMTP_USER}>`,
+    await sendEmail({
       to: email,
-      subject: `${code} — your Reloxy sign-in code`,
-      text: `Your Reloxy sign-in code: ${code}\n\nIt is valid for 10 minutes. If you didn't request it, just ignore this email.`,
-      html: `<div style="font-family:Helvetica,Arial,sans-serif;max-width:420px;margin:0 auto;padding:32px 24px;color:#1a1a1a">
+      subject: `${code} — код подтверждения Reloxy`,
+      text: `Ваш код подтверждения Reloxy: ${code}\n\nВведите его, чтобы подтвердить почту и войти. Код действует 10 минут.\nЕсли вы не запрашивали код — просто проигнорируйте это письмо.`,
+      html: `<div style="font-family:Helvetica,Arial,sans-serif;max-width:440px;margin:0 auto;padding:32px 24px;color:#1a1a1a">
         <div style="font-size:18px;font-weight:700;margin-bottom:18px">Reloxy</div>
-        <div style="font-size:14px;color:#555;margin-bottom:22px">Your sign-in code:</div>
+        <div style="font-size:14px;color:#555;margin-bottom:22px">Ваш код подтверждения почты:</div>
         <div style="font-size:34px;font-weight:800;letter-spacing:8px;margin-bottom:22px">${code}</div>
-        <div style="font-size:12px;color:#999">Valid for 10 minutes. If you didn't request it, ignore this email.</div>
+        <div style="font-size:13px;color:#555;margin-bottom:18px">Введите этот код, чтобы подтвердить почту и войти в аккаунт.</div>
+        <div style="font-size:12px;color:#999">Код действует 10 минут. Если вы не запрашивали его — просто проигнорируйте это письмо.</div>
       </div>`,
     });
     res.json({ ok: true });
@@ -1191,12 +1237,18 @@ app.post('/api/invoices', authMiddleware, async (req, res) => {
 
 app.put('/api/invoices/:id', authMiddleware, async (req, res) => {
   const { number, client_id, amount, issued_at, due_at, status } = req.body;
+  const prev = await db.execute({ sql: 'SELECT status FROM invoices WHERE id=? AND user_id=?', args: [req.params.id, ownerId(req)] });
+  const prevStatus = prev.rows[0]?.status;
   await db.execute({
     sql: 'UPDATE invoices SET number=?, client_id=?, amount=?, issued_at=?, due_at=?, status=? WHERE id=? AND user_id=?',
     args: [number||'', client_id||null, num(amount), issued_at||null, due_at||null, status||'pending', req.params.id, ownerId(req)],
   });
   const row = await db.execute({ sql: 'SELECT * FROM invoices WHERE id = ?', args: [req.params.id] });
-  res.json(row.rows[0]);
+  const inv = row.rows[0];
+  if (inv && status === 'paid' && prevStatus !== 'paid') {
+    await notifyUser(ownerId(req), `💰 <b>Счёт оплачен</b>\n#${tgEsc(inv.number||'')} · +${tgMoney(inv.amount)}\n→ <a href="https://reloxy.tech/app">Открыть Reloxy</a>`);
+  }
+  res.json(inv);
 });
 
 app.delete('/api/invoices/:id', authMiddleware, async (req, res) => {
@@ -1214,6 +1266,7 @@ app.put('/api/invoices/:id/pay', authMiddleware, async (req, res) => {
   const inv = row.rows[0];
   if (!inv) return res.status(404).json({ error: 'Invoice not found' });
   await sendTelegram(`💰 <b>Payment received!</b>\nInvoice: ${tgEsc(inv.number)}\nAmount: ${tgEsc(inv.amount)}`);
+  await notifyUser(ownerId(req), `💰 <b>Счёт оплачен</b>\n#${tgEsc(inv.number||'')} · +${tgMoney(inv.amount)}\n→ <a href="https://reloxy.tech/app">Открыть Reloxy</a>`);
   res.json(inv);
 });
 
@@ -1589,6 +1642,82 @@ async function runReminders() {
   } catch (e) { console.error('Reminders error:', e.message); }
 }
 
+// Money formatting for Telegram (amounts are stored in RUB)
+function tgMoney(n){ return (Math.round(Number(n) || 0)).toLocaleString('ru-RU') + ' ₽'; }
+
+// Premium owners with a linked Telegram chat — shared by the scheduled jobs below
+async function paidLinkedOwners(){
+  const us = await db.execute({ sql: 'SELECT id, plan, trial_ends_at, plan_expires_at, owner_id, telegram_chat_id FROM users WHERE telegram_chat_id IS NOT NULL', args: [] });
+  return us.rows.filter(u => !u.owner_id && isPaidRow(u));
+}
+
+// T-1 day deadline pings, once per project deadline
+async function runDeadlineReminders(){
+  if (!TG_API) return;
+  try {
+    const tStr = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+    for (const u of await paidLinkedOwners()){
+      const pr = await db.execute({ sql: "SELECT id, title, deadline, assigned_to, deadline_reminded FROM projects WHERE user_id=? AND status!='done' AND deadline=?", args: [u.id, tStr] });
+      for (const p of pr.rows){
+        if (p.deadline_reminded === p.deadline) continue;
+        const msg = `⏰ <b>Дедлайн завтра</b>\n${tgEsc(p.title)} — ${p.deadline}\n→ <a href="https://reloxy.tech/app">Открыть Reloxy</a>`;
+        await tgSend(u.telegram_chat_id, msg);
+        if (p.assigned_to && p.assigned_to !== u.id) await notifyUser(p.assigned_to, msg);
+        await db.execute({ sql: 'UPDATE projects SET deadline_reminded=? WHERE id=?', args: [p.deadline, p.id] });
+      }
+    }
+  } catch (e) { console.error('Deadline reminders error:', e.message); }
+}
+
+// Overdue invoice pings — once per invoice, also flips status to 'overdue'
+async function runOverdueChecks(){
+  if (!TG_API) return;
+  try {
+    const todayStr = new Date().toISOString().slice(0, 10);
+    for (const u of await paidLinkedOwners()){
+      const iv = await db.execute({ sql: "SELECT id, number, amount, due_at FROM invoices WHERE user_id=? AND status IN ('pending','overdue') AND overdue_notified=0 AND due_at IS NOT NULL AND due_at!='' AND due_at < ?", args: [u.id, todayStr] });
+      for (const i of iv.rows){
+        await tgSend(u.telegram_chat_id, `⚠️ <b>Счёт просрочен</b>\n#${tgEsc(i.number||'')} · ${tgMoney(i.amount)} — срок был ${i.due_at}\n→ <a href="https://reloxy.tech/app">Открыть Reloxy</a>`);
+        await db.execute({ sql: "UPDATE invoices SET status='overdue', overdue_notified=1 WHERE id=?", args: [i.id] });
+      }
+    }
+  } catch (e) { console.error('Overdue checks error:', e.message); }
+}
+
+// Monday morning weekly summary
+async function runWeeklySummary(){
+  if (!TG_API) return;
+  try {
+    const now = new Date();
+    const weekAgo = new Date(now.getTime() - 7*86400000).toISOString().slice(0, 10);
+    const todayStr = now.toISOString().slice(0, 10);
+    const in7 = new Date(now.getTime() + 7*86400000).toISOString().slice(0, 10);
+    for (const u of await paidLinkedOwners()){
+      const paid = await db.execute({ sql: "SELECT amount FROM invoices WHERE user_id=? AND status='paid' AND issued_at>=?", args: [u.id, weekAgo] });
+      const rev = paid.rows.reduce((acc,r)=>acc+(Number(r.amount)||0),0);
+      const unpaid = await db.execute({ sql: "SELECT amount FROM invoices WHERE user_id=? AND status IN ('pending','overdue')", args: [u.id] });
+      const out = unpaid.rows.reduce((acc,r)=>acc+(Number(r.amount)||0),0);
+      const act = await db.execute({ sql: "SELECT COUNT(*) c FROM projects WHERE user_id=? AND status!='done'", args: [u.id] });
+      const dl = await db.execute({ sql: "SELECT title, deadline FROM projects WHERE user_id=? AND status!='done' AND deadline>=? AND deadline<=? ORDER BY deadline", args: [u.id, todayStr, in7] });
+      let msg = `🗓 <b>Reloxy — сводка за неделю</b>\n\n` +
+        `💰 Поступления (7 дней): ${tgMoney(rev)}\n` +
+        `🧾 Не оплачено: ${tgMoney(out)} (${unpaid.rows.length})\n` +
+        `📂 Активных проектов: ${Number(act.rows[0]?.c || 0)}\n`;
+      if (dl.rows.length) msg += `\n📅 <b>Дедлайны на неделю</b>\n` + dl.rows.map(p=>`• ${tgEsc(p.title)} — ${p.deadline}`).join('\n') + '\n';
+      msg += `\n→ <a href="https://reloxy.tech/app">Открыть Reloxy</a>`;
+      await tgSend(u.telegram_chat_id, msg);
+    }
+  } catch (e) { console.error('Weekly summary error:', e.message); }
+}
+
+// One daily pass at ~09:00 — digest, deadline pings, overdue checks, Monday summary
+async function runDailyJobs(){
+  await runReminders();
+  await runDeadlineReminders();
+  await runOverdueChecks();
+  if (new Date().getDay() === 1) await runWeeklySummary(); // 1 = Monday
+}
+
 // Generate a cryptographically-strong link code (8 hex chars)
 function genCode() { return crypto.randomBytes(4).toString('hex').toUpperCase(); }
 
@@ -1686,11 +1815,45 @@ async function tgPoll() {
       if (text === '/help' || text === '/status') {
         const ur2 = await db.execute({ sql: 'SELECT name FROM users WHERE telegram_chat_id = ?', args: [chatId] });
         if (ur2.rows.length) {
-          await tgSend(chatId, `✅ Linked as <b>${tgEsc(ur2.rows[0].name)}</b>\n\nYou'll get notified about new tasks and projects.`);
+          await tgSend(chatId, `✅ Привязан как <b>${tgEsc(ur2.rows[0].name)}</b>\n\nУведомления о задачах, дедлайнах и оплатах включены.\n\n<b>Команды:</b>\n/today — дедлайны и задачи на сегодня\n/money — неоплаченные счета\n/stats — краткая статистика`);
         } else {
-          await tgSend(chatId, '❌ Not linked. Get your code from Reloxy → Team → Telegram.');
+          await tgSend(chatId, '❌ Не привязан. Возьмите код в Reloxy → Team → Telegram.');
         }
         continue;
+      }
+
+      if (text === '/today' || text === '/money' || text === '/stats') {
+        const ur3 = await db.execute({ sql: 'SELECT id, owner_id FROM users WHERE telegram_chat_id = ?', args: [chatId] });
+        if (!ur3.rows.length) { await tgSend(chatId, '❌ Аккаунт не привязан. Возьмите код в Reloxy → Team → Telegram.'); continue; }
+        const oid = ur3.rows[0].owner_id || ur3.rows[0].id;
+        const todayStr = new Date().toISOString().slice(0, 10);
+        const ym = todayStr.slice(0, 7);
+        if (text === '/today') {
+          const pr = await db.execute({ sql: "SELECT title FROM projects WHERE user_id=? AND status!='done' AND deadline=? ORDER BY title", args: [oid, todayStr] });
+          const tk = await db.execute({ sql: "SELECT title FROM tasks WHERE user_id=? AND status!='done' AND due_date=? ORDER BY title", args: [oid, todayStr] });
+          let m = `📅 <b>Сегодня</b>\n`;
+          m += pr.rows.length ? `\n<b>Дедлайны проектов:</b>\n` + pr.rows.map(p=>`• ${tgEsc(p.title)}`).join('\n') : `\nДедлайнов проектов на сегодня нет.`;
+          if (tk.rows.length) m += `\n\n<b>Задачи:</b>\n` + tk.rows.map(t=>`• ${tgEsc(t.title)}`).join('\n');
+          await tgSend(chatId, m); continue;
+        }
+        if (text === '/money') {
+          const iv = await db.execute({ sql: "SELECT amount, status FROM invoices WHERE user_id=? AND status IN ('pending','overdue')", args: [oid] });
+          const sum = iv.rows.reduce((acc,r)=>acc+(Number(r.amount)||0),0);
+          const over = iv.rows.filter(r=>r.status==='overdue');
+          const overSum = over.reduce((acc,r)=>acc+(Number(r.amount)||0),0);
+          const paid = await db.execute({ sql: "SELECT amount FROM invoices WHERE user_id=? AND status='paid' AND issued_at LIKE ?", args: [oid, ym+'%'] });
+          const rev = paid.rows.reduce((acc,r)=>acc+(Number(r.amount)||0),0);
+          await tgSend(chatId, `💰 <b>Деньги</b>\n\nНе оплачено: ${tgMoney(sum)} (${iv.rows.length} сч.)\nПросрочено: ${tgMoney(overSum)} (${over.length})\nПоступило в этом месяце: ${tgMoney(rev)}`);
+          continue;
+        }
+        if (text === '/stats') {
+          const ap = await db.execute({ sql: "SELECT COUNT(*) c FROM projects WHERE user_id=? AND status!='done'", args: [oid] });
+          const cl = await db.execute({ sql: "SELECT COUNT(*) c FROM clients WHERE user_id=?", args: [oid] });
+          const paid = await db.execute({ sql: "SELECT amount FROM invoices WHERE user_id=? AND status='paid' AND issued_at LIKE ?", args: [oid, ym+'%'] });
+          const rev = paid.rows.reduce((acc,r)=>acc+(Number(r.amount)||0),0);
+          await tgSend(chatId, `📊 <b>Статистика</b>\n\nАктивных проектов: ${Number(ap.rows[0]?.c||0)}\nКлиентов: ${Number(cl.rows[0]?.c||0)}\nПоступило в этом месяце: ${tgMoney(rev)}`);
+          continue;
+        }
       }
     }
   } catch (e) { console.error('TG poll error:', e.message); }
@@ -1718,8 +1881,13 @@ initDB().then(() => {
   // concurrent getUpdates calls cause 409 conflicts — disable with TELEGRAM_POLLING=false.
   if (process.env.TELEGRAM_POLLING !== 'false') {
     tgPoll();
-    // Premium daily reminders — fire around 09:00 server time
-    setInterval(() => { if (new Date().getHours() === 9) runReminders(); }, 60 * 60 * 1000).unref?.();
+    // Daily jobs — fire once around 09:00 server time (digest, deadline pings, overdue, weekly)
+    let _dailyJobsRan = null;
+    setInterval(() => {
+      const now = new Date();
+      const day = now.toISOString().slice(0, 10);
+      if (now.getHours() === 9 && _dailyJobsRan !== day) { _dailyJobsRan = day; runDailyJobs(); }
+    }, 60 * 60 * 1000).unref?.();
   }
   // Keep-warm: ping our own public URL every ~10 min so the instance never sleeps
   // (an inbound request resets the host's idle timer — no more cold-start screen).
