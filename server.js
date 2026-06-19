@@ -270,6 +270,7 @@ async function initDB() {
     `ALTER TABLE users ADD COLUMN blocked INTEGER DEFAULT 0`,
     `ALTER TABLE projects ADD COLUMN deadline_reminded TEXT DEFAULT NULL`,
     `ALTER TABLE invoices ADD COLUMN overdue_notified INTEGER DEFAULT 0`,
+    `ALTER TABLE projects ADD COLUMN staff_pay REAL DEFAULT 0`,
   ];
   for (const sql of migrations) {
     try {
@@ -908,7 +909,7 @@ app.get('/api/projects', authMiddleware, async (req, res) => {
 
 app.post('/api/projects', authMiddleware, async (req, res) => {
   if (denyStaff(req, res)) return;
-  const { title, type, client_id, status, progress, deadline, budget, cost, assigned_to } = req.body;
+  const { title, type, client_id, status, progress, deadline, budget, cost, assigned_to, staff_pay } = req.body;
   if (!title) return res.status(400).json({ error: 'Title is required' });
   const uid = ownerId(req);
   if (client_id) {
@@ -919,8 +920,8 @@ app.post('/api/projects', authMiddleware, async (req, res) => {
   const assignee = await validAssignee(req, assigned_to);
   const safeProgress = Math.max(0, Math.min(100, parseInt(progress) || 0));
   const result = await db.execute({
-    sql: 'INSERT INTO projects (user_id, client_id, title, type, status, progress, deadline, budget, cost, assigned_to) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-    args: [uid, client_id||null, title, type||'', status||'queue', safeProgress, deadline||null, num(budget), num(cost), assignee],
+    sql: 'INSERT INTO projects (user_id, client_id, title, type, status, progress, deadline, budget, cost, assigned_to, staff_pay) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+    args: [uid, client_id||null, title, type||'', status||'queue', safeProgress, deadline||null, num(budget), num(cost), assignee, num(staff_pay)],
   });
   const row = await db.execute({ sql: 'SELECT * FROM projects WHERE id = ?', args: [result.lastInsertRowid] });
   // Notify assigned staff
@@ -935,7 +936,7 @@ app.post('/api/projects', authMiddleware, async (req, res) => {
 
 app.put('/api/projects/:id', authMiddleware, async (req, res) => {
   if (denyStaff(req, res)) return;
-  const { title, type, client_id, status, progress, deadline, budget, cost, assigned_to } = req.body;
+  const { title, type, client_id, status, progress, deadline, budget, cost, assigned_to, staff_pay } = req.body;
   if (!title) return res.status(400).json({ error: 'Title is required' });
   const uid = ownerId(req);
   if (client_id) {
@@ -948,8 +949,8 @@ app.put('/api/projects/:id', authMiddleware, async (req, res) => {
   const prev = await db.execute({ sql: 'SELECT assigned_to, title FROM projects WHERE id = ? AND user_id = ?', args: [req.params.id, uid] });
   const prevAssigned = prev.rows[0]?.assigned_to;
   await db.execute({
-    sql: 'UPDATE projects SET title=?, type=?, client_id=?, status=?, progress=?, deadline=?, budget=?, cost=?, assigned_to=? WHERE id=? AND user_id=?',
-    args: [title, type||'', client_id||null, status||'queue', safeProgress, deadline||null, num(budget), num(cost), assignee, req.params.id, uid],
+    sql: 'UPDATE projects SET title=?, type=?, client_id=?, status=?, progress=?, deadline=?, budget=?, cost=?, assigned_to=?, staff_pay=? WHERE id=? AND user_id=?',
+    args: [title, type||'', client_id||null, status||'queue', safeProgress, deadline||null, num(budget), num(cost), assignee, num(staff_pay), req.params.id, uid],
   });
   const row = await db.execute({ sql: 'SELECT * FROM projects WHERE id = ?', args: [req.params.id] });
   // Notify if newly assigned or reassigned

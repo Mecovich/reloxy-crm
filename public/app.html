@@ -2248,6 +2248,10 @@ body.plan-paid .bento-promo { display:none !important; }
 #page-team .tm-head { color:rgba(217,217,217,0.3) !important; font-weight:600 !important; letter-spacing:0.6px !important; }
 #page-team .tm-seg, #page-team .tm-sort-btn { background:transparent !important; border:1px solid rgba(255,255,255,0.06) !important; }
 #page-team .tm-seg-btn.active { background:rgba(255,255,255,0.08) !important; color:#EDEDED !important; }
+/* STAFF dashboard toggle */
+#staff-dash { display:none; }
+#page-dashboard.staff-mode > *:not(#staff-dash) { display:none !important; }
+#page-dashboard.staff-mode #staff-dash { display:block !important; }
 #page-clients .cl-search { display:flex; align-items:center; gap:10px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:11px 15px; margin-bottom:16px; max-width:440px; }
 #page-clients .cl-search input { flex:1; background:none; border:none; outline:none; color:#EDEDED; font-size:13.5px; font-family:inherit; }
 #page-clients .cl-search input::placeholder { color:rgba(217,217,217,0.35); }
@@ -2493,6 +2497,7 @@ body { background:#0E0E0E !important; }
 
     <!-- DASHBOARD -->
     <div class="page active" id="page-dashboard">
+      <div id="staff-dash"></div>
 
       <!-- Welcome header (Stitch bento style) -->
       <section class="bento-welcome">
@@ -3930,12 +3935,12 @@ function hideBootVeil() {
 function applyStaffMode() {
   if (user?.role !== 'staff') return;
 
-  // Hide nav items staff shouldn't see
+  document.body.classList.add('is-staff');
+  // Staff sees only: dashboard, calendar, projects, tasks
+  const _allowed = ['dashboard','calendar','projects'];
   document.querySelectorAll('.nav-item').forEach(el => {
-    const onclick = el.getAttribute('onclick') || '';
-    if (onclick.includes("'finance'") || onclick.includes("'team'") || onclick.includes("'funnel'")) {
-      el.style.display = 'none';
-    }
+    const m = (el.getAttribute('onclick') || '').match(/go\('([^']+)'/);
+    if (m && !_allowed.includes(m[1])) el.style.display = 'none';
   });
 
   // Hide entire nav sections if empty
@@ -3989,8 +3994,8 @@ async function api(method, url, body) {
 // ─── NAV ───────────────────────────────────────────────────────────────────
 const TITLES = { dashboard:'Dashboard', calendar:'Calendar', clients:'Clients', projects:'Projects', funnel:'Pipeline', team:'Team', finance:'Finance', settings:'Settings', analytics:'Analytics', notes:'Notes', tasks:'Tasks', expenses:'Expenses', reports:'Reports' };
 function go(id, el) {
-  const staffBlocked = ['finance','team','funnel'];
-  if (user?.role === 'staff' && staffBlocked.includes(id)) return;
+  const staffAllowed = ['dashboard','calendar','projects','settings'];
+  if (user?.role === 'staff' && !staffAllowed.includes(id)) return;
   if (['analytics','reports'].includes(id) && user?.role !== 'staff' && planOf() === 'free') { openPricingModal('pro'); return; }
   document.querySelectorAll('.page').forEach(p => { p.classList.remove('active'); p.style.display = 'none'; });
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -4836,7 +4841,42 @@ function loadDashAiInsight(fallbackHTML){
     }
   }).catch(()=>{});
 }
+function renderStaffDash(){
+  const el=document.getElementById('staff-dash'); if(!el) return;
+  const ru=currentLang==='ru';
+  const mine=projects||[]; const pay=p=>Number(p.staff_pay)||0;
+  const done=mine.filter(p=>p.status==='done'); const active=mine.filter(p=>p.status!=='done');
+  const earned=done.reduce((a,p)=>a+pay(p),0); const pending=active.reduce((a,p)=>a+pay(p),0);
+  const today=new Date(); today.setHours(0,0,0,0);
+  const upcoming=active.filter(p=>p.deadline).map(p=>({p,d:new Date(p.deadline+'T00:00:00')})).filter(x=>!isNaN(x.d)).sort((a,b)=>a.d-b.d);
+  const nearest=upcoming[0];
+  const delta=d=>{const n=Math.ceil((d-today)/86400000);return n<0?(ru?'просрочен':'overdue'):n===0?(ru?'сегодня':'today'):n===1?(ru?'завтра':'tomorrow'):(ru?`через ${n} дн.`:`in ${n}d`);};
+  el.innerHTML=`
+    <div style="margin-bottom:26px">
+      <h1 style="font-size:30px;font-weight:600;letter-spacing:-1px">${ru?'С возвращением':'Welcome back'}, ${esc(user.name||'')}</h1>
+      <p style="font-size:13.5px;color:var(--g1);margin-top:5px">${ru?'Ваши проекты и заработок':'Your projects and earnings'}</p>
+    </div>
+    <div class="pipe-kpis" style="margin-bottom:18px">
+      <div class="pipe-kpi"><div class="metric-name">${ru?'Заработано':'Earned'}</div><div class="metric-value">${fmt(earned)}</div><div class="metric-sub">${ru?'по завершённым':'completed'}</div></div>
+      <div class="pipe-kpi"><div class="metric-name">${ru?'В работе':'In progress'}</div><div class="metric-value">${fmt(pending)}</div><div class="metric-sub">${ru?'ожидает завершения':'pending'}</div></div>
+      <div class="pipe-kpi"><div class="metric-name">${ru?'Активных проектов':'Active projects'}</div><div class="metric-value">${active.length}</div><div class="metric-sub">${ru?'всего':'total'} ${mine.length}</div></div>
+      <div class="pipe-kpi"><div class="metric-name">${ru?'Ближайший дедлайн':'Next deadline'}</div><div class="metric-value" style="font-size:18px">${nearest?delta(nearest.d):'—'}</div><div class="metric-sub">${nearest?esc(nearest.p.title):(ru?'нет':'none')}</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div style="background:var(--s1);border:1px solid var(--line);border-radius:16px;padding:22px">
+        <div style="font-size:10.5px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:var(--g2);margin-bottom:14px">${ru?'Мои проекты':'My projects'}</div>
+        ${mine.length?mine.map(p=>`<div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)"><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:500;color:var(--white);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p.title)}</div><div style="font-size:11px;color:var(--g2);margin-top:2px">${esc(p.client_name||'—')} · ${statusLabel(p.status)}</div></div>${pay(p)?`<div style="font-size:12px;font-weight:600;color:var(--g1);white-space:nowrap">${fmt(pay(p))}</div>`:''}</div>`).join(''):`<div style="font-size:12.5px;color:var(--g2)">${ru?'Проектов пока нет':'No projects yet'}</div>`}
+      </div>
+      <div style="background:var(--s1);border:1px solid var(--line);border-radius:16px;padding:22px">
+        <div style="font-size:10.5px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:var(--g2);margin-bottom:14px">${ru?'Ближайшие дедлайны':'Upcoming deadlines'}</div>
+        ${upcoming.length?upcoming.slice(0,6).map(x=>`<div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)"><span style="width:7px;height:7px;border-radius:50%;background:var(--white);flex-shrink:0"></span><div style="flex:1;min-width:0;font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(x.p.title)}</div><span style="font-size:11px;color:var(--g1);white-space:nowrap">${delta(x.d)}</span></div>`).join(''):`<div style="font-size:12.5px;color:var(--g2)">${ru?'Нет дедлайнов':'No deadlines'}</div>`}
+      </div>
+    </div>`;
+}
 function renderDashboard() {
+  const _pd=document.getElementById('page-dashboard');
+  if (user?.role==='staff') { if(_pd) _pd.classList.add('staff-mode'); renderStaffDash(); return; }
+  if (_pd) _pd.classList.remove('staff-mode');
   renderGoal();
   renderBanners();
   // Hide the old time-of-day greeting line — Stitch design uses a performance note instead
@@ -7225,6 +7265,10 @@ function openProjectModal(p) {
       <div class="field"><label class="field-label">${t('f_budget')}</label><input class="field-input" id="m-budget" type="number" value="${cvtInput(p?.budget)||0}" placeholder="0" style="text-align:left"></div>
       <div class="field"><label class="field-label">${currentLang==='ru'?'Расходы':'Costs'} ${curSym()}</label><input class="field-input" id="m-cost" type="number" value="${cvtInput(p?.cost)||0}" placeholder="0" style="text-align:left" title="${currentLang==='ru'?'Подрядчики, стоки, реклама — для расчёта маржи':'Contractors, stocks, ads — for margin'}"></div>
     </div>
+    ${user?.role!=='staff' ? `<div class="field-row">
+      <div class="field"><label class="field-label">${currentLang==='ru'?'Оплата сотруднику':'Staff pay'} ${curSym()}</label><input class="field-input" id="m-pay" type="number" value="${cvtInput(p?.staff_pay)||0}" placeholder="0" style="text-align:left" title="${currentLang==='ru'?'Сколько получит назначенный сотрудник — видно только вам':'What the assigned staff member earns — visible only to you'}"></div>
+      <div class="field"></div>
+    </div>` : ''}
     <div class="field">
       <label class="field-label" style="display:flex;justify-content:space-between;align-items:center">
         <span>${t('f_progress')}</span><span class="proj-progress-readout" id="m-progress-readout">${progressVal}%</span>
@@ -7261,7 +7305,7 @@ function openProjectModal(p) {
       </div>
     </div>` : ''}
   `, async () => {
-    const body = { title:val('m-title'), type:val('m-type'), client_id:val('m-client')||null, status:val('m-status'), progress:+val('m-progress'), deadline:val('m-deadline'), budget:cvtIn(+val('m-budget')), cost:cvtIn(+val('m-cost')), assigned_to:val('m-assigned')||null };
+    const body = { title:val('m-title'), type:val('m-type'), client_id:val('m-client')||null, status:val('m-status'), progress:+val('m-progress'), deadline:val('m-deadline'), budget:cvtIn(+val('m-budget')), cost:cvtIn(+val('m-cost')), assigned_to:val('m-assigned')||null, staff_pay: cvtIn(+(val('m-pay')||0)) };
     const autoDone = body.progress >= 100 && body.status !== 'done';
     if (autoDone) body.status = 'done';
     try {
