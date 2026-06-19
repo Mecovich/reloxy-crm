@@ -5068,7 +5068,7 @@ function renderDashboard() {
           <td>${i.due_date||i.created_at||'—'}</td>
         </tr>`).join('')}
       </tbody>
-    </table>` : emptyCta('task_alt', t('dash_all_paid'), currentLang==='ru' ? 'Новые счета появятся здесь' : 'New invoices will appear here', currentLang==='ru' ? '+ Новый счёт' : '+ New invoice', "go('finance',document.querySelectorAll('.nav-item')[6]);setTimeout(()=>openInvoiceModal(),200)");
+    </table>` : emptyCta('receipt_long', t('dash_all_paid'), currentLang==='ru' ? 'Новые счета появятся здесь' : 'New invoices will appear here', currentLang==='ru' ? '+ Новый счёт' : '+ New invoice', "go('finance',document.querySelectorAll('.nav-item')[6]);setTimeout(()=>openInvoiceModal(),200)");
 
   // ── Total Portfolio (paid + pending invoice value) ──
   const portfolioTotal = paidTotal + pendingTotal;
