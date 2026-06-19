@@ -1573,7 +1573,13 @@ app.post('/api/invite/:token', async (req, res) => {
       args: [owner.id, name, email, 'Staff', 'active'],
     });
 
-    res.json({ ok: true });
+    // Auto-login: issue a JWT so the new staff member lands straight in the app
+    const newId = result.lastInsertRowid;
+    const token = jwt.sign(
+      { id: newId, email, role: 'staff', name, owner_id: owner.id },
+      JWT_SECRET, { expiresIn: '30d' }
+    );
+    res.json({ ok: true, token, user: { id: newId, name, email, role: 'staff', owner_id: owner.id, plan: 'free', studioName: owner.studio_name || owner.name } });
   } catch(e) {
     console.error('Invite error:', e);
     res.status(500).json({ error: 'Internal server error' });

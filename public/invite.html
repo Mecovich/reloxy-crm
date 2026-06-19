@@ -136,6 +136,13 @@ async function joinTeam() {
     });
     const d = await r.json();
     if (!r.ok) throw new Error(d.error || 'Something went wrong');
+    if (d.token) {
+      localStorage.setItem('crm_token', d.token);
+      localStorage.setItem('crm_user', JSON.stringify(d.user));
+      localStorage.setItem('reloxy_email', (d.user && d.user.email) || email);
+      window.location.href = '/app';
+      return;
+    }
     document.getElementById('form-wrap').style.display = 'none';
     document.getElementById('success-wrap').style.display = 'flex';
   } catch (e) {

@@ -2252,6 +2252,19 @@ body.plan-paid .bento-promo { display:none !important; }
 #staff-dash { display:none; }
 #page-dashboard.staff-mode > *:not(#staff-dash) { display:none !important; }
 #page-dashboard.staff-mode #staff-dash { display:block !important; }
+/* TASKS — minimal, matching Clients */
+#page-tasks, #page-tasks * { font-family:"Helvetica Neue",Helvetica,-apple-system,"Segoe UI",Arial,sans-serif; }
+#page-tasks #tasks-wrap h1 { font-size:30px !important; letter-spacing:-1px !important; }
+#page-tasks .task-row { background:rgba(255,255,255,0.02) !important; border:1px solid rgba(255,255,255,0.06) !important; backdrop-filter:none !important; border-radius:14px !important; padding:16px 20px !important; margin-bottom:8px !important; }
+#page-tasks .task-row:hover { background:rgba(255,255,255,0.035) !important; border-color:rgba(255,255,255,0.12) !important; }
+#page-tasks .task-title { font-size:15px !important; font-weight:500 !important; }
+#page-tasks .task-check { width:20px !important; height:20px !important; border-radius:6px !important; }
+#page-tasks .task-meta { margin-top:7px !important; }
+#page-tasks .task-pri { background:transparent !important; border:none !important; padding:0 !important; font-size:11px !important; font-weight:500 !important; letter-spacing:0 !important; text-transform:capitalize !important; color:rgba(217,217,217,0.45) !important; }
+#page-tasks .task-pri.high { color:rgba(237,237,237,0.8) !important; }
+#page-tasks .tasks-filter { background:transparent !important; border:1px solid rgba(255,255,255,0.06) !important; text-transform:none !important; letter-spacing:0 !important; font-size:12px !important; font-weight:500 !important; color:rgba(217,217,217,0.5) !important; }
+#page-tasks .tasks-filter.active { background:rgba(255,255,255,0.06) !important; color:#EDEDED !important; border-color:rgba(255,255,255,0.12) !important; }
+#page-tasks .task-add-row { background:transparent !important; border:1px dashed rgba(255,255,255,0.1) !important; border-radius:14px !important; padding:14px 18px !important; }
 #page-clients .cl-search { display:flex; align-items:center; gap:10px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:11px 15px; margin-bottom:16px; max-width:440px; }
 #page-clients .cl-search input { flex:1; background:none; border:none; outline:none; color:#EDEDED; font-size:13.5px; font-family:inherit; }
 #page-clients .cl-search input::placeholder { color:rgba(217,217,217,0.35); }
@@ -2399,7 +2412,7 @@ body { background:#0E0E0E !important; }
         <span data-i18n="nav_finance">Finance</span>
       </div>
       <div class="nav-item" onclick="go('tasks',this)">
-        <span class="material-symbols-outlined nav-ms">task_alt</span>
+        <span class="material-symbols-outlined nav-ms">checklist</span>
         <span>Tasks</span>
       </div>
       <div class="nav-item" onclick="go('expenses',this)">
@@ -4851,25 +4864,44 @@ function renderStaffDash(){
   const upcoming=active.filter(p=>p.deadline).map(p=>({p,d:new Date(p.deadline+'T00:00:00')})).filter(x=>!isNaN(x.d)).sort((a,b)=>a.d-b.d);
   const nearest=upcoming[0];
   const delta=d=>{const n=Math.ceil((d-today)/86400000);return n<0?(ru?'просрочен':'overdue'):n===0?(ru?'сегодня':'today'):n===1?(ru?'завтра':'tomorrow'):(ru?`через ${n} дн.`:`in ${n}d`);};
+  const dotColor={queue:'rgba(217,217,217,0.4)','in-progress':'#E8C883',review:'rgba(120,170,255,0.8)',done:'#7fc8a0'};
+  const pill=st=>`<span style="display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--g1)"><span style="width:7px;height:7px;border-radius:50%;background:${dotColor[st]||'var(--g1)'}"></span>${statusLabel(st)}</span>`;
+  const eyebrow=t=>`<div style="font-size:10.5px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:var(--g2);margin-bottom:14px">${t}</div>`;
+  const card='background:var(--s1);border:1px solid var(--line);border-radius:18px;padding:24px';
   el.innerHTML=`
-    <div style="margin-bottom:26px">
+    <div style="margin-bottom:24px">
       <h1 style="font-size:30px;font-weight:600;letter-spacing:-1px">${ru?'С возвращением':'Welcome back'}, ${esc(user.name||'')}</h1>
       <p style="font-size:13.5px;color:var(--g1);margin-top:5px">${ru?'Ваши проекты и заработок':'Your projects and earnings'}</p>
     </div>
-    <div class="pipe-kpis" style="margin-bottom:18px">
-      <div class="pipe-kpi"><div class="metric-name">${ru?'Заработано':'Earned'}</div><div class="metric-value">${fmt(earned)}</div><div class="metric-sub">${ru?'по завершённым':'completed'}</div></div>
-      <div class="pipe-kpi"><div class="metric-name">${ru?'В работе':'In progress'}</div><div class="metric-value">${fmt(pending)}</div><div class="metric-sub">${ru?'ожидает завершения':'pending'}</div></div>
-      <div class="pipe-kpi"><div class="metric-name">${ru?'Активных проектов':'Active projects'}</div><div class="metric-value">${active.length}</div><div class="metric-sub">${ru?'всего':'total'} ${mine.length}</div></div>
-      <div class="pipe-kpi"><div class="metric-name">${ru?'Ближайший дедлайн':'Next deadline'}</div><div class="metric-value" style="font-size:18px">${nearest?delta(nearest.d):'—'}</div><div class="metric-sub">${nearest?esc(nearest.p.title):(ru?'нет':'none')}</div></div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-      <div style="background:var(--s1);border:1px solid var(--line);border-radius:16px;padding:22px">
-        <div style="font-size:10.5px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:var(--g2);margin-bottom:14px">${ru?'Мои проекты':'My projects'}</div>
-        ${mine.length?mine.map(p=>`<div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)"><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:500;color:var(--white);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p.title)}</div><div style="font-size:11px;color:var(--g2);margin-top:2px">${esc(p.client_name||'—')} · ${statusLabel(p.status)}</div></div>${pay(p)?`<div style="font-size:12px;font-weight:600;color:var(--g1);white-space:nowrap">${fmt(pay(p))}</div>`:''}</div>`).join(''):`<div style="font-size:12.5px;color:var(--g2)">${ru?'Проектов пока нет':'No projects yet'}</div>`}
+    <div style="${card};margin-bottom:14px">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap">
+        <div>
+          ${eyebrow(ru?'Заработано':'Earned')}
+          <div style="font-size:42px;font-weight:600;letter-spacing:-1.6px;line-height:1">${fmt(earned)}</div>
+          <div style="font-size:12.5px;color:var(--g1);margin-top:10px">+ ${fmt(pending)} ${ru?'в работе':'in progress'} · ${ru?'выполнено':'completed'} ${done.length}</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:10.5px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:var(--g2)">${ru?'Активных':'Active'}</div>
+          <div style="font-size:30px;font-weight:600;letter-spacing:-1px;margin-top:8px">${active.length}</div>
+          <div style="font-size:11.5px;color:var(--g2);margin-top:6px">${ru?'всего':'total'} ${mine.length}</div>
+        </div>
       </div>
-      <div style="background:var(--s1);border:1px solid var(--line);border-radius:16px;padding:22px">
-        <div style="font-size:10.5px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:var(--g2);margin-bottom:14px">${ru?'Ближайшие дедлайны':'Upcoming deadlines'}</div>
-        ${upcoming.length?upcoming.slice(0,6).map(x=>`<div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)"><span style="width:7px;height:7px;border-radius:50%;background:var(--white);flex-shrink:0"></span><div style="flex:1;min-width:0;font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(x.p.title)}</div><span style="font-size:11px;color:var(--g1);white-space:nowrap">${delta(x.d)}</span></div>`).join(''):`<div style="font-size:12.5px;color:var(--g2)">${ru?'Нет дедлайнов':'No deadlines'}</div>`}
+    </div>
+    <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:14px">
+      <div style="${card}">
+        ${eyebrow(ru?'Мои проекты':'My projects')}
+        ${mine.length?mine.map(p=>`<div style="display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--line)">
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13.5px;font-weight:500;color:var(--white);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p.title)}</div>
+            <div style="display:flex;align-items:center;gap:10px;margin-top:5px">${pill(p.status)}<span style="font-size:11px;color:var(--g2)">${esc(p.client_name||'—')}</span></div>
+          </div>
+          ${pay(p)?`<div style="font-size:13px;font-weight:600;color:var(--white);white-space:nowrap">${fmt(pay(p))}</div>`:''}
+        </div>`).join(''):`<div style="font-size:12.5px;color:var(--g2);padding:6px 0">${ru?'Проектов пока нет':'No projects yet'}</div>`}
+      </div>
+      <div style="${card}">
+        ${eyebrow(ru?'Ближайшие дедлайны':'Upcoming deadlines')}
+        ${nearest?`<div style="margin-bottom:16px"><div style="font-size:24px;font-weight:600;letter-spacing:-.8px">${delta(nearest.d)}</div><div style="font-size:12px;color:var(--g1);margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(nearest.p.title)}</div></div>`:''}
+        ${upcoming.length?upcoming.slice(0,5).map(x=>`<div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)"><span style="width:7px;height:7px;border-radius:50%;background:var(--white);flex-shrink:0"></span><div style="flex:1;min-width:0;font-size:12.5px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(x.p.title)}</div><span style="font-size:11px;color:var(--g1);white-space:nowrap">${delta(x.d)}</span></div>`).join(''):`<div style="font-size:12.5px;color:var(--g2);padding:6px 0">${ru?'Нет дедлайнов':'No deadlines'}</div>`}
       </div>
     </div>`;
 }
