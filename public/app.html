@@ -2570,6 +2570,7 @@ body { background:#0E0E0E !important; }
               <div class="bento-card-desc" id="chart-sub" style="margin-top:6px"></div>
             </div>
             <div style="display:flex;align-items:center;gap:16px">
+              <span class="material-symbols-outlined bento-icon-badge balance-eye" onclick="toggleBalance()" style="cursor:pointer;font-size:18px" title="Hide / show balance">visibility</span>
               <div class="bento-toggle">
                 <span class="bento-toggle-opt active" onclick="setChartMode('analytics',this)" data-i18n="dash_toggle_analytics">Analytics</span>
                 <span class="bento-toggle-opt" onclick="setChartMode('forecast',this)" data-i18n="dash_toggle_forecast">Forecasting</span>
@@ -2713,8 +2714,9 @@ body { background:#0E0E0E !important; }
             <span class="material-symbols-outlined bento-icon-badge">donut_large</span>
           </div>
           <div class="bento-donut-row">
-            <svg width="104" height="104" viewBox="0 0 104 104" style="flex-shrink:0">
-              <circle cx="52" cy="52" r="44" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="14"/>
+            <svg width="104" height="104" viewBox="0 0 104 104" style="flex-shrink:0;overflow:visible">
+              <defs><linearGradient id="donutGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#c4c4c4"/></linearGradient></defs>
+              <circle cx="52" cy="52" r="44" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="11"/>
               <g id="dash-donut-segments" transform="rotate(-90 52 52)"></g>
               <text x="52" y="49" text-anchor="middle" fill="#D9D9D9" font-size="20" font-weight="700" id="dash-donut-total">0</text>
               <text x="52" y="64" text-anchor="middle" fill="rgba(217,217,217,0.40)" font-size="8" font-weight="700" letter-spacing="1" id="dash-donut-sub">TOTAL</text>
@@ -4868,9 +4870,9 @@ function toggleBalance(){
   const hidden = !document.body.classList.contains('balance-hidden');
   document.body.classList.toggle('balance-hidden', hidden);
   try { localStorage.setItem('reloxy_balance_hidden', hidden ? '1' : '0'); } catch(_){}
-  const ico = document.getElementById('balance-eye-ico'); if (ico) ico.textContent = hidden ? 'visibility_off' : 'visibility';
+  document.querySelectorAll('.balance-eye').forEach(b => b.textContent = hidden ? 'visibility_off' : 'visibility');
 }
-(function(){ try { if (localStorage.getItem('reloxy_balance_hidden')==='1') { document.body.classList.add('balance-hidden'); const i=document.getElementById('balance-eye-ico'); if(i) i.textContent='visibility_off'; } } catch(_){} })();
+(function(){ try { if (localStorage.getItem('reloxy_balance_hidden')==='1') { document.body.classList.add('balance-hidden'); document.querySelectorAll('.balance-eye').forEach(b=>b.textContent='visibility_off'); } } catch(_){} })();
 function renderStaffDash(){
   const el=document.getElementById('staff-dash'); if(!el) return;
   const ru=currentLang==='ru';
@@ -5316,12 +5318,16 @@ function renderDashboard() {
     const donutSub = document.getElementById('dash-donut-sub');
     if (donutSub) donutSub.textContent = t('dash_total') || 'TOTAL';
     const r = 44, circumference = 2*Math.PI*r;
+    const segCount = counts.filter(c => c > 0).length;
+    const gap = segCount > 1 ? circumference * 0.02 : 0;
     let offsetAcc = 0;
     donutSeg.innerHTML = counts.map((c, i) => {
       if (!c || !total) return '';
       const frac = c/total;
       const dash = frac*circumference;
-      const seg = `<circle cx="52" cy="52" r="${r}" fill="none" stroke="rgba(217,217,217,${statusGroups[i].op})" stroke-width="14" stroke-dasharray="${dash} ${circumference-dash}" stroke-dashoffset="${-offsetAcc}" stroke-linecap="butt"/>`;
+      const visible = Math.max(0.5, dash - gap);
+      const stroke = i === 0 ? 'url(#donutGrad)' : `rgba(217,217,217,${statusGroups[i].op})`;
+      const seg = `<circle cx="52" cy="52" r="${r}" fill="none" stroke="${stroke}" stroke-width="11" stroke-dasharray="${visible} ${circumference-visible}" stroke-dashoffset="${-offsetAcc}" stroke-linecap="round"/>`;
       offsetAcc += dash;
       return seg;
     }).join('');
