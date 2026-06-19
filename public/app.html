@@ -2265,6 +2265,16 @@ body.plan-paid .bento-promo { display:none !important; }
 #page-tasks .tasks-filter { background:transparent !important; border:1px solid rgba(255,255,255,0.06) !important; text-transform:none !important; letter-spacing:0 !important; font-size:12px !important; font-weight:500 !important; color:rgba(217,217,217,0.5) !important; }
 #page-tasks .tasks-filter.active { background:rgba(255,255,255,0.06) !important; color:#EDEDED !important; border-color:rgba(255,255,255,0.12) !important; }
 #page-tasks .task-add-row { background:transparent !important; border:1px dashed rgba(255,255,255,0.1) !important; border-radius:14px !important; padding:14px 18px !important; }
+/* Hide-balance mask */
+.balance-eye { transition:color .12s; }
+.balance-eye:hover { color:#EDEDED !important; }
+.mask-money { position:relative; }
+body.balance-hidden .mask-money { color:transparent !important; }
+body.balance-hidden .mask-money::after { content:"••••"; position:absolute; left:0; top:0; bottom:0; display:flex; align-items:center; color:var(--g1); letter-spacing:3px; font-size:0.6em; }
+/* Calendar: all deadlines on a day completed -> green */
+.cal-day.all-done { background:rgba(127,200,160,0.06) !important; }
+.cal-day.all-done .cal-day-num { color:#9fd9bb !important; }
+.cal-event.deadline.done { color:#7fc8a0 !important; background:rgba(127,200,160,0.10) !important; border-color:rgba(127,200,160,0.30) !important; }
 #page-clients .cl-search { display:flex; align-items:center; gap:10px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:11px 15px; margin-bottom:16px; max-width:440px; }
 #page-clients .cl-search input { flex:1; background:none; border:none; outline:none; color:#EDEDED; font-size:13.5px; font-family:inherit; }
 #page-clients .cl-search input::placeholder { color:rgba(217,217,217,0.35); }
@@ -2524,9 +2534,9 @@ body { background:#0E0E0E !important; }
           <button class="bento-btn bento-icon-action" onclick="go('finance',document.querySelectorAll('.nav-item')[6])" data-i18n-title="btn_transfer"><span class="material-symbols-outlined">swap_horiz</span></button>
           <button class="bento-btn bento-icon-action" onclick="go('finance',document.querySelectorAll('.nav-item')[6])" data-i18n-title="btn_deposit"><span class="material-symbols-outlined">savings</span></button>
           <button class="bento-btn" onclick="openGoalModal()" id="goal-wrap-mini" style="display:none">
-            <span id="goal-mini-current">$ 0</span>
+            <span id="goal-mini-current" class="mask-money">$ 0</span>
             <span style="opacity:0.4">/</span>
-            <span id="goal-mini-target" style="opacity:0.6">$ 0</span>
+            <span id="goal-mini-target" class="mask-money" style="opacity:0.6">$ 0</span>
             <div style="width:40px;height:2px;background:rgba(217,217,217,0.15);border-radius:2px;overflow:hidden;margin-left:6px"><div id="goal-mini-fill" style="height:100%;width:0%;background:var(--accent);transition:width 0.8s;border-radius:2px"></div></div>
           </button>
         </div>
@@ -2554,7 +2564,7 @@ body { background:#0E0E0E !important; }
               <p class="bento-card-desc" data-i18n="dash_subtitle" style="margin-bottom:2px">How much you've earned, over time.</p>
               <p class="bento-card-desc" id="dash-chart-period-label" style="opacity:0.5;font-size:12px"></p>
               <div class="bento-earned-row">
-                <div class="bento-earned-num" id="chart-total">$ —</div>
+                <div class="bento-earned-num mask-money" id="chart-total">$ —</div>
                 <div class="chart-badge" id="chart-badge"></div>
               </div>
               <div class="bento-card-desc" id="chart-sub" style="margin-top:6px"></div>
@@ -2592,9 +2602,9 @@ body { background:#0E0E0E !important; }
           <div>
             <div class="bento-portfolio-head">
               <div class="bento-portfolio-label" data-i18n="dash_total_portfolio">Total Portfolio</div>
-              <span class="material-symbols-outlined bento-icon-badge">account_balance_wallet</span>
+              <span class="material-symbols-outlined bento-icon-badge balance-eye" id="balance-eye-ico" onclick="toggleBalance()" style="cursor:pointer" title="Hide / show balance">visibility</span>
             </div>
-            <div class="bento-portfolio-num" id="dash-portfolio-total">$ —</div>
+            <div class="bento-portfolio-num mask-money" id="dash-portfolio-total">$ —</div>
           </div>
           <div class="bento-portfolio-bar" id="dash-portfolio-bar">
             <div class="bento-portfolio-bar-seg is-paid" id="dash-portfolio-bar-paid" style="width:0%"></div>
@@ -4854,6 +4864,13 @@ function loadDashAiInsight(fallbackHTML){
     }
   }).catch(()=>{});
 }
+function toggleBalance(){
+  const hidden = !document.body.classList.contains('balance-hidden');
+  document.body.classList.toggle('balance-hidden', hidden);
+  try { localStorage.setItem('reloxy_balance_hidden', hidden ? '1' : '0'); } catch(_){}
+  const ico = document.getElementById('balance-eye-ico'); if (ico) ico.textContent = hidden ? 'visibility_off' : 'visibility';
+}
+(function(){ try { if (localStorage.getItem('reloxy_balance_hidden')==='1') { document.body.classList.add('balance-hidden'); const i=document.getElementById('balance-eye-ico'); if(i) i.textContent='visibility_off'; } } catch(_){} })();
 function renderStaffDash(){
   const el=document.getElementById('staff-dash'); if(!el) return;
   const ru=currentLang==='ru';
@@ -5757,8 +5774,9 @@ function renderCalendar() {
   for (let day = 1; day <= lastDay.getDate(); day++) {
     const isToday = day===today.getDate() && calMonth===today.getMonth() && calYear===today.getFullYear();
     const events  = deadlineMap[day] || [];
-    const evHtml  = events.map(p => `<div class="cal-event deadline" title="${esc(p.title)}">${esc(p.title)}</div>`).join('');
-    html += `<div class="cal-day${isToday?' today':''}">
+    const allDone = events.length>0 && events.every(p => p.status==='done');
+    const evHtml  = events.map(p => `<div class="cal-event deadline${p.status==='done'?' done':''}" title="${esc(p.title)}">${esc(p.title)}</div>`).join('');
+    html += `<div class="cal-day${isToday?' today':''}${allDone?' all-done':''}">
       <div class="cal-day-num">${day}</div>
       ${evHtml}
     </div>`;
