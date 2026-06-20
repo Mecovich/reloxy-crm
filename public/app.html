@@ -2313,6 +2313,30 @@ body.balance-hidden .mask-money::after { content:"\2217\2217\2217\2217"; positio
   .pipe-kpis { grid-template-columns:1fr 1fr !important; }
   .topbar .search { order:5; flex:1 1 100% !important; }
 }
+@media (max-width:820px){
+  .bento-h1 { font-size:27px !important; line-height:1.15 !important; }
+  .bento-welcome { margin-bottom:22px !important; gap:14px !important; padding-bottom:0 !important; }
+  .bento-card { padding:18px !important; }
+  .bento-earned-num { font-size:30px !important; }
+  .bento-card-head { flex-wrap:wrap !important; gap:12px !important; }
+  .bento-card-title { font-size:21px !important; line-height:28px !important; }
+  .bento-portfolio-num { font-size:30px !important; }
+  .chart-periods { flex-wrap:wrap; }
+  #revenue-chart-wrap { height:220px !important; }
+  .metrics, .fin-grid, .an-grid { grid-template-columns:repeat(2,1fr) !important; }
+  .cal-day { min-height:54px !important; padding:5px !important; }
+  .cal-day-num { font-size:11px !important; }
+  .cal-event { font-size:9px !important; padding:1px 4px !important; }
+  .field-row { grid-template-columns:1fr !important; }
+  .modal { width:95vw !important; max-width:95vw !important; }
+  #staff-dash h1 { font-size:24px !important; }
+}
+@media (max-width:560px){
+  .metrics, .fin-grid, .an-grid { grid-template-columns:1fr 1fr !important; }
+  .bento-welcome-actions { width:100%; }
+  .cal-event { font-size:0 !important; min-height:0 !important; width:6px !important; height:6px !important; padding:0 !important; margin:2px 2px 0 0 !important; border-radius:50% !important; display:inline-block !important; background:var(--g1) !important; vertical-align:middle; }
+  .cal-event.deadline.done { background:#7fc8a0 !important; }
+}
 #page-clients .cl-search { display:flex; align-items:center; gap:10px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:11px 15px; margin-bottom:16px; max-width:440px; }
 #page-clients .cl-search input { flex:1; background:none; border:none; outline:none; color:#EDEDED; font-size:13.5px; font-family:inherit; }
 #page-clients .cl-search input::placeholder { color:rgba(217,217,217,0.35); }
