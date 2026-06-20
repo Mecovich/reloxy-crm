@@ -1882,6 +1882,8 @@ app.get('/app',           (req, res) => res.sendFile(path.join(__dirname, 'publi
 app.get('/admin',         (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
 app.get('/invite/:token', (req, res) => res.sendFile(path.join(__dirname, 'public', 'invite.html')));
 app.get('/share/:token',  (req, res) => res.sendFile(path.join(__dirname, 'public', 'share.html')));
+app.get('/privacy',        (req, res) => res.sendFile(path.join(__dirname, 'public', 'privacy.html')));
+app.get('/terms',          (req, res) => res.sendFile(path.join(__dirname, 'public', 'terms.html')));
 app.get('*',              (req, res) => res.sendFile(path.join(__dirname, 'public', 'login.html')));
 
 // ─── Start ───────────────────────────────────────────────────────────────────
