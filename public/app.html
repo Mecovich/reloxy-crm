@@ -2270,7 +2270,7 @@ body.plan-paid .bento-promo { display:none !important; }
 .balance-eye:hover { color:#EDEDED !important; }
 .mask-money { position:relative; }
 body.balance-hidden .mask-money { color:transparent !important; }
-body.balance-hidden .mask-money::after { content:"••••"; position:absolute; left:0; top:0; bottom:0; display:flex; align-items:center; color:var(--g1); letter-spacing:3px; font-size:0.6em; }
+body.balance-hidden .mask-money::after { content:"\2217\2217\2217\2217"; position:absolute; left:0; top:0; bottom:0; display:flex; align-items:center; color:var(--g1); letter-spacing:4px; font-size:0.78em; }
 /* Calendar: all deadlines on a day completed -> green */
 .cal-day.all-done { background:rgba(127,200,160,0.06) !important; }
 .cal-day.all-done .cal-day-num { color:#9fd9bb !important; }
@@ -5728,7 +5728,7 @@ function renderReports() {
     repChart = new Chart(ctx, {
       type:'bar',
       data: { labels: months.map(m=>{ const [y,mo]=m.split('-'); return new Date(+y,+mo-1).toLocaleString('en',{month:'short'})+' '+y.slice(2); }), datasets:[{ data: months.map(m=>byMonth[m]||0), backgroundColor:'rgba(255,255,255,0.12)', borderColor:'rgba(255,255,255,0.35)', borderWidth:1, borderRadius:6 }] },
-      options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{ x:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#7a7a82',font:{size:11}}}, y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#7a7a82',font:{size:11},callback:v=>fmt(v)}} } }
+      options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}, tooltip:{ backgroundColor:'rgba(18,18,20,0.97)', borderColor:'rgba(255,255,255,0.12)', borderWidth:1, titleColor:'#ededed', bodyColor:'#cfcfcf', padding:{top:9,bottom:10,left:13,right:13}, cornerRadius:11, displayColors:false, caretSize:6, caretPadding:8, titleFont:{size:11,weight:'600'}, titleMarginBottom:5, bodyFont:{size:15,weight:'700'}, callbacks:{ label:(c)=>fmt(c.parsed.y) } }}, scales:{ x:{grid:{display:false},border:{display:false},ticks:{color:'#7a7a82',font:{size:11}}}, y:{grid:{color:'rgba(255,255,255,0.04)'},border:{display:false},ticks:{color:'#7a7a82',font:{size:11},callback:v=>fmt(v)}} } }
     });
   }
 
