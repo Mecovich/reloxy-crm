@@ -271,6 +271,7 @@ async function initDB() {
     `ALTER TABLE projects ADD COLUMN deadline_reminded TEXT DEFAULT NULL`,
     `ALTER TABLE invoices ADD COLUMN overdue_notified INTEGER DEFAULT 0`,
     `ALTER TABLE projects ADD COLUMN staff_pay REAL DEFAULT 0`,
+    `ALTER TABLE projects ADD COLUMN parent_id INTEGER DEFAULT NULL`,
   ];
   for (const sql of migrations) {
     try {
@@ -918,10 +919,16 @@ app.post('/api/projects', authMiddleware, async (req, res) => {
   }
   // assigned_to must be a real user account in this workspace (validated)
   const assignee = await validAssignee(req, assigned_to);
+  // Sub-project: parent must be an existing TOP-LEVEL project in this workspace (one level only)
+  let parentId = null;
+  if (req.body.parent_id) {
+    const pr = await db.execute({ sql: 'SELECT id FROM projects WHERE id=? AND user_id=? AND parent_id IS NULL', args: [req.body.parent_id, uid] });
+    if (pr.rows.length) parentId = Number(req.body.parent_id);
+  }
   const safeProgress = Math.max(0, Math.min(100, parseInt(progress) || 0));
   const result = await db.execute({
-    sql: 'INSERT INTO projects (user_id, client_id, title, type, status, progress, deadline, budget, cost, assigned_to, staff_pay) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-    args: [uid, client_id||null, title, type||'', status||'queue', safeProgress, deadline||null, num(budget), num(cost), assignee, num(staff_pay)],
+    sql: 'INSERT INTO projects (user_id, client_id, title, type, status, progress, deadline, budget, cost, assigned_to, staff_pay, parent_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+    args: [uid, client_id||null, title, type||'', status||'queue', safeProgress, deadline||null, num(budget), num(cost), assignee, num(staff_pay), parentId],
   });
   const row = await db.execute({ sql: 'SELECT * FROM projects WHERE id = ?', args: [result.lastInsertRowid] });
   // Notify assigned staff

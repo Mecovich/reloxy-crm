@@ -3757,7 +3757,7 @@ const TRANS = {
     f_company:'Company *', f_industry:'Industry', f_contact:'Contact',
     f_title:'Title *', f_type:'Type', f_client:'Client', f_status:'Status',
     f_deadline:'Deadline', f_budget:'Budget {cur}', f_progress:'Progress %',
-    f_stages:'Work stages', hint_stages:'Build a step-by-step plan — your client will see this on their project page.',
+    f_stages:'Work stages', f_subprojects:'Sub-projects', btn_add_subproject:'Sub-project', modal_new_subproject:'New sub-project', hint_stages:'Build a step-by-step plan — your client will see this on their project page.',
     btn_add_stage:'Add stage', btn_stage_confirm:'Add', loading_ellipsis:'Loading…', stages_empty:'No stages yet — add the first one.',
     f_share_link:'Client link', hint_share_link:'A read-only page where the client can track their project status — no login required.',
     btn_generate_link:'Generate client link', btn_copy_link:'Copy', confirm_revoke_link:'Revoke this link? The client will lose access to the project page.',
@@ -3902,7 +3902,7 @@ const TRANS = {
     f_company:'Компания *', f_industry:'Отрасль', f_contact:'Контакт',
     f_title:'Название *', f_type:'Вид услуги', f_client:'Клиент', f_status:'Статус',
     f_deadline:'Дедлайн', f_budget:'Бюджет {cur}', f_progress:'Прогресс %',
-    f_stages:'Этапы работы', hint_stages:'Соберите пошаговый план — клиент увидит его на своей странице проекта.',
+    f_stages:'Этапы работы', f_subprojects:'Под-проекты', btn_add_subproject:'Под-проект', modal_new_subproject:'Новый под-проект', hint_stages:'Соберите пошаговый план — клиент увидит его на своей странице проекта.',
     btn_add_stage:'Добавить этап', btn_stage_confirm:'Добавить', loading_ellipsis:'Загрузка…', stages_empty:'Пока нет этапов — добавьте первый.',
     f_share_link:'Ссылка для клиента', hint_share_link:'Страница только для просмотра, где клиент может следить за статусом проекта — без входа в систему.',
     btn_generate_link:'Создать ссылку для клиента', btn_copy_link:'Копировать', confirm_revoke_link:'Отозвать эту ссылку? Клиент потеряет доступ к странице проекта.',
@@ -6447,19 +6447,20 @@ function renderProjects() {
   if (_board) _board.style.display = '';
   if (_list) _list.style.display = 'none';
   const cols = { queue:[], inprogress:[], review:[], done:[] };
-  projects.forEach(p => {
+  const _boardItems = (user?.role === 'staff') ? projects : projects.filter(p => !p.parent_id);
+  _boardItems.forEach(p => {
     const k = p.status==='in-progress'?'inprogress':p.status;
     if (cols[k]) cols[k].push(p); else cols.queue.push(p);
   });
   const today = new Date(); today.setHours(0,0,0,0);
 
   // Stats bar
-  const totalBudget = projects.reduce((s,p) => s + (p.budget||0), 0);
+  const totalBudget = _boardItems.reduce((s,p) => s + (p.budget||0), 0);
   const totalActive = (cols.inprogress||[]).length;
   const ksTotal = document.getElementById('ks-total');
   const ksActive = document.getElementById('ks-active');
   const ksBudget = document.getElementById('ks-budget');
-  if (ksTotal)  ksTotal.textContent  = projects.length;
+  if (ksTotal)  ksTotal.textContent  = _boardItems.length;
   if (ksActive) ksActive.textContent = totalActive;
   if (ksBudget) ksBudget.textContent = fmt(totalBudget);
 
@@ -6495,6 +6496,7 @@ function renderProjects() {
         ${p.progress > 0 ? `<div class="k-prog-bar" style="margin-bottom:11px"><div class="k-prog-fill ${isComplete?'is-complete':''}" style="width:${p.progress}%"></div></div>` : ''}
         <div class="k-card-foot">
           <div class="k-client-chip" title="${esc(p.client_name||'')}">${clientAv}</div>
+          ${(() => { const kids = projects.filter(x=>x.parent_id===p.id); return kids.length ? `<span class="k-budget-tag" title="${currentLang==='ru'?'Под-проекты':'Sub-projects'}">⊞ ${kids.filter(x=>x.status==='done').length}/${kids.length}</span>` : ''; })()}
           ${p.budget ? `<span class="k-budget-tag">${fmt(p.budget)}</span>` : ''}
         </div>
       </div>`;
@@ -7367,10 +7369,21 @@ async function deleteClient(id) {
   } catch(e) { toast(e.message); }
 }
 
-function openProjectModal(p) {
+function renderSubprojectsList(parentId){
+  const kids = (projects||[]).filter(x => x.parent_id === parentId);
+  if (!kids.length) return `<div style="font-size:12px;color:var(--g2);padding:4px 0">${currentLang==='ru'?'Под-проектов пока нет — добавьте первый':'No sub-projects yet — add the first'}</div>`;
+  const dot = { queue:'rgba(217,217,217,0.4)','in-progress':'#E8C883', review:'rgba(120,170,255,0.8)', done:'#7fc8a0' };
+  return kids.map(k => `<div class="proj-stage-item" style="cursor:pointer" onclick="closeModal();openProjectModal(projects.find(x=>x.id===${k.id}))">
+    <span style="width:7px;height:7px;border-radius:50%;background:${dot[k.status]||'var(--g1)'};flex-shrink:0;margin-right:9px"></span>
+    <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#EDEDED">${esc(k.title)}</span>
+    <span style="font-size:11px;color:var(--g2);margin-right:8px">${statusLabel(k.status)}</span>
+    ${(user?.role!=='staff' && k.staff_pay) ? `<span style="font-size:11px;color:var(--g1)">${fmt(k.staff_pay)}</span>` : ''}
+  </div>`).join('');
+}
+function openProjectModal(p, opts) {
   const clientOpts = clients.map(c=>`<option value="${c.id}" ${p?.client_id==c.id?'selected':''}>${esc(c.name)}</option>`).join('');
   const progressVal = p?.progress||0;
-  showModal(p?t('modal_edit_project'):t('modal_new_project'), `
+  showModal(p ? t('modal_edit_project') : (opts && opts.parentId ? t('modal_new_subproject') : t('modal_new_project')), `
     <div class="field-row">
       <div class="field" style="flex:1.4"><label class="field-label">${t('f_title')}</label><input class="field-input" id="m-title" value="${esc(p?.title||'')}" placeholder="${currentLang==='ru'?'Например: Редизайн сайта':'e.g. Website redesign'}"></div>
       <div class="field"><label class="field-label">${t('f_type')}</label><input class="field-input" id="m-type" value="${esc(p?.type||'')}" placeholder="${currentLang==='ru'?'Бренд / Веб / Видео…':'Brand / Web / Video…'}"></div>
@@ -7406,6 +7419,15 @@ function openProjectModal(p) {
       </label>
       <input class="proj-progress-slider" id="m-progress" type="range" min="0" max="100" step="5" value="${progressVal}" oninput="document.getElementById('m-progress-readout').textContent=this.value+'%'">
     </div>
+    ${p && !p.parent_id ? `
+    <div class="field" style="margin-top:6px;border-top:1px solid var(--line);padding-top:16px">
+      <label class="field-label" style="display:flex;align-items:center;justify-content:space-between">
+        <span>${t('f_subprojects')}</span>
+        <span style="font-size:11px;font-weight:600;color:rgba(217,217,217,0.5);cursor:pointer" onclick="openProjectModal(null,{parentId:${p.id}})">+ ${t('btn_add_subproject')}</span>
+      </label>
+      <p class="field-hint" style="font-size:11px;color:rgba(217,217,217,0.35);margin:2px 0 6px">${currentLang==='ru'?'Отдельные работы внутри этого проекта — у каждой свой исполнитель и оплата.':'Separate works inside this project — each with its own assignee and pay.'}</p>
+      <div class="proj-stages-list" id="m-subprojects-list">${renderSubprojectsList(p.id)}</div>
+    </div>` : ''}
     ${p ? `
     <div class="field" style="margin-top:6px;border-top:1px solid var(--line);padding-top:16px">
       <label class="field-label" style="display:flex;align-items:center;justify-content:space-between">
@@ -7436,7 +7458,7 @@ function openProjectModal(p) {
       </div>
     </div>` : ''}
   `, async () => {
-    const body = { title:val('m-title'), type:val('m-type'), client_id:val('m-client')||null, status:val('m-status'), progress:+val('m-progress'), deadline:val('m-deadline'), budget:cvtIn(+val('m-budget')), cost:cvtIn(+val('m-cost')), assigned_to:val('m-assigned')||null, staff_pay: cvtIn(+(val('m-pay')||0)) };
+    const body = { title:val('m-title'), type:val('m-type'), client_id:val('m-client')||null, status:val('m-status'), progress:+val('m-progress'), deadline:val('m-deadline'), budget:cvtIn(+val('m-budget')), cost:cvtIn(+val('m-cost')), assigned_to:val('m-assigned')||null, staff_pay: cvtIn(+(val('m-pay')||0)), parent_id: (p ? p.parent_id : (opts && opts.parentId ? opts.parentId : null)) };
     const autoDone = body.progress >= 100 && body.status !== 'done';
     if (autoDone) body.status = 'done';
     try {
