@@ -430,15 +430,25 @@ const mailer = SMTP_USER ? nodemailer.createTransport({
 // Render (and many hosts) block outbound SMTP, so prefer an HTTPS email API when
 // configured. Whichever provider's env vars are set is used (Mailopost → UniOne →
 // SMTP fallback).
+const RESEND_API_KEY  = process.env.RESEND_API_KEY || '';
 const MAILOPOST_TOKEN = process.env.MAILOPOST_TOKEN || '';
 const UNIONE_API_KEY  = process.env.UNIONE_API_KEY || '';
 // RU UniOne accounts: https://go1.unisender.ru/ru/... (or go2); Intl: https://api.unione.io/en/...
 const UNIONE_API_URL  = process.env.UNIONE_API_URL || 'https://go1.unisender.ru/ru/transactional/api/v1/email/send.json';
 const MAIL_FROM       = process.env.MAIL_FROM || SMTP_USER || 'no-reply@reloxy.tech';
 const MAIL_FROM_NAME  = process.env.MAIL_FROM_NAME || 'Reloxy';
-const emailEnabled    = !!(MAILOPOST_TOKEN || UNIONE_API_KEY || mailer);
+const emailEnabled    = !!(RESEND_API_KEY || MAILOPOST_TOKEN || UNIONE_API_KEY || mailer);
 
 async function sendEmail({ to, subject, text, html }) {
+  if (RESEND_API_KEY) {
+    const r = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ from: `${MAIL_FROM_NAME} <${MAIL_FROM}>`, to: [to], subject, html, text }),
+    });
+    if (!r.ok) { const body = await r.text().catch(() => ''); throw new Error(`Resend ${r.status} ${body}`); }
+    return;
+  }
   if (MAILOPOST_TOKEN) {
     const r = await fetch('https://api.mailopost.ru/v1/email/messages', {
       method: 'POST',
@@ -463,7 +473,8 @@ async function sendEmail({ to, subject, text, html }) {
 }
 
 // Boot-time diagnostics so Render logs say plainly how email is delivered.
-if (MAILOPOST_TOKEN)   console.log(`✉️  Email via Mailopost — from ${MAIL_FROM}`);
+if (RESEND_API_KEY)    console.log(`✉️  Email via Resend — from ${MAIL_FROM}`);
+else if (MAILOPOST_TOKEN) console.log(`✉️  Email via Mailopost — from ${MAIL_FROM}`);
 else if (UNIONE_API_KEY) console.log(`✉️  Email via Unisender Go / UniOne — from ${MAIL_FROM}`);
 else if (mailer)       console.log(`✉️  Email via SMTP ${SMTP_HOST}:${SMTP_PORT} (often blocked on Render — codes may time out)`);
 else                   console.warn('✉️  Email DISABLED — set MAILOPOST_TOKEN + MAIL_FROM to enable codes.');
