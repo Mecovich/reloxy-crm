@@ -366,7 +366,7 @@ async function handleRegister(req, res) {
       { expiresIn: '30d' }
     );
 
-    sendTelegram(`<b>New user</b>\n${tgEsc(name)} · ${tgEsc(email)}`);
+    sendTelegram(`🆕 <b>Новая регистрация</b>\n${tgEsc(name)}\n${tgEsc(email)}\nСпособ: пароль`);
 
     res.json({ token, user: { id: result.lastInsertRowid, name, email, role, plan: 'free', trial_ends_at: trialEnd(), studioName: studioName || '' } });
   } catch (e) {
@@ -509,7 +509,7 @@ app.post('/api/auth/otp/verify', authLimiter, async (req, res) => {
         args: [name, email, placeholder, role, '', trialEnd()],
       });
       user = { id: ins.lastInsertRowid, name, email, role, plan: 'free', trial_ends_at: trialEnd() };
-      sendTelegram(`<b>New user (email code)</b>\n${tgEsc(name)} · ${tgEsc(email)}`);
+      sendTelegram(`🆕 <b>Новая регистрация</b>\n${tgEsc(name)}\n${tgEsc(email)}\nСпособ: код на email`);
     }
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role, name: user.name, owner_id: user.owner_id || null },
@@ -595,7 +595,7 @@ app.get('/api/auth/google/callback', async (req, res) => {
         args: [name, email, placeholder, role, googleId, '', trialEnd()],
       });
       user = { id: ins.lastInsertRowid, name, email, role, plan: 'free', trial_ends_at: trialEnd() };
-      sendTelegram(`<b>New Google user</b>\n${tgEsc(name)} · ${tgEsc(email)}`);
+      sendTelegram(`🆕 <b>Новая регистрация</b>\n${tgEsc(name)}\n${tgEsc(email)}\nСпособ: Google`);
     } else if (!user.google_id) {
       await db.execute({ sql: 'UPDATE users SET google_id = ? WHERE id = ?', args: [googleId, user.id] });
     }
@@ -798,7 +798,7 @@ app.post('/api/billing/webhook', async (req, res) => {
         const expires = new Date(); expires.setDate(expires.getDate() + 31);
         await db.execute({ sql: 'UPDATE payments SET status=?, payment_id=? WHERE order_id=?', args: ['paid', ev.payment_id || pay.payment_id, ev.order_id] });
         await db.execute({ sql: 'UPDATE users SET plan=?, plan_expires_at=? WHERE id=?', args: [pay.plan, expires.toISOString(), pay.user_id] });
-        sendTelegram(`<b>Оплата тарифа</b>\nUser ${pay.user_id} · ${tgEsc(pay.plan)} · ${tgEsc(String(ev.amount || pay.amount))} ₽`);
+        sendTelegram(`💰 <b>Оплата тарифа</b>\nПользователь #${pay.user_id}\nТариф: ${tgEsc(pay.plan)}\nСумма: ${tgEsc(String(ev.amount || pay.amount))} ₽`);
       }
     }
     if ((ev.event_type === 'payment.refunded' || ev.event_type === 'payment.chargeback') && ev.order_id) {
@@ -807,7 +807,7 @@ app.post('/api/billing/webhook', async (req, res) => {
       if (pay) {
         await db.execute({ sql: 'UPDATE payments SET status=? WHERE order_id=?', args: [String(ev.status || 'refunded'), ev.order_id] });
         await db.execute({ sql: 'UPDATE users SET plan=?, plan_expires_at=NULL WHERE id=?', args: ['free', pay.user_id] });
-        sendTelegram(`<b>Возврат / чарджбек</b>\nUser ${pay.user_id} · план снят`);
+        sendTelegram(`↩️ <b>Возврат / чарджбек</b>\nПользователь #${pay.user_id} · тариф снят`);
       }
     }
     res.status(200).send('OK');
@@ -1300,7 +1300,7 @@ app.put('/api/invoices/:id/pay', authMiddleware, async (req, res) => {
   const row = await db.execute({ sql: 'SELECT * FROM invoices WHERE id = ? AND user_id = ?', args: [req.params.id, ownerId(req)] });
   const inv = row.rows[0];
   if (!inv) return res.status(404).json({ error: 'Invoice not found' });
-  sendTelegram(`<b>Payment received</b>\n#${tgEsc(inv.number)} · ${tgEsc(inv.amount)}`);
+  sendTelegram(`💸 <b>Оплачен счёт</b>\n№ ${tgEsc(inv.number)} · ${tgEsc(inv.amount)}`);
   notifyUserPhoto(ownerId(req), `<b>Счёт оплачен</b>\n#${tgEsc(inv.number||'')} · +${tgMoney(inv.amount)}`, bannerFor('paid')).catch(()=>{});
   res.json(inv);
 });
@@ -1880,6 +1880,11 @@ async function tgPoll() {
         tgCodeAttempts.delete(chatId); // success — clear the counter
         await db.execute({ sql: 'UPDATE users SET telegram_chat_id = ?, tg_link_code = NULL WHERE id = ?', args: [chatId, u.id] });
         await tgSend(chatId, `<b>You're connected, ${tgEsc(u.name)}</b>\nDeadlines, payments and new assignments will land right here.`);
+        continue;
+      }
+
+      if (text.split('@')[0] === '/chatid' || text.split('@')[0] === '/id') {
+        await tgSend(chatId, `<b>Chat ID</b>\n<code>${chatId}</code>\n\nЧтобы сюда приходили новые регистрации и платежи — впишите это значение в переменную <b>TELEGRAM_CHAT_ID</b> на Render.`);
         continue;
       }
 
