@@ -1609,7 +1609,7 @@ async function tgSend(chatId, text) {
 }
 
 // Branded image for bot messages (override with TG_BANNER env; defaults to the logo)
-const TG_BANNER = process.env.TG_BANNER || ((process.env.APP_URL || 'https://reloxy.tech').replace(/\/$/, '') + '/logo.png');
+const TG_BANNER = process.env.TG_BANNER || ((process.env.APP_URL || 'https://reloxy.tech').replace(/\/$/, '') + '/tg-welcome.png');
 // Send a photo with an HTML caption; falls back to plain text if the photo fails
 async function tgSendPhoto(chatId, caption, photo) {
   if (!TG_API || !chatId) return;
