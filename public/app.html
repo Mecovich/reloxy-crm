@@ -4068,24 +4068,16 @@ function applyStaffMode() {
 }
 
 async function loadAll() {
-  const isStaff = user?.role === 'staff';
-  const fetches = [
-    api('GET', '/api/clients'),
-    api('GET', '/api/projects'),
-    isStaff ? Promise.resolve([]) : api('GET', '/api/deals'),
-    isStaff ? Promise.resolve([]) : api('GET', '/api/invoices'),
-    isStaff ? Promise.resolve(null) : api('GET', '/api/stats'),
-    isStaff ? Promise.resolve([]) : api('GET', '/api/staff'),
-    isStaff ? Promise.resolve([]) : api('GET', '/api/staff-accounts'),
-  ];
-  const [c, p, d, i, s, t, sa] = await Promise.allSettled(fetches);
-  if (c.status==='fulfilled') clients  = c.value;
-  if (p.status==='fulfilled') projects = p.value;
-  if (d.status==='fulfilled') deals    = d.value;
-  if (i.status==='fulfilled') invoices = i.value;
-  if (s.status==='fulfilled' && s.value) renderStats(s.value);
-  if (t.status==='fulfilled') staff    = t.value;
-  if (sa.status==='fulfilled') staffAccounts = sa.value || [];
+  try {
+    const d = await api('GET', '/api/bootstrap'); // one call instead of 7
+    clients = d.clients || [];
+    projects = d.projects || [];
+    deals = d.deals || [];
+    invoices = d.invoices || [];
+    staff = d.staff || [];
+    staffAccounts = d.staffAccounts || [];
+    if (d.stats) renderStats(d.stats);
+  } catch (e) { console.error('bootstrap failed', e); }
   renderCounts();
 }
 

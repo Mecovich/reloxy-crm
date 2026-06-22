@@ -853,6 +853,33 @@ async function validAssignee(req, assignedTo) {
 }
 
 // ─── CLIENTS ─────────────────────────────────────────────────────────────────
+// ─── BOOTSTRAP: one call returns everything for the initial app load ───────────
+app.get('/api/bootstrap', authMiddleware, async (req, res) => {
+  try {
+    const uid = ownerId(req);
+    if (isStaff(req)) {
+      const prj = await db.execute({ sql: `SELECT p.*, c.name as client_name FROM projects p LEFT JOIN clients c ON p.client_id=c.id WHERE p.user_id=? AND p.assigned_to=? ORDER BY p.created_at DESC`, args: [uid, req.user.id] });
+      return res.json({ clients: [], projects: prj.rows, deals: [], invoices: [], staff: [], staffAccounts: [], stats: null });
+    }
+    const [clients, projects, deals, invoices, staffRows, staffAcc, sc, sp, sd, si] = await Promise.all([
+      db.execute({ sql: 'SELECT * FROM clients WHERE user_id=? ORDER BY created_at DESC', args: [uid] }),
+      db.execute({ sql: `SELECT p.*, c.name as client_name FROM projects p LEFT JOIN clients c ON p.client_id=c.id WHERE p.user_id=? ORDER BY p.created_at DESC`, args: [uid] }),
+      db.execute({ sql: `SELECT d.*, c.name as client_name FROM deals d LEFT JOIN clients c ON d.client_id=c.id WHERE d.user_id=? ORDER BY d.created_at DESC`, args: [uid] }),
+      db.execute({ sql: `SELECT i.*, c.name as client_name, p.title as project_title FROM invoices i LEFT JOIN clients c ON i.client_id=c.id LEFT JOIN projects p ON i.project_id=p.id WHERE i.user_id=? ORDER BY i.created_at DESC`, args: [uid] }),
+      db.execute({ sql: 'SELECT * FROM staff WHERE user_id=? ORDER BY created_at DESC', args: [uid] }),
+      db.execute({ sql: 'SELECT id, name, email FROM users WHERE owner_id=? ORDER BY name ASC', args: [req.user.id] }),
+      db.execute({ sql: 'SELECT COUNT(*) as n FROM clients WHERE user_id=?', args: [uid] }),
+      db.execute({ sql: "SELECT COUNT(*) as n FROM projects WHERE user_id=? AND status != 'done'", args: [uid] }),
+      db.execute({ sql: "SELECT COUNT(*) as n FROM deals WHERE user_id=? AND stage NOT IN ('won','lost')", args: [uid] }),
+      db.execute({ sql: "SELECT SUM(amount) as total FROM invoices WHERE user_id=? AND status='paid'", args: [uid] }),
+    ]);
+    res.json({
+      clients: clients.rows, projects: projects.rows, deals: deals.rows, invoices: invoices.rows,
+      staff: staffRows.rows, staffAccounts: staffAcc.rows,
+      stats: { totalClients: sc.rows[0].n, activeProjects: sp.rows[0].n, totalLeads: sd.rows[0].n, revenue: si.rows[0].total || 0 },
+    });
+  } catch (e) { console.error('bootstrap error:', e.message); res.status(500).json({ error: 'Internal server error' }); }
+});
 app.get('/api/clients', authMiddleware, async (req, res) => {
   const result = await db.execute({ sql: 'SELECT * FROM clients WHERE user_id = ? ORDER BY created_at DESC', args: [ownerId(req)] });
   res.json(result.rows);
