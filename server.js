@@ -366,7 +366,7 @@ async function handleRegister(req, res) {
       { expiresIn: '30d' }
     );
 
-    await sendTelegram(`🆕 <b>New user</b>\nName: ${tgEsc(name)}\nEmail: ${tgEsc(email)}`);
+    sendTelegram(`🆕 <b>New user</b>\nName: ${tgEsc(name)}\nEmail: ${tgEsc(email)}`);
 
     res.json({ token, user: { id: result.lastInsertRowid, name, email, role, plan: 'free', trial_ends_at: trialEnd(), studioName: studioName || '' } });
   } catch (e) {
@@ -509,7 +509,7 @@ app.post('/api/auth/otp/verify', authLimiter, async (req, res) => {
         args: [name, email, placeholder, role, '', trialEnd()],
       });
       user = { id: ins.lastInsertRowid, name, email, role, plan: 'free', trial_ends_at: trialEnd() };
-      await sendTelegram(`🆕 <b>New user (email code)</b>\nName: ${tgEsc(name)}\nEmail: ${tgEsc(email)}`);
+      sendTelegram(`🆕 <b>New user (email code)</b>\nName: ${tgEsc(name)}\nEmail: ${tgEsc(email)}`);
     }
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role, name: user.name, owner_id: user.owner_id || null },
@@ -595,7 +595,7 @@ app.get('/api/auth/google/callback', async (req, res) => {
         args: [name, email, placeholder, role, googleId, '', trialEnd()],
       });
       user = { id: ins.lastInsertRowid, name, email, role, plan: 'free', trial_ends_at: trialEnd() };
-      await sendTelegram(`🆕 <b>New Google user</b>\nName: ${tgEsc(name)}\nEmail: ${tgEsc(email)}`);
+      sendTelegram(`🆕 <b>New Google user</b>\nName: ${tgEsc(name)}\nEmail: ${tgEsc(email)}`);
     } else if (!user.google_id) {
       await db.execute({ sql: 'UPDATE users SET google_id = ? WHERE id = ?', args: [googleId, user.id] });
     }
@@ -798,7 +798,7 @@ app.post('/api/billing/webhook', async (req, res) => {
         const expires = new Date(); expires.setDate(expires.getDate() + 31);
         await db.execute({ sql: 'UPDATE payments SET status=?, payment_id=? WHERE order_id=?', args: ['paid', ev.payment_id || pay.payment_id, ev.order_id] });
         await db.execute({ sql: 'UPDATE users SET plan=?, plan_expires_at=? WHERE id=?', args: [pay.plan, expires.toISOString(), pay.user_id] });
-        await sendTelegram(`✅ <b>Оплата тарифа</b>\nUser ID: ${pay.user_id}\nПлан: ${tgEsc(pay.plan)}\nСумма: ${tgEsc(String(ev.amount || pay.amount))} ₽`);
+        sendTelegram(`✅ <b>Оплата тарифа</b>\nUser ID: ${pay.user_id}\nПлан: ${tgEsc(pay.plan)}\nСумма: ${tgEsc(String(ev.amount || pay.amount))} ₽`);
       }
     }
     if ((ev.event_type === 'payment.refunded' || ev.event_type === 'payment.chargeback') && ev.order_id) {
@@ -807,7 +807,7 @@ app.post('/api/billing/webhook', async (req, res) => {
       if (pay) {
         await db.execute({ sql: 'UPDATE payments SET status=? WHERE order_id=?', args: [String(ev.status || 'refunded'), ev.order_id] });
         await db.execute({ sql: 'UPDATE users SET plan=?, plan_expires_at=NULL WHERE id=?', args: ['free', pay.user_id] });
-        await sendTelegram(`⚠️ <b>Возврат/чарджбек</b>\nUser ID: ${pay.user_id}\nПлан снят.`);
+        sendTelegram(`⚠️ <b>Возврат/чарджбек</b>\nUser ID: ${pay.user_id}\nПлан снят.`);
       }
     }
     res.status(200).send('OK');
@@ -820,7 +820,7 @@ app.post('/api/billing/webhook', async (req, res) => {
 app.post('/api/upgrade-request', authMiddleware, async (req, res) => {
   try {
     const { plan } = req.body;
-    await sendTelegram(`💳 <b>Заявка на тариф</b>\nUser: ${tgEsc(req.user.name || '')} (${tgEsc(req.user.email || '')})\nПлан: ${tgEsc(String(plan || '?'))}`);
+    sendTelegram(`💳 <b>Заявка на тариф</b>\nUser: ${tgEsc(req.user.name || '')} (${tgEsc(req.user.email || '')})\nПлан: ${tgEsc(String(plan || '?'))}`);
     res.json({ ok: true });
   } catch (e) { res.status(500).json({ error: 'Internal server error' }); }
 });
@@ -934,9 +934,9 @@ app.post('/api/projects', authMiddleware, async (req, res) => {
   // Notify assigned staff
   if (assignee) {
     const deadline_str = deadline ? `\n📅 Deadline: ${tgEsc(deadline)}` : '';
-    await notifyUserPhoto(assignee,
+    notifyUserPhoto(assignee,
       `🔔 <b>New project assigned to you</b>\n\n📁 <b>${tgEsc(title)}</b>${deadline_str}\n\nAssigned by: ${tgEsc(req.user.name)}\n\n→ <a href="https://reloxy.tech/app">Open Reloxy</a>`, bannerFor('assigned')
-    );
+    ).catch(()=>{});
   }
   res.json(row.rows[0]);
 });
@@ -963,9 +963,9 @@ app.put('/api/projects/:id', authMiddleware, async (req, res) => {
   // Notify if newly assigned or reassigned
   if (assignee && assignee != prevAssigned) {
     const deadline_str = deadline ? `\n📅 Deadline: ${tgEsc(deadline)}` : '';
-    await notifyUserPhoto(assignee,
+    notifyUserPhoto(assignee,
       `🔔 <b>Project assigned to you</b>\n\n📁 <b>${tgEsc(title)}</b>${deadline_str}\n\nAssigned by: ${tgEsc(req.user.name)}\n\n→ <a href="https://reloxy.tech/app">Open Reloxy</a>`, bannerFor('assigned')
-    );
+    ).catch(()=>{});
   }
   res.json(row.rows[0]);
 });
@@ -1254,7 +1254,7 @@ app.put('/api/invoices/:id', authMiddleware, async (req, res) => {
   const row = await db.execute({ sql: 'SELECT * FROM invoices WHERE id = ?', args: [req.params.id] });
   const inv = row.rows[0];
   if (inv && status === 'paid' && prevStatus !== 'paid') {
-    await notifyUserPhoto(ownerId(req), `💰 <b>Счёт оплачен</b>\n#${tgEsc(inv.number||'')} · +${tgMoney(inv.amount)}\n→ <a href="https://reloxy.tech/app">Открыть Reloxy</a>`, bannerFor('paid'));
+    notifyUserPhoto(ownerId(req), `💰 <b>Счёт оплачен</b>\n#${tgEsc(inv.number||'')} · +${tgMoney(inv.amount)}\n→ <a href="https://reloxy.tech/app">Открыть Reloxy</a>`, bannerFor('paid')).catch(()=>{});
   }
   res.json(inv);
 });
@@ -1273,8 +1273,8 @@ app.put('/api/invoices/:id/pay', authMiddleware, async (req, res) => {
   const row = await db.execute({ sql: 'SELECT * FROM invoices WHERE id = ? AND user_id = ?', args: [req.params.id, ownerId(req)] });
   const inv = row.rows[0];
   if (!inv) return res.status(404).json({ error: 'Invoice not found' });
-  await sendTelegram(`💰 <b>Payment received!</b>\nInvoice: ${tgEsc(inv.number)}\nAmount: ${tgEsc(inv.amount)}`);
-  await notifyUserPhoto(ownerId(req), `💰 <b>Счёт оплачен</b>\n#${tgEsc(inv.number||'')} · +${tgMoney(inv.amount)}\n→ <a href="https://reloxy.tech/app">Открыть Reloxy</a>`, bannerFor('paid'));
+  sendTelegram(`💰 <b>Payment received!</b>\nInvoice: ${tgEsc(inv.number)}\nAmount: ${tgEsc(inv.amount)}`);
+  notifyUserPhoto(ownerId(req), `💰 <b>Счёт оплачен</b>\n#${tgEsc(inv.number||'')} · +${tgMoney(inv.amount)}\n→ <a href="https://reloxy.tech/app">Открыть Reloxy</a>`, bannerFor('paid')).catch(()=>{});
   res.json(inv);
 });
 
