@@ -1608,12 +1608,34 @@ async function tgSend(chatId, text) {
   } catch (e) { console.error('TG send error:', e.message); }
 }
 
+// Branded image for bot messages (override with TG_BANNER env; defaults to the logo)
+const TG_BANNER = process.env.TG_BANNER || ((process.env.APP_URL || 'https://reloxy.tech').replace(/\/$/, '') + '/logo.png');
+// Send a photo with an HTML caption; falls back to plain text if the photo fails
+async function tgSendPhoto(chatId, caption, photo) {
+  if (!TG_API || !chatId) return;
+  try {
+    const r = await fetch(`${TG_API}/sendPhoto`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: chatId, photo: photo || TG_BANNER, caption, parse_mode: 'HTML' }),
+    });
+    const d = await r.json().catch(() => ({}));
+    if (!d.ok) { console.error('TG photo:', d.description || 'failed'); await tgSend(chatId, caption); }
+  } catch (e) { console.error('TG photo error:', e.message); await tgSend(chatId, caption); }
+}
+
 // Send notification to a user by their DB id
 async function notifyUser(userId, text) {
   if (!userId) return;
   const r = await db.execute({ sql: 'SELECT telegram_chat_id FROM users WHERE id = ?', args: [userId] });
   const chatId = r.rows[0]?.telegram_chat_id;
   if (chatId) await tgSend(chatId, text);
+}
+async function notifyUserPhoto(userId, caption, photo) {
+  if (!userId) return;
+  const r = await db.execute({ sql: 'SELECT telegram_chat_id FROM users WHERE id = ?', args: [userId] });
+  const chatId = r.rows[0]?.telegram_chat_id;
+  if (chatId) await tgSendPhoto(chatId, caption, photo);
 }
 
 // ─── Premium: daily Telegram reminders ───────────────────────────────────────
@@ -1675,8 +1697,8 @@ async function runDeadlineReminders(){
       for (const p of pr.rows){
         if (p.deadline_reminded === p.deadline) continue;
         const msg = `⏰ <b>Дедлайн завтра</b>\n${tgEsc(p.title)} — ${p.deadline}\n→ <a href="https://reloxy.tech/app">Открыть Reloxy</a>`;
-        await tgSend(u.telegram_chat_id, msg);
-        if (p.assigned_to && p.assigned_to !== u.id) await notifyUser(p.assigned_to, msg);
+        await tgSendPhoto(u.telegram_chat_id, msg);
+        if (p.assigned_to && p.assigned_to !== u.id) await notifyUserPhoto(p.assigned_to, msg);
         await db.execute({ sql: 'UPDATE projects SET deadline_reminded=? WHERE id=?', args: [p.deadline, p.id] });
       }
     }
@@ -1809,7 +1831,7 @@ async function tgPoll() {
         const parts = text.split(' ');
         const code  = parts[1]?.toUpperCase();
         if (!code) {
-          await tgSend(chatId, `👋 <b>Welcome to Reloxy!</b>\n\nTo link your account, get your code from the CRM:\n<b>Team → your profile → Telegram</b>\n\nThen send: <code>/start YOUR_CODE</code>`);
+          await tgSendPhoto(chatId, `👋 <b>Welcome to Reloxy!</b>\n\nTo link your account, get your code from the CRM:\n<b>Team → your profile → Telegram</b>\n\nThen send: <code>/start YOUR_CODE</code>`);
           continue;
         }
         if (tgCodeBlocked(chatId)) {
