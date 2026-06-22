@@ -199,6 +199,16 @@ body::before {
 .btn-google svg { width:17px; height:17px; flex-shrink:0; }
 
 .otp-hint { font-size:11.5px; color:var(--g1); margin-top:7px; }
+.otp-boxes { display:flex; gap:8px; }
+.otp-box {
+  flex:1; min-width:0; aspect-ratio:1/1; max-height:58px;
+  background:rgba(255,255,255,0.03); border:1px solid var(--line2); border-radius:11px;
+  color:var(--white); font-size:24px; font-weight:700; text-align:center;
+  outline:none; font-family:inherit; padding:0;
+  transition:border-color .15s, box-shadow .15s, background .15s, transform .12s;
+}
+.otp-box:focus { border-color:var(--line3); background:rgba(255,255,255,0.06); box-shadow:0 0 0 3px rgba(255,255,255,0.05); transform:translateY(-1px); }
+.otp-box.filled { border-color:var(--line3); background:rgba(255,255,255,0.05); }
 .otp-link { margin-top:14px; text-align:center; font-size:12.5px; color:var(--g1); cursor:pointer; transition:color .12s; user-select:none; }
 .otp-link:hover { color:var(--white); }
 .otp-code-input { text-align:center; font-size:22px !important; letter-spacing:10px; font-weight:700; }
@@ -346,7 +356,15 @@ body::before {
       </div>
       <div class="field" id="r-code-field" style="display:none">
         <label class="field-label">Code from email</label>
-        <input class="field-input otp-code-input" type="text" id="r-code" placeholder="••••••" maxlength="6" inputmode="numeric" autocomplete="one-time-code">
+        <div class="otp-boxes" id="otp-boxes">
+          <input class="otp-box" type="text" inputmode="numeric" maxlength="1" autocomplete="one-time-code" aria-label="Digit 1">
+          <input class="otp-box" type="text" inputmode="numeric" maxlength="1" aria-label="Digit 2">
+          <input class="otp-box" type="text" inputmode="numeric" maxlength="1" aria-label="Digit 3">
+          <input class="otp-box" type="text" inputmode="numeric" maxlength="1" aria-label="Digit 4">
+          <input class="otp-box" type="text" inputmode="numeric" maxlength="1" aria-label="Digit 5">
+          <input class="otp-box" type="text" inputmode="numeric" maxlength="1" aria-label="Digit 6">
+        </div>
+        <input type="hidden" id="r-code">
         <div class="otp-hint" id="r-hint">We sent a 6-digit code to your email — enter it to finish</div>
       </div>
       <button class="btn-primary" type="submit" id="btn-register">Create account</button>
@@ -512,7 +530,7 @@ body::before {
           if (!sr.ok) throw new Error(sd.error);
           regCodeMode = true;
           document.getElementById('r-code-field').style.display = 'block';
-          document.getElementById('r-code').focus();
+          if (window.focusOtp) window.focusOtp();
           btn.disabled = false; btn.textContent = 'Confirm code & create';
           return;
         }
@@ -527,6 +545,50 @@ body::before {
       btn.disabled = false; btn.textContent = regCodeMode ? 'Confirm code & create' : 'Create account';
     }
   }
+
+  // Segmented OTP input: auto-advance, backspace, paste, auto-submit when 6 digits.
+  (function setupOtp(){
+    const boxes = Array.from(document.querySelectorAll('#otp-boxes .otp-box'));
+    const hidden = document.getElementById('r-code');
+    if (!boxes.length || !hidden) return;
+    const sync = () => {
+      hidden.value = boxes.map(b => b.value).join('');
+      boxes.forEach(b => b.classList.toggle('filled', !!b.value));
+    };
+    const maybeSubmit = () => {
+      if (hidden.value.length === 6) {
+        const btn = document.getElementById('btn-register');
+        if (btn && !btn.disabled) btn.click();
+      }
+    };
+    boxes.forEach((box, i) => {
+      box.addEventListener('input', () => {
+        box.value = box.value.replace(/\D/g, '').slice(0, 1);
+        sync();
+        if (box.value && i < boxes.length - 1) boxes[i + 1].focus();
+        maybeSubmit();
+      });
+      box.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace' && !box.value && i > 0) { boxes[i - 1].focus(); }
+        else if (e.key === 'ArrowLeft' && i > 0) boxes[i - 1].focus();
+        else if (e.key === 'ArrowRight' && i < boxes.length - 1) boxes[i + 1].focus();
+      });
+      box.addEventListener('paste', (e) => {
+        e.preventDefault();
+        const digits = ((e.clipboardData || window.clipboardData).getData('text') || '').replace(/\D/g, '').slice(0, 6);
+        if (!digits) return;
+        digits.split('').forEach((d, j) => { if (boxes[j]) boxes[j].value = d; });
+        sync();
+        boxes[Math.min(digits.length, boxes.length - 1)].focus();
+        maybeSubmit();
+      });
+    });
+    window.focusOtp = function(){
+      boxes.forEach(b => { b.value = ''; b.classList.remove('filled'); });
+      hidden.value = '';
+      boxes[0].focus();
+    };
+  })();
 </script>
 </body>
 </html>
