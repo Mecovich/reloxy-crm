@@ -1597,13 +1597,14 @@ app.post('/api/invite/:token', async (req, res) => {
 const TG_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TG_API   = TG_TOKEN ? `https://api.telegram.org/bot${TG_TOKEN}` : null;
 
-async function tgSend(chatId, text) {
+const OPEN_KB = { inline_keyboard: [[ { text: 'Открыть Reloxy', url: ((process.env.APP_URL || 'https://reloxy.tech').replace(/\/$/, '')) + '/app' } ]] };
+async function tgSend(chatId, text, reply_markup) {
   if (!TG_API || !chatId) return;
   try {
     await fetch(`${TG_API}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: chatId, text, parse_mode: 'HTML', disable_web_page_preview: true }),
+      body: JSON.stringify({ chat_id: chatId, text, parse_mode: 'HTML', disable_web_page_preview: true, ...(reply_markup ? { reply_markup } : {}) }),
     });
   } catch (e) { console.error('TG send error:', e.message); }
 }
@@ -1620,11 +1621,11 @@ async function tgSendPhoto(chatId, caption, photo) {
     const r = await fetch(`${TG_API}/sendPhoto`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: chatId, photo: photo || TG_BANNER, caption, parse_mode: 'HTML' }),
+      body: JSON.stringify({ chat_id: chatId, photo: photo || TG_BANNER, caption, parse_mode: 'HTML', reply_markup: OPEN_KB }),
     });
     const d = await r.json().catch(() => ({}));
-    if (!d.ok) { console.error('TG photo:', d.description || 'failed'); await tgSend(chatId, caption); }
-  } catch (e) { console.error('TG photo error:', e.message); await tgSend(chatId, caption); }
+    if (!d.ok) { console.error('TG photo:', d.description || 'failed'); await tgSend(chatId, caption, OPEN_KB); }
+  } catch (e) { console.error('TG photo error:', e.message); await tgSend(chatId, caption, OPEN_KB); }
 }
 
 // Send notification to a user by their DB id

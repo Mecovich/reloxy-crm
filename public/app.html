@@ -391,6 +391,10 @@ tr:hover td { background:transparent; }
 .tg-link{color:var(--white);text-decoration:none;border-bottom:1px solid var(--line2)}
 .tg-link:hover{border-color:var(--white)}
 .tg-cmd-row{display:flex;align-items:center;gap:8px;background:var(--s2);border:1px solid var(--line2);border-radius:10px;padding:9px 10px 9px 13px}
+.tg-connect-btn{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;padding:12px;border-radius:11px;background:#2688ff;color:#fff;text-decoration:none;font-size:13.5px;font-weight:600;margin-bottom:14px;transition:filter .12s}
+.tg-connect-btn:hover{filter:brightness(1.08)}
+.tg-or{display:flex;align-items:center;gap:10px;font-size:10.5px;color:var(--g2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px}
+.tg-or::before,.tg-or::after{content:"";flex:1;height:1px;background:var(--line)}
 .tg-cmd{flex:1;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:14px;font-weight:600;letter-spacing:1px;color:var(--white);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tg-iconbtn{width:30px;height:30px;border-radius:8px;border:1px solid var(--line2);background:transparent;color:var(--g1);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all .12s}
 .tg-iconbtn:hover{color:var(--white);border-color:var(--line3);background:var(--s3)}
@@ -3128,6 +3132,11 @@ body { background:#0E0E0E !important; }
                 </div>
                 <div class="tg-body" id="tg-connect-block">
                   <p class="tg-desc">Get notified in Telegram when projects are assigned to you or deadlines are near.</p>
+                  <a id="tg-connect-btn" class="tg-connect-btn" href="https://t.me/ReloxyCRMBot" target="_blank" rel="noopener">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.869 4.326-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.83.941z"/></svg>
+                    <span data-i18n="tg_connect_btn">Connect Telegram in one tap</span>
+                  </a>
+                  <div class="tg-or"><span data-i18n="tg_or_manual">or link manually</span></div>
                   <div class="tg-steps">
                     <div class="tg-step"><span class="tg-step-n">1</span><span>Open <a href="https://t.me/ReloxyCRMBot" target="_blank" class="tg-link">@ReloxyCRMBot</a> in Telegram</span></div>
                     <div class="tg-step"><span class="tg-step-n">2</span><span>Send this command to the bot:</span></div>
@@ -3730,7 +3739,7 @@ const TRANS = {
     tab_profile:'Profile', tab_studio:'Studio', btn_save_settings:'Save settings',
     set_name:'Name', set_phone:'Telegram', set_email:'Email',
     set_currency:'Currency', set_language:'Language',
-    set_tg:'Telegram', set_tg_off:'Not configured', set_tg_on:'Connected',
+    set_tg:'Telegram', set_tg_off:'Not configured', set_tg_on:'Connected', tg_connect_btn:'Connect Telegram in one tap', tg_or_manual:'or link manually',
     set_tg_token:'Bot token (from @BotFather)', set_tg_chat:'Chat ID (from @userinfobot)',
     btn_tg_test:'Send test message', btn_save_profile:'Save profile',
     set_studio_name:'Studio name', btn_save_studio:'Save studio',
@@ -3875,7 +3884,7 @@ const TRANS = {
     tab_profile:'Профиль', tab_studio:'Студия', btn_save_settings:'Сохранить',
     set_name:'Имя', set_phone:'Telegram', set_email:'Email',
     set_currency:'Валюта', set_language:'Язык',
-    set_tg:'Telegram', set_tg_off:'Не настроен', set_tg_on:'Подключён',
+    set_tg:'Telegram', set_tg_off:'Не настроен', set_tg_on:'Подключён', tg_connect_btn:'Подключить Telegram в один тап', tg_or_manual:'или вручную по коду',
     set_tg_token:'Токен бота (от @BotFather)', set_tg_chat:'Chat ID (от @userinfobot)',
     btn_tg_test:'Отправить тест', btn_save_profile:'Сохранить профиль',
     set_studio_name:'Название студии', btn_save_studio:'Сохранить студию',
@@ -7018,6 +7027,8 @@ async function loadTgCode() {
     if (inlineEl) inlineEl.textContent = code || 'YOUR_CODE';
     const cmdEl = document.getElementById('tg-code-cmd');
     if (cmdEl) cmdEl.textContent = `/start ${code || '——'}`;
+    const connBtn = document.getElementById('tg-connect-btn');
+    if (connBtn && code) connBtn.href = `https://t.me/ReloxyCRMBot?start=${code}`;
     if (linked) {
       badge.innerHTML = '<span class="tg-badge-dot"></span>Connected'; badge.style.color = 'var(--white)';
       statusText.textContent = 'Your Telegram is linked and active';
