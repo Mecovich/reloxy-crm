@@ -404,12 +404,12 @@ tr:hover td { background:transparent; }
 .tg-disconnect:hover{background:rgba(248,113,113,0.08)}
 .tg-hint{font-size:11.5px;color:var(--g2);margin-top:12px}
 /* COMING SOON placeholder */
-.soon-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:480px;padding:24px}
-.soon-ico{width:50px;height:50px;border-radius:50%;border:1px solid var(--line2);display:flex;align-items:center;justify-content:center;color:var(--g1)}
-.soon-ico svg{width:21px;height:21px}
-.soon-title{font-size:20px;font-weight:600;letter-spacing:-.4px;color:var(--white);margin-top:24px}
-.soon-sub{font-size:13px;color:var(--g2);max-width:330px;line-height:1.6;margin-top:10px}
-.soon-status{margin-top:22px;font-size:10.5px;font-weight:500;letter-spacing:.7px;text-transform:uppercase;color:var(--g2)}
+.soon-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:460px;padding:24px;font-family:"Helvetica Neue",Helvetica,Arial,sans-serif}
+.soon-ico{display:flex;align-items:center;justify-content:center;color:rgba(217,217,217,0.32);margin-bottom:22px}
+.soon-ico svg{width:25px;height:25px}
+.soon-title{font-size:19px;font-weight:500;letter-spacing:-.3px;color:#ededed}
+.soon-sub{font-size:13px;color:var(--g2);max-width:300px;line-height:1.6;margin-top:9px;font-weight:400}
+.soon-status{margin-top:20px;font-size:10px;font-weight:500;letter-spacing:1.2px;text-transform:uppercase;color:rgba(217,217,217,0.26)}
 @media(max-width:900px){.pipe-kpis{grid-template-columns:repeat(2,1fr)}.pipe-kpi:nth-child(2){border-right:none}.pipe-board{grid-template-columns:1fr}}
 .f-amt { width:110px; text-align:right; font-size:12.5px; color:var(--g1); font-variant-numeric:tabular-nums; }
 
@@ -3169,10 +3169,10 @@ body { background:#0E0E0E !important; }
                 <div class="set-field">
                   <label class="set-label" data-i18n="set_currency">Currency</label>
                   <select class="set-input" id="set-currency" onchange="setCurrency(this.value)">
-                    <option value="RUB">₽ Russian Ruble</option>
-                    <option value="USD">$ US Dollar</option>
-                    <option value="EUR">€ Euro</option>
-                    <option value="GBP">£ British Pound</option>
+                    <option value="RUB">Russian Ruble</option>
+                    <option value="USD">US Dollar</option>
+                    <option value="EUR">Euro</option>
+                    <option value="GBP">British Pound</option>
                   </select>
                 </div>
               </div>
