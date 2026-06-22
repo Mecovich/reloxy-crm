@@ -307,11 +307,22 @@ async function initDB() {
 }
 
 // ─── Auth Middleware ──────────────────────────────────────────────────────────
+// In-memory set of blocked user ids. Refreshed periodically + on admin changes, so a
+// user blocked AFTER login loses access within ~60s — without a DB hit per request.
+let blockedUsers = new Set();
+async function refreshBlockedUsers() {
+  try {
+    const r = await db.execute({ sql: 'SELECT id FROM users WHERE blocked = 1', args: [] });
+    blockedUsers = new Set(r.rows.map(x => String(x.id)));
+  } catch (e) { /* keep last known set on transient errors */ }
+}
+
 function authMiddleware(req, res, next) {
   const token = req.headers.authorization?.split(' ')[1];
   if (!token) return res.status(401).json({ error: 'No token' });
   try {
     req.user = jwt.verify(token, JWT_SECRET);
+    if (blockedUsers.has(String(req.user.id))) return res.status(403).json({ error: 'Account blocked' });
     next();
   } catch {
     res.status(401).json({ error: 'Invalid token' });
@@ -901,7 +912,8 @@ app.put('/api/clients/:id', authMiddleware, async (req, res) => {
     sql: 'UPDATE clients SET name=?, industry=?, contact_name=?, email=?, phone=?, status=?, notes=? WHERE id=? AND user_id=?',
     args: [name, industry||'', contact_name||'', email||'', phone||'', status||'active', notes||'', req.params.id, ownerId(req)],
   });
-  const row = await db.execute({ sql: 'SELECT * FROM clients WHERE id = ?', args: [req.params.id] });
+  const row = await db.execute({ sql: 'SELECT * FROM clients WHERE id = ? AND user_id = ?', args: [req.params.id, ownerId(req)] });
+  if (!row.rows.length) return res.status(404).json({ error: 'Not found' });
   res.json(row.rows[0]);
 });
 
@@ -986,7 +998,8 @@ app.put('/api/projects/:id', authMiddleware, async (req, res) => {
     sql: 'UPDATE projects SET title=?, type=?, client_id=?, status=?, progress=?, deadline=?, budget=?, cost=?, assigned_to=?, staff_pay=? WHERE id=? AND user_id=?',
     args: [title, type||'', client_id||null, status||'queue', safeProgress, deadline||null, num(budget), num(cost), assignee, num(staff_pay), req.params.id, uid],
   });
-  const row = await db.execute({ sql: 'SELECT * FROM projects WHERE id = ?', args: [req.params.id] });
+  const row = await db.execute({ sql: 'SELECT * FROM projects WHERE id = ? AND user_id = ?', args: [req.params.id, uid] });
+  if (!row.rows.length) return res.status(404).json({ error: 'Not found' });
   // Notify if newly assigned or reassigned
   if (assignee && assignee != prevAssigned) {
     const deadline_str = deadline ? `\nDue ${tgEsc(deadline)}` : '';
@@ -1193,7 +1206,8 @@ app.put('/api/tasks/:id', authMiddleware, async (req, res) => {
     sql: 'UPDATE tasks SET title=?, description=?, project_id=?, status=?, priority=?, due_date=? WHERE id=? AND user_id=?',
     args: [title, description || '', project_id || null, status || 'todo', priority || 'medium', due_date || null, req.params.id, ownerId(req)],
   });
-  const row = await db.execute({ sql: 'SELECT * FROM tasks WHERE id = ?', args: [req.params.id] });
+  const row = await db.execute({ sql: 'SELECT * FROM tasks WHERE id = ? AND user_id = ?', args: [req.params.id, ownerId(req)] });
+  if (!row.rows.length) return res.status(404).json({ error: 'Not found' });
   res.json(row.rows[0]);
 });
 
@@ -1234,7 +1248,8 @@ app.put('/api/deals/:id', authMiddleware, async (req, res) => {
     sql: 'UPDATE deals SET title=?, client_id=?, value=?, stage=? WHERE id=? AND user_id=?',
     args: [title, client_id||null, num(value), stage||'new', req.params.id, ownerId(req)],
   });
-  const row = await db.execute({ sql: 'SELECT * FROM deals WHERE id = ?', args: [req.params.id] });
+  const row = await db.execute({ sql: 'SELECT * FROM deals WHERE id = ? AND user_id = ?', args: [req.params.id, ownerId(req)] });
+  if (!row.rows.length) return res.status(404).json({ error: 'Not found' });
   res.json(row.rows[0]);
 });
 
@@ -1278,8 +1293,9 @@ app.put('/api/invoices/:id', authMiddleware, async (req, res) => {
     sql: 'UPDATE invoices SET number=?, client_id=?, amount=?, issued_at=?, due_at=?, status=? WHERE id=? AND user_id=?',
     args: [number||'', client_id||null, num(amount), issued_at||null, due_at||null, status||'pending', req.params.id, ownerId(req)],
   });
-  const row = await db.execute({ sql: 'SELECT * FROM invoices WHERE id = ?', args: [req.params.id] });
+  const row = await db.execute({ sql: 'SELECT * FROM invoices WHERE id = ? AND user_id = ?', args: [req.params.id, ownerId(req)] });
   const inv = row.rows[0];
+  if (!inv) return res.status(404).json({ error: 'Not found' });
   if (inv && status === 'paid' && prevStatus !== 'paid') {
     notifyUserPhoto(ownerId(req), `<b>Счёт оплачен</b>\n#${tgEsc(inv.number||'')} · +${tgMoney(inv.amount)}`, bannerFor('paid')).catch(()=>{});
   }
@@ -1330,7 +1346,8 @@ app.put('/api/events/:id', authMiddleware, async (req, res) => {
     sql: 'UPDATE events SET title=?, description=?, date=?, time=?, color=? WHERE id=? AND user_id=?',
     args: [title, description || '', date, time || '', color || '#000000', req.params.id, ownerId(req)],
   });
-  const row = await db.execute({ sql: 'SELECT * FROM events WHERE id = ?', args: [req.params.id] });
+  const row = await db.execute({ sql: 'SELECT * FROM events WHERE id = ? AND user_id = ?', args: [req.params.id, ownerId(req)] });
+  if (!row.rows.length) return res.status(404).json({ error: 'Not found' });
   res.json(row.rows[0]);
 });
 
@@ -1468,6 +1485,7 @@ app.put('/api/admin/users/:id', authMiddleware, adminMiddleware, async (req, res
     sql: 'UPDATE users SET role=?, plan=?, plan_expires_at=?, trial_ends_at=?, blocked=? WHERE id=?',
     args: [v(role, cur.role), v(plan, cur.plan), v(plan_expires_at, cur.plan_expires_at), v(trial_ends_at, cur.trial_ends_at), (v(blocked, cur.blocked) ? 1 : 0), req.params.id],
   });
+  refreshBlockedUsers();
   res.json({ ok: true });
 });
 
@@ -1954,6 +1972,8 @@ app.get('*',              (req, res) => res.sendFile(path.join(__dirname, 'publi
 // ─── Start ───────────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 3000;
 initDB().then(() => {
+  refreshBlockedUsers();
+  setInterval(refreshBlockedUsers, 60000);
   app.listen(PORT, () => console.log(`🚀 Reloxy CRM running on port ${PORT}`));
   // Telegram long-polling must run on ONE instance only. With multiple instances,
   // concurrent getUpdates calls cause 409 conflicts — disable with TELEGRAM_POLLING=false.
