@@ -934,8 +934,8 @@ app.post('/api/projects', authMiddleware, async (req, res) => {
   // Notify assigned staff
   if (assignee) {
     const deadline_str = deadline ? `\n📅 Deadline: ${tgEsc(deadline)}` : '';
-    await notifyUser(assignee,
-      `🔔 <b>New project assigned to you</b>\n\n📁 <b>${tgEsc(title)}</b>${deadline_str}\n\nAssigned by: ${tgEsc(req.user.name)}\n\n→ <a href="https://reloxy.tech/app">Open Reloxy</a>`
+    await notifyUserPhoto(assignee,
+      `🔔 <b>New project assigned to you</b>\n\n📁 <b>${tgEsc(title)}</b>${deadline_str}\n\nAssigned by: ${tgEsc(req.user.name)}\n\n→ <a href="https://reloxy.tech/app">Open Reloxy</a>`, bannerFor('assigned')
     );
   }
   res.json(row.rows[0]);
@@ -963,8 +963,8 @@ app.put('/api/projects/:id', authMiddleware, async (req, res) => {
   // Notify if newly assigned or reassigned
   if (assignee && assignee != prevAssigned) {
     const deadline_str = deadline ? `\n📅 Deadline: ${tgEsc(deadline)}` : '';
-    await notifyUser(assignee,
-      `🔔 <b>Project assigned to you</b>\n\n📁 <b>${tgEsc(title)}</b>${deadline_str}\n\nAssigned by: ${tgEsc(req.user.name)}\n\n→ <a href="https://reloxy.tech/app">Open Reloxy</a>`
+    await notifyUserPhoto(assignee,
+      `🔔 <b>Project assigned to you</b>\n\n📁 <b>${tgEsc(title)}</b>${deadline_str}\n\nAssigned by: ${tgEsc(req.user.name)}\n\n→ <a href="https://reloxy.tech/app">Open Reloxy</a>`, bannerFor('assigned')
     );
   }
   res.json(row.rows[0]);
@@ -1254,7 +1254,7 @@ app.put('/api/invoices/:id', authMiddleware, async (req, res) => {
   const row = await db.execute({ sql: 'SELECT * FROM invoices WHERE id = ?', args: [req.params.id] });
   const inv = row.rows[0];
   if (inv && status === 'paid' && prevStatus !== 'paid') {
-    await notifyUser(ownerId(req), `💰 <b>Счёт оплачен</b>\n#${tgEsc(inv.number||'')} · +${tgMoney(inv.amount)}\n→ <a href="https://reloxy.tech/app">Открыть Reloxy</a>`);
+    await notifyUserPhoto(ownerId(req), `💰 <b>Счёт оплачен</b>\n#${tgEsc(inv.number||'')} · +${tgMoney(inv.amount)}\n→ <a href="https://reloxy.tech/app">Открыть Reloxy</a>`, bannerFor('paid'));
   }
   res.json(inv);
 });
@@ -1274,7 +1274,7 @@ app.put('/api/invoices/:id/pay', authMiddleware, async (req, res) => {
   const inv = row.rows[0];
   if (!inv) return res.status(404).json({ error: 'Invoice not found' });
   await sendTelegram(`💰 <b>Payment received!</b>\nInvoice: ${tgEsc(inv.number)}\nAmount: ${tgEsc(inv.amount)}`);
-  await notifyUser(ownerId(req), `💰 <b>Счёт оплачен</b>\n#${tgEsc(inv.number||'')} · +${tgMoney(inv.amount)}\n→ <a href="https://reloxy.tech/app">Открыть Reloxy</a>`);
+  await notifyUserPhoto(ownerId(req), `💰 <b>Счёт оплачен</b>\n#${tgEsc(inv.number||'')} · +${tgMoney(inv.amount)}\n→ <a href="https://reloxy.tech/app">Открыть Reloxy</a>`, bannerFor('paid'));
   res.json(inv);
 });
 
@@ -1610,6 +1610,9 @@ async function tgSend(chatId, text) {
 
 // Branded image for bot messages (override with TG_BANNER env; defaults to the logo)
 const TG_BANNER = process.env.TG_BANNER || ((process.env.APP_URL || 'https://reloxy.tech').replace(/\/$/, '') + '/tg-welcome.png');
+// Per-event banner: put public/tg-<key>.png (e.g. tg-deadline.png) or set env TG_BANNER_<KEY>
+const _BANNER_BASE = (process.env.APP_URL || 'https://reloxy.tech').replace(/\/$/, '');
+function bannerFor(key){ return process.env['TG_BANNER_'+String(key).toUpperCase()] || `${_BANNER_BASE}/tg-${key}.png`; }
 // Send a photo with an HTML caption; falls back to plain text if the photo fails
 async function tgSendPhoto(chatId, caption, photo) {
   if (!TG_API || !chatId) return;
@@ -1672,7 +1675,7 @@ async function runReminders() {
       if (!isPaidRow(u)) continue;       // premium gate
       if (_remindSent.get(u.id) === todayStr) continue;
       const msg = await buildReminderDigest(u);
-      if (msg) await tgSend(u.telegram_chat_id, msg);
+      if (msg) await tgSendPhoto(u.telegram_chat_id, msg, bannerFor('digest'));
       _remindSent.set(u.id, todayStr);
     }
   } catch (e) { console.error('Reminders error:', e.message); }
@@ -1697,8 +1700,8 @@ async function runDeadlineReminders(){
       for (const p of pr.rows){
         if (p.deadline_reminded === p.deadline) continue;
         const msg = `⏰ <b>Дедлайн завтра</b>\n${tgEsc(p.title)} — ${p.deadline}\n→ <a href="https://reloxy.tech/app">Открыть Reloxy</a>`;
-        await tgSendPhoto(u.telegram_chat_id, msg);
-        if (p.assigned_to && p.assigned_to !== u.id) await notifyUserPhoto(p.assigned_to, msg);
+        await tgSendPhoto(u.telegram_chat_id, msg, bannerFor('deadline'));
+        if (p.assigned_to && p.assigned_to !== u.id) await notifyUserPhoto(p.assigned_to, msg, bannerFor('deadline'));
         await db.execute({ sql: 'UPDATE projects SET deadline_reminded=? WHERE id=?', args: [p.deadline, p.id] });
       }
     }
@@ -1713,7 +1716,7 @@ async function runOverdueChecks(){
     for (const u of await paidLinkedOwners()){
       const iv = await db.execute({ sql: "SELECT id, number, amount, due_at FROM invoices WHERE user_id=? AND status IN ('pending','overdue') AND overdue_notified=0 AND due_at IS NOT NULL AND due_at!='' AND due_at < ?", args: [u.id, todayStr] });
       for (const i of iv.rows){
-        await tgSend(u.telegram_chat_id, `⚠️ <b>Счёт просрочен</b>\n#${tgEsc(i.number||'')} · ${tgMoney(i.amount)} — срок был ${i.due_at}\n→ <a href="https://reloxy.tech/app">Открыть Reloxy</a>`);
+        await tgSendPhoto(u.telegram_chat_id, `⚠️ <b>Счёт просрочен</b>\n#${tgEsc(i.number||'')} · ${tgMoney(i.amount)} — срок был ${i.due_at}\n→ <a href="https://reloxy.tech/app">Открыть Reloxy</a>`, bannerFor('overdue'));
         await db.execute({ sql: "UPDATE invoices SET status='overdue', overdue_notified=1 WHERE id=?", args: [i.id] });
       }
     }
@@ -1741,7 +1744,7 @@ async function runWeeklySummary(){
         `📂 Активных проектов: ${Number(act.rows[0]?.c || 0)}\n`;
       if (dl.rows.length) msg += `\n📅 <b>Дедлайны на неделю</b>\n` + dl.rows.map(p=>`• ${tgEsc(p.title)} — ${p.deadline}`).join('\n') + '\n';
       msg += `\n→ <a href="https://reloxy.tech/app">Открыть Reloxy</a>`;
-      await tgSend(u.telegram_chat_id, msg);
+      await tgSendPhoto(u.telegram_chat_id, msg, bannerFor('weekly'));
     }
   } catch (e) { console.error('Weekly summary error:', e.message); }
 }
@@ -1802,7 +1805,7 @@ app.post('/api/tg/remind-now', authMiddleware, async (req, res) => {
     if (!isPaidRow(u)) return res.status(403).json({ error: 'premium_only' });
     if (!u.telegram_chat_id) return res.status(400).json({ error: 'telegram_not_linked' });
     const msg = (await buildReminderDigest(u)) || '✅ <b>Reloxy</b>\nNo upcoming deadlines or unpaid invoices right now.';
-    await tgSend(u.telegram_chat_id, msg);
+    await tgSendPhoto(u.telegram_chat_id, msg, bannerFor('digest'));
     res.json({ ok: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -1831,7 +1834,7 @@ async function tgPoll() {
         const parts = text.split(' ');
         const code  = parts[1]?.toUpperCase();
         if (!code) {
-          await tgSendPhoto(chatId, `👋 <b>Welcome to Reloxy!</b>\n\nTo link your account, get your code from the CRM:\n<b>Team → your profile → Telegram</b>\n\nThen send: <code>/start YOUR_CODE</code>`);
+          await tgSendPhoto(chatId, `👋 <b>Welcome to Reloxy!</b>\n\nTo link your account, get your code from the CRM:\n<b>Team → your profile → Telegram</b>\n\nThen send: <code>/start YOUR_CODE</code>`, bannerFor('welcome'));
           continue;
         }
         if (tgCodeBlocked(chatId)) {
