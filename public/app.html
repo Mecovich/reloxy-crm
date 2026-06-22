@@ -958,9 +958,10 @@ tr:hover { background:rgba(255,255,255,0.018); }
 .task-pri.medium { border-color:var(--line2); color:var(--g1); }
 .task-pri.low { border-color:var(--line); color:var(--g2); }
 .task-due { font-size:11px; color:var(--g2); }
-.task-del { font-size:11px; color:var(--g2); cursor:pointer; padding:2px 7px; border-radius:5px; opacity:0; transition:all 0.12s; border:none; background:transparent; font-family:inherit; }
+.task-del { font-size:11px; color:var(--g2); cursor:pointer; padding:2px 7px; border-radius:5px; opacity:0.45; transition:all 0.12s; border:none; background:transparent; font-family:inherit; }
 .task-row:hover .task-del { opacity:1; }
 .task-del:hover { color:var(--white); background:var(--s3); }
+@media (max-width:820px){ .task-del { opacity:0.75; font-size:15px; padding:6px 11px; } }
 .task-add-row { display:flex; align-items:center; gap:10px; padding:11px 14px; border:1px dashed var(--line2); border-radius:12px; margin-top:10px; cursor:text; }
 .task-add-input { flex:1; background:none; border:none; outline:none; font-size:13px; color:var(--white); font-family:inherit; }
 .task-add-input::placeholder { color:var(--g3); }
@@ -2361,13 +2362,34 @@ body.balance-hidden .mask-money::after { content:"\2217\2217\2217\2217"; positio
   body.sidebar-collapsed #reopen-sidebar:hover { background:var(--s3,#222); transform:translateY(-1px); }
   body.sidebar-collapsed #reopen-sidebar svg { width:17px; height:17px; }
 }
-/* Mobile drawer: obvious menu button + solid opaque panel that fully covers content */
+/* Desktop collapse control inside the sidebar header */
+.sb-collapse { margin-left:auto; width:30px; height:30px; display:none; align-items:center; justify-content:center; border:none; background:transparent; color:var(--g2); border-radius:8px; cursor:pointer; transition:color .15s, background .15s; flex-shrink:0; }
+.sb-collapse:hover { color:#EDEDED; background:var(--s3,#222); }
+.sb-collapse svg { width:15px; height:15px; }
+@media (min-width:821px){ .sb-collapse { display:flex; } }
+
+/* Mobile top bar (hamburger + brand) — desktop hides it */
+#mobile-topbar { display:none; }
 @media (max-width:820px){
-  .sidebar-toggle { width:42px !important; height:42px !important; border:1px solid var(--line) !important; background:rgba(255,255,255,0.05) !important; color:#EDEDED !important; border-radius:11px !important; margin-right:6px !important; }
-  .sidebar-toggle svg { width:19px !important; height:19px !important; }
-  .sidebar { background:var(--black,#0a0a0a) !important; }
+  #mobile-topbar {
+    display:flex; align-items:center; gap:12px;
+    position:fixed; top:0; left:0; right:0; height:54px; z-index:400;
+    padding:0 14px; background:rgba(12,12,14,0.97);
+    backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+    border-bottom:1px solid var(--line);
+  }
+  #mobile-menu-btn { width:40px; height:40px; padding:0; display:flex; align-items:center; justify-content:center; border:1px solid var(--line); background:rgba(255,255,255,0.05); color:#EDEDED; border-radius:10px; cursor:pointer; flex-shrink:0; }
+  #mobile-menu-btn:active { background:rgba(255,255,255,0.1); }
+  #mobile-menu-btn svg { width:20px; height:20px; }
+  #mobile-topbar-brand { font-size:17px; font-weight:700; letter-spacing:-0.4px; color:#EDEDED; }
+  /* content clears the fixed bar */
+  .page.active, #page-projects.active { padding-top:70px !important; }
+  /* solid drawer, correct stacking: drawer > backdrop > bar; modals above all */
+  .sidebar { background:var(--black,#121212) !important; z-index:650 !important; }
   body.sidebar-open .sidebar { box-shadow:0 0 70px rgba(0,0,0,0.9) !important; }
-  /* the floating reopen button is desktop-only — never on mobile */
+  .mobile-backdrop { z-index:600 !important; }
+  .overlay { z-index:900 !important; }
+  /* desktop-only floating reopen button never shows on mobile */
   #reopen-sidebar { display:none !important; }
 }
 /* Mobile: prevent iOS focus-zoom (inputs must be >=16px) + comfy modal buttons */
@@ -2450,6 +2472,7 @@ body::before { display:none !important; }
 #atmosphere { display:none !important; }
 body { background:#0E0E0E !important; }
 .activity-feed { display:flex; flex-direction:column; max-width:780px; }
+.activity-feed.is-empty { max-width:none; width:100%; min-height:55vh; align-items:center; justify-content:center; }
 .activity-item { display:flex; align-items:flex-start; gap:14px; padding:14px 4px; border-bottom:1px solid rgba(255,255,255,0.05); }
 .activity-ic { font-size:18px !important; color:rgba(217,217,217,0.55); width:32px; height:32px; display:inline-flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:10px; flex-shrink:0; }
 .activity-txt { font-size:13.5px; color:rgba(237,237,237,0.78); line-height:1.5; }
@@ -2478,20 +2501,23 @@ body { background:#0E0E0E !important; }
       <img src="/logo.svg" alt="Reloxy">
     </div>
     <div class="brand-name">Reloxy</div>
+    <button class="sb-collapse" onclick="toggleSidebar()" title="Свернуть меню" aria-label="Свернуть меню">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M10 3.5 5.5 8l4.5 4.5"/></svg>
+    </button>
   </div>
-  <div class="sb-search" onclick="cmdOpen()">
+  <div class="sb-search" onclick="closeMobileSidebar();cmdOpen()">
     <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6.5" cy="6.5" r="4.5"/><line x1="10" y1="10" x2="14" y2="14"/></svg>
     <span data-i18n="search_word">Search</span>
     <kbd>⌘K</kbd>
   </div>
   <div class="sb-quick">
-    <button class="sb-quick-btn" onclick="openProjectModal()" title="New project">
+    <button class="sb-quick-btn" onclick="closeMobileSidebar();openProjectModal()" title="New project">
       <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1.5" y="3" width="13" height="10.5" rx="2"/><path d="M5.5 3V1.5M10.5 3V1.5M8 6.5v4M6 8.5h4"/></svg>
     </button>
-    <button class="sb-quick-btn" onclick="openClientModal()" title="New client">
+    <button class="sb-quick-btn" onclick="closeMobileSidebar();openClientModal()" title="New client">
       <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6.5" cy="5.5" r="2.8"/><path d="M1.5 14c.6-2.8 2.6-4.2 5-4.2s4.4 1.4 5 4.2M12.5 5.5h3M14 4v3"/></svg>
     </button>
-    <button class="sb-quick-btn" onclick="openInvoiceModal()" title="New invoice">
+    <button class="sb-quick-btn" onclick="closeMobileSidebar();openInvoiceModal()" title="New invoice">
       <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 1.5h10v13l-2-1.3-1.7 1.3L8 13.2 6.7 14.5 5 13.2l-2 1.3v-13z"/><path d="M5.5 5h5M5.5 8h5"/></svg>
     </button>
   </div>
@@ -2596,6 +2622,12 @@ body { background:#0E0E0E !important; }
     <line x1="6" y1="2" x2="6" y2="14"/>
   </svg>
 </button>
+<div id="mobile-topbar">
+  <button id="mobile-menu-btn" onclick="toggleSidebar()" aria-label="Меню">
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="3" y1="6" x2="17" y2="6"/><line x1="3" y1="10" x2="17" y2="10"/><line x1="3" y1="14" x2="17" y2="14"/></svg>
+  </button>
+  <span id="mobile-topbar-brand">Reloxy</span>
+</div>
 <main class="main">
   <div class="topbar">
     <button class="sidebar-toggle" onclick="toggleSidebar()" title="Toggle sidebar">
@@ -5965,7 +5997,8 @@ function renderActivity() {
   });
   (typeof deals!=='undefined'?deals:[]).forEach(d => { if (d.created_at) items.push({ t:new Date(d.created_at), ic:'trending_up', txt:(ru?'Новая сделка':'New deal'), name:d.title }); });
   items.sort((a,b) => b.t - a.t);
-  if (!items.length) { el.innerHTML = `<div class="activity-empty">${ru?'Пока нет активности':'No activity yet'}</div>`; return; }
+  if (!items.length) { el.classList.add('is-empty'); el.innerHTML = `<div class="activity-empty">${ru?'Пока нет активности':'No activity yet'}</div>`; return; }
+  el.classList.remove('is-empty');
   const fd = d => d.toLocaleDateString(ru?'ru-RU':'en-US',{day:'numeric',month:'short'}) + ' · ' + d.toLocaleTimeString(ru?'ru-RU':'en-US',{hour:'2-digit',minute:'2-digit'});
   el.innerHTML = items.slice(0,40).map(x => `
     <div class="activity-item">
