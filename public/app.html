@@ -3611,19 +3611,22 @@ body { background:#0E0E0E !important; }
 <script>
 // ─── Handle Google OAuth redirect ──────────────────────────────────────────
 (function() {
-  const p = new URLSearchParams(location.search);
-  const gtoken = p.get('gtoken');
-  if (gtoken) {
-    localStorage.setItem('crm_token', gtoken);
-    localStorage.setItem('crm_user', JSON.stringify({
-      name: decodeURIComponent(p.get('gname') || ''),
-      email: decodeURIComponent(p.get('gemail') || ''),
-      role: p.get('grole') || 'user',
-      plan: p.get('gplan') || 'free',
-    }));
-    localStorage.setItem('reloxy_email', decodeURIComponent(p.get('gemail') || ''));
-    history.replaceState({}, '', '/app');
-  }
+  const code = new URLSearchParams(location.search).get('code');
+  if (!code) return;
+  // Exchange the one-time Google OAuth code for a JWT, then reload clean
+  fetch('/api/auth/exchange', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ code }) })
+    .then(r => r.json())
+    .then(d => {
+      if (d && d.token) {
+        localStorage.setItem('crm_token', d.token);
+        localStorage.setItem('crm_user', JSON.stringify(d.user || {}));
+        if (d.user && d.user.email) localStorage.setItem('reloxy_email', d.user.email);
+        location.replace('/app');
+      } else {
+        location.replace('/login?error=google_failed');
+      }
+    })
+    .catch(() => location.replace('/login?error=google_failed'));
 })();
 
 // ─── STATE ─────────────────────────────────────────────────────────────────
@@ -3987,6 +3990,7 @@ function applyLang(lang) {
 
 // ─── INIT ──────────────────────────────────────────────────────────────────
 async function init() {
+  if (new URLSearchParams(location.search).get('code')) return; // OAuth exchange in progress — page will reload
   if (!token) return (window.location.href = '/');
   try {
     const me = await api('GET', '/api/auth/me');
