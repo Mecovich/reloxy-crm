@@ -4625,16 +4625,19 @@ function drawRevenueChart(period) {
       plugins: {
         legend: { display: false },
         tooltip: {
-          backgroundColor: 'rgba(12,12,14,0.95)',
-          borderColor: 'rgba(255,255,255,0.1)',
+          backgroundColor: 'rgba(18,18,20,0.97)',
+          borderColor: 'rgba(255,255,255,0.12)',
           borderWidth: 1,
-          titleColor: '#4a4a52',
+          titleColor: 'rgba(237,237,237,0.5)',
           bodyColor: '#f0f0f0',
-          padding: { x: 16, y: 12 },
+          padding: { top: 10, bottom: 11, left: 14, right: 14 },
           cornerRadius: 12,
           displayColors: false,
-          titleFont: { size: 11, family: 'Geist', weight: '400' },
-          bodyFont: { size: 16, family: 'Geist', weight: '700' },
+          caretSize: 6,
+          caretPadding: 8,
+          titleFont: { size: 11, family: 'Helvetica Neue', weight: '500' },
+          titleMarginBottom: 6,
+          bodyFont: { size: 17, family: 'Helvetica Neue', weight: '700' },
           callbacks: {
             title: items => items[0].label,
             label: item => item.raw > 0 ? curSym()+' ' + fmtNum(item.raw) : '—'
