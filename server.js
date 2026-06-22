@@ -366,7 +366,7 @@ async function handleRegister(req, res) {
       { expiresIn: '30d' }
     );
 
-    sendTelegram(`🆕 <b>New user</b>\nName: ${tgEsc(name)}\nEmail: ${tgEsc(email)}`);
+    sendTelegram(`<b>New user</b>\n${tgEsc(name)} · ${tgEsc(email)}`);
 
     res.json({ token, user: { id: result.lastInsertRowid, name, email, role, plan: 'free', trial_ends_at: trialEnd(), studioName: studioName || '' } });
   } catch (e) {
@@ -509,7 +509,7 @@ app.post('/api/auth/otp/verify', authLimiter, async (req, res) => {
         args: [name, email, placeholder, role, '', trialEnd()],
       });
       user = { id: ins.lastInsertRowid, name, email, role, plan: 'free', trial_ends_at: trialEnd() };
-      sendTelegram(`🆕 <b>New user (email code)</b>\nName: ${tgEsc(name)}\nEmail: ${tgEsc(email)}`);
+      sendTelegram(`<b>New user (email code)</b>\n${tgEsc(name)} · ${tgEsc(email)}`);
     }
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role, name: user.name, owner_id: user.owner_id || null },
@@ -595,7 +595,7 @@ app.get('/api/auth/google/callback', async (req, res) => {
         args: [name, email, placeholder, role, googleId, '', trialEnd()],
       });
       user = { id: ins.lastInsertRowid, name, email, role, plan: 'free', trial_ends_at: trialEnd() };
-      sendTelegram(`🆕 <b>New Google user</b>\nName: ${tgEsc(name)}\nEmail: ${tgEsc(email)}`);
+      sendTelegram(`<b>New Google user</b>\n${tgEsc(name)} · ${tgEsc(email)}`);
     } else if (!user.google_id) {
       await db.execute({ sql: 'UPDATE users SET google_id = ? WHERE id = ?', args: [googleId, user.id] });
     }
@@ -798,7 +798,7 @@ app.post('/api/billing/webhook', async (req, res) => {
         const expires = new Date(); expires.setDate(expires.getDate() + 31);
         await db.execute({ sql: 'UPDATE payments SET status=?, payment_id=? WHERE order_id=?', args: ['paid', ev.payment_id || pay.payment_id, ev.order_id] });
         await db.execute({ sql: 'UPDATE users SET plan=?, plan_expires_at=? WHERE id=?', args: [pay.plan, expires.toISOString(), pay.user_id] });
-        sendTelegram(`✅ <b>Оплата тарифа</b>\nUser ID: ${pay.user_id}\nПлан: ${tgEsc(pay.plan)}\nСумма: ${tgEsc(String(ev.amount || pay.amount))} ₽`);
+        sendTelegram(`<b>Оплата тарифа</b>\nUser ${pay.user_id} · ${tgEsc(pay.plan)} · ${tgEsc(String(ev.amount || pay.amount))} ₽`);
       }
     }
     if ((ev.event_type === 'payment.refunded' || ev.event_type === 'payment.chargeback') && ev.order_id) {
@@ -807,7 +807,7 @@ app.post('/api/billing/webhook', async (req, res) => {
       if (pay) {
         await db.execute({ sql: 'UPDATE payments SET status=? WHERE order_id=?', args: [String(ev.status || 'refunded'), ev.order_id] });
         await db.execute({ sql: 'UPDATE users SET plan=?, plan_expires_at=NULL WHERE id=?', args: ['free', pay.user_id] });
-        sendTelegram(`⚠️ <b>Возврат/чарджбек</b>\nUser ID: ${pay.user_id}\nПлан снят.`);
+        sendTelegram(`<b>Возврат / чарджбек</b>\nUser ${pay.user_id} · план снят`);
       }
     }
     res.status(200).send('OK');
@@ -820,7 +820,7 @@ app.post('/api/billing/webhook', async (req, res) => {
 app.post('/api/upgrade-request', authMiddleware, async (req, res) => {
   try {
     const { plan } = req.body;
-    sendTelegram(`💳 <b>Заявка на тариф</b>\nUser: ${tgEsc(req.user.name || '')} (${tgEsc(req.user.email || '')})\nПлан: ${tgEsc(String(plan || '?'))}`);
+    sendTelegram(`<b>Заявка на тариф</b>\n${tgEsc(req.user.name || '')} (${tgEsc(req.user.email || '')}) · ${tgEsc(String(plan || '?'))}`);
     res.json({ ok: true });
   } catch (e) { res.status(500).json({ error: 'Internal server error' }); }
 });
@@ -933,9 +933,9 @@ app.post('/api/projects', authMiddleware, async (req, res) => {
   const row = await db.execute({ sql: 'SELECT * FROM projects WHERE id = ?', args: [result.lastInsertRowid] });
   // Notify assigned staff
   if (assignee) {
-    const deadline_str = deadline ? `\n📅 Deadline: ${tgEsc(deadline)}` : '';
+    const deadline_str = deadline ? `\nDue ${tgEsc(deadline)}` : '';
     notifyUserPhoto(assignee,
-      `🔔 <b>New project assigned to you</b>\n\n📁 <b>${tgEsc(title)}</b>${deadline_str}\n\nAssigned by: ${tgEsc(req.user.name)}\n\n→ <a href="https://reloxy.tech/app">Open Reloxy</a>`, bannerFor('assigned')
+      `<b>New project assigned</b>\n<b>${tgEsc(title)}</b>${deadline_str}\nFrom ${tgEsc(req.user.name)}`, bannerFor('assigned')
     ).catch(()=>{});
   }
   res.json(row.rows[0]);
@@ -962,9 +962,9 @@ app.put('/api/projects/:id', authMiddleware, async (req, res) => {
   const row = await db.execute({ sql: 'SELECT * FROM projects WHERE id = ?', args: [req.params.id] });
   // Notify if newly assigned or reassigned
   if (assignee && assignee != prevAssigned) {
-    const deadline_str = deadline ? `\n📅 Deadline: ${tgEsc(deadline)}` : '';
+    const deadline_str = deadline ? `\nDue ${tgEsc(deadline)}` : '';
     notifyUserPhoto(assignee,
-      `🔔 <b>Project assigned to you</b>\n\n📁 <b>${tgEsc(title)}</b>${deadline_str}\n\nAssigned by: ${tgEsc(req.user.name)}\n\n→ <a href="https://reloxy.tech/app">Open Reloxy</a>`, bannerFor('assigned')
+      `<b>Project assigned to you</b>\n<b>${tgEsc(title)}</b>${deadline_str}\nFrom ${tgEsc(req.user.name)}`, bannerFor('assigned')
     ).catch(()=>{});
   }
   res.json(row.rows[0]);
@@ -1254,7 +1254,7 @@ app.put('/api/invoices/:id', authMiddleware, async (req, res) => {
   const row = await db.execute({ sql: 'SELECT * FROM invoices WHERE id = ?', args: [req.params.id] });
   const inv = row.rows[0];
   if (inv && status === 'paid' && prevStatus !== 'paid') {
-    notifyUserPhoto(ownerId(req), `💰 <b>Счёт оплачен</b>\n#${tgEsc(inv.number||'')} · +${tgMoney(inv.amount)}\n→ <a href="https://reloxy.tech/app">Открыть Reloxy</a>`, bannerFor('paid')).catch(()=>{});
+    notifyUserPhoto(ownerId(req), `<b>Счёт оплачен</b>\n#${tgEsc(inv.number||'')} · +${tgMoney(inv.amount)}`, bannerFor('paid')).catch(()=>{});
   }
   res.json(inv);
 });
@@ -1273,8 +1273,8 @@ app.put('/api/invoices/:id/pay', authMiddleware, async (req, res) => {
   const row = await db.execute({ sql: 'SELECT * FROM invoices WHERE id = ? AND user_id = ?', args: [req.params.id, ownerId(req)] });
   const inv = row.rows[0];
   if (!inv) return res.status(404).json({ error: 'Invoice not found' });
-  sendTelegram(`💰 <b>Payment received!</b>\nInvoice: ${tgEsc(inv.number)}\nAmount: ${tgEsc(inv.amount)}`);
-  notifyUserPhoto(ownerId(req), `💰 <b>Счёт оплачен</b>\n#${tgEsc(inv.number||'')} · +${tgMoney(inv.amount)}\n→ <a href="https://reloxy.tech/app">Открыть Reloxy</a>`, bannerFor('paid')).catch(()=>{});
+  sendTelegram(`<b>Payment received</b>\n#${tgEsc(inv.number)} · ${tgEsc(inv.amount)}`);
+  notifyUserPhoto(ownerId(req), `<b>Счёт оплачен</b>\n#${tgEsc(inv.number||'')} · +${tgMoney(inv.amount)}`, bannerFor('paid')).catch(()=>{});
   res.json(inv);
 });
 
@@ -1661,10 +1661,9 @@ async function buildReminderDigest(u) {
   const iv = await db.execute({ sql: "SELECT number, amount, due_at, status FROM invoices WHERE user_id=? AND status IN ('pending','overdue')", args: [u.id] });
   const dueInv = iv.rows.filter(i => !i.due_at || new Date(i.due_at) <= in2);
   if (!soon.length && !dueInv.length) return null;
-  let msg = `🔔 <b>Reloxy — reminders</b>\n`;
-  if (soon.length) msg += `\n📅 <b>Deadlines</b>\n` + soon.map(p => { const d = new Date(p.deadline + 'T00:00:00'); const diff = Math.ceil((d - today) / 86400000); const tag = diff < 0 ? 'overdue' : diff === 0 ? 'today' : diff + 'd'; return `• ${p.title} — ${tag}`; }).join('\n') + '\n';
-  if (dueInv.length) msg += `\n💰 <b>Invoices</b>\n` + dueInv.map(i => `• #${i.number || ''} ${i.amount ? ('· ' + i.amount) : ''} — ${i.status}`).join('\n') + '\n';
-  msg += `\n→ <a href="https://reloxy.tech/app">Open Reloxy</a>`;
+  let msg = `<b>Сводка Reloxy</b>\n`;
+  if (soon.length) msg += `\n<b>Дедлайны</b>\n` + soon.map(p => { const d = new Date(p.deadline + 'T00:00:00'); const diff = Math.ceil((d - today) / 86400000); const tag = diff < 0 ? 'просрочен' : diff === 0 ? 'сегодня' : diff + 'д'; return `• ${p.title} — ${tag}`; }).join('\n') + '\n';
+  if (dueInv.length) msg += `\n<b>Счета</b>\n` + dueInv.map(i => `• #${i.number || ''} ${i.amount ? ('· ' + tgMoney(i.amount)) : ''} — ${i.status}`).join('\n') + '\n';
   return msg;
 }
 const _remindSent = new Map(); // userId -> 'YYYY-MM-DD'
@@ -1702,7 +1701,7 @@ async function runDeadlineReminders(){
       const pr = await db.execute({ sql: "SELECT id, title, deadline, assigned_to, deadline_reminded FROM projects WHERE user_id=? AND status!='done' AND deadline=?", args: [u.id, tStr] });
       for (const p of pr.rows){
         if (p.deadline_reminded === p.deadline) continue;
-        const msg = `⏰ <b>Дедлайн завтра</b>\n${tgEsc(p.title)} — ${p.deadline}\n→ <a href="https://reloxy.tech/app">Открыть Reloxy</a>`;
+        const msg = `<b>Дедлайн завтра</b>\n${tgEsc(p.title)} · до ${p.deadline}`;
         await tgSendPhoto(u.telegram_chat_id, msg, bannerFor('deadline'));
         if (p.assigned_to && p.assigned_to !== u.id) await notifyUserPhoto(p.assigned_to, msg, bannerFor('deadline'));
         await db.execute({ sql: 'UPDATE projects SET deadline_reminded=? WHERE id=?', args: [p.deadline, p.id] });
@@ -1719,7 +1718,7 @@ async function runOverdueChecks(){
     for (const u of await paidLinkedOwners()){
       const iv = await db.execute({ sql: "SELECT id, number, amount, due_at FROM invoices WHERE user_id=? AND status IN ('pending','overdue') AND overdue_notified=0 AND due_at IS NOT NULL AND due_at!='' AND due_at < ?", args: [u.id, todayStr] });
       for (const i of iv.rows){
-        await tgSendPhoto(u.telegram_chat_id, `⚠️ <b>Счёт просрочен</b>\n#${tgEsc(i.number||'')} · ${tgMoney(i.amount)} — срок был ${i.due_at}\n→ <a href="https://reloxy.tech/app">Открыть Reloxy</a>`, bannerFor('overdue'));
+        await tgSendPhoto(u.telegram_chat_id, `<b>Счёт просрочен</b>\n#${tgEsc(i.number||'')} · ${tgMoney(i.amount)} · срок был ${i.due_at}`, bannerFor('overdue'));
         await db.execute({ sql: "UPDATE invoices SET status='overdue', overdue_notified=1 WHERE id=?", args: [i.id] });
       }
     }
@@ -1741,12 +1740,11 @@ async function runWeeklySummary(){
       const out = unpaid.rows.reduce((acc,r)=>acc+(Number(r.amount)||0),0);
       const act = await db.execute({ sql: "SELECT COUNT(*) c FROM projects WHERE user_id=? AND status!='done'", args: [u.id] });
       const dl = await db.execute({ sql: "SELECT title, deadline FROM projects WHERE user_id=? AND status!='done' AND deadline>=? AND deadline<=? ORDER BY deadline", args: [u.id, todayStr, in7] });
-      let msg = `🗓 <b>Reloxy — сводка за неделю</b>\n\n` +
-        `💰 Поступления (7 дней): ${tgMoney(rev)}\n` +
-        `🧾 Не оплачено: ${tgMoney(out)} (${unpaid.rows.length})\n` +
-        `📂 Активных проектов: ${Number(act.rows[0]?.c || 0)}\n`;
-      if (dl.rows.length) msg += `\n📅 <b>Дедлайны на неделю</b>\n` + dl.rows.map(p=>`• ${tgEsc(p.title)} — ${p.deadline}`).join('\n') + '\n';
-      msg += `\n→ <a href="https://reloxy.tech/app">Открыть Reloxy</a>`;
+      let msg = `<b>Сводка за неделю</b>\n\n` +
+        `Поступления (7 дней): ${tgMoney(rev)}\n` +
+        `Не оплачено: ${tgMoney(out)} (${unpaid.rows.length})\n` +
+        `Активных проектов: ${Number(act.rows[0]?.c || 0)}`;
+      if (dl.rows.length) msg += `\n\n<b>Дедлайны на неделю</b>\n` + dl.rows.map(p=>`• ${tgEsc(p.title)} — ${p.deadline}`).join('\n');
       await tgSendPhoto(u.telegram_chat_id, msg, bannerFor('weekly'));
     }
   } catch (e) { console.error('Weekly summary error:', e.message); }
@@ -1807,7 +1805,7 @@ app.post('/api/tg/remind-now', authMiddleware, async (req, res) => {
     if (!u) return res.status(404).json({ error: 'User not found' });
     if (!isPaidRow(u)) return res.status(403).json({ error: 'premium_only' });
     if (!u.telegram_chat_id) return res.status(400).json({ error: 'telegram_not_linked' });
-    const msg = (await buildReminderDigest(u)) || '✅ <b>Reloxy</b>\nNo upcoming deadlines or unpaid invoices right now.';
+    const msg = (await buildReminderDigest(u)) || '<b>All clear</b>\nNo upcoming deadlines or unpaid invoices.';
     await tgSendPhoto(u.telegram_chat_id, msg, bannerFor('digest'));
     res.json({ ok: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
@@ -1837,47 +1835,47 @@ async function tgPoll() {
         const parts = text.split(' ');
         const code  = parts[1]?.toUpperCase();
         if (!code) {
-          await tgSendPhoto(chatId, `👋 <b>Welcome to Reloxy!</b>\n\nTo link your account, get your code from the CRM:\n<b>Team → your profile → Telegram</b>\n\nThen send: <code>/start YOUR_CODE</code>`, bannerFor('welcome'));
+          await tgSendPhoto(chatId, `<b>Welcome to Reloxy</b>\nProjects, deadlines and payments — right in your pocket.\n\nTo connect: open <b>Settings → Telegram</b> in the app and tap “Connect in one tap”, or send <code>/start CODE</code>.`, bannerFor('welcome'));
           continue;
         }
         if (tgCodeBlocked(chatId)) {
-          await tgSend(chatId, '⏳ Too many attempts. Please wait a few minutes and try again.');
+          await tgSend(chatId, '<b>Too many attempts</b>\nWait a few minutes and try again.');
           continue;
         }
         // Find user by code
         const ur = await db.execute({ sql: 'SELECT id, name FROM users WHERE tg_link_code = ?', args: [code] });
         if (!ur.rows.length) {
           tgCodeFail(chatId);
-          await tgSend(chatId, '❌ Code not found. Please get a fresh code from Reloxy CRM.');
+          await tgSend(chatId, '<b>Code not found</b>\nGet a fresh code in the CRM and try again.');
           continue;
         }
         const u = ur.rows[0];
         tgCodeAttempts.delete(chatId); // success — clear the counter
         await db.execute({ sql: 'UPDATE users SET telegram_chat_id = ?, tg_link_code = NULL WHERE id = ?', args: [chatId, u.id] });
-        await tgSend(chatId, `✅ <b>Connected!</b>\n\nHi ${tgEsc(u.name)}, your Reloxy account is now linked.\n\nYou'll receive notifications here when tasks or projects are assigned to you.`);
+        await tgSend(chatId, `<b>You're connected, ${tgEsc(u.name)}</b>\nDeadlines, payments and new assignments will land right here.`);
         continue;
       }
 
       if (text === '/help' || text === '/status') {
         const ur2 = await db.execute({ sql: 'SELECT name FROM users WHERE telegram_chat_id = ?', args: [chatId] });
         if (ur2.rows.length) {
-          await tgSend(chatId, `✅ Привязан как <b>${tgEsc(ur2.rows[0].name)}</b>\n\nУведомления о задачах, дедлайнах и оплатах включены.\n\n<b>Команды:</b>\n/today — дедлайны и задачи на сегодня\n/money — неоплаченные счета\n/stats — краткая статистика`);
+          await tgSend(chatId, `<b>Вы на связи, ${tgEsc(ur2.rows[0].name)}</b>\nУведомления включены.\n\n<b>Команды</b>\n/today — дедлайны и задачи на сегодня\n/money — неоплаченные счета\n/stats — краткая сводка`);
         } else {
-          await tgSend(chatId, '❌ Не привязан. Возьмите код в Reloxy → Team → Telegram.');
+          await tgSend(chatId, '<b>Аккаунт не привязан</b>\nВозьмите код в CRM: Настройки → Telegram.');
         }
         continue;
       }
 
       if (text === '/today' || text === '/money' || text === '/stats') {
         const ur3 = await db.execute({ sql: 'SELECT id, owner_id FROM users WHERE telegram_chat_id = ?', args: [chatId] });
-        if (!ur3.rows.length) { await tgSend(chatId, '❌ Аккаунт не привязан. Возьмите код в Reloxy → Team → Telegram.'); continue; }
+        if (!ur3.rows.length) { await tgSend(chatId, '<b>Аккаунт не привязан</b>\nВозьмите код в CRM: Настройки → Telegram.'); continue; }
         const oid = ur3.rows[0].owner_id || ur3.rows[0].id;
         const todayStr = new Date().toISOString().slice(0, 10);
         const ym = todayStr.slice(0, 7);
         if (text === '/today') {
           const pr = await db.execute({ sql: "SELECT title FROM projects WHERE user_id=? AND status!='done' AND deadline=? ORDER BY title", args: [oid, todayStr] });
           const tk = await db.execute({ sql: "SELECT title FROM tasks WHERE user_id=? AND status!='done' AND due_date=? ORDER BY title", args: [oid, todayStr] });
-          let m = `📅 <b>Сегодня</b>\n`;
+          let m = `<b>Сегодня</b>\n`;
           m += pr.rows.length ? `\n<b>Дедлайны проектов:</b>\n` + pr.rows.map(p=>`• ${tgEsc(p.title)}`).join('\n') : `\nДедлайнов проектов на сегодня нет.`;
           if (tk.rows.length) m += `\n\n<b>Задачи:</b>\n` + tk.rows.map(t=>`• ${tgEsc(t.title)}`).join('\n');
           await tgSend(chatId, m); continue;
@@ -1889,7 +1887,7 @@ async function tgPoll() {
           const overSum = over.reduce((acc,r)=>acc+(Number(r.amount)||0),0);
           const paid = await db.execute({ sql: "SELECT amount FROM invoices WHERE user_id=? AND status='paid' AND issued_at LIKE ?", args: [oid, ym+'%'] });
           const rev = paid.rows.reduce((acc,r)=>acc+(Number(r.amount)||0),0);
-          await tgSend(chatId, `💰 <b>Деньги</b>\n\nНе оплачено: ${tgMoney(sum)} (${iv.rows.length} сч.)\nПросрочено: ${tgMoney(overSum)} (${over.length})\nПоступило в этом месяце: ${tgMoney(rev)}`);
+          await tgSend(chatId, `<b>Деньги</b>\n\nНе оплачено: ${tgMoney(sum)} (${iv.rows.length} сч.)\nПросрочено: ${tgMoney(overSum)} (${over.length})\nПоступило в этом месяце: ${tgMoney(rev)}`);
           continue;
         }
         if (text === '/stats') {
@@ -1897,7 +1895,7 @@ async function tgPoll() {
           const cl = await db.execute({ sql: "SELECT COUNT(*) c FROM clients WHERE user_id=?", args: [oid] });
           const paid = await db.execute({ sql: "SELECT amount FROM invoices WHERE user_id=? AND status='paid' AND issued_at LIKE ?", args: [oid, ym+'%'] });
           const rev = paid.rows.reduce((acc,r)=>acc+(Number(r.amount)||0),0);
-          await tgSend(chatId, `📊 <b>Статистика</b>\n\nАктивных проектов: ${Number(ap.rows[0]?.c||0)}\nКлиентов: ${Number(cl.rows[0]?.c||0)}\nПоступило в этом месяце: ${tgMoney(rev)}`);
+          await tgSend(chatId, `<b>Статистика</b>\n\nАктивных проектов: ${Number(ap.rows[0]?.c||0)}\nКлиентов: ${Number(cl.rows[0]?.c||0)}\nПоступило в этом месяце: ${tgMoney(rev)}`);
           continue;
         }
       }
