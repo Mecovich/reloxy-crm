@@ -2361,6 +2361,15 @@ body.balance-hidden .mask-money::after { content:"\2217\2217\2217\2217"; positio
   body.sidebar-collapsed #reopen-sidebar:hover { background:var(--s3,#222); transform:translateY(-1px); }
   body.sidebar-collapsed #reopen-sidebar svg { width:17px; height:17px; }
 }
+/* Mobile drawer: obvious menu button + solid opaque panel that fully covers content */
+@media (max-width:820px){
+  .sidebar-toggle { width:42px !important; height:42px !important; border:1px solid var(--line) !important; background:rgba(255,255,255,0.05) !important; color:#EDEDED !important; border-radius:11px !important; margin-right:6px !important; }
+  .sidebar-toggle svg { width:19px !important; height:19px !important; }
+  .sidebar { background:var(--black,#0a0a0a) !important; }
+  body.sidebar-open .sidebar { box-shadow:0 0 70px rgba(0,0,0,0.9) !important; }
+  /* the floating reopen button is desktop-only — never on mobile */
+  #reopen-sidebar { display:none !important; }
+}
 /* Mobile: prevent iOS focus-zoom (inputs must be >=16px) + comfy modal buttons */
 @media (max-width:820px){
   .modal-inner input, .modal-inner select, .modal-inner textarea,
@@ -4309,8 +4318,8 @@ function toggleSidebar() {
   localStorage.setItem('reloxy_sidebar', collapsed ? '0' : '1');
 }
 function closeMobileSidebar() { document.body.classList.remove('sidebar-open'); }
-// Restore sidebar state on load
-(function(){ if(localStorage.getItem('reloxy_sidebar')==='0') document.body.classList.add('sidebar-collapsed'); })();
+// Sidebar always starts expanded on entry; collapsing is a per-session choice.
+(function(){ try { localStorage.removeItem('reloxy_sidebar'); } catch(e){} document.body.classList.remove('sidebar-collapsed'); })();
 
 function toggleUserPopup(e) {
   e.stopPropagation();
