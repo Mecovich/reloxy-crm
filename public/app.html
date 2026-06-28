@@ -6935,7 +6935,11 @@ function setCurrency(cur) {
     const v = t(el.getAttribute('data-i18n'));
     if (typeof v === 'string') el.textContent = v;
   });
-  if (typeof renderAll === 'function') { try { renderAll(); } catch(_) {} }
+  // Re-render the active page (deals, finance, dashboard, etc.) so amounts and the
+  // currency symbol update immediately — renderAll() never existed, which is why
+  // switching currency didn't refresh the pipeline/deals view.
+  try { if (typeof renderCounts === 'function') renderCounts(); } catch(_) {}
+  try { if (typeof renderPage === 'function' && currentPage) renderPage(currentPage); } catch(_) {}
   setMsg('profile-msg', t('msg_profile_saved'), 'ok');
 }
 function renderBillingTab() {

@@ -437,6 +437,9 @@ const UNIONE_API_KEY  = process.env.UNIONE_API_KEY || '';
 const UNIONE_API_URL  = process.env.UNIONE_API_URL || 'https://go1.unisender.ru/ru/transactional/api/v1/email/send.json';
 const MAIL_FROM       = process.env.MAIL_FROM || SMTP_USER || 'no-reply@reloxy.tech';
 const MAIL_FROM_NAME  = process.env.MAIL_FROM_NAME || 'Reloxy';
+// Banner shown at the top of transactional emails. Override with MAIL_BANNER (set a
+// dedicated email banner image), defaults to the existing welcome banner.
+const MAIL_BANNER     = process.env.MAIL_BANNER || ((process.env.APP_URL || 'https://reloxy.tech').replace(/\/$/, '') + '/tg-welcome.png');
 const emailEnabled    = !!(RESEND_API_KEY || MAILOPOST_TOKEN || UNIONE_API_KEY || mailer);
 
 async function sendEmail({ to, subject, text, html }) {
@@ -494,13 +497,28 @@ app.post('/api/auth/otp/send', authLimiter, async (req, res) => {
       to: email,
       subject: `${code} — код подтверждения Reloxy`,
       text: `Ваш код подтверждения Reloxy: ${code}\n\nВведите его, чтобы подтвердить почту и войти. Код действует 10 минут.\nЕсли вы не запрашивали код — просто проигнорируйте это письмо.`,
-      html: `<div style="font-family:Helvetica,Arial,sans-serif;max-width:440px;margin:0 auto;padding:32px 24px;color:#1a1a1a">
-        <div style="font-size:18px;font-weight:700;margin-bottom:18px">Reloxy</div>
-        <div style="font-size:14px;color:#555;margin-bottom:22px">Ваш код подтверждения почты:</div>
-        <div style="font-size:34px;font-weight:800;letter-spacing:8px;margin-bottom:22px">${code}</div>
-        <div style="font-size:13px;color:#555;margin-bottom:18px">Введите этот код, чтобы подтвердить почту и войти в аккаунт.</div>
-        <div style="font-size:12px;color:#999">Код действует 10 минут. Если вы не запрашивали его — просто проигнорируйте это письмо.</div>
-      </div>`,
+      html: `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#0b0b0c;margin:0;padding:28px 12px;font-family:Helvetica,Arial,sans-serif">
+        <tr><td align="center">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:460px;background:#141416;border:1px solid #242428;border-radius:16px;overflow:hidden">
+            <tr><td style="padding:0;line-height:0;font-size:0">
+              <img src="${MAIL_BANNER}" width="460" alt="Reloxy" style="display:block;width:100%;max-width:460px;height:auto;border:0;outline:none;text-decoration:none">
+            </td></tr>
+            <tr><td style="padding:28px 32px 4px">
+              <div style="font-size:12px;color:#8a8a92;letter-spacing:1px;text-transform:uppercase">Подтверждение почты</div>
+              <div style="font-size:16px;color:#e9e9ee;margin-top:12px;line-height:1.55">Введите этот код, чтобы подтвердить почту и войти в Reloxy:</div>
+            </td></tr>
+            <tr><td align="center" style="padding:20px 32px 6px">
+              <div style="display:inline-block;background:#1c1c20;border:1px solid #2d2d33;border-radius:12px;padding:16px 24px;font-size:32px;font-weight:800;letter-spacing:8px;color:#ffffff">${code}</div>
+            </td></tr>
+            <tr><td style="padding:14px 32px 28px">
+              <div style="font-size:13px;color:#7c7c84;line-height:1.6">Код действует 10 минут. Если вы не запрашивали его — просто проигнорируйте это письмо.</div>
+            </td></tr>
+            <tr><td style="padding:18px 32px;border-top:1px solid #242428;background:#101012">
+              <div style="font-size:12px;color:#6c6c74;line-height:1.6">Reloxy · <a href="https://reloxy.tech" style="color:#9a9aa2;text-decoration:none">reloxy.tech</a> · поддержка <a href="mailto:support@reloxy.tech" style="color:#9a9aa2;text-decoration:none">support@reloxy.tech</a></div>
+            </td></tr>
+          </table>
+        </td></tr>
+      </table>`,
     });
     res.json({ ok: true });
   } catch (e) { console.error('otp send:', e.message); res.status(500).json({ error: 'Could not send email, try again' }); }
